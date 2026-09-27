@@ -10,7 +10,7 @@ import io, re, sys
 stamp = sys.argv[1]
 p = 'index.html'
 s = io.open(p, encoding='utf-8').read()
-s2 = re.sub(r'(<b id="buildStamp"[^>]*>)[^<]*(</b>)', lambda m: m.group(1) + stamp + m.group(2), s, count=1)
+s2 = re.sub(r'(<(?:b|span) id="buildStamp"[^>]*>)[^<]*(</(?:b|span)>)', lambda m: m.group(1) + stamp + m.group(2), s, count=1)
 if s2 == s:
     print('ВНИМАНИЕ: метка сборки не найдена в index.html')
 io.open(p, 'w', encoding='utf-8').write(s2)
