@@ -79,9 +79,13 @@
 
   /* the hairline runs from the top of the page down to the end of the statements,
      the way the reference threads one rule through its opening chapter */
-  #spine,#spine2,#spine3{position:absolute;left:calc(var(--col) - clamp(10px,1.6vw,26px));width:1px;
+  /* One unbroken rule. The breaks at each block of big type are punched out by
+     two opaque strips laid over it, which cannot end up as stray stubs the way
+     three separately measured segments could. */
+  #spine{position:absolute;top:0;left:calc(var(--col) - clamp(10px,1.6vw,26px));width:1px;
     background:var(--hair);z-index:1;transform-origin:50% 0;}
-  #spine{top:0;}
+  .spine-gap{position:absolute;left:calc(var(--col) - clamp(10px,1.6vw,26px) - 10px);width:21px;
+    background:var(--paper);z-index:1;transition:background .9s var(--eo);}
   #spineCap{position:absolute;left:calc(var(--col) - clamp(10px,1.6vw,26px));transform:translateX(-50%);z-index:2;
     width:44px;height:44px;border-radius:50%;border:1px solid var(--hair);background:var(--paper);
     display:flex;align-items:center;justify-content:center;font-size:10.5px;font-weight:600;color:var(--dim);}
@@ -108,7 +112,7 @@
      column at 35.7vw — which is what gives the reference its stagger. */
   /* both sit against the right edge of the statement column and start level
      with the top of the name */
-  .op-note{position:absolute;z-index:3;left:var(--col);top:clamp(14px,3vh,34px);}
+  .op-note{position:absolute;z-index:3;left:var(--col);top:clamp(56px,7vh,86px);}
   .op-1{position:relative;z-index:2;margin-top:clamp(110px,28vh,290px);}
   .chapter{position:relative;}
   .op-role{position:absolute;z-index:3;right:clamp(15px,4.1vw,64px);top:clamp(110px,28vh,290px);text-align:right;}
@@ -117,7 +121,7 @@
   .col-l{margin-left:clamp(22px,6vw,110px);}
   .col-r{margin-left:var(--col);}
   .ind{margin-left:calc(var(--col) + clamp(40px,7vw,130px));}
-  .blk{margin-top:.3em;}
+  .blk{margin-top:.08em;}
 
   /* ---------- five squares ---------- */
   /* the loose one sits left of the rule, the run of four to the right of it */
@@ -133,11 +137,12 @@
   .tiles-note{grid-column:4 / 7;margin-top:18px;max-width:44ch;}
 
   .stmt2{position:relative;z-index:2;padding:clamp(60px,14vh,180px) 0 clamp(20px,5vh,60px);}
-  .t-a{margin-left:clamp(50px,9vw,170px);}
-  .t-b{margin-left:var(--col);}
-  .t-c{margin-left:0;}
-  /* lines up under the 'ю' of the word above it */
-  .t-d{margin-left:7.1em;}
+  /* a steady descent to the right, then the last line set under the middle of
+     the one above it */
+  .t-a{margin-left:0;}
+  .t-b{margin-left:clamp(40px,8vw,150px);}
+  .t-c{margin-left:clamp(80px,16vw,300px);}
+  .t-d{margin-left:clamp(150px,29vw,540px);}
 
   /* ---------- work / globe ---------- */
   .featured{position:relative;margin-top:clamp(60px,14vh,180px);}
@@ -195,6 +200,7 @@
   .close-mid .clock.l{justify-self:end;}
   .close-mid .clock.r{justify-self:start;}
   .close-still{width:clamp(150px,17vw,280px);aspect-ratio:3/4;overflow:hidden;background:var(--ghost);justify-self:center;}
+  .close-still .still-tilt{width:100%;height:100%;will-change:transform;}
   .close-still img{width:100%;height:100%;object-fit:cover;}
   .c-c{margin-left:clamp(20px,5vw,90px);}
   .c-d{margin-left:clamp(90px,15vw,260px);}
@@ -218,8 +224,13 @@
     :root{--col:24vw;}
     /* the two labels are pinned to the grid on wide screens; at this width
        there is no room beside the name, so they return to the flow */
-    .op-note{position:static;margin-left:0;padding-top:clamp(8px,1.6vh,16px);}
-    .op-role{position:static;text-align:left;margin-top:clamp(8px,1.4vh,16px);}
+    /* relative, not static: the erasers that punch the rule are positioned, so
+       any text that has to sit above them needs a stacking context too */
+    /* relative, not static: the erasers that punch the rule are positioned, so
+       text that must sit above them needs a stacking context. The offsets from
+       the wide layout have to be cleared, or `top` shifts the block instead. */
+    .op-note{position:relative;z-index:3;top:auto;left:auto;margin-left:0;padding-top:clamp(52px,9vh,80px);}
+    .op-role{position:relative;z-index:3;top:auto;right:auto;text-align:left;margin-top:clamp(8px,1.4vh,16px);}
     .stmt > div, .op-1 > div{white-space:normal;}
     .idx-wrap{margin-left:0;}
     .ind{margin-left:calc(var(--col) + 6vw);}
@@ -259,8 +270,8 @@
   <!-- ============ OPENING CHAPTER ============ -->
   <section class="chapter pad" id="chapter">
     <div id="spine"></div>
-    <div id="spine2"></div>
-    <div id="spine3"></div>
+    <div class="spine-gap" id="gapA"></div>
+    <div class="spine-gap" id="gapB"></div>
     <div id="spineCap">’26</div>
     <canvas id="heroFX" aria-hidden="true"></canvas>
     <canvas id="fluidSrc" aria-hidden="true"></canvas>
@@ -324,9 +335,9 @@
     <div class="lg c-b" data-goo>сначала было</div>
 
     <div class="close-mid">
-      <span class="clock l" id="clockH" data-goo>( 16</span>
-      <div class="close-still"><img id="closeStill" src="yoga1.jpg" alt=""></div>
-      <span class="clock r" id="clockM" data-goo>41 )</span>
+      <span class="clock l" id="clockH" data-goo data-nosplit>( 16</span>
+      <div class="close-still"><div class="still-tilt"><img id="closeStill" src="yoga1.jpg" alt=""></div></div>
+      <span class="clock r" id="clockM" data-goo data-nosplit>41 )</span>
     </div>
 
     <div class="lg c-c" data-goo>всего лишь</div>
@@ -353,7 +364,7 @@
     </div>
 
     <div class="tailroom"></div>
-    <span id="buildStamp" style="display:none">BUILD 27.09 20:34</span>
+    <span id="buildStamp" style="display:none">BUILD 27.09 20:46</span>
   </section>
 
 </main>
@@ -564,37 +575,30 @@
     var sp = document.getElementById('spine'), cap = document.getElementById('spineCap');
     var chap = document.getElementById('chapter');
     if(!sp || !chap) return;
+    var gA = document.getElementById('gapA'), gB = document.getElementById('gapB');
     function measure(){
-      // Three runs rather than one: the rule stops short of each block of big
-      // type, picks up again below it, and finally hangs a short tail that ends
-      // in the year badge — so it never cuts through a word.
-      var sp2 = document.getElementById('spine2'), sp3 = document.getElementById('spine3');
       var stmt = document.querySelector('.stmt');
-      var tiles = document.getElementById('tiles');
       var stmt2 = document.querySelector('.stmt2');
-      var pad = 14;  // a clean break at the type, not a visible interruption
-
-      var a1 = 0, b1 = stmt ? stmt.offsetTop - pad : chap.offsetHeight;
-      sp.style.top = a1 + 'px';
-      sp.style.height = Math.max(0, b1 - a1) + 'px';
-
-      if(sp2 && stmt && stmt2){
-        var a2 = stmt.offsetTop + stmt.offsetHeight + pad;
-        var b2 = stmt2.offsetTop - pad;
-        sp2.style.top = a2 + 'px';
-        sp2.style.height = Math.max(0, b2 - a2) + 'px';
+      var pad = 13;
+      var end = stmt2 ? (stmt2.offsetTop + stmt2.offsetHeight + 96) : chap.offsetHeight;
+      sp.style.height = end + 'px';
+      if(cap) cap.style.top = (end - 22) + 'px';
+      if(gA && stmt){
+        gA.style.top = (stmt.offsetTop - pad) + 'px';
+        gA.style.height = (stmt.offsetHeight + pad * 2) + 'px';
       }
-      if(sp3 && stmt2){
-        var a3 = stmt2.offsetTop + stmt2.offsetHeight + pad;
-        sp3.style.top = a3 + 'px';
-        sp3.style.height = '96px';
-        if(cap) cap.style.top = (a3 + 96 - 22) + 'px';
+      if(gB && stmt2){
+        gB.style.top = (stmt2.offsetTop - pad) + 'px';
+        gB.style.height = (stmt2.offsetHeight + pad * 2) + 'px';
       }
     }
     measure();
+    // re-measured whenever the page height changes, and once more after load
     ScrollTrigger.addEventListener('refreshInit', measure);
-    gsap.from([sp, document.getElementById('spine2'), document.getElementById('spine3')].filter(Boolean),
-      {scaleY: 0, duration: 1.4, stagger: .12, ease: EASE.rise, delay: .1});
+    window.addEventListener('load', function(){ setTimeout(measure, 300); });
+    if(document.fonts && document.fonts.ready) document.fonts.ready.then(measure);
+
+    gsap.from(sp, {scaleY: 0, duration: 1.6, ease: EASE.rise, delay: .1});
     if(cap) gsap.from(cap, {scale: 0, opacity: 0, duration: .8, ease: EASE.rise,
       scrollTrigger: {trigger: cap, start: 'top 95%'}});
   }
@@ -658,27 +662,23 @@
     // faint watermark for the whole page, solid ink only once joined
     .to([L, R], {color: 'var(--ink)', ease: 'none'}, 0);
 
-    // The notes are part of the same scrubbed join rather than a separate
-    // trigger fired at the very end: they begin to form while the two halves
-    // are still closing, and are solid by the time the halves meet.
-    [fL, fR].forEach(function(el, i){
-      if(!el) return;
-      var g = makeGoo();
-      el.style.filter = 'url(#' + g.id + ')';
-      g.blur.setAttribute('stdDeviation', 14);
-      gsap.timeline({
-        scrollTrigger: {
-          trigger: document.body,
-          // ends short of the document's final pixel: with inertial scrolling the
-          // reader effectively never stops exactly on it, so anything that
-          // completed there was never seen
-          start: 'bottom bottom+=260',
-          end: 'bottom bottom+=40',
-          scrub: .6, invalidateOnRefresh: true, refreshPriority: -10
-        }
-      })
-      .to(el, {opacity: 1, duration: .5, ease: 'none'}, i * .06)
-      .to(g.blur, {attr: {stdDeviation: 0}, duration: 1, ease: 'none'}, i * .06);
+    // A plain one-shot entrance well before the end of the document. Tying
+    // these to a scrub that finished on the last pixel meant inertial scrolling
+    // sailed past the only place they were ever fully visible.
+    ScrollTrigger.create({
+      trigger: document.body, start: 'bottom bottom+=240', once: true, refreshPriority: -10,
+      onEnter: function(){
+        [fL, fR].forEach(function(el, i){
+          if(!el) return;
+          var g = makeGoo();
+          el.style.filter = 'url(#' + g.id + ')';
+          g.blur.setAttribute('stdDeviation', 13);
+          gsap.timeline({delay: i * 0.12})
+            .to(el, {opacity: 1, duration: .5, ease: 'none'}, 0)
+            .to(g.blur, {attr: {stdDeviation: 0}, duration: GOO_TIME, ease: EASE.goo,
+              onComplete: function(){ el.style.filter = 'none'; }}, 0);
+        });
+      }
     });
   }
 
@@ -923,12 +923,16 @@
     // plays again on every arrival rather than once for the life of the page
     ScrollTrigger.create({trigger: box, start: 'top 95%', onEnter: fly, onEnterBack: fly});
     if(!coarse){
-      var qx = gsap.quickTo(box, 'rotateY', {duration: .9, ease: 'power3'});
-      var qy = gsap.quickTo(box, 'rotateX', {duration: .9, ease: 'power3'});
+      // a separate element from the one the fly-in animates, so the two never
+      // overwrite each other's transform
+      var tilt = box.querySelector('.still-tilt') || box;
+      gsap.set(tilt, {transformPerspective: 900});
+      var qx = gsap.quickTo(tilt, 'rotateY', {duration: .9, ease: 'power3'});
+      var qy = gsap.quickTo(tilt, 'rotateX', {duration: .9, ease: 'power3'});
       // it leans toward the pointer wherever it is on the page, not only when
       // the pointer is over the picture itself
       window.addEventListener('pointermove', function(e){
-        if(!box.__live) return;
+
         var r = box.getBoundingClientRect();
         var cx = r.left + r.width / 2, cy = r.top + r.height / 2;
         qx(Math.max(-22, Math.min(22, (e.clientX - cx) / 22)));
@@ -1110,7 +1114,9 @@
       var grow = window.__globeGrow || 0;
       var lift = window.__globeLift || 0;
       var settled = grow * (1 - lift);
-      var spread = 0.34 + settled * 0.66;
+      // held tight through the first half of its arrival, then opened
+      var eased = settled < .45 ? 0 : (settled - .45) / .55;
+      var spread = 0.34 + eased * 0.66;
       for(var t = 0; t < tiles.length; t++){
         tiles[t].mesh.position.copy(tiles[t].dir).multiplyScalar(RADIUS * spread);
       }
