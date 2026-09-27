@@ -1,0 +1,2153 @@
+<meta charset="utf-8"><title>Ivanov Design</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@400;600;800;900&family=Manrope:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/gsap.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/ScrollTrigger.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/SplitText.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/CustomEase.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/Observer.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/InertiaPlugin.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/DrawSVGPlugin.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/Flip.min.js"></script>
+<style>
+  :root{
+    --bg:#f1f1ee;
+    --bg-soft:#e7e7e2;
+    --white:#ffffff;
+    --ink:#16160f;
+    --ink-dim:#5c5c52;
+    --ink-faint:#93938a;
+    --line:rgba(22,22,15,0.12);
+    --line-strong:rgba(22,22,15,0.26);
+    --accent:#f4fb00;
+    --accent-ink:#16160f;
+    --dark:#16160f;
+    --dark-2:#242419;
+    --radius:20px;
+    --shadow:0 1px 2px rgba(20,20,10,.04), 0 10px 28px rgba(20,20,10,.06);
+  }
+
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  html{color-scheme:light;overflow-x:hidden;max-width:100vw;}
+  body{
+    margin:0;
+    background:var(--bg);
+    color:var(--ink);
+    font-family:'Manrope',ui-sans-serif,system-ui,sans-serif;
+    -webkit-font-smoothing:antialiased;
+    overflow-x:hidden;
+    max-width:100vw;
+    -webkit-touch-callout:none;
+  }
+  a, button, .case-card, .filter-btn, .cat-pill{-webkit-tap-highlight-color:transparent;outline:none;}
+  .case-card:active, .filter-btn:active, .btn:active{opacity:.82;transition:opacity .12s ease;}
+  ::selection{background:var(--accent);color:var(--accent-ink);}
+  a{color:inherit;}
+  img,svg{max-width:100%;}
+  button{font:inherit;}
+  .wrap{max-width:1180px;margin:0 auto;padding:0 28px;}
+
+  h1,h2,h3{
+    font-family:'Unbounded',ui-sans-serif,system-ui,sans-serif;
+    text-wrap:balance;margin:0;letter-spacing:-0.01em;
+  }
+
+  .mark{
+    background-image:linear-gradient(var(--accent), var(--accent));
+    background-repeat:no-repeat;background-size:100% 40%;background-position:0 88%;
+  }
+
+  .eyebrow{
+    font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:12px;
+    letter-spacing:0.14em;text-transform:uppercase;color:var(--ink-dim);
+    display:inline-flex;align-items:center;gap:8px;
+  }
+  .eyebrow::before{content:"";width:6px;height:6px;background:var(--dark);border-radius:50%;}
+
+  /* ---------- scroll reveal: base hidden state only — GSAP drives the actual motion per-variant (see script) ---------- */
+  /* SplitText line masks: each line gets a clipping wrapper so letters rise out of nothing */
+  .sl-line{overflow:hidden;display:block;}
+  .split-ready{visibility:visible;}
+  html.rvl-js [data-reveal]{opacity:0;}
+  html.rvl-js [data-reveal].rvl-in{opacity:1;}
+  @media (prefers-reduced-motion: reduce){
+    html.rvl-js [data-reveal]{opacity:1!important;transform:none!important;filter:none!important;}
+  }
+  .ch{display:inline-block;will-change:transform,opacity,filter;}
+  .word-wrap{display:inline-block;overflow:visible;}
+  .reveal{opacity:0;transform:translateY(18px);}
+  @media (prefers-reduced-motion: reduce){.reveal{opacity:1;transform:none;}}
+
+  /* ---------- top bar ---------- */
+  /* The bar is fixed and normally absent: it is brought back only when the reader scrolls up.
+     Instead of a flat rectangle it rides on a stack of backdrop-filter layers whose blur grows
+     toward the top of the screen, with a white wash that fades out along with the blur. */
+  .topbar{
+    position:fixed;left:0;right:0;top:0;z-index:60;background:none;border-bottom:none;
+    opacity:0;transform:translateY(-16px);filter:blur(14px);pointer-events:none;
+    transition:opacity .55s cubic-bezier(.22,1,.36,1), transform .55s cubic-bezier(.22,1,.36,1), filter .55s cubic-bezier(.22,1,.36,1);
+  }
+  .topbar.is-open{opacity:1;transform:translateY(0);filter:blur(0px);pointer-events:auto;}
+  .tb-veil{position:absolute;left:0;right:0;top:0;height:132px;pointer-events:none;z-index:-1;}
+  /* each layer blurs more than the one below it and is masked to a shorter band from the top,
+     so the blur accumulates upward instead of switching on at a hard edge */
+  .tb-blur{
+    position:absolute;inset:0;
+    -webkit-backdrop-filter:blur(var(--b));backdrop-filter:blur(var(--b));
+    -webkit-mask-image:linear-gradient(to bottom, #000 0%, #000 var(--m), transparent calc(var(--m) + 24%));
+    mask-image:linear-gradient(to bottom, #000 0%, #000 var(--m), transparent calc(var(--m) + 24%));
+  }
+  /* the lightening: strongest where the blur is strongest, gone where the blur is gone */
+  .tb-wash{
+    position:absolute;inset:0;
+    background:linear-gradient(to bottom, rgba(255,255,255,.78) 0%, rgba(255,255,255,.52) 34%, rgba(255,255,255,.22) 66%, rgba(255,255,255,0) 100%);
+  }
+  /* a bright rim of light along the bottom edge of the frosted zone: the cue that reads as a pane
+     of glass with an edge, rather than a rectangle of blur */
+  .tb-rim{
+    position:absolute;left:0;right:0;top:84px;height:1px;
+    background:linear-gradient(to right, rgba(255,255,255,0), rgba(255,255,255,.95) 18%, rgba(255,255,255,.95) 82%, rgba(255,255,255,0));
+    opacity:.75;
+  }
+  .tb-spec{
+    position:absolute;left:0;top:0;width:36%;height:84px;pointer-events:none;
+    background:linear-gradient(104deg, rgba(255,255,255,0), rgba(255,255,255,.5), rgba(255,255,255,0));
+    filter:blur(9px);opacity:.75;
+  }
+  #mainView, #photoView{padding-top:68px;}
+  .topbar-inner{display:flex;align-items:center;justify-content:space-between;height:68px;}
+  .logo{display:flex;align-items:center;gap:10px;text-decoration:none;color:var(--ink);}
+  .logo svg{width:72px;height:auto;display:block;}
+  nav.primary{display:flex;gap:28px;font-size:14px;font-weight:600;}
+  nav.primary a{text-decoration:none;color:var(--ink-dim);transition:color .15s ease;}
+  nav.primary a:hover, nav.primary a:focus-visible{color:var(--ink);}
+  .topbar-cta{
+    font-family:'IBM Plex Mono',monospace;font-size:12px;letter-spacing:.06em;text-transform:uppercase;
+    background:var(--accent);color:var(--accent-ink);border-radius:999px;padding:11px 20px;
+    text-decoration:none;font-weight:700;transition:transform .15s ease;white-space:nowrap;
+  }
+  .topbar-cta:hover{transform:translateY(-2px);}
+
+  /* ---------- marquee ---------- */
+  .marquee-strip{background:var(--white);border-top:1px solid var(--line);border-bottom:2px solid var(--accent);overflow:hidden;white-space:nowrap;}
+  .marquee-track{display:inline-flex;animation:scroll 34s linear infinite;}
+  @media (prefers-reduced-motion: reduce){.marquee-track{animation:none;}}
+  .marquee-track span{
+    font-family:'IBM Plex Mono',monospace;font-size:13px;letter-spacing:.08em;text-transform:uppercase;
+    color:var(--ink-dim);font-weight:600;padding:13px 26px;display:inline-flex;align-items:center;gap:26px;
+  }
+  .marquee-track span::after{content:"◆";color:var(--accent);font-size:9px;}
+  @keyframes scroll{from{transform:translateX(0);}to{transform:translateX(-50%);}}
+
+  /* ---------- hero ---------- */
+  .hero{padding:80px 0 64px;position:relative;overflow:hidden;}
+  .hero-grid{display:grid;grid-template-columns:1.4fr 1fr;gap:48px;align-items:end;position:relative;z-index:1;}
+  .hero h1{font-size:clamp(44px, 6.4vw, 88px);line-height:1.0;font-weight:900;margin-top:18px;}
+  .hero-lede{font-size:17px;line-height:1.6;color:var(--ink-dim);max-width:46ch;margin-top:24px;}
+  .hero-actions{display:flex;gap:14px;margin-top:32px;flex-wrap:wrap;}
+  .btn{
+    font-family:'IBM Plex Mono',monospace;font-size:13px;letter-spacing:.05em;text-transform:uppercase;
+    text-decoration:none;padding:15px 26px;border-radius:999px;display:inline-flex;align-items:center;gap:10px;
+    transition:transform .15s ease, background .15s ease;cursor:pointer;border:none;
+  }
+  .btn-solid{background:var(--accent);color:var(--accent-ink);font-weight:700;}
+  .btn-solid:hover{transform:translateY(-2px);}
+  .btn-ghost{border:1px solid var(--line-strong);background:none;color:var(--ink);}
+  .btn-ghost:hover{border-color:var(--dark);}
+  .btn-lg{padding:20px 32px;font-size:14px;border-radius:18px;}
+
+  .hero-panel{border:1px solid var(--line);border-radius:var(--radius);background:var(--white);box-shadow:var(--shadow);padding:26px;font-family:'IBM Plex Mono',monospace;}
+  .hero-panel-row{display:flex;justify-content:space-between;padding:12px 0;border-bottom:1px dashed var(--line);font-size:13px;}
+  .hero-panel-row:last-child{border-bottom:none;}
+  .hero-panel-row span:first-child{color:var(--ink-faint);}
+  .hero-panel-row span:last-child{color:var(--ink);text-align:right;}
+
+  .hero-blob{
+    position:absolute;border-radius:50%;background:var(--accent);
+    filter:blur(60px);opacity:.35;z-index:0;pointer-events:none;
+  }
+  .hero-blob.b1{width:340px;height:340px;top:-120px;right:-60px;}
+  .hero-blob.b2{width:220px;height:220px;bottom:-80px;left:20%;opacity:.2;}
+
+  /* ---------- section shell ---------- */
+  section{padding:88px 0;border-bottom:1px solid var(--line);}
+  section:last-of-type{border-bottom:none;}
+  .section-head{display:flex;justify-content:space-between;align-items:flex-end;gap:24px;margin:16px 0 40px;flex-wrap:wrap;}
+  .section-head h2{font-size:clamp(28px,3.6vw,42px);font-weight:800;}
+  .section-head p{color:var(--ink-dim);max-width:38ch;font-size:15px;line-height:1.6;margin:0;}
+
+  /* ---------- about ---------- */
+  .about-grid{display:grid;grid-template-columns:1.1fr 0.9fr;gap:72px;}
+  .about-text p{font-size:16px;line-height:1.75;color:var(--ink-dim);max-width:56ch;}
+  .about-text strong{color:var(--ink);font-weight:700;}
+  .stat-row{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--line);border:1px solid var(--line);border-radius:14px;overflow:hidden;margin-top:32px;}
+  .stat{background:var(--white);padding:22px 18px;}
+  .stat b{display:block;font-family:'Unbounded',sans-serif;font-size:28px;color:var(--ink);}
+  .stat span{font-size:12px;color:var(--ink-dim);text-transform:uppercase;letter-spacing:.05em;}
+  .gear-card{border:1px solid var(--line);border-radius:var(--radius);padding:26px 28px;background:var(--white);box-shadow:var(--shadow);}
+  .gear-card h3{font-family:'IBM Plex Mono',monospace;font-size:13px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-faint);font-weight:500;margin-bottom:16px;}
+  .gear-card ul{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:12px;}
+  .gear-card li{display:flex;justify-content:space-between;font-size:14px;padding-bottom:12px;border-bottom:1px solid var(--line);gap:12px;}
+  .gear-card li:last-child{border-bottom:none;padding-bottom:0;}
+  .gear-card li span:last-child{color:var(--ink-dim);font-family:'IBM Plex Mono',monospace;font-size:12.5px;text-align:right;}
+
+  /* ---------- centered skills timeline ---------- */
+  .timeline{position:relative;padding:20px 0;}
+  .tl-dot{position:relative;z-index:3;}
+  .timeline-wave{position:absolute;left:0;top:0;width:100%;height:100%;pointer-events:none;overflow:visible;}
+  .wave-track{stroke:var(--line-strong);stroke-width:2;}
+  .wave-live{stroke:var(--accent);stroke-width:3.5;stroke-linecap:round;filter:drop-shadow(0 0 7px rgba(244,251,0,.75));}
+  .wave-dot{fill:var(--accent);filter:drop-shadow(0 0 10px rgba(244,251,0,.9));}
+  .tl-group-label{
+    text-align:center;font-family:'IBM Plex Mono',monospace;font-size:12px;letter-spacing:.14em;text-transform:uppercase;
+    color:var(--accent-ink);background:var(--accent);display:inline-block;padding:8px 18px;border-radius:999px;font-weight:700;
+    position:relative;left:50%;transform:translateX(-50%);margin:36px 0 22px;z-index:2;
+  }
+  .tl-row{display:grid;grid-template-columns:1fr 44px 1fr;align-items:center;position:relative;margin-bottom:8px;}
+  .tl-dot{
+    width:44px;height:44px;border-radius:50%;background:var(--white);border:2px solid var(--line-strong);
+    display:flex;align-items:center;justify-content:center;font-family:'IBM Plex Mono',monospace;font-weight:700;font-size:12.5px;
+    color:var(--ink-dim);justify-self:center;position:relative;z-index:2;
+  }
+  .tl-card{background:var(--white);border:1px solid var(--line);border-radius:16px;padding:16px 20px;box-shadow:var(--shadow);}
+  .tl-row.l .tl-card{grid-column:1;text-align:right;}
+  .tl-row.l .tl-spacer{grid-column:3;}
+  .tl-row.r .tl-card{grid-column:3;text-align:left;}
+  .tl-row.r .tl-spacer{grid-column:1;}
+  .tl-name{font-weight:700;font-size:15.5px;}
+  .tl-sub{color:var(--ink-dim);font-size:13px;margin-top:3px;line-height:1.5;}
+
+  /* ---------- skills: a horizontal rail that the page scroll pulls left→right ---------- */
+  .tlh{position:relative;height:100vh;}
+  .tlh-rail{position:absolute;inset:0;display:flex;align-items:center;overflow:hidden;}
+  .tlh-track{
+    position:relative;display:flex;align-items:center;gap:clamp(20px,3vw,52px);
+    /* the left inset is what puts card one comfortably on screen before the rail starts moving */
+    padding-left:max(28px, calc(50vw - 480px));
+    padding-right:max(28px, calc(50vw - 260px));
+    will-change:transform;
+  }
+  .tlh-wave{position:absolute;left:0;top:0;height:100%;pointer-events:none;overflow:visible;}
+  .tlh-item{
+    position:relative;flex:none;width:clamp(290px,31vw,394px);height:min(660px,80vh);
+    will-change:opacity,filter,transform;
+  }
+  .tlh-item .tl-card{padding:26px 28px 28px;border-radius:20px;}
+  .tlh-item .tl-name{font-family:'Unbounded',sans-serif;font-size:21px;font-weight:800;letter-spacing:-.01em;line-height:1.12;}
+  .tlh-item .tl-sub{font-size:14.5px;line-height:1.62;margin-top:12px;color:var(--ink-dim);}
+  .tlh-item .tl-dot{width:54px;height:54px;font-size:14px;box-shadow:0 6px 20px rgba(20,20,10,.10);}
+  .tlh-item.star .tl-card{box-shadow:0 18px 48px rgba(244,251,0,.35);}
+  .tlh-item .tl-dot{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);}
+  .tlh-item .tl-card{position:absolute;left:0;right:0;text-align:left;}
+  .tlh-item.up .tl-card{bottom:calc(50% + 58px);}
+  .tlh-item.down .tl-card{top:calc(50% + 58px);}
+  .tlh-stem{position:absolute;left:50%;width:2px;background:var(--line-strong);transform:translateX(-50%);}
+  .tlh-item.up .tlh-stem{bottom:calc(50% + 24px);height:36px;}
+  .tlh-item.down .tlh-stem{top:calc(50% + 24px);height:36px;}
+  .tlh-item.star .tl-dot{background:var(--accent);border-color:var(--accent);color:var(--accent-ink);}
+  .tlh-item.star .tl-card{background:var(--accent);border-color:var(--accent);}
+  .tlh-item.star .tl-sub{color:rgba(22,22,15,.72);}
+
+  .tl-final{
+    margin:40px auto 0;max-width:460px;text-align:center;background:var(--white);color:var(--ink);
+    border:2px solid var(--accent);border-radius:20px;padding:28px 30px;position:relative;box-shadow:var(--shadow);
+  }
+  .tl-final .tl-dot{margin:0 auto 14px;background:var(--accent);border-color:var(--accent);color:var(--accent-ink);}
+  .tl-final b{font-family:'Unbounded',sans-serif;font-size:20px;color:var(--ink);display:block;margin-bottom:8px;}
+  .tl-final p{margin:0;color:var(--ink-dim);font-size:13.5px;line-height:1.6;}
+
+  @media (max-width: 760px){
+    .tl-row{grid-template-columns:44px 1fr;}
+    .tl-dot{grid-column:1;justify-self:start;}
+    .tl-row.l .tl-card, .tl-row.r .tl-card{grid-column:2;text-align:left;}
+    .tl-row.l .tl-spacer, .tl-row.r .tl-spacer{display:none;}
+  }
+
+  /* ---------- glass card: image floats/turns on its own inside a fixed frame ---------- */
+  .glass{position:relative;}
+  .glass-inner{position:relative;}
+  .glass-sheen{
+    position:absolute;inset:0;z-index:3;pointer-events:none;border-radius:inherit;
+    background:radial-gradient(circle at 32% 24%, rgba(255,255,255,.5), rgba(255,255,255,0) 58%);
+    mix-blend-mode:overlay;opacity:.8;
+  }
+  .case-slide{perspective:1000px;}
+  .img-float{
+    width:100%;height:100%;transform-style:preserve-3d;
+    animation:imgFloat 9s ease-in-out infinite;
+    animation-delay:calc(var(--float-i, 0) * -1.7s);
+  }
+  @keyframes imgFloat{
+    0%   {transform:scale(1.16) rotateY(-8deg) rotateX(3deg);}
+    50%  {transform:scale(1.22) rotateY(8deg) rotateX(-3deg);}
+    100% {transform:scale(1.16) rotateY(-8deg) rotateX(3deg);}
+  }
+  @media (prefers-reduced-motion: reduce){
+    .img-float{animation:none;transform:scale(1.05);}
+  }
+
+  /* ---------- cases ---------- */
+  .case-filters{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:30px;}
+  .filter-btn{
+    font-family:'IBM Plex Mono',monospace;font-size:12.5px;letter-spacing:.05em;text-transform:uppercase;
+    background:var(--white);border:1px solid var(--line-strong);color:var(--ink-dim);padding:10px 18px;
+    border-radius:999px;cursor:pointer;transition:all .15s ease;
+  }
+  .filter-btn:hover{border-color:var(--ink);color:var(--ink);}
+  .filter-btn.is-active{background:var(--accent);color:var(--accent-ink);border-color:var(--accent);font-weight:700;}
+  .case-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:36px;}
+  .case-card[hidden]{display:none;}
+  .case-card{
+    border:1px solid var(--line);border-radius:var(--radius);overflow:hidden;
+    background:var(--white);box-shadow:var(--shadow);text-decoration:none;color:var(--ink);display:block;
+  }
+  .case-carousel{position:relative;aspect-ratio:1/1;background:var(--bg-soft);border-radius:var(--radius) var(--radius) 0 0;overflow:hidden;}
+  .case-track{display:flex;height:100%;overflow-x:auto;scroll-snap-type:x mandatory;scrollbar-width:none;-ms-overflow-style:none;cursor:grab;}
+  .case-track::-webkit-scrollbar{display:none;}
+  .case-slide{flex:0 0 100%;scroll-snap-align:start;position:relative;height:100%;}
+  .case-slide img{width:100%;height:100%;object-fit:cover;display:block;}
+  .case-tag-row{position:absolute;top:14px;left:14px;right:14px;z-index:2;display:flex;justify-content:space-between;align-items:flex-start;}
+  .case-tag{
+    font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.06em;text-transform:uppercase;
+    background:rgba(22,22,15,0.68);color:var(--accent);padding:6px 10px;border-radius:999px;backdrop-filter:blur(4px);
+  }
+  .case-ext{width:32px;height:32px;border-radius:50%;background:rgba(22,22,15,0.68);color:var(--accent);display:flex;align-items:center;justify-content:center;font-size:14px;}
+  .case-dots{position:absolute;bottom:12px;left:0;right:0;z-index:2;display:flex;justify-content:center;gap:6px;pointer-events:none;}
+  .case-dots span{width:6px;height:6px;border-radius:50%;background:rgba(255,255,255,.55);transition:background .2s ease, transform .2s ease;}
+  .case-dots span.active{background:var(--accent);transform:scale(1.3);}
+  .case-arrow{
+    position:absolute;top:50%;transform:translateY(-50%);z-index:2;width:36px;height:36px;border-radius:50%;
+    background:rgba(255,255,255,.85);border:1px solid var(--line);display:flex;align-items:center;justify-content:center;
+    cursor:pointer;font-size:15px;color:var(--ink);opacity:0;transition:opacity .15s ease;
+  }
+  .case-carousel:hover .case-arrow{opacity:1;}
+  .case-arrow.prev{left:12px;}
+  .case-arrow.next{right:12px;}
+  .case-3d{position:absolute;inset:0;z-index:1;touch-action:none;cursor:grab;overflow:hidden;background:var(--bg-soft);}
+  .case-3d:active{cursor:grabbing;}
+  .case-3d canvas{display:block;width:100%;height:100%;position:relative;z-index:1;}
+  .case-3d-bg{
+    position:absolute;inset:0;width:100%;height:100%;object-fit:cover;
+    filter:blur(26px) brightness(.8) saturate(1.15);
+    transform:scale(1.25);transform-origin:center;
+  }
+  .case-carousel:has(.case-3d) .case-arrow,
+  .case-carousel:has(.case-3d) .case-dots{display:none;}
+  .case-body{padding:24px 26px 28px;}
+  .case-tag-above{
+    display:inline-block;font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.06em;text-transform:uppercase;
+    color:var(--ink-dim);background:var(--bg-soft);padding:5px 10px;border-radius:999px;margin-bottom:10px;
+  }
+  .case-body h3{font-size:19px;font-weight:600;margin-bottom:6px;}
+  .case-body p{margin:0 0 16px;font-size:13.5px;color:var(--ink-dim);line-height:1.5;}
+  .case-open-btn{
+    font-family:'IBM Plex Mono',monospace;font-size:13px;letter-spacing:.05em;text-transform:uppercase;
+    border:none;background:var(--accent);color:var(--accent-ink);font-weight:700;
+    padding:14px 24px;border-radius:999px;cursor:pointer;transition:transform .15s ease;
+  }
+  .case-open-btn:hover{transform:translateY(-2px);}
+  .case-open-btn:active{transform:scale(0.97);}
+
+  .cta-band{
+    margin-top:56px;border:2px solid var(--accent);border-radius:var(--radius);background:var(--white);
+    padding:44px;display:grid;grid-template-columns:1fr auto auto;gap:20px;align-items:center;box-shadow:var(--shadow);
+  }
+  .cta-band h3{color:var(--ink);font-size:clamp(20px,2.6vw,28px);}
+  .cta-band p{color:var(--ink-dim);font-size:13.5px;margin:6px 0 0;}
+  .cta-btn{
+    font-family:'IBM Plex Mono',monospace;font-size:12.5px;letter-spacing:.05em;text-transform:uppercase;
+    background:var(--accent);color:var(--accent-ink);padding:16px 22px;border-radius:14px;text-decoration:none;
+    font-weight:700;white-space:nowrap;text-align:center;transition:transform .15s ease;
+  }
+  .cta-btn:hover{transform:translateY(-2px);}
+  .cta-btn.ghost{background:none;border:1.5px solid var(--line-strong);color:var(--ink);}
+
+  /* ---------- lightbox ---------- */
+  .lightbox{position:fixed;inset:0;z-index:100;background:rgba(15,15,10,0.72);backdrop-filter:blur(6px);display:flex;align-items:center;justify-content:center;padding:24px;opacity:0;pointer-events:none;transition:opacity .2s ease;}
+  .lightbox.is-open{opacity:1;pointer-events:auto;}
+  .lightbox-panel{max-width:920px;width:100%;max-height:88vh;overflow-y:auto;background:var(--white);border-radius:20px;transform:translateY(16px);transition:transform .25s ease;}
+  .lightbox.is-open .lightbox-panel{transform:translateY(0);}
+  .lightbox-carousel{position:relative;aspect-ratio:4/3;background:var(--bg-soft);}
+  .lightbox-track{display:flex;height:100%;overflow-x:auto;scroll-snap-type:x mandatory;scrollbar-width:none;}
+  .lightbox-track::-webkit-scrollbar{display:none;}
+  .lightbox-track .case-slide{flex:0 0 100%;height:100%;}
+  .lightbox-track img{width:100%;height:100%;object-fit:cover;}
+  .lightbox-body{padding:28px 30px 32px;}
+  .lightbox-top{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;}
+  .lightbox-body h3{font-size:24px;margin-bottom:8px;}
+  .lightbox-body p{color:var(--ink-dim);font-size:14.5px;line-height:1.65;max-width:60ch;}
+  .lightbox-close{flex:none;width:36px;height:36px;border-radius:50%;border:1px solid var(--line-strong);background:none;color:var(--ink);font-size:16px;cursor:pointer;}
+  .lightbox-close:hover{background:var(--accent);color:var(--accent-ink);border-color:var(--accent);}
+
+  /* ---------- services: pinned sequence, one orb per service ---------- */
+  .svc-stage{position:relative;height:100vh;overflow:hidden;}
+  /* each service is a self-contained slide: its own orb plus its own text, so the pair travels
+     together — the outgoing one recedes upward while the next one rises from below */
+  .svc-slide{
+    position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
+    will-change:transform,opacity,filter;
+  }
+  .svc-orb{
+    position:absolute;left:50%;top:50%;
+    /* deliberately wider than the viewport: the left and right edges run off-screen */
+    width:min(132vw,1280px);height:min(84vh,620px);
+    transform:translate(-50%,-50%);
+    border-radius:50%;pointer-events:none;z-index:0;
+    background:
+      radial-gradient(ellipse at 50% 50%, rgba(244,251,0,.10) 30%, rgba(244,251,0,.46) 70%, rgba(244,251,0,.92) 100%);
+    box-shadow:0 40px 130px rgba(244,251,0,.26), inset 0 0 110px rgba(255,255,255,.4);
+  }
+  /* The highlights live on their own layers so they can drift independently — the inside of the
+     sphere keeps moving instead of sitting there as a frozen gradient. */
+  .svc-orb i{
+    position:absolute;inset:-6%;border-radius:50%;display:block;pointer-events:none;
+    will-change:transform,opacity;
+  }
+  .svc-orb .g1{background:radial-gradient(ellipse at 50% 8%, rgba(255,255,255,.95), rgba(255,255,255,0) 46%);}
+  .svc-orb .g2{background:radial-gradient(ellipse at 48% 96%, rgba(255,255,255,.6), rgba(255,255,255,0) 50%);}
+  .svc-orb .g3{background:radial-gradient(ellipse at 22% 62%, rgba(255,255,255,.5), rgba(255,255,255,0) 38%);mix-blend-mode:screen;}
+  .svc-orb .g4{background:conic-gradient(from 0deg at 50% 50%, rgba(255,255,255,0) 0deg, rgba(255,255,255,.34) 74deg, rgba(255,255,255,0) 150deg, rgba(255,255,255,0) 360deg);opacity:.5;}
+  /* text lives inside the orb and is centred, not left-aligned */
+  /* Three clearly separated ranks — number, title, then supporting copy — with the rhythm set by
+     one spacing step so the block stops looking arbitrarily padded. */
+  .svc-item{
+    position:relative;z-index:2;text-align:center;
+    width:min(620px,84vw);margin:0 auto;will-change:opacity,filter,transform;
+    display:flex;flex-direction:column;align-items:center;gap:0;
+  }
+  .svc-num{
+    font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.24em;font-weight:600;
+    color:var(--accent-ink);background:rgba(255,255,255,.55);border:1px solid rgba(22,22,15,.14);
+    padding:7px 14px;border-radius:999px;display:inline-block;margin:0 0 26px;
+  }
+  .svc-item h3{
+    font-size:clamp(30px,5vw,58px);font-weight:900;line-height:1.0;letter-spacing:-.025em;
+    margin:0 0 20px;max-width:15ch;
+  }
+  .svc-item p{
+    color:rgba(22,22,15,.7);font-size:clamp(15px,1.45vw,17px);line-height:1.6;
+    margin:0 0 30px;max-width:44ch;
+  }
+  .svc-points{
+    list-style:none;margin:0;padding:22px 0 0;display:flex;flex-direction:column;gap:12px;
+    align-items:center;border-top:1px solid rgba(22,22,15,.16);width:min(420px,78vw);
+  }
+  .svc-points li{
+    font-family:'IBM Plex Mono',monospace;font-size:12.5px;letter-spacing:.005em;
+    color:rgba(22,22,15,.62);line-height:1.5;max-width:42ch;
+  }
+  @media (max-width:720px){
+    .svc-item p{font-size:15px;}
+    .svc-orb{width:150vw;height:74vh;}
+  }
+
+  /* ---------- contact ---------- */
+  .contact-panel{border:1px solid var(--line);border-radius:24px;background:var(--accent);color:var(--accent-ink);padding:56px;display:grid;grid-template-columns:1.2fr 1fr;gap:40px;align-items:center;position:relative;overflow:hidden;}
+  .contact-panel h2{font-size:clamp(30px,4vw,46px);line-height:1.1;color:var(--accent-ink);}
+  /* dark ink on the yellow plate: white type sat at roughly 1.3:1 here and simply vanished */
+  .contact-panel .eyebrow{color:rgba(22,22,15,.62);}
+  .contact-panel h2 .mark{
+    background-image:linear-gradient(var(--white),var(--white));background-size:100% 100%;background-position:0 0;
+    color:var(--ink);padding:2px 10px;border-radius:8px;display:inline-block;
+  }
+  .contact-panel .hero-lede{color:rgba(22,22,15,.72);}
+  .contact-links{display:flex;flex-direction:column;gap:2px;position:relative;z-index:1;}
+  .contact-links a{display:flex;justify-content:space-between;align-items:center;text-decoration:none;padding:16px 4px;border-bottom:1px solid rgba(22,22,15,.18);font-family:'IBM Plex Mono',monospace;font-size:14px;color:var(--accent-ink);}
+  .contact-links a:hover{color:var(--white);}
+  .contact-links a span:first-child{color:rgba(22,22,15,.55);text-transform:uppercase;font-size:11px;letter-spacing:.08em;}
+  .contact-blob{position:absolute;width:280px;height:280px;border-radius:50%;background:var(--white);filter:blur(70px);opacity:.35;top:-100px;right:-60px;}
+  .contact-blob.b2{width:340px;height:340px;top:auto;right:auto;bottom:-150px;left:-90px;opacity:.28;background:var(--ink);filter:blur(90px);}
+  /* faint printed-grid texture so the yellow plate is not a flat fill */
+  .contact-grid{
+    position:absolute;inset:0;pointer-events:none;opacity:.5;
+    background-image:radial-gradient(rgba(22,22,15,.16) 1px, transparent 1px);
+    background-size:22px 22px;
+    -webkit-mask-image:radial-gradient(ellipse at 70% 20%, #000, transparent 72%);
+    mask-image:radial-gradient(ellipse at 70% 20%, #000, transparent 72%);
+  }
+  /* a wide band of light that sweeps across the plate on a loop */
+  .contact-sheen{
+    position:absolute;top:-60%;left:-40%;width:42%;height:220%;pointer-events:none;
+    background:linear-gradient(100deg, rgba(255,255,255,0), rgba(255,255,255,.55), rgba(255,255,255,0));
+    transform:rotate(14deg);filter:blur(12px);
+  }
+  .contact-status{
+    display:inline-flex;align-items:center;gap:9px;margin-top:20px;
+    font-family:'IBM Plex Mono',monospace;font-size:11.5px;letter-spacing:.06em;
+    color:rgba(22,22,15,.6);text-transform:uppercase;
+  }
+  .contact-status i{width:8px;height:8px;border-radius:50%;background:var(--ink);display:block;}
+  .cl-val{display:inline-flex;align-items:center;gap:8px;}
+  .cl-val i{display:inline-block;font-style:normal;will-change:transform;}
+  .contact-panel{will-change:transform;}
+
+  footer{padding:32px 0 56px;display:flex;justify-content:space-between;align-items:center;font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--ink-faint);flex-wrap:wrap;gap:12px;}
+
+  /* ---------- photography view ---------- */
+  #photoView{display:none;}
+  body.show-photo #mainView{display:none;}
+  body.show-photo #photoView{display:block;}
+  .photo-hero{padding:64px 0 40px;}
+  .photo-hero h1{font-size:clamp(38px,6vw,72px);font-weight:900;line-height:1.02;}
+  .photo-back{display:inline-flex;align-items:center;gap:8px;font-family:'IBM Plex Mono',monospace;font-size:12.5px;text-transform:uppercase;letter-spacing:.05em;color:var(--ink-dim);text-decoration:none;margin-bottom:28px;background:none;border:none;cursor:pointer;padding:0;}
+  .photo-back:hover{color:var(--ink);}
+  .photo-columns{display:grid;grid-template-columns:1fr 1fr;gap:40px;margin-top:36px;}
+  .photo-columns p{color:var(--ink-dim);font-size:15px;line-height:1.7;}
+  .photo-vibe{font-size:clamp(30px,4.4vw,52px);font-weight:900;margin:56px 0 24px;}
+  .photo-vibe .mark{padding:0 4px;}
+  .series-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:32px;margin-top:44px;}
+
+  @media (max-width: 860px){
+    nav.primary{display:none;}
+    .hero-grid, .about-grid, .contact-panel, .photo-columns{grid-template-columns:1fr;}
+    .case-grid, .series-grid{grid-template-columns:1fr;}
+    .service-row{grid-template-columns:1fr;gap:8px;}
+    .stat-row{grid-template-columns:1fr;}
+    .contact-panel{padding:32px;}
+    .cta-band{grid-template-columns:1fr;text-align:center;}
+  }
+  @media (max-width: 560px){
+    .wrap{padding:0 18px;}
+    .lightbox-body{padding:22px 20px 26px;}
+  }
+</style>
+
+<div class="topbar" id="topbar">
+  <div class="tb-veil" aria-hidden="true">
+    <div class="tb-blur" style="--b:2px;--m:100%"></div>
+    <div class="tb-blur" style="--b:4px;--m:70%"></div>
+    <div class="tb-blur" style="--b:9px;--m:48%"></div>
+    <div class="tb-blur" style="--b:16px;--m:28%"></div>
+    <div class="tb-blur" style="--b:26px;--m:10%"></div>
+    <div class="tb-wash"></div>
+    <div class="tb-spec" id="tbSpec"></div>
+    <div class="tb-rim"></div>
+  </div>
+  <div class="wrap topbar-inner">
+    <a href="#top" class="logo" onclick="showMain()">
+      <svg viewBox="0 0 1216 583" xmlns="http://www.w3.org/2000/svg" fill="currentColor">
+        <path d="M552.73 461.455H470.054L462.772 400.627H407.512L399.373 461.455H320.553L383.952 119.187H488.474L552.73 461.455ZM415.651 339.798H455.061L436.641 172.305H435.784L415.651 339.798Z"/>
+        <path d="M705.515 320.95H706.371V119.187H782.621V461.455H696.947L633.12 249.84H632.263V461.455H556.013V119.187H642.116L705.515 320.95Z"/>
+        <path d="M902.277 467.024C838.45 467.024 800.753 426.329 800.753 369.784V210.858C800.753 151.315 839.307 113.618 902.277 113.618C966.105 113.618 1003.8 152.6 1003.8 210.858V369.784C1003.8 426.329 965.248 467.024 902.277 467.024ZM902.277 406.195C917.27 406.195 924.981 395.915 924.981 375.781V204.433C924.981 183.442 918.556 174.447 901.849 174.447C886.856 174.447 879.574 181.729 879.574 203.576V375.781C879.574 395.915 887.284 406.195 902.277 406.195Z"/>
+        <path d="M66.0844 582.545L76.7331 576.594C53.139 523.142 41.3419 476.789 41.3419 437.535C41.3419 416.826 42.9203 395.182 46.077 372.606V191.745C15.359 244.534 0 304.436 0 371.451C0 400.265 4.28035 428.87 12.841 457.267C23.4897 493.597 41.2375 535.357 66.0844 582.545Z"/>
+        <path fill-rule="evenodd" clip-rule="evenodd" d="M46.077 461.455V372.606C50.7496 339.188 58.8803 303.725 70.4692 266.217C85.3587 218.186 103.501 175.557 124.897 138.33V461.455H46.077ZM136.49 119.187C135.013 121.501 133.551 123.838 132.102 126.198L183.293 461.455H280.962L339.22 119.187H259.972L233.841 362.073L232.984 362.502L211.566 119.187H136.49ZM46.077 119.187H98.7286C78.1826 142.795 60.8284 166.645 46.6662 190.737L46.077 191.745V119.187Z"/>
+        <path d="M239.908 9.70909L232.392 0C178.474 39.0214 133.919 78.7503 98.7286 119.187H124.897V138.33C127.259 134.22 129.661 130.176 132.102 126.198L131.032 119.187H136.49C139.381 114.656 142.325 110.214 145.323 105.86C169.752 70.5736 201.281 38.5231 239.908 9.70909Z"/>
+        <path d="M1138.61 1.90241e-05L1127.96 5.95075C1146.57 48.113 1157.84 85.8583 1161.77 119.187H1190.02C1179.21 84.3013 1162.08 44.5724 1138.61 1.90241e-05Z"/>
+        <path d="M964.785 572.836L972.301 582.545C1027.07 542.912 1072.17 502.548 1107.61 461.455H1069.41C1066.13 466.647 1062.79 471.724 1059.37 476.685C1034.94 511.972 1003.41 544.022 964.785 572.836Z"/>
+        <path fill-rule="evenodd" clip-rule="evenodd" d="M1190.02 119.187C1190.65 121.234 1191.26 123.265 1191.85 125.279C1198.04 145.795 1201.99 166.42 1203.7 187.154L1215.27 119.187H1190.02ZM1174.19 360.541C1169.37 371.228 1163.99 381.651 1158.03 391.809C1144.24 415.253 1127.44 438.468 1107.61 461.455H1157.01L1174.19 360.541ZM1069.41 461.455C1095.38 420.323 1116.98 371.947 1134.22 316.328C1153.64 253.48 1163.35 196.374 1163.35 145.01C1163.35 136.719 1162.82 128.111 1161.77 119.187H1136.02L1109.89 362.073L1109.04 362.502L1087.62 119.187H1007.08L1059.35 461.455H1069.41Z"/>
+        <path d="M1174.19 360.541C1194.53 315.434 1204.69 265.618 1204.69 211.094C1204.69 203.098 1204.36 195.118 1203.7 187.154L1174.19 360.541Z"/>
+      </svg>
+    </a>
+    <nav class="primary">
+      <a href="#about" onclick="showMain()">Обо мне</a>
+      <a href="#skills" onclick="showMain()">Скиллы</a>
+      <a href="#cases" onclick="showMain()">Кейсы</a>
+      <a href="#" onclick="showPhoto();return false;">Фото</a>
+      <a href="#contact" onclick="showMain()">Контакты</a>
+    </nav>
+    <a class="topbar-cta" href="#contact" onclick="showMain()">Обсудить проект</a>
+  </div>
+</div>
+
+<div id="mainView">
+
+<div class="marquee-strip">
+  <div class="marquee-track" aria-hidden="true">
+    <span>SMM-СТРАТЕГИЯ И ВЕДЕНИЕ</span><span>ФОТОСЪЁМКА ПОЛНОГО ЦИКЛА</span><span>СТУДИЙНЫЙ И ВЫЕЗДНОЙ СВЕТ</span><span>РЕТУШЬ И КОМПОЗИТИНГ</span><span>ГРАФИЧЕСКИЙ ДИЗАЙН И АЙДЕНТИКА</span><span>ADOBE PHOTOSHOP</span><span>ADOBE AFTER EFFECTS</span><span>ПРЕМИАЛЬНЫЙ КОНТЕНТ ДЛЯ БРЕНДОВ</span>
+    <span>SMM-СТРАТЕГИЯ И ВЕДЕНИЕ</span><span>ФОТОСЪЁМКА ПОЛНОГО ЦИКЛА</span><span>СТУДИЙНЫЙ И ВЫЕЗДНОЙ СВЕТ</span><span>РЕТУШЬ И КОМПОЗИТИНГ</span><span>ГРАФИЧЕСКИЙ ДИЗАЙН И АЙДЕНТИКА</span><span>ADOBE PHOTOSHOP</span><span>ADOBE AFTER EFFECTS</span><span>ПРЕМИАЛЬНЫЙ КОНТЕНТ ДЛЯ БРЕНДОВ</span>
+  </div>
+</div>
+
+<div id="top"></div>
+<header class="hero">
+  <div class="hero-blob b1"></div>
+  <div class="hero-blob b2"></div>
+  <div class="wrap hero-grid">
+    <div>
+      <span class="eyebrow">Илья Иванов · SMM &amp; graphic design</span>
+      <h1 data-reveal="tilt">СНИМАЮ, СОБИРАЮ И <span class="mark">ОЖИВЛЯЮ</span> БРЕНДЫ.</h1>
+      <p class="hero-lede" data-reveal>Премиальный подход к визуалу бренда: от постановки света и съёмки на профессиональную камеру — до графики, моушн-дизайна в After Effects и стратегического ведения соцсетей. Один подрядчик закрывает то, на что обычно нужна команда из трёх специалистов.</p>
+      <div class="hero-actions" data-reveal>
+        <a class="btn btn-solid" href="#cases">Смотреть кейсы</a>
+        <a class="btn btn-ghost" href="https://t.me/llyaMihailovich" target="_blank" rel="noopener">Написать в Telegram</a>
+      </div>
+    </div>
+    <div class="hero-panel" data-reveal="right">
+      <div class="hero-panel-row"><span>Формат</span><span>Фото · Видео · Motion · SMM</span></div>
+      <div class="hero-panel-row"><span>Съёмка</span><span>Студия / выезд, свой свет</span></div>
+      <div class="hero-panel-row"><span>Постпродакшн</span><span>Photoshop, After Effects</span></div>
+      <div class="hero-panel-row"><span>Сроки</span><span>Кейс за 3–7 дней</span></div>
+      <div class="hero-panel-row"><span>География</span><span>Россия, удалённо</span></div>
+    </div>
+  </div>
+</header>
+
+<section id="about">
+  <div class="wrap about-grid">
+    <div class="about-text" data-reveal="left">
+      <span class="eyebrow">Обо мне</span>
+      <h2 style="margin-top:18px;font-size:clamp(26px,3.4vw,36px);">Дизайнер, который сам снимает то, что потом сам же и собирает.</h2>
+      <p style="margin-top:22px;">Я не микрофон в руках агентства — я делаю сам: снимаю, обрабатываю, собираю пост, пишу текст и ставлю в план. Полный цикл в одной голове — это меньше созвонов и меньше «потеряли на передаче между отделами». За последний год закрыл SMM клиники под ключ: от съёмки до публикации, без посредников. Не питчу процесс — питчу результат.</p>
+      <div class="stat-row">
+        <div class="stat"><b>Full-cycle</b><span>съёмка + свет</span></div>
+        <div class="stat"><b>7+ программ</b><span>Ps · Ai · Ae · Lr · Figma</span></div>
+        <div class="stat"><b>1 подрядчик</b><span>вместо трёх</span></div>
+      </div>
+    </div>
+    <div class="gear-card" data-reveal="right">
+      <h3>Коротко</h3>
+      <ul>
+        <li><span>Дизайн</span><span>Графика · Айдентика · SMM</span></li>
+        <li><span>Съёмка</span><span>Камера, свет, локация</span></li>
+        <li><span>Постпродакшн</span><span>Photoshop · After Effects</span></li>
+        <li><span>Подход</span><span>Насмотренность + стратегия</span></li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<section id="skills">
+  <div class="wrap">
+    <div class="section-head" data-reveal="tilt">
+      <div>
+        <span class="eyebrow">Скиллы</span>
+        <h2 style="margin-top:12px;">Софт, оборудование, стратегия</h2>
+      </div>
+      <p>Не склад оборудования — шесть вещей, за которые реально платят клиенты.</p>
+    </div>
+
+  </div>
+
+  <div class="tlh" id="tlh">
+    <div class="tlh-rail">
+      <div class="tlh-track" id="tlhTrack">
+        <svg class="tlh-wave" id="timelineWave" aria-hidden="true" preserveAspectRatio="none">
+          <path class="wave-track" id="waveTrack" fill="none"></path>
+          <path class="wave-live" id="waveLive" fill="none"></path>
+          <circle class="wave-dot" id="waveDot" r="6"></circle>
+        </svg>
+
+        <div class="tlh-item up"><div class="tl-card"><div class="tl-name">Продакшн</div><div class="tl-sub">Полный цикл съёмки — от студии до выезда на локацию. Свой свет и техника, ничего не беру напрокат в последний момент.</div></div><span class="tlh-stem"></span><div class="tl-dot">1</div></div>
+        <div class="tlh-item down"><div class="tl-dot">2</div><span class="tlh-stem"></span><div class="tl-card"><div class="tl-name">Постпродакшн</div><div class="tl-sub">Довожу материал до финального вида: ретушь, цветокоррекция, векторная графика — в Photoshop, Lightroom и Illustrator.</div></div></div>
+        <div class="tlh-item up"><div class="tl-card"><div class="tl-name">Моушн</div><div class="tl-sub">Анимация и видео для reels и сторис в After Effects — отдельный навык, не просто «немного двигаю картинки».</div></div><span class="tlh-stem"></span><div class="tl-dot">3</div></div>
+        <div class="tlh-item down"><div class="tl-dot">4</div><span class="tlh-stem"></span><div class="tl-card"><div class="tl-name">SMM и стратегия</div><div class="tl-sub">Веду проект от контент-плана до отчёта по метрикам: планирую публикации, пишу тексты, настраиваю рекламу и показываю, что сработало.</div></div></div>
+        <div class="tlh-item up"><div class="tl-card"><div class="tl-name">Нейросети</div><div class="tl-sub">Генерация референсов, апскейл, ускорение ретуши и подбора концепций.</div></div><span class="tlh-stem"></span><div class="tl-dot">5</div></div>
+        <div class="tlh-item down star"><div class="tl-dot">★</div><span class="tlh-stem"></span><div class="tl-card"><div class="tl-name">Насмотренность</div><div class="tl-sub">Референсы, вкус и чувство формы — то, что не пишут в резюме, но видно в каждом кадре и в каждом макете.</div></div></div>
+
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="cases">
+  <div class="wrap">
+    <div class="section-head" data-reveal="tilt">
+      <div>
+        <span class="eyebrow">Кейсы</span>
+        <h2 style="margin-top:12px;">Реальные проекты</h2>
+      </div>
+      <p>Слайды пролистываются вправо — наклони телефон, карточки стеклянные и живые.</p>
+    </div>
+
+    <div class="case-filters" data-reveal>
+      <button class="filter-btn is-active" data-filter="all">Все</button>
+      <button class="filter-btn" data-filter="graphic">Графика</button>
+      <button class="filter-btn" data-filter="smm">СММ</button>
+      <button class="filter-btn" data-filter="photo">Фотография</button>
+    </div>
+
+    <div class="case-grid" id="caseGrid">
+
+      <article class="case-card glass" data-reveal="scale" data-cat="graphic" data-title="Quoters Tennis Club"
+        data-desc="Айдентика теннисного клуба в здании бывшей картинной галереи: логотип, фирменный индиго-цвет корта, навигация «to court», интерьер и мерч.">
+        <div class="glass-inner">
+        <div class="case-carousel">
+          <div class="case-track" data-lenis-prevent>
+            <div class="case-slide"><div class="img-float"><img src="quoters1.jpg" alt="Quoters Tennis Club" loading="lazy"></div></div>
+            <div class="case-slide"><div class="img-float"><img src="quoters2.jpg" alt="Quoters интерьер" loading="lazy"></div></div>
+          </div>
+          <div class="case-3d" data-src="quoters1.jpg"></div>
+          <div class="case-tag-row"><span class="case-tag">Графика</span></div>
+          <button class="case-arrow prev" aria-label="Назад">‹</button>
+          <button class="case-arrow next" aria-label="Далее">›</button>
+          <div class="case-dots"><span class="active"></span><span></span></div>
+          <div class="glass-sheen"></div>
+        </div>
+        </div>
+        <div class="case-body"><h3>Quoters Tennis Club</h3><p>Айдентика теннис-клуба: логотип, цвет, навигация, мерч.</p><button class="case-open-btn" onclick="event.stopPropagation(); window.openLightbox(this.closest('.case-card'));">Открыть кейс →</button></div>
+      </article>
+
+      <article class="case-card glass" data-reveal="scale" data-cat="graphic" data-title="Blaze"
+        data-desc="Единый кейс пляжного бара Blaze: рекламная фотосъёмка на локации, мобильное приложение с меню и кэшбэком, мерч и фирменный стиль.">
+        <div class="glass-inner">
+        <div class="case-carousel">
+          <div class="case-track" data-lenis-prevent>
+            <div class="case-slide"><div class="img-float"><img src="blaze1.jpg" alt="Blaze — съёмка" loading="lazy" style="object-position:center 25%;"></div></div>
+            <div class="case-slide"><div class="img-float"><img src="blaze2.jpg" alt="Blaze — приложение" loading="lazy"></div></div>
+            <div class="case-slide"><div class="img-float"><img src="blaze3.jpg" alt="Blaze — мерч" loading="lazy"></div></div>
+          </div>
+          <div class="case-3d" data-src="blaze1.jpg"></div>
+          <div class="case-tag-row"><span class="case-tag">Графика</span></div>
+          <button class="case-arrow prev" aria-label="Назад">‹</button>
+          <button class="case-arrow next" aria-label="Далее">›</button>
+          <div class="case-dots"><span class="active"></span><span></span><span></span></div>
+          <div class="glass-sheen"></div>
+        </div>
+        </div>
+        <div class="case-body"><h3>Blaze</h3><p>Съёмка, мобильное приложение и мерч пляжного бара — один кейс.</p><button class="case-open-btn" onclick="event.stopPropagation(); window.openLightbox(this.closest('.case-card'));">Открыть кейс →</button></div>
+      </article>
+
+      <article class="case-card glass" data-reveal="scale" data-cat="graphic" data-title="GLOFF"
+        data-desc="Наружная реклама и брендирование сети GLOFF: билборды, остановки, брендирование грузового транспорта и витрины магазинов — единая узнаваемая система.">
+        <div class="glass-inner">
+        <div class="case-carousel">
+          <div class="case-track" data-lenis-prevent>
+            <div class="case-slide"><div class="img-float"><img src="gloff1.jpg" alt="GLOFF — наружная реклама" loading="lazy"></div></div>
+            <div class="case-slide"><div class="img-float"><img src="gloff2.jpg" alt="GLOFF — билборд и транспорт" loading="lazy"></div></div>
+            <div class="case-slide"><div class="img-float"><img src="gloff3.jpg" alt="GLOFF — витрины" loading="lazy"></div></div>
+          </div>
+          <div class="case-3d" data-src="gloff1.jpg"></div>
+          <div class="case-tag-row"><span class="case-tag">Графика</span></div>
+          <button class="case-arrow prev" aria-label="Назад">‹</button>
+          <button class="case-arrow next" aria-label="Далее">›</button>
+          <div class="case-dots"><span class="active"></span><span></span><span></span></div>
+          <div class="glass-sheen"></div>
+        </div>
+        </div>
+        <div class="case-body"><h3>GLOFF</h3><p>Наружная реклама и брендирование торговой сети.</p><button class="case-open-btn" onclick="event.stopPropagation(); window.openLightbox(this.closest('.case-card'));">Открыть кейс →</button></div>
+      </article>
+
+      <article class="case-card glass" data-reveal="scale" data-cat="smm" data-title="Алтейя Арома"
+        data-desc="SMM бренда натуральных духов «Алтейя»: съёмка ручного производства, продуктовые сеты, ведение соцсетей от контент-плана до публикации."
+        data-link="https://ivanov-designer.ru/smm">
+        <div class="glass-inner">
+        <div class="case-carousel">
+          <div class="case-track" data-lenis-prevent>
+            <div class="case-slide"><div class="img-float"><img src="altey1.jpg" alt="Алтейя Арома" loading="lazy" style="object-position:center 30%;"></div></div>
+          </div>
+          <div class="case-3d" data-src="altey1.jpg"></div>
+          <div class="glass-sheen"></div>
+        </div>
+        </div>
+        <div class="case-body">
+          <span class="case-tag-above">СММ</span>
+          <h3>Алтейя Арома</h3>
+          <p>SMM бренда натуральных духов: съёмка и ведение соцсетей. Открывается на ivanov-designer.ru/smm →</p>
+        </div>
+      </article>
+
+      <article class="case-card glass" data-reveal="scale" data-cat="photo" id="yogaCase"
+        data-title="Йога в поле" data-img2="ph_meadow.jpg"
+        data-desc="Fashion-взгляд на съёмку: чистый свет, смелый цвет, характер в кадре. Часть летней серии на цветочном поле — полный альбом смотри в разделе «Фотография».">
+        <div class="glass-inner">
+        <div class="case-carousel">
+          <div class="case-track" data-lenis-prevent>
+            <div class="case-slide"><div class="img-float"><img src="yoga1.jpg" alt="Йога в поле" loading="lazy" style="object-position:center 30%;"></div></div>
+          </div>
+          <div class="case-3d" data-src="yoga1.jpg"></div>
+          <div class="case-tag-row"><span class="case-tag">Фотография</span></div>
+          <div class="glass-sheen"></div>
+        </div>
+        </div>
+        <div class="case-body"><h3>Йога в поле</h3><p>Летняя серия на цветочном поле — смотреть все фотосессии →</p><button class="case-open-btn" onclick="event.stopPropagation(); window.openLightbox(this.closest('.case-card'));">Открыть кейс →</button></div>
+      </article>
+
+    </div>
+
+    <div class="cta-band" data-reveal="scale">
+      <div>
+        <h3>Отдельные направления</h3>
+        <p>SMM-кейсы и инфографика для маркетплейсов вынесены в самостоятельные разделы — можно посмотреть каждое отдельно.</p>
+      </div>
+      <a class="cta-btn" href="https://ivanov-designer.ru/smm" target="_blank" rel="noopener">Все SMM-кейсы →</a>
+      <a class="cta-btn ghost" href="https://ivanov-designer.ru/info" target="_blank" rel="noopener">Вся инфографика →</a>
+    </div>
+  </div>
+</section>
+
+<section id="services">
+  <div class="wrap">
+    <div class="section-head" data-reveal="tilt">
+      <div>
+        <span class="eyebrow">Услуги</span>
+        <h2 style="margin-top:12px;">Чем можно закрыть проект</h2>
+      </div>
+      <p>Берётся отдельно или полным циклом — от стратегии до готовой публикации.</p>
+    </div>
+  </div>
+
+  <div class="svc-stage" id="svcStage">
+    <div class="svc-slide">
+      <div class="svc-orb"><i class="g1"></i><i class="g2"></i><i class="g3"></i><i class="g4"></i></div>
+      <article class="svc-item">
+        <span class="svc-num">01</span>
+        <h3>Ведение соцсетей</h3>
+        <p>Беру аккаунт целиком: стратегия, контент-план, съёмка под него, тексты, публикация и разбор метрик. Вы не собираете подрядчиков по частям и не сводите их между собой — весь цикл идёт в одной голове.</p>
+        <ul class="svc-points">
+          <li>Контент-план на месяц вперёд, а не «посты по вдохновению»</li>
+          <li>Съёмка специально под рубрики, а не стоки</li>
+          <li>Отчёт по охватам и вовлечению с выводами, что повторять</li>
+        </ul>
+      </article>
+    </div>
+    <div class="svc-slide">
+      <div class="svc-orb"><i class="g1"></i><i class="g2"></i><i class="g3"></i><i class="g4"></i></div>
+      <article class="svc-item">
+        <span class="svc-num">02</span>
+        <h3>Фотосъёмка</h3>
+        <p>Продукт, портрет, предметка, репортаж. Приезжаю со своим светом и техникой — студия не обязательна, снимаем там, где живёт бренд. Отдаю обработанные кадры, готовые к публикации, а не сырой архив.</p>
+        <ul class="svc-points">
+          <li>Свой свет и оптика, автономное питание на выезде</li>
+          <li>Ретушь и единый цвет по всей серии</li>
+          <li>Кадры сразу в нужных форматах под ленту и сторис</li>
+        </ul>
+      </article>
+    </div>
+    <div class="svc-slide">
+      <div class="svc-orb"><i class="g1"></i><i class="g2"></i><i class="g3"></i><i class="g4"></i></div>
+      <article class="svc-item">
+        <span class="svc-num">03</span>
+        <h3>Графический дизайн</h3>
+        <p>Фирменный стиль и визуальные системы: логотип, палитра, типографика, носители. Не «картинка на один раз», а правила, по которым бренд дальше собирается без меня.</p>
+        <ul class="svc-points">
+          <li>Айдентика с логикой, а не набор красивых форм</li>
+          <li>Шаблоны для соцсетей, которые переживут смену дизайнера</li>
+          <li>Полиграфия и наружная реклама под печать</li>
+        </ul>
+      </article>
+    </div>
+    <div class="svc-slide">
+      <div class="svc-orb"><i class="g1"></i><i class="g2"></i><i class="g3"></i><i class="g4"></i></div>
+      <article class="svc-item">
+        <span class="svc-num">04</span>
+        <h3>Моушн и монтаж</h3>
+        <p>Оживляю то, что уже снято: reels, видео-обложки, анимация логотипа и графики. Движение делает ленту заметной там, где статика проходит мимо взгляда.</p>
+        <ul class="svc-points">
+          <li>Reels и сторис с монтажом под ритм площадки</li>
+          <li>Анимация логотипа и фирменной графики</li>
+          <li>Титры и подложки, собранные в After Effects</li>
+        </ul>
+      </article>
+    </div>
+  </div>
+</section>
+
+<section id="contact" style="border-bottom:none;">
+  <div class="wrap">
+    <div class="contact-panel" data-reveal="scale" id="contactPanel">
+      <div class="contact-blob"></div>
+      <div class="contact-blob b2"></div>
+      <div class="contact-grid" aria-hidden="true"></div>
+      <div class="contact-sheen" aria-hidden="true"></div>
+      <div>
+        <span class="eyebrow" style="color:rgba(22,22,15,.62);">Контакты</span>
+        <h2 style="margin-top:16px;">Есть проект? <span class="mark">Обсудим.</span></h2>
+        <p class="hero-lede" style="margin-top:16px;">Расскажи, что нужно снять или собрать — отвечаю в течение дня.</p>
+        <div class="contact-status"><i></i><span>на связи — обычно отвечаю в тот же день</span></div>
+      </div>
+      <div class="contact-links">
+        <a href="https://t.me/llyaMihailovich" target="_blank" rel="noopener"><span>Telegram</span><span class="cl-val">@llyaMihailovich<i>→</i></span></a>
+        <a href="https://www.instagram.com/llyamihailovich" target="_blank" rel="noopener"><span>Instagram*</span><span class="cl-val">@llyamihailovich<i>→</i></span></a>
+        <a href="https://ivanov-designer.ru" target="_blank" rel="noopener"><span>Текущий сайт</span><span class="cl-val">ivanov-designer.ru<i>→</i></span></a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer class="wrap">
+  <span>© IVANOV DESIGN — SMM &amp; graphic design <b id="buildStamp" style="font-weight:500;opacity:.55;">BUILD 27.09 14:26</b></span>
+  <span>*Instagram принадлежит Meta, признанной экстремистской и запрещённой на территории РФ</span>
+</footer>
+
+</div>
+
+<div id="photoView">
+  <div class="wrap photo-hero">
+    <button class="photo-back" onclick="showMain()">← На главную</button>
+    <span class="eyebrow">Фотография</span>
+    <h1 style="margin-top:14px;">Let's <span class="mark">create</span></h1>
+    <p class="hero-lede" style="margin-top:18px;">Сделаем фото, которое останется надолго в памяти — а на холодильник повесим? И внукам покажем. Шесть фотосессий из портфолио — от студии до цветочного поля.</p>
+
+    <div class="series-grid">
+
+      <article class="case-card glass" data-reveal="scale" data-title="Йога в поле" data-img2="ph_meadow.jpg"
+        data-desc="Fashion-взгляд на летнюю съёмку: поза лотоса, яркий свет и характер в кадре на цветочном поле. Смелый цвет и естественная динамика.">
+        <div class="glass-inner"><div class="case-carousel">
+          <div class="case-track" data-lenis-prevent><div class="case-slide"><div class="img-float"><img src="yoga1.jpg" alt="Йога в поле" loading="lazy" style="object-position:center 25%;"></div></div></div>
+          <div class="case-tag-row"><span class="case-tag">Летняя серия</span></div>
+          <div class="glass-sheen"></div>
+        </div></div>
+        <div class="case-body"><h3>Йога в поле</h3><p>Поза лотоса, цветочное поле, летний свет.</p></div>
+      </article>
+
+      <article class="case-card glass" data-reveal="scale" data-title="Резина" data-img2="ph_tires.jpg"
+        data-desc="Тёмная студийная серия: кожа, дым и автомобильные шины как графичный реквизит. Контрастный свет, жёсткие тени, драматичный fashion-настрой.">
+        <div class="glass-inner"><div class="case-carousel">
+          <div class="case-track" data-lenis-prevent><div class="case-slide"><div class="img-float"><img src="ph_tires.jpg" alt="Резина" loading="lazy"></div></div></div>
+          <div class="case-tag-row"><span class="case-tag">Студия</span></div>
+          <div class="glass-sheen"></div>
+        </div></div>
+        <div class="case-body"><h3>Резина</h3><p>Тёмная студийная съёмка с шинами как реквизитом.</p></div>
+      </article>
+
+      <article class="case-card glass" data-reveal="scale" data-title="Гараж" data-img2="ph_garage.jpg"
+        data-desc="Динамичная съёмка в гараже: мотоцикл, кожа, контровой свет. Драйв и движение в каждом кадре — история про скорость и характер.">
+        <div class="glass-inner"><div class="case-carousel">
+          <div class="case-track" data-lenis-prevent><div class="case-slide"><div class="img-float"><img src="ph_garage.jpg" alt="Гараж" loading="lazy"></div></div></div>
+          <div class="case-tag-row"><span class="case-tag">Динамика</span></div>
+          <div class="glass-sheen"></div>
+        </div></div>
+        <div class="case-body"><h3>Гараж</h3><p>Мотоцикл, кожа и контровой свет.</p></div>
+      </article>
+
+      <article class="case-card glass" data-reveal="scale" data-title="Дома" data-img2="ph_cozy.jpg"
+        data-desc="Лайфстайл-съёмка в естественном свете: уют, мягкие текстуры, спокойный тон. То, что называют «домашним premium» — просто и дорого одновременно.">
+        <div class="glass-inner"><div class="case-carousel">
+          <div class="case-track" data-lenis-prevent><div class="case-slide"><div class="img-float"><img src="ph_cozy.jpg" alt="Дома" loading="lazy"></div></div></div>
+          <div class="case-tag-row"><span class="case-tag">Лайфстайл</span></div>
+          <div class="glass-sheen"></div>
+        </div></div>
+        <div class="case-body"><h3>Дома</h3><p>Лайфстайл-съёмка в естественном свете.</p></div>
+      </article>
+
+      <article class="case-card glass" data-reveal="scale" data-title="Город" data-img2="ph_urban.jpg"
+        data-desc="Уличная fashion-серия на крыше автомобиля: урбанистичный фон, кожа, ветер в волосах. Контраст мегаполиса и портрета крупным планом.">
+        <div class="glass-inner"><div class="case-carousel">
+          <div class="case-track" data-lenis-prevent><div class="case-slide"><div class="img-float"><img src="ph_urban.jpg" alt="Город" loading="lazy"></div></div></div>
+          <div class="case-tag-row"><span class="case-tag">Урбан</span></div>
+          <div class="glass-sheen"></div>
+        </div></div>
+        <div class="case-body"><h3>Город</h3><p>Уличная fashion-серия на крыше автомобиля.</p></div>
+      </article>
+
+      <article class="case-card glass" data-reveal="scale" data-title="Портрет" data-img2="ph_portrait.jpg"
+        data-desc="Тёплый портрет на насыщенном цветном фоне: живая эмоция, мягкий свет, летнее настроение. Кадр держится на цвете и искренности момента.">
+        <div class="glass-inner"><div class="case-carousel">
+          <div class="case-track" data-lenis-prevent><div class="case-slide"><div class="img-float"><img src="ph_portrait.jpg" alt="Портрет" loading="lazy"></div></div></div>
+          <div class="case-tag-row"><span class="case-tag">Портрет</span></div>
+          <div class="glass-sheen"></div>
+        </div></div>
+        <div class="case-body"><h3>Портрет</h3><p>Тёплый портрет на цветном фоне.</p></div>
+      </article>
+
+    </div>
+
+    <div class="photo-columns" data-reveal>
+      <p>Мне нравится искать интересные сочетания, необычно выстраивать кадр и подбирать ракурсы, которые делают из фотографии — сок.</p>
+      <p>Кайфую от цветовых контрастов, смелых и ярких работ. Во многом привлекает fashion-взгляд на фотографию: чистый, но одновременно выразительный и эмоциональный.</p>
+    </div>
+    <p class="hero-lede" data-reveal>Но это всё скорее про пик насмотренности и культурного жанра, так что и с лаконичной съёмкой вашего мероприятия, и с «лав стори» справимся.</p>
+
+    <h2 class="photo-vibe" data-reveal="tilt">ВАЙБ <span class="mark">СВОБОДА</span><br>И ЭНЕРГИЯ</h2>
+    <p class="hero-lede" data-reveal style="max-width:56ch;">Это именно то, чем хочется делиться — и вещи, без которых в подходе к работе их цифровое воплощение невозможно.</p>
+
+    <div class="hero-actions" data-reveal style="margin:40px 0 20px;">
+      <a class="btn btn-solid" href="#contact" onclick="showMain()">Обсудить съёмку</a>
+      <button class="btn btn-ghost" onclick="showMain()">← Вернуться на главную</button>
+    </div>
+  </div>
+</div>
+
+<div class="lightbox" id="lightbox">
+  <div class="lightbox-panel">
+    <div class="lightbox-carousel">
+      <div class="lightbox-track" data-lenis-prevent id="lightboxTrack"></div>
+      <button class="case-arrow prev" id="lbPrev" aria-label="Назад">‹</button>
+      <button class="case-arrow next" id="lbNext" aria-label="Далее">›</button>
+    </div>
+    <div class="lightbox-body">
+      <div class="lightbox-top">
+        <h3 id="lightboxTitle">Название</h3>
+        <button class="lightbox-close" id="lightboxClose" aria-label="Закрыть">✕</button>
+      </div>
+      <p id="lightboxDesc"></p>
+    </div>
+  </div>
+</div>
+
+<script>
+  var reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  document.documentElement.classList.add('rvl-js');
+  gsap.registerPlugin(ScrollTrigger);
+  ['SplitText','CustomEase','Observer','InertiaPlugin','DrawSVGPlugin','Flip'].forEach(function(n){
+    if(window[n]) gsap.registerPlugin(window[n]);
+  });
+
+  // ---------- motion vocabulary ----------
+  // One stock easing on every movement is what made the page feel uniform and mechanical. These are
+  // hand-drawn curves, one per kind of gesture, so a heavy object receding and a letter dropping into
+  // a headline no longer share a timing profile.
+  var EASE = {rise:'power3.out', recede:'power2.inOut', glide:'power2.out', settle:'back.out(1.6)', draw:'none'};
+  if(window.CustomEase){
+    // slow, weighted departure then a long glide — for things travelling away from the reader
+    EASE.recede = CustomEase.create('recede', 'M0,0 C0.28,0 0.32,0.12 0.45,0.42 0.58,0.72 0.72,1 1,1');
+    // quick commitment, long soft landing — for anything arriving into place
+    EASE.rise   = CustomEase.create('rise',   'M0,0 C0.1,0 0.14,0.62 0.28,0.84 0.44,1.08 0.72,1 1,1');
+    // even, unhurried travel with just enough ease at both ends to avoid a mechanical start
+    EASE.glide  = CustomEase.create('glide',  'M0,0 C0.36,0 0.24,1 1,1');
+    // arrives, overshoots barely, settles — for small elements that should feel light
+    EASE.settle = CustomEase.create('settle', 'M0,0 C0.12,0 0.2,1.12 0.42,1.06 0.62,1.01 0.78,1 1,1');
+  }
+  window.EASE = EASE;
+
+  // ---------- split text into lines/words/chars, with line masks ----------
+  // Replaces the hand-rolled splitter, which broke words mid-word and needed a wrapper hack.
+  function splitLines(el, opts){
+    if(!window.SplitText) return null;
+    try{ return new SplitText(el, Object.assign({type:'lines,words,chars', mask:'lines', linesClass:'sl-line'}, opts||{})); }
+    catch(e){ return null; }
+  }
+  window.splitLines = splitLines;
+
+  // ---------- remeasure once the page has actually settled ----------
+  // Every pinned section's start/end was being computed before covers and webfonts arrived, so the
+  // whole scroll map was laid out against the wrong page height. This is the single biggest source
+  // of triggers firing in the wrong place.
+  (function(){
+    var done = false;
+    function refresh(){ if(done) return; done = true; ScrollTrigger.refresh(); }
+    if(document.fonts && document.fonts.ready){ document.fonts.ready.then(function(){ ScrollTrigger.refresh(); }); }
+    window.addEventListener('load', function(){
+      ScrollTrigger.refresh();
+      // and once more after late images decode
+      var imgs = Array.prototype.slice.call(document.images).filter(function(i){ return !i.complete; });
+      var left = imgs.length;
+      if(!left){ setTimeout(function(){ ScrollTrigger.refresh(); }, 200); return; }
+      imgs.forEach(function(i){
+        i.addEventListener('load', function(){ if(--left <= 0) ScrollTrigger.refresh(); });
+        i.addEventListener('error', function(){ if(--left <= 0) ScrollTrigger.refresh(); });
+      });
+    });
+    var rt; window.addEventListener('resize', function(){ clearTimeout(rt); rt = setTimeout(function(){ ScrollTrigger.refresh(); }, 220); });
+  })();
+
+  // ---------- letter-splitting (preserves nested spans like .mark, skips <br>) ----------
+  function splitChars(root){
+    function walk(node){
+      if(node.nodeType === 3){
+        var frag = document.createDocumentFragment();
+        var parts = node.textContent.split(/(\s+)/);
+        parts.forEach(function(part){
+          if(part === '') return;
+          if(/^\s+$/.test(part)){
+            frag.appendChild(document.createTextNode(part));
+            return;
+          }
+          var wrap = document.createElement('span');
+          wrap.className = 'word-wrap';
+          for(var i=0;i<part.length;i++){
+            var span = document.createElement('span');
+            span.className = 'ch';
+            span.textContent = part[i];
+            wrap.appendChild(span);
+          }
+          frag.appendChild(wrap);
+        });
+        node.parentNode.replaceChild(frag, node);
+      } else if(node.nodeType === 1 && node.tagName !== 'BR'){
+        Array.from(node.childNodes).forEach(walk);
+      }
+    }
+    Array.from(root.childNodes).forEach(walk);
+    return root.querySelectorAll('.ch');
+  }
+
+  // ===== HEADER — only present while the reader is scrolling back up =====
+  (function(){
+    var bar = document.getElementById('topbar');
+    if(!bar) return;
+    var open = false;
+    function setOpen(v){ if(v === open) return; open = v; bar.classList.toggle('is-open', v); }
+    setOpen(window.scrollY < 80);
+
+    // Observer reads wheel, touch and pointer through one normalised stream, so a trackpad flick
+    // and a thumb drag produce the same decision. The hand-rolled delta counter this replaces had
+    // to guess at both.
+    if(window.Observer){
+      Observer.create({
+        target: window, type: 'wheel,touch,scroll', tolerance: 24, preventDefault: false,
+        onUp: function(){ if(window.scrollY > 80) setOpen(true); },
+        onDown: function(){ if(window.scrollY > 80) setOpen(false); },
+        onChangeY: function(self){ if(self.scrollY() < 80) setOpen(true); }
+      });
+    } else {
+      var last = window.scrollY, acc = 0;
+      window.addEventListener('scroll', function(){
+        var y = window.scrollY, d = y - last; last = y;
+        if(y < 80){ acc = 0; setOpen(true); return; }
+        if((d > 0) !== (acc > 0)) acc = 0;
+        acc += d;
+        if(acc < -46) setOpen(true); else if(acc > 26) setOpen(false);
+      }, {passive: true});
+    }
+
+    // the specular streak crosses the frosted band on a slow loop
+    var spec = document.getElementById('tbSpec');
+    if(spec && window.gsap){
+      gsap.fromTo(spec, {xPercent: -120}, {xPercent: 400, duration: 7, ease: 'power1.inOut', repeat: -1, repeatDelay: 3});
+    }
+  })();
+
+  var handled = new Set();
+
+  if(reduced){
+    document.querySelectorAll('[data-reveal]').forEach(function(el){ el.classList.add('rvl-in'); });
+  } else {
+
+    // ===== HERO TITLE — letters flip up out of blur =====
+    var heroH1 = document.querySelector('.hero h1[data-reveal]');
+    if(heroH1){
+      handled.add(heroH1);
+      heroH1.classList.add('rvl-in');
+      var heroSplit = splitLines(heroH1);
+      if(heroSplit){
+        // letters climb out from under the mask of their own line, so nothing is ever seen
+        // floating outside the text block
+        gsap.from(heroSplit.chars, {
+          yPercent: 118, rotateX: -74, opacity: 0, filter: 'blur(7px)',
+          duration: 1.15, stagger: {each: .014, from: 'start'}, ease: EASE.rise,
+          transformOrigin: '50% 100% -30px',
+          scrollTrigger: {trigger: heroH1, start: 'top 95%'}
+        });
+      } else {
+        gsap.from(splitChars(heroH1), {opacity:0, y:46, filter:'blur(10px)', duration:.9, stagger:.016, ease:EASE.rise,
+          scrollTrigger:{trigger:heroH1, start:'top 95%'}});
+      }
+    }
+
+    // ===== SECTION HEADINGS — letters zoom out of blur (different rhythm from hero) =====
+    document.querySelectorAll('.section-head h2, .photo-vibe').forEach(function(h){
+      handled.add(h);
+      var revealAncestor = h.closest('[data-reveal]');
+      if(revealAncestor){ handled.add(revealAncestor); revealAncestor.classList.add('rvl-in'); }
+      h.classList.add('rvl-in');
+      var head = h.closest('.section-head');
+      var eyebrow = head && head.querySelector('.eyebrow');
+      var lede = head && head.querySelector('p');
+      var split = splitLines(h);
+
+      // One timeline for the whole heading group. The eyebrow and the standfirst are not
+      // afterthoughts on a different curve any more — they are beats of the same entrance,
+      // built on the same masked-line reveal as the title.
+      var tl = gsap.timeline({scrollTrigger: {trigger: head || h, start: 'top 88%'}});
+
+      if(eyebrow){
+        var eSplit = splitLines(eyebrow, {type: 'chars', mask: null});
+        tl.from(eSplit ? eSplit.chars : eyebrow, {
+          yPercent: 100, opacity: 0, filter: 'blur(5px)',
+          duration: .6, stagger: .02, ease: EASE.rise
+        }, 0);
+      }
+      if(split){
+        tl.from(split.chars, {
+          yPercent: 112, rotateX: -62, opacity: 0, filter: 'blur(6px)',
+          duration: 1.05, stagger: .013, ease: EASE.rise, transformOrigin: '50% 100% -24px'
+        }, 0.12);
+      } else {
+        tl.from(splitChars(h), {y: -26, opacity: 0, duration: .5, stagger: .012, ease: EASE.settle}, 0.12);
+      }
+      if(lede){
+        var lSplit = splitLines(lede);
+        tl.from(lSplit ? lSplit.lines : lede, {
+          yPercent: lSplit ? 100 : 0, opacity: 0, filter: 'blur(6px)',
+          duration: .85, stagger: .09, ease: EASE.rise
+        }, 0.3);
+      }
+    });
+
+    // ===== HERO secondary elements — soft rise from blur =====
+    gsap.utils.toArray('.hero [data-reveal]:not(h1)').forEach(function(el, i){
+      handled.add(el);
+      gsap.fromTo(el, {opacity:0, y:20, filter:'blur(9px)'}, {
+        opacity:1, y:0, filter:'blur(0px)', duration:.8, delay:.25+i*.08, ease:'power2.out',
+        scrollTrigger:{trigger:el, start:'top 95%'}
+      });
+    });
+
+    // ===== HERO blobs — true multi-speed parallax =====
+    gsap.to('.hero-blob.b1', {y:-130, x:60, ease:'none', scrollTrigger:{trigger:'.hero', start:'top top', end:'bottom top', scrub:.4}});
+    gsap.to('.hero-blob.b2', {y:95, x:-45, ease:'none', scrollTrigger:{trigger:'.hero', start:'top top', end:'bottom top', scrub:1.1}});
+
+    // ===== ABOUT =====
+    // Note on property choice throughout this block: the panel entrance uses yPercent and the
+    // parallax drift uses y. GSAP composes those into one translate, so the two can run on the same
+    // element without fighting — which is what was making things jump before.
+    (function(){
+      var aboutText = document.querySelector('.about-text[data-reveal]');
+      var gearCard = document.querySelector('.gear-card[data-reveal]');
+      [[aboutText, 0], [gearCard, .08]].forEach(function(pair){
+        var el = pair[0];
+        if(!el) return;
+        handled.add(el);
+        gsap.fromTo(el, {opacity: 0, scale: 1.1, yPercent: -4, filter: 'blur(14px)'}, {
+          opacity: 1, scale: 1, yPercent: 0, filter: 'blur(0px)',
+          duration: 1.1, delay: pair[1], ease: EASE.rise,
+          scrollTrigger: {trigger: el, start: 'top 88%'}
+        });
+      });
+      if(gearCard) gsap.to(gearCard, {y: -46, ease: 'none', scrollTrigger: {trigger: '#about', start: 'top bottom', end: 'bottom top', scrub: .8}});
+      if(aboutText) gsap.to(aboutText, {y: 16, ease: 'none', scrollTrigger: {trigger: '#about', start: 'top bottom', end: 'bottom top', scrub: 1.3}});
+
+      var eyebrow = document.querySelector('.about-text .eyebrow');
+      var aboutH = document.querySelector('.about-text h2');
+      var aboutP = document.querySelector('.about-text > p');
+
+      var tl = gsap.timeline({scrollTrigger: {trigger: '.about-text', start: 'top 84%'}});
+      if(eyebrow){
+        var eS = splitLines(eyebrow, {type: 'chars', mask: null});
+        tl.from(eS ? eS.chars : eyebrow, {yPercent: 100, opacity: 0, duration: .55, stagger: .02, ease: EASE.rise}, 0);
+      }
+      if(aboutH){
+        var hS = splitLines(aboutH);
+        // line by line rather than letter by letter: this heading runs to ten words, and
+        // per-character motion on copy that long reads as noise
+        tl.from(hS ? hS.lines : aboutH, {
+          yPercent: 100, opacity: 0, filter: 'blur(7px)', rotate: hS ? 1.6 : 0,
+          duration: .95, stagger: .1, ease: EASE.rise, transformOrigin: '0% 50%'
+        }, .1);
+      }
+      if(aboutP){
+        var pS = splitLines(aboutP);
+        tl.from(pS ? pS.lines : aboutP, {
+          yPercent: 100, opacity: 0, duration: .8, stagger: .045, ease: EASE.rise
+        }, .32);
+      }
+
+      // The three figures: no translation at all. The row paints its 1px dividers with its own
+      // background showing through the grid gaps, so moving a cell used to tear a grey band open
+      // underneath it. Wiping them in from the bottom keeps every cell flush in its slot.
+      var stats = gsap.utils.toArray('.stat-row .stat');
+      if(stats.length){
+        gsap.from(stats, {
+          clipPath: 'inset(100% 0% 0% 0%)', opacity: 0,
+          duration: .8, stagger: .12, ease: EASE.glide,
+          scrollTrigger: {trigger: '.stat-row', start: 'top 92%'}
+        });
+        gsap.utils.toArray('.stat b').forEach(function(b){
+          gsap.from(b, {yPercent: 60, opacity: 0, duration: .7, delay: .18, ease: EASE.settle,
+            scrollTrigger: {trigger: '.stat-row', start: 'top 92%'}});
+        });
+      }
+      // the row as a whole drifts — the cells never move relative to each other
+      gsap.to('.stat-row', {y: -22, ease: 'none', scrollTrigger: {trigger: '#about', start: 'top bottom', end: 'bottom top', scrub: 1.1}});
+
+      var gearH = document.querySelector('.gear-card h3');
+      if(gearH){
+        var gS = splitLines(gearH, {type: 'chars', mask: null});
+        gsap.from(gS ? gS.chars : gearH, {yPercent: -120, opacity: 0, duration: .5, stagger: .025, ease: EASE.rise,
+          scrollTrigger: {trigger: '.gear-card', start: 'top 90%'}});
+      }
+      gsap.utils.toArray('.gear-card li').forEach(function(li, i){
+        var left = li.querySelector('span:first-child'), right = li.querySelector('span:last-child');
+        var t = gsap.timeline({scrollTrigger: {trigger: '.gear-card', start: 'top 86%'}});
+        // the two halves of each row close toward each other — the rule between them draws itself
+        t.from(left,  {xPercent: -40, opacity: 0, filter: 'blur(6px)', duration: .65, ease: EASE.rise}, i * .09)
+         .from(right, {xPercent: 40,  opacity: 0, filter: 'blur(6px)', duration: .65, ease: EASE.rise}, i * .09)
+         .from(li,    {borderBottomColor: 'rgba(22,22,15,0)', duration: .5, ease: 'none'}, i * .09);
+      });
+    })();
+
+    // ===== SKILLS — a horizontal rail pulled left→right by the page scroll =====
+    (function(){
+      var stage = document.getElementById('tlh');
+      var track = document.getElementById('tlhTrack');
+      var svg = document.getElementById('timelineWave');
+      var trackPath = document.getElementById('waveTrack');
+      var live = document.getElementById('waveLive');
+      var dot = document.getElementById('waveDot');
+      var items = gsap.utils.toArray('#tlhTrack .tlh-item');
+      if(!stage || !track || !live || !items.length) return;
+
+      var tl = null;
+      // No hold any more. A hold meant a stretch of scrolling during which the rail did not move at
+      // all, which reads as the page hanging. Instead the first two cards are revealed on the
+      // approach, before the pin engages, so they are already readable when the rail starts — and
+      // the rail then travels continuously from the very first pixel of the pin.
+      var HOLD = 0;
+      var LEAD = 2;
+
+      function build(){
+        if(tl){ tl.scrollTrigger && tl.scrollTrigger.kill(); tl.kill(); tl = null; }
+        gsap.set(track, {x: 0});
+
+        var full = track.scrollWidth;
+        var h = track.getBoundingClientRect().height || items[0].offsetHeight;
+        var dist = Math.max(1, full - window.innerWidth);
+
+        svg.style.width = full + 'px';
+        svg.setAttribute('viewBox', '0 0 ' + full + ' ' + h);
+        var mid = h / 2;
+        var amp = Math.min(52, h * 0.082);
+        var crests = Math.max(2, Math.round(full / 660));
+        var steps = 200, d = '';
+        for(var i = 0; i <= steps; i++){
+          var t = i / steps, x = t * full;
+          d += (i === 0 ? 'M' : 'L') + x.toFixed(1) + ' ' + (mid + Math.sin(t * Math.PI * 2 * crests) * amp).toFixed(1);
+        }
+        trackPath.setAttribute('d', d);
+        live.setAttribute('d', d);
+        var len = live.getTotalLength();
+        if(!window.DrawSVGPlugin){ live.style.strokeDasharray = len; live.style.strokeDashoffset = len; }
+
+        items.forEach(function(it, idx){
+          if(idx < LEAD) return;   // these are handled by the approach reveal below
+          gsap.set(it, {opacity: 0, yPercent: 14, scale: .9, filter: 'blur(13px)'});
+        });
+        // the cards already on screen when the section arrives: they open as it climbs into view,
+        // so the reader never scrolls through an empty full-height band waiting for the pin
+        if(!stage.__lead){
+          stage.__lead = true;
+          items.slice(0, LEAD).forEach(function(it, k){
+            gsap.fromTo(it,
+              {opacity: 0, yPercent: 16, scale: .9, filter: 'blur(13px)'},
+              {opacity: 1, yPercent: 0, scale: 1, filter: 'blur(0px)', ease: EASE.rise,
+               scrollTrigger: {trigger: stage, start: 'top ' + (88 - k * 10) + '%', end: 'top ' + (40 - k * 10) + '%', scrub: .6}});
+          });
+        }
+
+        tl = gsap.timeline({
+          scrollTrigger: {
+            trigger: stage, start: 'top top',
+            end: function(){ return '+=' + Math.round(dist + window.innerHeight * .55); },
+            pin: true, scrub: .5, anticipatePin: 1, invalidateOnRefresh: true,
+            onUpdate: function(self){
+              if(!dot) return;
+              var pt = live.getPointAtLength(len * Math.max(0, Math.min(1, (self.progress - HOLD) / (1 - HOLD))));
+              dot.setAttribute('cx', pt.x); dot.setAttribute('cy', pt.y);
+              dot.style.opacity = self.progress > HOLD + .004 && self.progress < .996 ? 1 : 0;
+            }
+          }
+        });
+
+        // hold, then travel — the line draws in lockstep with the rail
+        tl.to(track, {x: function(){ return -dist; }, ease: 'none', duration: 1 - HOLD}, HOLD);
+        if(window.DrawSVGPlugin) tl.fromTo(live, {drawSVG: '0%'}, {drawSVG: '100%', ease: 'none', duration: 1 - HOLD}, HOLD);
+        else tl.to(live, {strokeDashoffset: 0, ease: 'none', duration: 1 - HOLD}, HOLD);
+
+        items.forEach(function(it, idx){
+          if(idx < LEAD) return;   // opened on the approach, not inside the pin
+          // where this card reaches the reading position, mapped onto the travel
+          var at = (it.offsetLeft + it.offsetWidth * .5 - window.innerWidth * .56) / dist;
+          at = Math.min(.86, Math.max(0, at));
+          tl.to(it, {
+            opacity: 1, yPercent: 0, scale: 1, filter: 'blur(0px)',
+            ease: EASE.rise, duration: .14
+          }, at);
+        });
+      }
+
+      build();
+      // rebuild on refresh, but guard against recursion: build() creates a ScrollTrigger, and
+      // creating one inside a refresh would otherwise kick off another refresh
+      var rebuilding = false;
+      ScrollTrigger.addEventListener('refresh', function(){
+        if(rebuilding) return;
+        rebuilding = true;
+        build();
+        requestAnimationFrame(function(){ rebuilding = false; });
+      });
+    })();
+
+    // ===== CASE GRID — cards flip down from a top hinge, cascading =====
+    var gridCards = gsap.utils.toArray('#caseGrid .case-card[data-reveal]');
+    gridCards.forEach(function(el){ handled.add(el); });
+    if(gridCards.length){
+      ScrollTrigger.batch(gridCards, {
+        start:'top 90%',
+        onEnter: function(batch){
+          gsap.fromTo(batch, {opacity:0, rotateX:-80, y:-24, filter:'blur(15px)', transformPerspective:1000, transformOrigin:'top center'}, {
+            opacity:1, rotateX:0, y:0, filter:'blur(0px)', duration:.85, stagger:.14, ease:'power3.out'
+          });
+        }
+      });
+    }
+
+    // ===== CASES — the heading was the only animated thing in this block. Filters, card titles,
+    // descriptions, tags and buttons now each arrive on their own beat. =====
+    (function(){
+      var filters = gsap.utils.toArray('.case-filters .filter-btn');
+      if(filters.length){
+        gsap.fromTo(filters, {opacity: 0, y: 22, scale: .84, filter: 'blur(9px)'}, {
+          opacity: 1, y: 0, scale: 1, filter: 'blur(0px)',
+          duration: .6, stagger: .07, ease: 'back.out(2)',
+          scrollTrigger: {trigger: '.case-filters', start: 'top 95%'}
+        });
+      }
+      gsap.utils.toArray('#caseGrid .case-card').forEach(function(card){
+        var tag = card.querySelector('.case-tag');
+        var h3 = card.querySelector('.case-body h3');
+        var para = card.querySelector('.case-body p');
+        var btn = card.querySelector('.case-open-btn');
+
+        if(tag){
+          gsap.fromTo(tag, {opacity: 0, x: -20, filter: 'blur(8px)'}, {
+            opacity: 1, x: 0, filter: 'blur(0px)', duration: .55, delay: .2, ease: 'power2.out',
+            scrollTrigger: {trigger: card, start: 'top 88%'}
+          });
+        }
+        if(h3){
+          // letters, so the title assembles rather than just fading
+          gsap.fromTo(splitChars(h3), {opacity: 0, y: 22, filter: 'blur(8px)'}, {
+            opacity: 1, y: 0, filter: 'blur(0px)', duration: .5, stagger: .018, ease: 'power2.out',
+            scrollTrigger: {trigger: card, start: 'top 86%'}
+          });
+        }
+        if(para){
+          gsap.fromTo(para, {opacity: 0, y: 16, filter: 'blur(7px)'}, {
+            opacity: 1, y: 0, filter: 'blur(0px)', duration: .6, delay: .18, ease: 'power2.out',
+            scrollTrigger: {trigger: card, start: 'top 86%'}
+          });
+        }
+        if(btn){
+          gsap.fromTo(btn, {opacity: 0, y: 14, scale: .9, filter: 'blur(8px)'}, {
+            opacity: 1, y: 0, scale: 1, filter: 'blur(0px)', duration: .55, delay: .3, ease: 'back.out(2)',
+            scrollTrigger: {trigger: card, start: 'top 84%'}
+          });
+        }
+      });
+    })();
+
+    // ===== PHOTOGRAPHY SERIES — alternating side-hinge flip (distinct from case grid) =====
+    var seriesCards = gsap.utils.toArray('.series-grid .case-card[data-reveal]');
+    seriesCards.forEach(function(el, i){
+      handled.add(el);
+      var fromSide = (i % 2 === 0) ? -70 : 70;
+      gsap.fromTo(el, {opacity:0, rotateY:fromSide*.55, x:fromSide*.6, filter:'blur(14px)', transformPerspective:1000}, {
+        opacity:1, rotateY:0, x:0, filter:'blur(0px)', duration:.9, ease:'power3.out',
+        scrollTrigger:{trigger:el, start:'top 90%'}
+      });
+    });
+
+    // ===== IMAGE PARALLAX inside every case card frame (composes with the CSS idle float on the parent) =====
+    document.querySelectorAll('.case-slide img').forEach(function(img){
+      var card = img.closest('.case-card') || img.closest('.case-carousel');
+      gsap.to(img, {
+        yPercent:-9, ease:'none',
+        scrollTrigger:{trigger:card, start:'top bottom', end:'bottom top', scrub:.5}
+      });
+    });
+
+    // ===== SERVICES =====
+    (function(){
+      var stage = document.getElementById('svcStage');
+      var slides = gsap.utils.toArray('#svcStage .svc-slide');
+      if(!stage || !slides.length) return;
+      var items = slides.map(function(sl){ return sl.querySelector('.svc-item'); });
+      var orbs = slides.map(function(sl){ return sl.querySelector('.svc-orb'); });
+
+      // Every orb's inner highlights drift on their own long loops. This is why the sphere reads as
+      // a body of light rather than a flat gradient: nothing inside it is ever still.
+      orbs.forEach(function(orb, i){
+        var g = orb.querySelectorAll('i');
+        gsap.to(g[0], {xPercent: 6, yPercent: 4, scale: 1.08, duration: 9 + i, ease: 'sine.inOut', repeat: -1, yoyo: true});
+        gsap.to(g[1], {xPercent: -7, yPercent: -5, scale: 1.12, duration: 11 + i, ease: 'sine.inOut', repeat: -1, yoyo: true, delay: .6});
+        gsap.to(g[2], {xPercent: 12, yPercent: -8, opacity: .35, duration: 7.5 + i, ease: 'sine.inOut', repeat: -1, yoyo: true, delay: 1.1});
+        gsap.to(g[3], {rotate: 360, duration: 44, ease: 'none', repeat: -1});
+      });
+
+      // the section heading dissolves as the stage arrives, so it never competes with the orb
+      var head = document.querySelector('#services .section-head');
+      if(head){
+        gsap.to(head, {
+          opacity: 0, filter: 'blur(18px)', yPercent: -26, ease: 'none',
+          scrollTrigger: {trigger: stage, start: 'top 80%', end: 'top 26%', scrub: .5}
+        });
+      }
+
+      gsap.set(slides[0], {yPercent: 0, scale: 1, opacity: 1, filter: 'blur(0px)'});
+      gsap.set(items[0], {opacity: 0, yPercent: 8, filter: 'blur(14px)'});
+      // the first orb blooms while the stage is still climbing the screen, before the pin engages
+      gsap.fromTo(orbs[0],
+        {scale: .2, opacity: 0, filter: 'blur(30px)'},
+        {scale: 1, opacity: 1, filter: 'blur(0px)', ease: EASE.rise,
+         scrollTrigger: {trigger: stage, start: 'top 88%', end: 'top 24%', scrub: .7}});
+
+      slides.forEach(function(sl, i){
+        if(i === 0) return;
+        gsap.set(sl, {yPercent: 46, scale: .48, opacity: 0, filter: 'blur(28px)'});
+        gsap.set(items[i], {opacity: 0, yPercent: 8, filter: 'blur(14px)'});
+      });
+
+      // Timing. The previous build pinned this section for roughly five screen-heights and filled
+      // most of that with dead segments: over long stretches of scrolling nothing on screen changed
+      // at all, which reads as the page having frozen. Two things fix it — the pin is much shorter,
+      // and no part of the timeline is allowed to be motionless.
+      var HANDOFF = 1.0, HOLD = 0.4, INTRO = 0.4;
+      var beats = INTRO + (slides.length - 1) * (HANDOFF + HOLD) + 0.2;
+
+      var tl = gsap.timeline({
+        scrollTrigger: {
+          trigger: stage, start: 'top top',
+          end: function(){ return '+=' + Math.round(beats * window.innerHeight * 0.62); },
+          pin: true, scrub: .55, anticipatePin: 1, invalidateOnRefresh: true
+        }
+      });
+
+      // a continuous slow drift across the entire pin, so scrolling always moves something even
+      // between hand-offs
+      tl.fromTo(orbs.map(function(o){ return o; }),
+        {rotate: -3}, {rotate: 3, ease: 'none', duration: beats}, 0);
+
+      tl.to(items[0], {opacity: 1, yPercent: 0, filter: 'blur(0px)', duration: INTRO, ease: EASE.rise}, 0);
+
+      var at = INTRO;
+      function hold(slideEl, itemEl, dur){
+        // the "hold" is not a pause: the orb keeps opening out and the text creeps up a little,
+        // so the reader's scroll is always answered by movement on screen
+        tl.to(slideEl, {scale: 1.05, ease: 'none', duration: dur}, at);
+        tl.to(itemEl, {yPercent: -3, ease: 'none', duration: dur}, at);
+        at += dur;
+      }
+      hold(slides[0], items[0], HOLD);
+
+      for(var i = 0; i < slides.length - 1; i++){
+        // receding: up, smaller, out of focus — weighted departure curve
+        tl.to(slides[i], {
+          yPercent: -40, scale: .5, opacity: 0, filter: 'blur(26px)',
+          duration: HANDOFF, ease: EASE.recede
+        }, at);
+        // arriving from below on the mirror curve, overlapping so both are briefly in frame
+        tl.fromTo(slides[i + 1],
+          {yPercent: 46, scale: .48, opacity: 0, filter: 'blur(28px)'},
+          {yPercent: 0, scale: 1, opacity: 1, filter: 'blur(0px)', duration: HANDOFF, ease: EASE.rise},
+          at + 0.08);
+        tl.to(items[i + 1], {
+          opacity: 1, yPercent: 0, filter: 'blur(0px)', duration: HANDOFF * .55, ease: EASE.rise
+        }, at + HANDOFF * .5);
+        at += HANDOFF;
+        hold(slides[i + 1], items[i + 1], HOLD);
+      }
+      // the last slide is left fully resolved — no closing shrink-and-blur
+    })();
+
+    // ===== CTA band — slides up out of a skew, straightening =====
+    var ctaBand = document.querySelector('.cta-band[data-reveal]');
+    if(ctaBand){ handled.add(ctaBand);
+      gsap.fromTo(ctaBand, {opacity:0, y:60, skewY:4, filter:'blur(10px)'}, {
+        opacity:1, y:0, skewY:0, filter:'blur(0px)', duration:.9, ease:'power4.out',
+        scrollTrigger:{trigger:ctaBand, start:'top 90%'}
+      });
+    }
+
+    // ===== CONTACT — the plate is alive on its own: a word running behind the text, a band of light
+    // sweeping across it, a breathing status dot, and the whole card tilting toward the pointer =====
+    (function(){
+      var panel = document.querySelector('.contact-panel');
+      var blob = panel && panel.querySelector('.contact-blob');
+      var blob2 = panel && panel.querySelector('.contact-blob.b2');
+      if(!panel) return;
+
+      if(blob){
+        gsap.to(blob, {scale: 1.25, x: 40, y: 30, duration: 7, ease: 'sine.inOut', repeat: -1, yoyo: true});
+      }
+      if(blob2){
+        gsap.to(blob2, {scale: 1.18, x: -30, y: -40, duration: 9, ease: 'sine.inOut', repeat: -1, yoyo: true});
+      }
+
+      // heading assembles letter by letter out of blur
+      var h2 = panel.querySelector('h2');
+      if(h2){
+        gsap.fromTo(splitChars(h2), {opacity: 0, y: 34, rotateX: -80, filter: 'blur(10px)'}, {
+          opacity: 1, y: 0, rotateX: 0, filter: 'blur(0px)',
+          duration: .75, stagger: .02, ease: 'back.out(1.7)',
+          scrollTrigger: {trigger: panel, start: 'top 82%'}
+        });
+      }
+
+      // band of light crossing the plate
+      var sheen = panel.querySelector('.contact-sheen');
+      if(sheen){
+        gsap.fromTo(sheen, {x: '-10%'}, {x: '320%', duration: 5.5, ease: 'power1.inOut', repeat: -1, repeatDelay: 2.6});
+      }
+
+      // status dot breathing
+      var pulse = panel.querySelector('.contact-status i');
+      if(pulse){
+        gsap.to(pulse, {scale: 1.9, opacity: .25, duration: 1.1, ease: 'sine.inOut', repeat: -1, yoyo: true});
+      }
+
+      // arrows nudge on a loop so the rows read as clickable without a hover
+      gsap.utils.toArray('.contact-links .cl-val i').forEach(function(ar, i){
+        gsap.to(ar, {x: 7, duration: .9, ease: 'sine.inOut', repeat: -1, yoyo: true, delay: i * .18});
+      });
+
+      // the plate itself tilts toward the pointer
+      if(!window.matchMedia('(pointer: coarse)').matches){
+        gsap.set(panel, {transformPerspective: 1100, transformOrigin: '50% 50%'});
+        panel.addEventListener('pointermove', function(e){
+          var r = panel.getBoundingClientRect();
+          gsap.to(panel, {
+            rotateY: ((e.clientX - r.left) / r.width - .5) * 7,
+            rotateX: -((e.clientY - r.top) / r.height - .5) * 6,
+            duration: .6, ease: 'power2.out', overwrite: 'auto'
+          });
+        });
+        panel.addEventListener('pointerleave', function(){
+          gsap.to(panel, {rotateX: 0, rotateY: 0, duration: .9, ease: 'power3.out', overwrite: 'auto'});
+        });
+      }
+
+      if(!window.matchMedia('(pointer: coarse)').matches){
+        panel.addEventListener('pointermove', function(e){
+          var r = panel.getBoundingClientRect();
+          var px = (e.clientX - r.left) / r.width;
+          var py = (e.clientY - r.top) / r.height;
+          if(blob){
+            gsap.to(blob, {x: (px - .5) * 220, y: (py - .5) * 180, duration: .9, ease: 'power2.out', overwrite: 'auto'});
+          }
+          panel.querySelectorAll('.contact-links a').forEach(function(a){
+            var ar = a.getBoundingClientRect();
+            var dy = (e.clientY - (ar.top + ar.height / 2)) / ar.height;
+            var near = Math.max(0, 1 - Math.abs(dy));
+            gsap.to(a, {x: near * 14, duration: .5, ease: 'power2.out', overwrite: 'auto'});
+          });
+        });
+        panel.addEventListener('pointerleave', function(){
+          panel.querySelectorAll('.contact-links a').forEach(function(a){
+            gsap.to(a, {x: 0, duration: .6, ease: 'power2.out', overwrite: 'auto'});
+          });
+        });
+      }
+    })();
+
+    // ===== CONTACT panel — elastic pop with a twist =====
+    var contactPanel = document.querySelector('.contact-panel[data-reveal]');
+    if(contactPanel){ handled.add(contactPanel);
+      gsap.fromTo(contactPanel, {opacity:0, scale:.7, rotate:-3, filter:'blur(12px)'}, {
+        opacity:1, scale:1, rotate:0, filter:'blur(0px)', duration:.95, ease:'back.out(1.5)',
+        scrollTrigger:{trigger:contactPanel, start:'top 88%'}
+      });
+    }
+
+    // ===== everything else still tagged [data-reveal] — simple, varied by declared variant =====
+    document.querySelectorAll('[data-reveal]').forEach(function(el){
+      if(handled.has(el)) return;
+      var v = el.getAttribute('data-reveal');
+      var from = {opacity:0, y:18, filter:'blur(8px)'};
+      if(v === 'left') from = {opacity:0, x:-40, filter:'blur(8px)'};
+      if(v === 'right') from = {opacity:0, x:40, filter:'blur(8px)'};
+      gsap.fromTo(el, from, {
+        opacity:1, x:0, y:0, filter:'blur(0px)', duration:.75, ease:'power2.out',
+        scrollTrigger:{trigger:el, start:'top 92%'}
+      });
+    });
+
+  }
+
+  // ---------- case carousels: dots + arrows ----------
+  document.querySelectorAll('.case-carousel').forEach(function(car){
+    var track = car.querySelector('.case-track');
+    var dots = car.querySelectorAll('.case-dots span');
+    var prev = car.querySelector('.case-arrow.prev');
+    var next = car.querySelector('.case-arrow.next');
+    if(!track) return;
+    function setActive(){
+      var i = Math.round(track.scrollLeft / track.clientWidth);
+      dots.forEach(function(d,idx){ d.classList.toggle('active', idx===i); });
+    }
+    track.addEventListener('scroll', setActive, {passive:true});
+    if(prev) prev.addEventListener('click', function(e){ e.preventDefault(); e.stopPropagation(); track.scrollBy({left:-track.clientWidth, behavior:'smooth'}); });
+    if(next) next.addEventListener('click', function(e){ e.preventDefault(); e.stopPropagation(); track.scrollBy({left:track.clientWidth, behavior:'smooth'}); });
+  });
+
+  // ---------- give each floating image its own phase so a grid of cards doesn't pulse in unison ----------
+  document.querySelectorAll('.img-float').forEach(function(el, i){
+    el.style.setProperty('--float-i', i % 6);
+  });
+
+  // ---------- lightbox ----------
+  var lightbox = document.getElementById('lightbox');
+  var lbTrack = document.getElementById('lightboxTrack');
+  var lbTitle = document.getElementById('lightboxTitle');
+  var lbDesc = document.getElementById('lightboxDesc');
+
+  function openLightbox(card){
+    var imgs = Array.from(card.querySelectorAll('.case-slide img')).map(function(i){return {src:i.src, alt:i.alt};});
+    if(card.dataset.img2){ imgs.push({src: card.dataset.img2, alt: card.dataset.title||''}); }
+    lbTrack.innerHTML = '';
+    imgs.forEach(function(img){
+      var slide = document.createElement('div');
+      slide.className = 'case-slide';
+      var clone = document.createElement('img');
+      clone.src = img.src; clone.alt = img.alt;
+      slide.appendChild(clone);
+      lbTrack.appendChild(slide);
+    });
+    lbTitle.textContent = card.dataset.title || '';
+    lbDesc.textContent = card.dataset.desc || '';
+    lightbox.classList.add('is-open');
+    document.body.style.overflow = 'hidden';
+  }
+  window.openLightbox = openLightbox;
+  function closeLightbox(){
+    lightbox.classList.remove('is-open');
+    document.body.style.overflow = '';
+  }
+  document.querySelectorAll('.case-card[data-title]').forEach(function(card){
+    card.addEventListener('click', function(e){
+      if(card.tagName === 'A') return; // external link cards navigate normally
+      openLightbox(card);
+    });
+  });
+  document.getElementById('lightboxClose').addEventListener('click', closeLightbox);
+  lightbox.addEventListener('click', function(e){ if(e.target === lightbox) closeLightbox(); });
+  document.addEventListener('keydown', function(e){ if(e.key==='Escape') closeLightbox(); });
+  document.getElementById('lbPrev').addEventListener('click', function(){ lbTrack.scrollBy({left:-lbTrack.clientWidth, behavior:'smooth'}); });
+  document.getElementById('lbNext').addEventListener('click', function(){ lbTrack.scrollBy({left:lbTrack.clientWidth, behavior:'smooth'}); });
+
+  // ---------- local case filters ----------
+  document.querySelectorAll('.filter-btn').forEach(function(btn){
+    btn.addEventListener('click', function(){
+      document.querySelectorAll('.filter-btn').forEach(function(b){ b.classList.remove('is-active'); });
+      btn.classList.add('is-active');
+      var f = btn.dataset.filter;
+      document.querySelectorAll('#caseGrid .case-card').forEach(function(card){
+        card.hidden = !(f === 'all' || card.dataset.cat === f);
+      });
+      ScrollTrigger.refresh();
+    });
+  });
+
+  function showMain(){
+    document.body.classList.remove('show-photo');
+    window.scrollTo(0,0);
+    requestAnimationFrame(function(){ ScrollTrigger.refresh(); });
+  }
+  function showPhoto(){
+    document.body.classList.add('show-photo');
+    window.scrollTo(0,0);
+    requestAnimationFrame(function(){ ScrollTrigger.refresh(); });
+  }
+</script>
+
+<script type="module">
+  // ---------- Case3DCard: glossy interactive plate for the main Cases grid ----------
+  // Built on vanilla Three.js rather than React Three Fiber + drei: this page is a single
+  // static HTML file with no React/JSX build step, so R3F/drei (npm/bundler-first packages)
+  // can't load reliably here. Same geometry, material params, lighting rig, env, drag+inertia
+  // and scroll-reveal behaviour as specified — just wired with plain Three.js + pointer events.
+  import * as THREE from "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js";
+
+  var reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var isCoarsePointer = window.matchMedia('(pointer: coarse)').matches;
+  // single source of truth for object size/depth — every card instance must use these, no per-card overrides
+  var CARD_OBJECT_WIDTH = 1.5;
+  var CARD_OBJECT_DEPTH = 0.3; // 20% of width, so the glass edge actually reads
+
+  // Real photo-studio environment (CC0, Poly Haven "studio_small_09", downscaled to 1024×512).
+  // Flat procedural panels gave flat reflections — what makes a surface read as glass is
+  // reflecting distinct bright shapes (octabox softboxes) against a dark ceiling.
+  function loadStudioEnv(renderer, onReady){
+    new THREE.TextureLoader().load('studio_env.jpg', function(tex){
+      tex.mapping = THREE.EquirectangularReflectionMapping;
+      tex.colorSpace = THREE.SRGBColorSpace;
+      var pmrem = new THREE.PMREMGenerator(renderer);
+      var rt = pmrem.fromEquirectangular(tex);
+      pmrem.dispose();
+      tex.dispose();
+      onReady(rt.texture);
+    });
+  }
+
+  // Cheap blur: draw the cover into a tiny canvas and let bilinear upscaling smear it into a soft
+  // colour field. The in-scene backdrop must NOT be a sharp copy of the cover — when it was, the
+  // plate carrying the same photo vanished against it and the cover stopped reading at all.
+  // ---------- glass texture, derived from a photograph of shattered glass ----------
+  // Source: a CC0 photograph of a safety-glass pane that has crazed into a full crack web.
+  // The photo also contains the window frame behind it and the sun gradient across it, which must
+  // not end up in the texture. Subtracting a heavily blurred copy of the image from itself removes
+  // everything low-frequency — frame bars, lighting, vignetting — and leaves only the crack lines.
+  // Those drive a normal map (built with a Sobel pass), so the cracks genuinely bend the light
+  // across the edge instead of merely changing how shiny it is.
+  var _glassTexPromise = null;
+  function loadGlassTextures(onReady){
+    if(_glassTexPromise){ _glassTexPromise.then(onReady); return; }
+    _glassTexPromise = new Promise(function(resolve){
+      var img = new Image();
+      img.onload = function(){
+        var S = 512;
+        var c = document.createElement('canvas'); c.width = c.height = S;
+        var ctx = c.getContext('2d', {willReadFrequently: true});
+        ctx.drawImage(img, 0, 0, S, S);
+        var src = ctx.getImageData(0, 0, S, S).data;
+
+        var gray = new Float32Array(S * S);
+        for(var i = 0, n = S * S; i < n; i++){
+          gray[i] = (src[i*4] * 0.299 + src[i*4+1] * 0.587 + src[i*4+2] * 0.114);
+        }
+
+        // separable box blur, run twice — cheap and smooth enough to serve as the low-pass
+        function blur(buf, r){
+          var tmp = new Float32Array(S * S), out = new Float32Array(S * S);
+          for(var y = 0; y < S; y++){
+            var acc = 0, row = y * S;
+            for(var x = -r; x <= r; x++) acc += buf[row + Math.min(S-1, Math.max(0, x))];
+            for(var x2 = 0; x2 < S; x2++){
+              tmp[row + x2] = acc / (2*r + 1);
+              acc -= buf[row + Math.min(S-1, Math.max(0, x2 - r))];
+              acc += buf[row + Math.min(S-1, Math.max(0, x2 + r + 1))];
+            }
+          }
+          for(var x3 = 0; x3 < S; x3++){
+            var acc2 = 0;
+            for(var y2 = -r; y2 <= r; y2++) acc2 += tmp[Math.min(S-1, Math.max(0, y2)) * S + x3];
+            for(var y3 = 0; y3 < S; y3++){
+              out[y3 * S + x3] = acc2 / (2*r + 1);
+              acc2 -= tmp[Math.min(S-1, Math.max(0, y3 - r)) * S + x3];
+              acc2 += tmp[Math.min(S-1, Math.max(0, y3 + r + 1)) * S + x3];
+            }
+          }
+          return out;
+        }
+        var low = blur(blur(gray, 9), 9);
+
+        // high-pass, centred on zero and pushed hard so the crack lines separate cleanly
+        var hp = new Float32Array(S * S);
+        for(var k = 0, m = S * S; k < m; k++){
+          hp[k] = Math.max(0, Math.min(1, 0.5 + (gray[k] - low[k]) / 255 * 2.6));
+        }
+
+        // roughness: a crack is a fresh fracture face, so it is glossier than the crazed field
+        // around it — the cracks catch the studio reflection and the rest stays satin
+        var rough = ctx.createImageData(S, S);
+        for(var a = 0, q = S * S; a < q; a++){
+          var edge = Math.abs(hp[a] - 0.5) * 2;
+          var v = Math.round(255 * (0.42 - edge * 0.34));
+          rough.data[a*4] = rough.data[a*4+1] = rough.data[a*4+2] = v;
+          rough.data[a*4+3] = 255;
+        }
+
+        // normal map: Sobel gradients of the high-pass become the surface tilt
+        var norm = ctx.createImageData(S, S);
+        function at(x, y){
+          return hp[Math.min(S-1, Math.max(0, y)) * S + Math.min(S-1, Math.max(0, x))];
+        }
+        var STRENGTH = 2.4;
+        for(var y4 = 0; y4 < S; y4++){
+          for(var x4 = 0; x4 < S; x4++){
+            var dx = (at(x4+1,y4-1) + 2*at(x4+1,y4) + at(x4+1,y4+1))
+                   - (at(x4-1,y4-1) + 2*at(x4-1,y4) + at(x4-1,y4+1));
+            var dy = (at(x4-1,y4+1) + 2*at(x4,y4+1) + at(x4+1,y4+1))
+                   - (at(x4-1,y4-1) + 2*at(x4,y4-1) + at(x4+1,y4-1));
+            var nx = -dx * STRENGTH, ny = -dy * STRENGTH, nz = 1;
+            var len = Math.sqrt(nx*nx + ny*ny + nz*nz) || 1;
+            var o = (y4 * S + x4) * 4;
+            norm.data[o]   = Math.round((nx/len * 0.5 + 0.5) * 255);
+            norm.data[o+1] = Math.round((ny/len * 0.5 + 0.5) * 255);
+            norm.data[o+2] = Math.round((nz/len * 0.5 + 0.5) * 255);
+            norm.data[o+3] = 255;
+          }
+        }
+
+        function toTex(imgData){
+          var cc = document.createElement('canvas'); cc.width = cc.height = S;
+          cc.getContext('2d').putImageData(imgData, 0, 0);
+          var t = new THREE.CanvasTexture(cc);
+          t.wrapS = t.wrapT = THREE.RepeatWrapping;
+          t.anisotropy = 4;
+          return t;
+        }
+        resolve({rough: toTex(rough), normal: toTex(norm)});
+      };
+      img.onerror = function(){ resolve(null); };
+      img.src = 'glass_crack.jpg';
+    });
+    _glassTexPromise.then(onReady);
+  }
+
+  function makeSoftBackdropTexture(src, onReady){
+    var img = new Image();
+    img.onload = function(){
+      var c = document.createElement('canvas');
+      c.width = 36; c.height = 36;
+      var ctx = c.getContext('2d');
+      ctx.drawImage(img, 0, 0, 36, 36);
+      var t = new THREE.CanvasTexture(c);
+      t.colorSpace = THREE.SRGBColorSpace;
+      t.minFilter = THREE.LinearFilter;
+      t.magFilter = THREE.LinearFilter;
+      onReady(t);
+    };
+    img.src = src;
+  }
+
+  function setupCase3D(container, index){
+    var src = container.dataset.src;
+
+    // Deterministic per-card resting angle: same card always lands on the same tilt across reloads,
+    // but no two cards in the grid start flat-on to the camera in the same pose.
+    var seed = index * 137.5;
+    var restX = THREE.MathUtils.degToRad(((seed % 16) - 8));
+    var restY = THREE.MathUtils.degToRad((((seed * 1.7) % 30) - 15));
+
+    // DOM backdrop: still there as the visible card background behind the transparent canvas
+    var bg = document.createElement('img');
+    bg.className = 'case-3d-bg';
+    bg.src = src;
+    bg.alt = '';
+    container.appendChild(bg);
+
+    var canvas = document.createElement('canvas');
+    container.appendChild(canvas);
+
+    var renderer = new THREE.WebGLRenderer({canvas: canvas, antialias: true, alpha: true});
+    // transparent clear: if a frame ever fails, the carousel image behind shows through — never black
+    renderer.setClearColor(0x000000, 0);
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+    renderer.outputColorSpace = THREE.SRGBColorSpace;
+    // fix: without tone mapping (default is NoToneMapping) any HDR value above 1.0 — exactly what
+    // Fresnel reflections on glass edges produce at grazing rotation angles — hard-clips to pure
+    // white instead of rolling off. This was the actual cause of the "goes white on rotation" bug.
+    renderer.toneMapping = THREE.ACESFilmicToneMapping;
+    // ACES pulls mid-tones down by design; lift exposure so the cards don't read as murky
+    renderer.toneMappingExposure = 1.25;
+
+    var scene = new THREE.Scene();
+    var camera = new THREE.PerspectiveCamera(28, 1, 0.1, 20);
+    camera.position.set(0, 0, 5.2);
+
+    loadStudioEnv(renderer, function(envTex){
+      scene.environment = envTex;
+      renderer.render(scene, camera);
+    });
+
+    var key = new THREE.DirectionalLight(0xffd7a0, 3.2);
+    key.position.set(2.6, 3, 4);
+    scene.add(key);
+    var rim = new THREE.DirectionalLight(0xdfe6ff, 1.2);
+    rim.position.set(-3, -1.2, -2);
+    scene.add(rim);
+    var amb = new THREE.AmbientLight(0xffffff, 0.6);
+    scene.add(amb);
+    // fill from above/below so the shadow side never collapses to pure black
+    var hemi = new THREE.HemisphereLight(0xffffff, 0x5a5a4e, 0.7);
+    scene.add(hemi);
+
+    // Glass now runs everywhere. It used to be switched off on every touch device, which meant the
+    // effect was literally absent on phones — the FPS watchdog below is the safety net instead.
+    var clearcoatOn = true;
+    var glassOn = true;
+    // The map is deliberately NOT handed to the material until the bitmap has actually decoded.
+    // A texture whose image has not arrived yet is sampled as (0,0,0) in WebGL, and the lighting
+    // then multiplies that black albedo — which is exactly how the cover turned into a black square.
+    var tex = null;
+    var texReady = false;
+
+    // In-scene backdrop: the translucent glass edges show what is rendered INSIDE the WebGL scene, not the DOM
+    // image sitting behind the canvas. Without this plane the glass edge had a void to refract —
+    // but a sharp copy of the cover made the plate disappear against it, so this is the soft version.
+    var bgPlane = new THREE.Mesh(
+      new THREE.PlaneGeometry(7, 7),
+      new THREE.MeshBasicMaterial({color: 0x6f6f66})
+    );
+    bgPlane.position.set(0, 0, -1.6);
+    scene.add(bgPlane);
+    makeSoftBackdropTexture(src, function(t){
+      bgPlane.material.map = t;
+      bgPlane.material.color.setHex(0x8f8f86);
+      bgPlane.material.needsUpdate = true;
+    });
+
+    // front face: the case photo, glossy but legible
+    // metalness stays low on purpose: a metallic surface with no environment map resolved yet renders
+    // near-black, and the studio env arrives asynchronously — that was the black-screen bug.
+    var faceMat = new THREE.MeshPhysicalMaterial({
+      color: 0xdededa,
+      metalness: 0.06,
+      roughness: 0.34,
+      clearcoat: clearcoatOn ? 0.85 : 0,
+      clearcoatRoughness: 0.2,
+      envMapIntensity: 1.0
+    });
+    // edges: glass carried by an actual drawn texture — cracks, stress rings and hairline scratches.
+    // Native `transmission` is deliberately NOT used: its extra render pass comes out black on iOS
+    // Safari, which is exactly when the covers went dark. Plain alpha + clearcoat + env reflections
+    // read as glass on every device and let the crack texture be the thing you actually see.
+    var edgeMat = new THREE.MeshPhysicalMaterial({
+      color: 0xe8e8e0,
+      metalness: 0,
+      roughness: 0.2,
+      transparent: true,
+      opacity: 0.76,
+      clearcoat: clearcoatOn ? 1.0 : 0,
+      clearcoatRoughness: 0.04,
+      // thin-film sheen across the rim — the cue that reads as "glass" rather than "translucent plastic"
+      iridescence: 0.5,
+      iridescenceIOR: 1.35,
+      iridescenceThicknessRange: [120, 420],
+      envMapIntensity: 1.9,
+      side: THREE.FrontSide
+    });
+    // the crack web arrives from the photograph; until it does the edge is plain polished glass
+    loadGlassTextures(function(gt){
+      if(!gt) return;
+      var repeatAlong = 3;
+      gt.rough.repeat.set(repeatAlong, 1);
+      gt.normal.repeat.set(repeatAlong, 1);
+      edgeMat.roughnessMap = gt.rough;
+      edgeMat.normalMap = gt.normal;
+      edgeMat.normalScale = new THREE.Vector2(0.7, 0.7);
+      edgeMat.needsUpdate = true;
+      renderer.render(scene, camera);
+    });
+    var materials = [edgeMat, edgeMat, edgeMat, edgeMat, faceMat, edgeMat];
+    var geo = new THREE.BoxGeometry(CARD_OBJECT_WIDTH, CARD_OBJECT_WIDTH, CARD_OBJECT_DEPTH);
+    var mesh = new THREE.Mesh(geo, materials);
+    scene.add(mesh);
+
+    // ---- interaction state ----
+    // "base" is the settled rotation the object rests at — its own per-card rest angle, plus the
+    // desktop hover-parallax offset while the mouse sits over the card. Dragging writes straight
+    // into base; releasing damps base back to that rest angle (not to zero) instead of snapping,
+    // so idle sway never has to jump-cut in.
+    var baseX = restX, baseY = restY, targetX = restX, targetY = restY;
+    var dragging = false, lastX = 0, lastY = 0, dragDist = 0;
+    var idlePhase = Math.random() * 10;
+
+    canvas.addEventListener('click', function(e){ e.stopPropagation(); });
+
+    canvas.addEventListener('pointerdown', function(e){
+      dragging = true; dragDist = 0;
+      lastX = e.clientX; lastY = e.clientY;
+      canvas.setPointerCapture(e.pointerId);
+    });
+    canvas.addEventListener('pointermove', function(e){
+      if(!dragging){
+        if(!isCoarsePointer){
+          var r = container.getBoundingClientRect();
+          var px = (e.clientX - r.left) / r.width - 0.5;
+          var py = (e.clientY - r.top) / r.height - 0.5;
+          var maxT = THREE.MathUtils.degToRad(11);
+          targetY = restY + px * maxT * 2;
+          targetX = restX + -py * maxT * 2;
+        }
+        return;
+      }
+      var dx = e.clientX - lastX, dy = e.clientY - lastY;
+      dragDist += Math.abs(dx) + Math.abs(dy);
+      baseY += dx * 0.008;
+      baseX += -dy * 0.008;
+      lastX = e.clientX; lastY = e.clientY;
+    });
+    function endDrag(e){
+      if(!dragging) return;
+      dragging = false;
+      try{ canvas.releasePointerCapture(e.pointerId); }catch(err){}
+      // touch has no hover concept — always spring back to 0; desktop settles to the current
+      // cursor-parallax offset (0 if the pointer has already left the card)
+      if(isCoarsePointer){ targetX = restX; targetY = restY; }
+      if(dragDist < 6){
+        e.stopPropagation();
+        if(window.openLightbox){
+          var card = container.closest('.case-card');
+          if(card) window.openLightbox(card);
+        }
+      }
+    }
+    canvas.addEventListener('pointerup', endDrag);
+    canvas.addEventListener('pointercancel', endDrag);
+    canvas.addEventListener('mouseleave', function(){
+      if(!isCoarsePointer && !dragging){ targetX = restX; targetY = restY; }
+    });
+
+    // ---- viewport gating ----
+    var inView = false;
+    var io = new IntersectionObserver(function(entries){
+      entries.forEach(function(en){ inView = en.isIntersecting; });
+    }, {threshold: 0.1});
+    io.observe(container);
+
+    // ---- scroll-linked reveal ----
+    if(window.gsap){
+      window.gsap.set(container, {opacity: 0, scale: 0.92, transformOrigin: '50% 50%'});
+      if(window.ScrollTrigger){
+        window.ScrollTrigger.create({
+          trigger: container.closest('.case-card') || container,
+          start: 'top 90%',
+          onEnter: function(){ window.gsap.to(container, {opacity: 1, scale: 1, duration: 0.8, ease: 'power3.out'}); }
+        });
+      } else {
+        window.gsap.to(container, {opacity: 1, scale: 1, duration: 0.8, ease: 'power3.out'});
+      }
+    }
+
+    function resize(){
+      var w = container.clientWidth, h = container.clientHeight;
+      if(w === 0 || h === 0) return;
+      renderer.setSize(w, h, false);
+      camera.aspect = w / h;
+      camera.updateProjectionMatrix();
+    }
+    new ResizeObserver(resize).observe(container);
+    resize();
+    renderer.render(scene, camera); // paint immediately, don't wait for the first rAF/IO tick
+
+    // now load the cover, attach it only once it is decodable, and repaint straight away — the
+    // render loop is viewport-gated, so it cannot be relied on to pick the texture up on its own
+    new THREE.TextureLoader().load(src, function(t){
+      t.colorSpace = THREE.SRGBColorSpace;
+      t.anisotropy = Math.min(4, renderer.capabilities.getMaxAnisotropy());
+      tex = t; texReady = true;
+      faceMat.map = t;
+      faceMat.color.setHex(0xffffff);
+      faceMat.needsUpdate = true;
+      renderer.render(scene, camera);
+    }, undefined, function(){
+      // if the image genuinely cannot be fetched, leave the light plate rather than a black hole
+      faceMat.color.setHex(0xd6d6d0);
+      faceMat.needsUpdate = true;
+      renderer.render(scene, camera);
+    });
+
+    // ---- fps watchdog: drop clearcoat if it can't hold ~45fps ----
+    var frames = 0, fpsTimer = performance.now(), degraded = false, lastT = performance.now();
+
+    function tick(now){
+      requestAnimationFrame(tick);
+      if(!inView) return;
+      var dt = Math.min((now - lastT) / 1000, 0.05);
+      lastT = now;
+
+      frames++;
+      if(now - fpsTimer > 2000){
+        var fps = frames / ((now - fpsTimer) / 1000);
+        if(fps < 42 && !degraded && clearcoatOn){
+          degraded = true; clearcoatOn = false;
+          materials.forEach(function(m){ m.clearcoat = 0; if(m.transmission) m.transmission = 0; m.envMapIntensity *= 0.8; m.needsUpdate = true; });
+        }
+        frames = 0; fpsTimer = now;
+      }
+
+      if(dragging){
+        // idle is fully suspended — rotation follows the live drag one-to-one, nothing overlaid
+        mesh.rotation.x = baseX;
+        mesh.rotation.y = baseY;
+        mesh.rotation.z = 0;
+      } else {
+        idlePhase += dt;
+        // spring the base rotation toward its resting target (0, or the live hover-parallax
+        // offset on desktop) — frame-rate independent damping, ~0.6-0.8s to settle, no snapping
+        baseX = THREE.MathUtils.damp(baseX, targetX, 4, dt);
+        baseY = THREE.MathUtils.damp(baseY, targetY, 4, dt);
+
+        // Idle "breathing" sway, layered on top of base so return-to-rest and sway blend into one
+        // continuous motion. Y swings ±18°: below roughly 15° the side face is a ~2% sliver of the
+        // silhouette and the object reads as a flat picture turning, which was the whole complaint.
+        // Cycle lengths ~4.5s / 5.7s / 7s — different per axis so it never looks mechanical.
+        var swayY = THREE.MathUtils.degToRad(18);
+        var swayX = THREE.MathUtils.degToRad(10);
+        mesh.rotation.x = baseX + Math.sin(idlePhase * 1.1 + 1.7) * swayX;
+        mesh.rotation.y = baseY + Math.sin(idlePhase * 1.4) * swayY;
+        mesh.rotation.z = Math.sin(idlePhase * 0.9 + 4.1) * THREE.MathUtils.degToRad(4);
+      }
+
+      renderer.render(scene, camera);
+    }
+    requestAnimationFrame(tick);
+  }
+
+  if(!reducedMotion){
+    document.querySelectorAll('.case-3d').forEach(function(el, i){ setupCase3D(el, i); });
+  }
+</script>
