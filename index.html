@@ -4,7 +4,6 @@
 <meta name="description" content="Илья Иванов — SMM, графический дизайн и фотосъёмка полного цикла.">
 <link rel="preload" href="fonts/ak.woff2" as="font" type="font/woff2" crossorigin>
 <script src="https://cdn.jsdelivr.net/npm/lenis@1.3.21/dist/lenis.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/webgl-fluid@0.3.4/dist/webgl-fluid.umd.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/gsap.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/ScrollTrigger.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/SplitText.min.js"></script>
@@ -22,8 +21,8 @@
   }
 
   :root{
-    --ink:#0a0a0a; --paper:#f2f2f0;
-    --dim:rgba(10,10,10,.45); --hair:rgba(10,10,10,.14); --ghost:rgba(10,10,10,.07);
+    --ink:#000000; --paper:#ffffff;
+    --dim:rgba(0,0,0,.45); --hair:rgba(0,0,0,.14); --ghost:rgba(0,0,0,.07);
     --accent:#f4fb00; --eo:cubic-bezier(.22,1,.36,1);
     /* measured off the reference: left gutter at 4.1vw, second column at 35.7vw */
     --gut:clamp(15px,4.1vw,64px);
@@ -31,8 +30,8 @@
     --rule:35.7vw;
   }
   html.is-dark{
-    --ink:#f2f2f0; --paper:#0a0a0a;
-    --dim:rgba(242,242,240,.45); --hair:rgba(242,242,240,.16); --ghost:rgba(242,242,240,.08);
+    --ink:#ffffff; --paper:#000000;
+    --dim:rgba(255,255,255,.45); --hair:rgba(255,255,255,.16); --ghost:rgba(255,255,255,.08);
   }
 
   *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
@@ -106,16 +105,15 @@
   /* ---------- opening ---------- */
   .chapter{position:relative;}
   #heroFX{position:absolute;top:0;left:0;right:0;height:100svh;z-index:0;pointer-events:none;}
-  /* the simulation itself is never shown — only its alpha is used as the mask */
-  #fluidSrc{position:absolute;top:0;left:0;width:1px;height:1px;opacity:0;pointer-events:none;}
+
   /* The opening alternates between two columns — the left gutter and a second
      column at 35.7vw — which is what gives the reference its stagger. */
-  /* both sit against the right edge of the statement column and start level
-     with the top of the name */
-  .op-note{position:absolute;z-index:3;left:var(--col);top:clamp(56px,7vh,86px);}
-  .op-1{position:relative;z-index:2;margin-top:clamp(110px,28vh,290px);}
+  /* kept in the flow, above the name, in the same column: absolute offsets went
+     on landing on top of the heading at widths I could not check */
+  .op-note{position:relative;z-index:3;margin-left:var(--col);padding-top:clamp(56px,9vh,110px);}
+  .op-1{position:relative;z-index:2;margin-top:clamp(18px,3vh,40px);}
   .chapter{position:relative;}
-  .op-role{position:absolute;z-index:3;right:clamp(15px,4.1vw,64px);top:clamp(110px,28vh,290px);text-align:right;}
+  .op-role{position:relative;z-index:3;margin-left:var(--col);margin-top:clamp(10px,1.8vh,22px);}
   .stmt{position:relative;z-index:2;padding:clamp(2px,.6vh,8px) 0 clamp(60px,13vh,170px);}
   .stmt > div, .op-1 > div{white-space:nowrap;}
   .col-l{margin-left:clamp(22px,6vw,110px);}
@@ -229,8 +227,8 @@
     /* relative, not static: the erasers that punch the rule are positioned, so
        text that must sit above them needs a stacking context. The offsets from
        the wide layout have to be cleared, or `top` shifts the block instead. */
-    .op-note{position:relative;z-index:3;top:auto;left:auto;margin-left:0;padding-top:clamp(52px,9vh,80px);}
-    .op-role{position:relative;z-index:3;top:auto;right:auto;text-align:left;margin-top:clamp(8px,1.4vh,16px);}
+    .op-note{margin-left:0;padding-top:clamp(52px,9vh,80px);}
+    .op-role{margin-left:0;}
     .stmt > div, .op-1 > div{white-space:normal;}
     .idx-wrap{margin-left:0;}
     .ind{margin-left:calc(var(--col) + 6vw);}
@@ -274,7 +272,6 @@
     <div class="spine-gap" id="gapB"></div>
     <div id="spineCap">’26</div>
     <canvas id="heroFX" aria-hidden="true"></canvas>
-    <canvas id="fluidSrc" aria-hidden="true"></canvas>
 
     <div class="op-note"><span class="sm dim" data-goo>Россия<br>SMM · Дизайн · Фото</span></div>
 
@@ -364,7 +361,7 @@
     </div>
 
     <div class="tailroom"></div>
-    <span id="buildStamp" style="display:none">BUILD 27.09 21:04</span>
+    <span id="buildStamp" style="display:none">BUILD 27.09 21:11</span>
   </section>
 
 </main>
@@ -431,52 +428,52 @@
 
   var AMP = 26, OFF = -13, BLUR0 = 8;
 
+  // The weld is done with CSS blur and contrast rather than an SVG filter.
+  // An animated feGaussianBlur is rasterised on the CPU in Safari, and one frame
+  // of a full-width headline cost hundreds of milliseconds — which is why only
+  // two frames of the animation were ever drawn. blur() and contrast() are
+  // composited on the graphics card instead. The threshold needs an opaque
+  // backdrop to bite, and contrast() pivots on mid grey, so a pure white page
+  // stays white and pure black type stays black while the edges weld together.
+  var GOO_BLUR = 10, GOO_CONTRAST = 18;
+
   function revealText(el, delay){
     if(!el || el.__revealed) return null;
     el.__revealed = true;
     el.classList.add('shown');
 
-    // Small copy gets a plain fade. An animated SVG filter re-renders its whole
-    // region on every frame, and there are two dozen small labels here — giving
-    // each of them a filter bought nothing visible and cost a great deal. The
-    // metaball is kept for the large type, where it actually reads.
     var fs = parseFloat(getComputedStyle(el).fontSize) || 16;
     if(fs < 30){
-      return gsap.fromTo(el, {opacity: 0, filter: 'blur(5px)'},
-        {opacity: 1, filter: 'blur(0px)', duration: GOO_TIME * .7, ease: EASE.glide,
-         delay: delay || 0, onComplete: function(){ el.style.filter = 'none'; }});
+      return gsap.fromTo(el, {opacity: 0}, {opacity: 1, duration: GOO_TIME * .7,
+        ease: EASE.glide, delay: delay || 0});
     }
 
-    // One filter per LINE rather than one for the whole block: a filter region is
-    // re-rendered in full every frame its blur changes, so a line-sized region
-    // costs a fraction of a three-line one.
-    // A line carrying a live child (the morphing word) must not be split:
-    // SplitText rebuilds the markup and clones the child, which produced two
-    // elements sharing one id — the swap then drove an empty duplicate.
-    var lines = null;
-    if(window.SplitText && !el.hasAttribute('data-nosplit')){
-      try{ lines = new SplitText(el, {type: 'lines'}).lines; }catch(e){ lines = null; }
-    }
-    var targets = (lines && lines.length) ? lines : [el];
+    var st = {b: GOO_BLUR, c: GOO_CONTRAST};
+    el.style.background = 'var(--paper)';
+    el.style.filter = 'blur(' + st.b + 'px) contrast(' + st.c + ')';
 
-    var tl = gsap.timeline({delay: delay || 0});
-    targets.forEach(function(line, i){
-      var g = makeGoo();
-      line.style.willChange = 'filter';
-      line.style.filter = 'url(#' + g.id + ')';
-      g.blur.setAttribute('stdDeviation', BLUR0);
-
-      // tweened as an attribute by GSAP itself — no per-frame callback per line
-      tl.to(g.blur, {attr: {stdDeviation: 0}, duration: GOO_TIME, ease: EASE.goo,
-        onComplete: function(){ line.style.filter = 'none'; line.style.willChange = 'auto'; }
-      }, i * 0.14);
-
-      var m = {amp: AMP, off: OFF};
-      tl.to(m, {amp: 1, off: 0, duration: GOO_TIME * .35, ease: 'none',
-        onUpdate: function(){ g.cm.setAttribute('values', gooMatrix(m.amp, m.off)); }
-      }, i * 0.1 + GOO_TIME * .55);
+    return gsap.to(st, {
+      b: 0, c: 1, duration: GOO_TIME, delay: delay || 0, ease: EASE.goo,
+      onUpdate: function(){
+        el.style.filter = 'blur(' + st.b.toFixed(2) + 'px) contrast(' + st.c.toFixed(2) + ')';
+      },
+      onComplete: function(){ el.style.filter = 'none'; el.style.background = 'none'; }
     });
-    return tl;
+  }
+
+  // the same animation run backwards, for anything leaving the screen
+  function hideText(el){
+    if(!el || !el.__revealed) return null;
+    el.__revealed = false;
+    var st = {b: 0, c: 1};
+    el.style.background = 'var(--paper)';
+    return gsap.to(st, {
+      b: GOO_BLUR * 1.6, c: GOO_CONTRAST, duration: GOO_TIME * .7, ease: EASE.goo,
+      onUpdate: function(){
+        el.style.filter = 'blur(' + st.b.toFixed(2) + 'px) contrast(' + st.c.toFixed(2) + ')';
+      },
+      onComplete: function(){ el.classList.remove('shown'); el.style.filter = 'none'; el.style.background = 'none'; }
+    });
   }
 
   function armReveals(root){
@@ -814,136 +811,105 @@
      same organic mass without needing a threshold, and work everywhere.
      ============================================================ */
   /* ============================================================
-     The reveal behind the opening screen is a real fluid simulation running on
-     the GPU — velocity and dye advected over a grid — rather than stamps drawn
-     by hand. Its dye is rendered into a transparent canvas, so its alpha is
-     already the shape we want; the covers are then kept only where that alpha
-     exists. One drawImage per frame, everything else on the graphics card.
+     The reveal behind the opening screen. Every previous attempt failed
+     silently somewhere I could not see: a canvas threshold that does nothing to
+     alpha in Safari, an SVG mask too slow to paint, and a simulation whose
+     splats all landed off-canvas because the pointer offset was subtracted
+     twice. This version has no library and no coordinate translation — the
+     handler sits on the element and the trail is drawn straight into a mask
+     canvas, so there is nothing left that can quietly do nothing.
      ============================================================ */
   (function(){
     var cv = document.getElementById('heroFX');
-    var src = document.getElementById('fluidSrc');
     var chap = document.getElementById('chapter');
-    if(!cv || !src || !chap || reduced || coarse) return;
-    if(typeof WebGLFluid !== 'function') return;
-    // the reference disables its own reveal below 992px; the effect needs a
-    // pointer and the simulation is not worth its cost on a phone
-    if(window.matchMedia('(max-width: 991px)').matches) return;
+    if(!cv || !chap || reduced || coarse) return;
 
     var ctx = cv.getContext('2d');
-    // a soft reveal gains nothing from retina pixels, and dropping to 1 cuts the
-    // per-frame fill by four on a 2x display
-    var dpr = 1;
+    var mcv = document.createElement('canvas');
+    var mctx = mcv.getContext('2d');
     var W = 0, H = 0, boxes = [], imgs = [];
 
     CASES.forEach(function(c){ var im = new Image(); im.src = c.img; imgs.push(im); });
     var SPOTS = [
-      [.08,.08,.24],[.34,.28,.20],[.60,.10,.22],[.82,.24,.26],
-      [.14,.50,.22],[.44,.58,.28],[.72,.54,.20],[.28,.80,.24]
+      [.06,.06,.26],[.32,.26,.22],[.58,.08,.24],[.80,.22,.28],
+      [.12,.48,.24],[.42,.56,.30],[.70,.52,.22],[.26,.78,.26]
     ];
     function place(){
       boxes = imgs.map(function(im, i){
         var sp = SPOTS[i % SPOTS.length];
-        var w = Math.max(150, W * sp[2]);
+        var w = Math.max(160, W * sp[2]);
         return {im: im, x: sp[0] * W, y: sp[1] * H, w: w, h: w * .72};
       });
     }
     function size(){
-      W = chap.clientWidth; H = Math.min(window.innerHeight, chap.clientHeight);
-      cv.width = Math.round(W * dpr); cv.height = Math.round(H * dpr);
+      W = chap.clientWidth;
+      H = Math.min(window.innerHeight, chap.clientHeight);
+      cv.width = mcv.width = Math.round(W);
+      cv.height = mcv.height = Math.round(H);
       cv.style.width = W + 'px'; cv.style.height = H + 'px';
-      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-      src.width = Math.round(W * 0.6); src.height = Math.round(H * 0.6);
-      src.style.width = W + 'px'; src.style.height = H + 'px';
       place();
     }
     new ResizeObserver(size).observe(chap);
     size();
 
-    WebGLFluid(src, {
-      TRANSPARENT: true,            // the dye's alpha becomes our mask
-      BACK_COLOR: {r: 0, g: 0, b: 0},
-      SIM_RESOLUTION: 64,
-      DYE_RESOLUTION: 256,
-      DENSITY_DISSIPATION: 2.4,     // the trail fades rather than lingering
-      VELOCITY_DISSIPATION: 1.8,
-      PRESSURE: 0.8,
-      CURL: 22,
-      SPLAT_RADIUS: 0.32,
-      SPLAT_FORCE: 5200,
-      SHADING: false,
-      COLORFUL: false,
-      PAUSED: false,
-      BLOOM: false,
-      SUNRAYS: false
-    });
-
-    // the simulation listens on its own canvas, which is parked out of the way,
-    // so the reader's movements over the section are forwarded to it
-    function forward(type, e){
-      var r = chap.getBoundingClientRect();
-      var x = e.clientX - r.left, y = e.clientY - r.top;
-      var ev = new PointerEvent(type, {
-        clientX: x, clientY: y, bubbles: true, cancelable: true,
-        pointerId: 1, pointerType: 'mouse', isPrimary: true
-      });
-      src.dispatchEvent(ev);
-    }
-    // the library binds mousemove/mousedown, not the pointer events
-    // The simulation reads offsetX/offsetY. On an event made in script those are
-    // always 0 — the browser only derives them from a real hit test — so every
-    // splat was landing in the canvas's top-left corner instead of under the
-    // pointer. Defining them on the instance overrides the prototype getter.
-    function forwardMouse(type, e){
-      var r = chap.getBoundingClientRect();
-      var x = e.clientX - r.left, y = e.clientY - r.top;
-      var ev = new MouseEvent(type, {
-        clientX: e.clientX, clientY: e.clientY,
-        bubbles: true, cancelable: true, buttons: 1
-      });
-      Object.defineProperty(ev, 'offsetX', {value: x, configurable: true});
-      Object.defineProperty(ev, 'offsetY', {value: y, configurable: true});
-      src.dispatchEvent(ev);
-    }
-    // The simulation injects dye on mousemove only while it considers the pointer
-    // pressed — it raises that flag on mousedown and drops it on mouseup. Moving
-    // the mouse without clicking therefore produced nothing whatsoever. One
-    // synthetic press at the start leaves it permanently in the drawing state,
-    // and no mouseup is ever sent.
-    var armed = false;
+    // the pointer trail, painted into the mask
+    var px = -1, py = -1, tx = -1, ty = -1, moving = 0;
     chap.addEventListener('pointermove', function(e){
-      if(!armed){ armed = true; forwardMouse('mousedown', e); }
-      forwardMouse('mousemove', e);
-      forward('pointermove', e);
+      var r = chap.getBoundingClientRect();
+      tx = e.clientX - r.left;
+      ty = e.clientY - r.top;
+      if(px < 0){ px = tx; py = ty; }
+      moving = performance.now();
     }, {passive: true});
+
+    function stamp(x, y, r){
+      var g = mctx.createRadialGradient(x, y, 0, x, y, r);
+      g.addColorStop(0, 'rgba(255,255,255,1)');
+      g.addColorStop(.62, 'rgba(255,255,255,.9)');
+      g.addColorStop(1, 'rgba(255,255,255,0)');
+      mctx.fillStyle = g;
+      mctx.beginPath(); mctx.arc(x, y, r, 0, Math.PI * 2); mctx.fill();
+    }
 
     var visible = true;
     new IntersectionObserver(function(es){
       es.forEach(function(en){ visible = en.isIntersecting; });
     }, {threshold: .01}).observe(chap);
 
-    var lastMove = 0;
-    chap.addEventListener('pointermove', function(){ lastMove = performance.now(); }, {passive: true});
-    var cleared = false;
-    gsap.ticker.add(function(){
-      if(!visible) return;
-      // the dye dissipates in a couple of seconds; after that there is nothing
-      // to composite, so the whole pass is skipped until the pointer moves again
-      if(performance.now() - lastMove > 2600){
-        if(!cleared){ ctx.clearRect(0, 0, W, H); cleared = true; }
-        return;
+    function draw(){
+      if(!visible || !W) return;
+      var idle = performance.now() - moving > 2600;
+
+      // the trail thins out a little every frame, so it heals behind the cursor
+      mctx.globalCompositeOperation = 'destination-out';
+      mctx.fillStyle = 'rgba(0,0,0,0.055)';
+      mctx.fillRect(0, 0, W, H);
+      mctx.globalCompositeOperation = 'source-over';
+
+      if(!idle && tx >= 0){
+        // stamps along the segment travelled since the last frame, so a fast
+        // sweep leaves a continuous stroke instead of a dotted line
+        var dx = tx - px, dy = ty - py;
+        var dist = Math.sqrt(dx * dx + dy * dy);
+        var steps = Math.max(1, Math.min(24, Math.round(dist / 12)));
+        for(var i = 1; i <= steps; i++){
+          stamp(px + dx * (i / steps), py + dy * (i / steps), 130);
+        }
+        px = tx; py = ty;
       }
-      cleared = false;
+
       ctx.clearRect(0, 0, W, H);
       ctx.globalCompositeOperation = 'source-over';
       boxes.forEach(function(b){
         if(b.im.complete && b.im.naturalWidth) ctx.drawImage(b.im, b.x, b.y, b.w, b.h);
       });
-      // keep the covers only where the dye has been
       ctx.globalCompositeOperation = 'destination-in';
-      ctx.drawImage(src, 0, 0, W, H);
+      ctx.drawImage(mcv, 0, 0);
       ctx.globalCompositeOperation = 'source-over';
-    });
+    }
+    gsap.ticker.add(draw);
+    // exposed so the drawing can be stepped and measured without a live ticker
+    window.__heroDraw = draw;
   })();
 
   /* ---------- the closing still: flies in, then leans toward the pointer ---------- */
