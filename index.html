@@ -26,8 +26,15 @@
     --accent:#f4fb00; --eo:cubic-bezier(.22,1,.36,1);
     /* measured off the reference: left gutter at 4.1vw, second column at 35.7vw */
     --gut:clamp(15px,4.1vw,64px);
-    --col:35.7vw;
-    --rule:35.7vw;
+    /* 8-column grid measured off the reference at viewport 1990:
+       side margin 22.1px, gap 22.11px, column 223.875px.
+       margin = gap = 1.1111vw, column = 11.25vw,
+       and the rule sits on the right edge of column 3. */
+    --gg:1.1111%;
+    --colw:11.25%;
+    --rule:37.083%;   /* 1.1111 + 3*11.25 + 2*1.1111 */
+    --c4:38.194%;     /* start of column 4 = 760/1990 */
+    --col:38.194%;
   }
   html.is-dark{
     --ink:#ffffff; --paper:#000000;
@@ -52,9 +59,9 @@
   /* One headline size for the whole page, exactly as the reference sets it:
      11.5vw, weight 500, line-height .895, tracking -.052em. Weight 600 was why
      everything read as over-inked and squashed. */
-  .xl,.lg{font-size:min(11.5vw,150px);font-weight:500;line-height:.895;letter-spacing:-.052em;margin:0;}
+  .xl,.lg{font-size:clamp(34px,6.25vw,132px);font-weight:500;line-height:.88;letter-spacing:-.0495em;}
   .md{font-size:min(6vw,64px);font-weight:500;line-height:.9;letter-spacing:-.05em;margin:0;}
-  .sm{font-size:16px;font-weight:500;letter-spacing:-.008em;line-height:1.22;}
+  .sm{font-size:max(13px,.972vw);font-weight:500;letter-spacing:-.027em;line-height:1.07;}
   .sm.dim{color:var(--dim);}
 
   .pad{padding:0 var(--gut);}
@@ -78,14 +85,12 @@
 
   /* the hairline runs from the top of the page down to the end of the statements,
      the way the reference threads one rule through its opening chapter */
-  /* One unbroken rule. The breaks at each block of big type are punched out by
-     two opaque strips laid over it, which cannot end up as stray stubs the way
-     three separately measured segments could. */
-  #spine{position:absolute;top:0;left:calc(var(--col) - clamp(10px,1.6vw,26px));width:1px;
+  /* One unbroken rule from the top of the chapter to the year badge, drawn
+     behind the type. It is not interrupted anywhere. */
+  #spine{position:absolute;top:0;bottom:0;left:var(--rule);width:1px;
     background:var(--hair);z-index:1;transform-origin:50% 0;}
-  .spine-gap{position:absolute;left:calc(var(--col) - clamp(10px,1.6vw,26px) - 10px);width:21px;
-    background:var(--paper);z-index:1;transition:background .9s var(--eo);}
-  #spineCap{position:absolute;left:calc(var(--col) - clamp(10px,1.6vw,26px));transform:translateX(-50%);z-index:2;
+
+  #spineCap{position:absolute;left:var(--rule);bottom:0;transform:translateX(-50%);z-index:2;
     width:44px;height:44px;border-radius:50%;border:1px solid var(--hair);background:var(--paper);
     display:flex;align-items:center;justify-content:center;font-size:10.5px;font-weight:600;color:var(--dim);}
 
@@ -116,9 +121,9 @@
   .op-role{position:relative;z-index:3;margin-left:var(--col);margin-top:clamp(10px,1.8vh,22px);}
   .stmt{position:relative;z-index:2;padding:clamp(2px,.6vh,8px) 0 clamp(60px,13vh,170px);}
   .stmt > div, .op-1 > div{white-space:nowrap;}
-  .col-l{margin-left:clamp(22px,6vw,110px);}
-  .col-r{margin-left:var(--col);}
-  .ind{margin-left:calc(var(--col) + clamp(40px,7vw,130px));}
+  .col-l{margin-left:var(--gg);}
+  .col-r{margin-left:var(--c4);}
+  .ind{margin-left:calc(var(--c4) + var(--colw) + var(--gg));}
   .blk{margin-top:.08em;}
 
   /* ---------- five squares ---------- */
@@ -127,16 +132,18 @@
      single cover lives in the strip left of the rule, the run of four begins
      exactly where the rule stands. This holds at any screen width, which the
      six-track version did not. */
-  .tiles{display:grid;grid-template-columns:var(--col) 1fr;
+  .tiles{display:grid;grid-template-columns:repeat(8,minmax(0,1fr));gap:0 var(--gg);
+    margin:clamp(40px,7vh,96px) var(--gg);}
     position:relative;z-index:2;margin:clamp(20px,5vh,60px) 0 0;width:100%;}
-  .tiles-left{padding-right:clamp(20px,3vw,52px);}
-  .tiles-right{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));
-    gap:clamp(18px,2.6vw,46px);}
   .tile{aspect-ratio:1/1;background:var(--ghost);overflow:hidden;position:relative;}
   .tile img{width:100%;height:100%;object-fit:cover;}
   .tile.gap{background:none;}
   /* begins under the third photo counting from the right */
-  .tiles-note{grid-column:2 / 5;margin-top:18px;max-width:44ch;}
+  .tiles-note{grid-column:4 / 6;margin-top:22px;}
+  .tile{aspect-ratio:1;overflow:hidden;background:var(--ghost);}
+  .tile img{width:100%;height:100%;object-fit:cover;display:block;}
+  .tile.c1{grid-column:1/2;} .tile.c4{grid-column:4/5;} .tile.c5{grid-column:5/6;}
+  .tile.c7{grid-column:7/8;} .tile.c8{grid-column:8/9;}
 
   .stmt2{position:relative;z-index:2;padding:clamp(60px,14vh,180px) 0 clamp(20px,5vh,60px);}
   /* a steady descent to the right, then the last line set under the middle of
@@ -223,7 +230,7 @@
   .tailroom{height:clamp(220px,34vh,420px);}
 
   @media (max-width:900px){
-    :root{--col:24vw;}
+    :root{--colw:22%;--rule:24%;--c4:26%;--col:26%;}
     /* the two labels are pinned to the grid on wide screens; at this width
        there is no room beside the name, so they return to the flow */
     /* relative, not static: the erasers that punch the rule are positioned, so
@@ -237,9 +244,8 @@
     .idx-wrap{margin-left:0;}
     .ind{margin-left:calc(var(--col) + 6vw);}
     .op-1{margin-top:clamp(50px,14vh,120px);}
-    .tiles{grid-template-columns:1fr;}
-    .tiles-left{padding-right:0;margin-bottom:clamp(14px,2.4vw,30px);}
-    .tiles-right{grid-template-columns:repeat(2,1fr);}
+    .tiles{grid-template-columns:repeat(2,1fr);gap:clamp(10px,2.4vw,18px);}
+    .tile.c1,.tile.c4,.tile.c5,.tile.c7,.tile.c8{grid-column:auto;}
     .tiles-note{grid-column:1 / -1;}
     .mark-half{font-size:clamp(2.2rem,13vw,4rem);}
     .close-mid{flex-direction:column;}
@@ -272,10 +278,8 @@
 <main>
 
   <!-- ============ OPENING CHAPTER ============ -->
-  <section class="chapter pad" id="chapter">
+  <section class="chapter" id="chapter">
     <div id="spine"></div>
-    <div class="spine-gap" id="gapA"></div>
-    <div class="spine-gap" id="gapB"></div>
     <div id="spineCap">’26</div>
     <canvas id="heroFX" aria-hidden="true"></canvas>
 
@@ -367,7 +371,7 @@
     </div>
 
     <div class="tailroom"></div>
-    <span id="buildStamp" style="display:none">BUILD 27.09 21:22</span>
+    <span id="buildStamp" style="display:none">BUILD 27.09 21:39</span>
   </section>
 
 </main>
@@ -502,24 +506,23 @@
     // the reference leaves columns deliberately empty, so the row reads as a
     // considered placement rather than a filled grid
     // one on its own at the left, then a gap, then a run of four
-    function tile(c){
+    // columns measured off the reference: 1, 4, 5, 7, 8 are filled, the rest
+    // are deliberately left empty so the row reads as placement, not a fill
+    var SLOTS = ['c1','c4','c5','c7','c8'];
+    function tile(c, slot){
       var d = document.createElement('div');
-      d.className = 'tile';
+      d.className = 'tile ' + slot;
       var im = document.createElement('img'); im.src = c.img; im.alt = c.t;
       d.appendChild(im);
       return d;
     }
-    var left = document.createElement('div'); left.className = 'tiles-left';
-    left.appendChild(tile(CASES[0]));
-    var right = document.createElement('div'); right.className = 'tiles-right';
-    [CASES[1], CASES[2], CASES[3], CASES[4]].forEach(function(c){ right.appendChild(tile(c)); });
-    host.appendChild(left); host.appendChild(right);
+    SLOTS.forEach(function(slot, i){ host.appendChild(tile(CASES[i], slot)); });
     var note = document.createElement('p');
     note.className = 'sm dim tiles-note';
     note.style.fontSize = 'clamp(14px,1.15vw,17px)';
     note.setAttribute('data-goo','');
     note.textContent = 'Снимаю, обрабатываю и собираю визуал для брендов — от постановки света до публикации, с упором на ясность и ритм.';
-    right.appendChild(note);
+    host.appendChild(note);
 
     // tiles rise in, one after another
     gsap.utils.toArray('#tiles .tile').forEach(function(t, i){
@@ -596,23 +599,10 @@
     var sp = document.getElementById('spine'), cap = document.getElementById('spineCap');
     var chap = document.getElementById('chapter');
     if(!sp || !chap) return;
-    var gA = document.getElementById('gapA'), gB = document.getElementById('gapB');
-    function measure(){
-      var stmt = document.querySelector('.stmt');
-      var stmt2 = document.querySelector('.stmt2');
-      var pad = 13;
-      var end = stmt2 ? (stmt2.offsetTop + stmt2.offsetHeight + 96) : chap.offsetHeight;
-      sp.style.height = end + 'px';
-      if(cap) cap.style.top = (end - 22) + 'px';
-      if(gA && stmt){
-        gA.style.top = (stmt.offsetTop - pad) + 'px';
-        gA.style.height = (stmt.offsetHeight + pad * 2) + 'px';
-      }
-      if(gB && stmt2){
-        gB.style.top = (stmt2.offsetTop - pad) + 'px';
-        gB.style.height = (stmt2.offsetHeight + pad * 2) + 'px';
-      }
-    }
+    // The rule is stretched top-to-bottom by CSS (top:0;bottom:0) and the cap is
+    // pinned to its foot, so there is nothing left to measure and no way for it
+    // to come out as a stub when the page height changes.
+    function measure(){}
     measure();
     // re-measured whenever the page height changes, and once more after load
     ScrollTrigger.addEventListener('refreshInit', measure);
