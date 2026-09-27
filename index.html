@@ -72,8 +72,9 @@
 
   /* the hairline runs from the top of the page down to the end of the statements,
      the way the reference threads one rule through its opening chapter */
-  #spine{position:absolute;top:0;left:calc(var(--col) - clamp(10px,1.6vw,26px));width:1px;background:var(--hair);z-index:1;
-    transform-origin:50% 0;}
+  #spine,#spine2,#spine3{position:absolute;left:calc(var(--col) - clamp(10px,1.6vw,26px));width:1px;
+    background:var(--hair);z-index:1;transform-origin:50% 0;}
+  #spine{top:0;}
   #spineCap{position:absolute;left:calc(var(--col) - clamp(10px,1.6vw,26px));transform:translateX(-50%);z-index:2;
     width:44px;height:44px;border-radius:50%;border:1px solid var(--hair);background:var(--paper);
     display:flex;align-items:center;justify-content:center;font-size:10.5px;font-weight:600;color:var(--dim);}
@@ -99,19 +100,19 @@
   .op-role{position:relative;z-index:2;margin-top:clamp(8px,1.4vh,16px);}
   .stmt{position:relative;z-index:2;padding:clamp(2px,.6vh,8px) 0 clamp(60px,13vh,170px);}
   .stmt > div, .op-1 > div{white-space:nowrap;}
-  .col-l{margin-left:clamp(10px,2.6vw,48px);}
+  .col-l{margin-left:clamp(22px,6vw,110px);}
   .col-r{margin-left:var(--col);}
   .ind{margin-left:calc(var(--col) + clamp(40px,7vw,130px));}
   .blk{margin-top:.3em;}
 
   /* ---------- five squares ---------- */
-  .tiles{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:clamp(8px,1.2vw,16px);
+  .tiles{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:clamp(8px,1.2vw,16px);
     position:relative;z-index:2;margin:clamp(20px,5vh,60px) 0 0;max-width:min(1100px,92vw);
     margin-left:var(--col);}
   .tile{aspect-ratio:1/1;background:var(--ghost);overflow:hidden;position:relative;}
   .tile img{width:100%;height:100%;object-fit:cover;}
   .tile.gap{background:none;}
-  .tiles-note{grid-column:2 / 4;margin-top:14px;max-width:44ch;}
+  .tiles-note{grid-column:3 / 6;margin-top:14px;max-width:44ch;}
 
   .stmt2{position:relative;z-index:2;padding:clamp(60px,14vh,180px) 0 clamp(20px,5vh,60px);}
   .t-a{margin-left:clamp(50px,9vw,170px);}
@@ -138,18 +139,18 @@
 
   /* ---------- case index: a narrow column, not the full width ---------- */
   .band{padding:clamp(80px,18vh,220px) 0;}
-  .idx-wrap{max-width:min(660px,86vw);margin:0 auto;}
+  .idx-wrap{max-width:min(520px,84vw);margin:0 auto;}
   .idx{border-top:1px solid var(--hair);margin-top:clamp(60px,12vh,150px);}
-  .idx-row{display:grid;grid-template-columns:3ch 1fr auto;gap:clamp(10px,2.4vw,34px);align-items:baseline;
+  .idx-row{display:grid;grid-template-columns:3ch 1fr auto;gap:clamp(10px,2.4vw,34px);align-items:center;
     padding:clamp(12px,1.9vh,20px) 0;border-bottom:1px solid var(--hair);cursor:pointer;
     transition:opacity .35s var(--eo);}
   .idx.hovered .idx-row{opacity:.3;}
   .idx.hovered .idx-row.on{opacity:1;}
-  .idx-row .n{font-size:11px;color:var(--dim);font-weight:600;}
+  .idx-row .n{font-size:11px;color:var(--dim);font-weight:500;align-self:start;}
   .idx-row .t{font-size:clamp(1.1rem,2.6vw,1.9rem);font-weight:600;line-height:1;letter-spacing:-.035em;
     transition:transform .45s var(--eo);}
   .idx-row.on .t{transform:translateX(clamp(6px,1.2vw,16px));}
-  .idx-row .c{font-size:11px;color:var(--dim);font-weight:600;white-space:nowrap;}
+  .idx-row .c{font-size:11px;color:var(--dim);font-weight:500;white-space:nowrap;align-self:center;}
   /* the preview holds one place instead of chasing the pointer */
   /* portrait, modest, and parked clear of the column so it never covers a title */
   #thumb{position:absolute;top:0;right:calc(-1 * clamp(150px,15vw,230px) - clamp(20px,3vw,48px));
@@ -168,7 +169,7 @@
     margin:clamp(90px,19vh,240px) 0;gap:clamp(60px,13vw,220px);}
   /* one shared gap between every bracket, digit and colon, so the row reads as
      an evenly spaced expression rather than clumps */
-  .close-mid .clock{font-size:min(9vw,110px);font-weight:500;letter-spacing:-.04em;
+  .close-mid .clock{font-size:min(11vw,140px);font-weight:500;letter-spacing:-.04em;
     display:flex;align-items:center;gap:clamp(22px,4.6vw,72px);white-space:nowrap;}
   .close-mid .clock.l{justify-self:end;}
   .close-mid .clock.r{justify-self:start;}
@@ -225,6 +226,8 @@
   <!-- ============ OPENING CHAPTER ============ -->
   <section class="chapter pad" id="chapter">
     <div id="spine"></div>
+    <div id="spine2"></div>
+    <div id="spine3"></div>
     <div id="spineCap">’26</div>
     <canvas id="heroFX"></canvas>
 
@@ -242,8 +245,8 @@
       <div class="lg col-l" data-goo>собираю</div>
       <div class="lg col-l" data-goo>и оживляю</div>
       <div class="lg col-r blk" data-goo><span id="morphWord" style="visibility:hidden">бренды</span>,</div>
-      <div class="lg col-r" data-goo>смыслы</div>
-      <div class="lg col-r ind" data-goo>и кадры.</div>
+      <div class="lg col-r" data-goo>продукты</div>
+      <div class="lg col-r ind" data-goo>и людей.</div>
     </div>
 
     <div class="tiles" id="tiles"></div>
@@ -271,7 +274,7 @@
   <section class="band pad" id="cases">
     <div class="idx-wrap">
       <h2 class="lg" data-goo style="margin-left:0;">Кейсы</h2>
-      <div class="lg" data-goo style="margin-left:clamp(46px,10vw,210px);">и последние</div>
+      <div class="lg" data-goo style="margin-left:clamp(46px,10vw,210px);">и&nbsp;последние</div>
       <div class="lg" data-goo style="margin-left:clamp(18px,5vw,110px);">работы</div>
       <div class="idx-holder">
         <div class="idx" id="caseIndex"></div>
@@ -316,7 +319,7 @@
     </div>
 
     <div class="tailroom"></div>
-    <span class="sm dim" data-goo style="opacity:.55;">© Илья Иванов <b id="buildStamp" style="font-weight:500;">BUILD 27.09 17:38</b></span>
+    <span id="buildStamp" style="display:none">BUILD 27.09 17:38</span>
   </section>
 
 </main>
@@ -359,8 +362,10 @@
     var id = 'goo-' + (gooN++), NS = 'http://www.w3.org/2000/svg';
     var f = document.createElementNS(NS,'filter');
     f.setAttribute('id', id);
-    f.setAttribute('x','-35%'); f.setAttribute('y','-50%');
-    f.setAttribute('width','170%'); f.setAttribute('height','200%');
+    // A filter region is re-rendered in full every frame its blur changes, so
+    // keeping it tight is the biggest single saving on large headlines.
+    f.setAttribute('x','-12%'); f.setAttribute('y','-22%');
+    f.setAttribute('width','124%'); f.setAttribute('height','144%');
     var blur = document.createElementNS(NS,'feGaussianBlur');
     blur.setAttribute('in','SourceGraphic'); blur.setAttribute('stdDeviation','0'); blur.setAttribute('result','b');
     var cm = document.createElementNS(NS,'feColorMatrix');
@@ -375,14 +380,17 @@
     el.__revealed = true;
     el.classList.add('shown');
     var g = makeGoo();
+    el.style.willChange = 'filter';
     el.style.filter = 'url(#' + g.id + ')';
-    var st = {b: 16};
-    g.blur.setAttribute('stdDeviation', 16);
+    var st = {b: 11};
+    g.blur.setAttribute('stdDeviation', 11);
+    // Metaball only. The rise-and-fade that ran alongside it made every frame pay
+    // for a transform, an opacity composite and a full filter pass at once — and
+    // it is not what the reference does either.
     var tl = gsap.timeline({delay: delay || 0});
     tl.to(st, {b: 0, duration: GOO_TIME, ease: EASE.goo,
       onUpdate: function(){ g.blur.setAttribute('stdDeviation', st.b); },
-      onComplete: function(){ el.style.filter = 'none'; }}, 0);
-    tl.from(el, {yPercent: 22, opacity: 0, duration: GOO_TIME * .9, ease: EASE.rise}, 0);
+      onComplete: function(){ el.style.filter = 'none'; el.style.willChange = 'auto'; }}, 0);
     return tl;
   }
 
@@ -401,7 +409,8 @@
     if(!host) return;
     // the reference leaves columns deliberately empty, so the row reads as a
     // considered placement rather than a filled grid
-    var PLAN = [CASES[0], CASES[1], CASES[2], CASES[3], CASES[4]];
+    // one on its own at the left, then a gap, then a run of four
+    var PLAN = [CASES[0], null, CASES[1], CASES[2], CASES[3], CASES[4]];
     PLAN.forEach(function(c){
       var d = document.createElement('div');
       d.className = 'tile' + (c ? '' : ' gap');
@@ -449,15 +458,20 @@
       host.querySelectorAll('.idx-row').forEach(function(r){ r.classList.toggle('on', r === row); });
       if(timg.getAttribute('src') !== row.dataset.img) timg.src = row.dataset.img;
       // the preview stays put and slides the row's own distance down the column
-      gsap.to(thumb, {opacity: 1, y: row.offsetTop, duration: .5, ease: EASE.glide});
-      // unrolls from its lower edge upward rather than just fading in
-      gsap.fromTo(thumb, {clipPath: 'inset(100% 0 0 0)'},
-        {clipPath: 'inset(0% 0 0 0)', duration: .6, ease: EASE.rise, overwrite: 'auto'});
+      gsap.to(thumb, {opacity: 1, y: row.offsetTop, duration: .5, ease: EASE.glide, overwrite: 'auto'});
+      // Only unroll when it was actually hidden. Restarting the wipe for every
+      // row the cursor crossed is what made it flicker on a fast sweep.
+      if(!host.__open){
+        host.__open = true;
+        gsap.fromTo(thumb, {clipPath: 'inset(100% 0 0 0)'},
+          {clipPath: 'inset(0% 0 0 0)', duration: .6, ease: EASE.rise, overwrite: 'auto'});
+      }
     });
     host.addEventListener('pointerleave', function(){
       host.classList.remove('hovered');
       host.querySelectorAll('.idx-row').forEach(function(r){ r.classList.remove('on'); });
-      gsap.to(thumb, {opacity: 0, clipPath: 'inset(100% 0 0 0)', duration: .4, ease: EASE.glide});
+      host.__open = false;
+      gsap.to(thumb, {opacity: 0, clipPath: 'inset(100% 0 0 0)', duration: .4, ease: EASE.glide, overwrite: 'auto'});
     });
   })();
 
@@ -486,15 +500,36 @@
     var chap = document.getElementById('chapter');
     if(!sp || !chap) return;
     function measure(){
-      // it must not cut through the big lines, so it stops where they start
+      // Three runs rather than one: the rule stops short of each block of big
+      // type, picks up again below it, and finally hangs a short tail that ends
+      // in the year badge — so it never cuts through a word.
+      var sp2 = document.getElementById('spine2'), sp3 = document.getElementById('spine3');
       var stmt = document.querySelector('.stmt');
-      var end = stmt ? stmt.offsetTop : chap.offsetHeight;
-      sp.style.height = end + 'px';
-      if(cap) cap.style.top = (end - 22) + 'px';
+      var tiles = document.getElementById('tiles');
+      var stmt2 = document.querySelector('.stmt2');
+      var pad = 26;
+
+      var a1 = 0, b1 = stmt ? stmt.offsetTop - pad : chap.offsetHeight;
+      sp.style.top = a1 + 'px';
+      sp.style.height = Math.max(0, b1 - a1) + 'px';
+
+      if(sp2 && stmt && stmt2){
+        var a2 = stmt.offsetTop + stmt.offsetHeight + pad;
+        var b2 = stmt2.offsetTop - pad;
+        sp2.style.top = a2 + 'px';
+        sp2.style.height = Math.max(0, b2 - a2) + 'px';
+      }
+      if(sp3 && stmt2){
+        var a3 = stmt2.offsetTop + stmt2.offsetHeight + pad;
+        sp3.style.top = a3 + 'px';
+        sp3.style.height = '96px';
+        if(cap) cap.style.top = (a3 + 96 - 22) + 'px';
+      }
     }
     measure();
     ScrollTrigger.addEventListener('refreshInit', measure);
-    gsap.from(sp, {scaleY: 0, duration: 1.4, ease: EASE.rise, delay: .1});
+    gsap.from([sp, document.getElementById('spine2'), document.getElementById('spine3')].filter(Boolean),
+      {scaleY: 0, duration: 1.4, stagger: .12, ease: EASE.rise, delay: .1});
     if(cap) gsap.from(cap, {scale: 0, opacity: 0, duration: .8, ease: EASE.rise,
       scrollTrigger: {trigger: cap, start: 'top 95%'}});
   }
@@ -544,7 +579,7 @@
 
     // the corner notes arrive afterwards, and they do use the unsticking animation
     ScrollTrigger.create({
-      trigger: document.body, start: 'bottom bottom+=20', once: true, refreshPriority: -10,
+      trigger: document.body, start: 'bottom bottom', once: true, refreshPriority: -10,
       onEnter: function(){
         [fL, fR].forEach(function(el, i){
           if(!el) return;
@@ -603,7 +638,7 @@
     var tl = gsap.timeline({
       scrollTrigger: {
         trigger: stage, start: 'top top',
-        end: '+=' + Math.round(window.innerHeight * 2.4),
+        end: '+=' + Math.round(window.innerHeight * 4.2),
         pin: true, scrub: .8, invalidateOnRefresh: true
       }
     });
@@ -617,7 +652,7 @@
       // the sphere rises while they are still parting, not after
       .to(window, {__globeGrow: 1, ease: EASE.glide, duration: .24}, 0.02)
       // 3: it holds centre screen, turning like something that was shoved
-      .to(window, {__globeSpin: 1, ease: 'none', duration: .28}, '>')
+      .to(window, {__globeSpin: 1, ease: 'none', duration: .52}, '>')
       // 4: it leaves off the top, and the words start rejoining as it goes
       .to(window, {__globeLift: 1, ease: EASE.glide, duration: .2}, '>')
       .to(A, {x: 0, scale: 1, ease: EASE.glide, duration: .16}, '<0.04')
@@ -634,7 +669,7 @@
     if(!stage) return;
     var root = document.documentElement;
     ScrollTrigger.create({
-      trigger: stage, start: 'top top', end: '+=' + Math.round(window.innerHeight * 2.4),
+      trigger: stage, start: 'top top', end: '+=' + Math.round(window.innerHeight * 4.2),
       scrub: true, invalidateOnRefresh: true,
       onUpdate: function(self){
         // on once the words have parted, off again once the link has formed
@@ -717,13 +752,16 @@
       var r = chap.getBoundingClientRect();
       mx = e.clientX - r.left; my = e.clientY - r.top; inside = true;
       var now = performance.now();
-      if(now - lastSpawn > 22){
+      if(now - lastSpawn > 14){
         lastSpawn = now;
         // wide scatter and a generous radius: the smear should read as a spill,
         // not as a dot following the cursor
-        blobs.push({x: mx + (Math.random()-.5)*120, y: my + (Math.random()-.5)*120,
-                    r: 95 + Math.random()*95, life: 1});
-        if(blobs.length > 40) blobs.shift();
+        // One wide stamp per step, jittered only slightly. Small scattered discs
+        // were what read as a string of beads instead of a brush; overlapping
+        // wide ones weld into a single travelling shape.
+        blobs.push({x: mx + (Math.random()-.5)*36, y: my + (Math.random()-.5)*36,
+                    r: 150 + Math.random()*60, life: 1});
+        if(blobs.length > 26) blobs.shift();
       }
     }, {passive: true});
     chap.addEventListener('pointerleave', function(){ inside = false; });
@@ -756,9 +794,11 @@
         // nearly flat to the rim, then a short falloff: overlapping discs then
         // read as one welded shape with a crisp outline, the way the metaball
         // filter behaves on the text — a long feather looked like fog instead
+        // flat almost to the rim, then a very short falloff — the same hard
+        // threshold the metaball filter gives the text
         g.addColorStop(0,   'rgba(255,255,255,' + a + ')');
-        g.addColorStop(.72, 'rgba(255,255,255,' + (a * 0.92) + ')');
-        g.addColorStop(.88, 'rgba(255,255,255,' + (a * 0.45) + ')');
+        g.addColorStop(.86, 'rgba(255,255,255,' + a + ')');
+        g.addColorStop(.97, 'rgba(255,255,255,' + (a * 0.5) + ')');
         g.addColorStop(1,   'rgba(255,255,255,0)');
         mctx.fillStyle = g;
         mctx.beginPath(); mctx.arc(b.x, b.y, r, 0, Math.PI * 2); mctx.fill();
@@ -790,12 +830,13 @@
   (function(){
     var box = document.querySelector('.close-still');
     if(!box || reduced) return;
-    gsap.set(box, {transformPerspective: 900, transformStyle: 'preserve-3d'});
-    gsap.from(box, {
-      rotateX: -72, rotateY: 26, rotateZ: -12, yPercent: 40, scale: .72, opacity: 0,
-      duration: 1.5, ease: EASE.rise,
-      scrollTrigger: {trigger: box, start: 'top 92%', once: true}
-    });
+    gsap.set(box, {transformPerspective: 900});
+    // fromTo, not from: a bare `from` leaves whatever state it was interrupted
+    // in sitting on the element, which is how it froze as a parallelogram
+    gsap.fromTo(box,
+      {rotateX: -70, rotateY: 24, scale: .74, opacity: 0},
+      {rotateX: 0, rotateY: 0, scale: 1, opacity: 1, duration: 1.4, ease: EASE.rise,
+       scrollTrigger: {trigger: box, start: 'top 95%', once: true}});
     if(!coarse){
       var qx = gsap.quickTo(box, 'rotateY', {duration: .8, ease: 'power3'});
       var qy = gsap.quickTo(box, 'rotateX', {duration: .8, ease: 'power3'});
@@ -830,6 +871,10 @@
     function paint(){ num.innerHTML = Math.round(shown.v) + '<span>%</span>'; }
     function bump(){ loaded++; gsap.to(shown, {v: Math.round(loaded/total*100), duration:.5, ease:'none', onUpdate:paint}); }
     urls.forEach(function(u){ var im = new Image(); im.onload = bump; im.onerror = bump; im.src = u; });
+    // the webfont has to be in place before anything animates, or the first
+    // frames pay for a reflow on top of the filter work
+    total += 1;
+    if(document.fonts && document.fonts.ready){ document.fonts.ready.then(bump); } else { bump(); }
     var guard = setTimeout(function(){ gsap.to(shown, {v:100, duration:.4, onUpdate:paint}); }, 4500);
     var iv = setInterval(function(){
       if(shown.v >= 99.5){
@@ -956,8 +1001,8 @@
         var spin = window.__globeSpin || 0;
         var d = spin - (group.__lastSpin || 0);
         group.__lastSpin = spin;
-        velX += d * 1.1;
-        group.rotation.y += .038 * dt + velX;
+        velX += d * 0.55;
+        group.rotation.y += .022 * dt + velX;
         group.rotation.x += velY;
         velX *= .945; velY *= .945;
         group.rotation.x += (0 - group.rotation.x) * .85 * dt;
