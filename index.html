@@ -2,9 +2,7 @@
 <title>Илья Иванов</title>
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="description" content="Илья Иванов — SMM, графический дизайн и фотосъёмка полного цикла.">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Golos+Text:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="preload" href="fonts/ak.woff2" as="font" type="font/woff2" crossorigin>
 <script src="https://cdn.jsdelivr.net/npm/lenis@1.3.21/dist/lenis.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/webgl-fluid@0.3.4/dist/webgl-fluid.umd.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/gsap.min.js"></script>
@@ -13,6 +11,16 @@
 <script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/CustomEase.min.js"></script>
 
 <style>
+  /* The licensed face, served from the site itself. One weight covers the whole
+     page: the range is declared wide so the browser never fakes a bolder cut. */
+  @font-face{
+    font-family:'AK';
+    src:url('fonts/ak.woff2') format('woff2');
+    font-weight:100 900;
+    font-style:normal;
+    font-display:block;
+  }
+
   :root{
     --ink:#0a0a0a; --paper:#f2f2f0;
     --dim:rgba(10,10,10,.45); --hair:rgba(10,10,10,.14); --ghost:rgba(10,10,10,.07);
@@ -31,10 +39,7 @@
   html{overflow-x:hidden;max-width:100vw;}
   body{
     margin:0;background:var(--paper);color:var(--ink);
-    /* Helvetica Neue first: on Apple hardware it is the nearest thing to the
-       Akzidenz-Grotesk the reference licenses, and its Cyrillic is native.
-       Golos Text covers everything else without buying a licence. */
-    font-family:'Helvetica Neue','Golos Text',Helvetica,Arial,sans-serif;
+    font-family:'AK','Helvetica Neue',Helvetica,Arial,sans-serif;
     font-size:13px;line-height:1.25;letter-spacing:-.02em;font-weight:500;
     -webkit-font-smoothing:antialiased;overflow-x:hidden;max-width:100vw;
     transition:background .9s var(--eo), color .9s var(--eo);
@@ -211,6 +216,10 @@
 
   @media (max-width:900px){
     :root{--col:24vw;}
+    /* the two labels are pinned to the grid on wide screens; at this width
+       there is no room beside the name, so they return to the flow */
+    .op-note{position:static;margin-left:0;padding-top:clamp(8px,1.6vh,16px);}
+    .op-role{position:static;text-align:left;margin-top:clamp(8px,1.4vh,16px);}
     .stmt > div, .op-1 > div{white-space:normal;}
     .idx-wrap{margin-left:0;}
     .ind{margin-left:calc(var(--col) + 6vw);}
@@ -344,7 +353,7 @@
     </div>
 
     <div class="tailroom"></div>
-    <span id="buildStamp" style="display:none">BUILD 27.09 20:29</span>
+    <span id="buildStamp" style="display:none">BUILD 27.09 20:34</span>
   </section>
 
 </main>
