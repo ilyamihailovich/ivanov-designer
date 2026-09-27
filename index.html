@@ -99,7 +99,7 @@
   .op-role{position:relative;z-index:2;margin-top:clamp(8px,1.4vh,16px);}
   .stmt{position:relative;z-index:2;padding:clamp(2px,.6vh,8px) 0 clamp(60px,13vh,170px);}
   .stmt > div, .op-1 > div{white-space:nowrap;}
-  .col-l{margin-left:0;}
+  .col-l{margin-left:clamp(10px,2.6vw,48px);}
   .col-r{margin-left:var(--col);}
   .ind{margin-left:calc(var(--col) + clamp(40px,7vw,130px));}
   .blk{margin-top:.3em;}
@@ -138,8 +138,8 @@
 
   /* ---------- case index: a narrow column, not the full width ---------- */
   .band{padding:clamp(80px,18vh,220px) 0;}
-  .idx-wrap{max-width:min(760px,88vw);margin:0 auto;}
-  .idx{border-top:1px solid var(--hair);margin-top:clamp(26px,5vh,60px);}
+  .idx-wrap{max-width:min(660px,86vw);margin:0 auto;}
+  .idx{border-top:1px solid var(--hair);margin-top:clamp(60px,12vh,150px);}
   .idx-row{display:grid;grid-template-columns:3ch 1fr auto;gap:clamp(10px,2.4vw,34px);align-items:baseline;
     padding:clamp(12px,1.9vh,20px) 0;border-bottom:1px solid var(--hair);cursor:pointer;
     transition:opacity .35s var(--eo);}
@@ -153,7 +153,8 @@
   /* the preview holds one place instead of chasing the pointer */
   /* portrait, modest, and parked clear of the column so it never covers a title */
   #thumb{position:absolute;top:0;right:calc(-1 * clamp(150px,15vw,230px) - clamp(20px,3vw,48px));
-    width:clamp(120px,11vw,180px);aspect-ratio:3/4;pointer-events:none;opacity:0;overflow:hidden;z-index:5;}
+    width:clamp(120px,11vw,180px);aspect-ratio:3/4;pointer-events:none;opacity:0;overflow:hidden;z-index:5;
+    clip-path:inset(100% 0 0 0);}
   #thumb img{width:100%;height:100%;object-fit:cover;}
   .idx-holder{position:relative;}
 
@@ -165,7 +166,10 @@
      right, the way the reference frames its image with the clock */
   .close-mid{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;
     margin:clamp(90px,19vh,240px) 0;gap:clamp(60px,13vw,220px);}
-  .close-mid .clock{font-size:clamp(2.4rem,6.6vw,5.4rem);font-weight:600;letter-spacing:-.045em;}
+  /* one shared gap between every bracket, digit and colon, so the row reads as
+     an evenly spaced expression rather than clumps */
+  .close-mid .clock{font-size:min(9vw,110px);font-weight:500;letter-spacing:-.04em;
+    display:flex;align-items:center;gap:clamp(22px,4.6vw,72px);white-space:nowrap;}
   .close-mid .clock.l{justify-self:end;}
   .close-mid .clock.r{justify-self:start;}
   .close-still{width:clamp(150px,17vw,280px);aspect-ratio:3/4;overflow:hidden;background:var(--ghost);justify-self:center;}
@@ -267,8 +271,8 @@
   <section class="band pad" id="cases">
     <div class="idx-wrap">
       <h2 class="lg" data-goo style="margin-left:0;">Кейсы</h2>
-      <div class="lg" data-goo style="margin-left:clamp(40px,9vw,190px);">и последние</div>
-      <div class="lg" data-goo style="margin-left:clamp(16px,4vw,80px);">работы</div>
+      <div class="lg" data-goo style="margin-left:clamp(46px,10vw,210px);">и последние</div>
+      <div class="lg" data-goo style="margin-left:clamp(18px,5vw,110px);">работы</div>
       <div class="idx-holder">
         <div class="idx" id="caseIndex"></div>
         <div id="thumb"><img alt=""></div>
@@ -312,7 +316,7 @@
     </div>
 
     <div class="tailroom"></div>
-    <span class="sm dim" data-goo style="opacity:.55;">© Илья Иванов <b id="buildStamp" style="font-weight:500;">BUILD 27.09 17:28</b></span>
+    <span class="sm dim" data-goo style="opacity:.55;">© Илья Иванов <b id="buildStamp" style="font-weight:500;">BUILD 27.09 17:38</b></span>
   </section>
 
 </main>
@@ -445,12 +449,15 @@
       host.querySelectorAll('.idx-row').forEach(function(r){ r.classList.toggle('on', r === row); });
       if(timg.getAttribute('src') !== row.dataset.img) timg.src = row.dataset.img;
       // the preview stays put and slides the row's own distance down the column
-      gsap.to(thumb, {opacity: 1, y: row.offsetTop, duration: .55, ease: EASE.glide});
+      gsap.to(thumb, {opacity: 1, y: row.offsetTop, duration: .5, ease: EASE.glide});
+      // unrolls from its lower edge upward rather than just fading in
+      gsap.fromTo(thumb, {clipPath: 'inset(100% 0 0 0)'},
+        {clipPath: 'inset(0% 0 0 0)', duration: .6, ease: EASE.rise, overwrite: 'auto'});
     });
     host.addEventListener('pointerleave', function(){
       host.classList.remove('hovered');
       host.querySelectorAll('.idx-row').forEach(function(r){ r.classList.remove('on'); });
-      gsap.to(thumb, {opacity: 0, duration: .4, ease: EASE.glide});
+      gsap.to(thumb, {opacity: 0, clipPath: 'inset(100% 0 0 0)', duration: .4, ease: EASE.glide});
     });
   })();
 
@@ -479,8 +486,9 @@
     var chap = document.getElementById('chapter');
     if(!sp || !chap) return;
     function measure(){
-      var stmt2 = document.querySelector('.stmt2');
-      var end = stmt2 ? (stmt2.offsetTop + stmt2.offsetHeight) : chap.offsetHeight;
+      // it must not cut through the big lines, so it stops where they start
+      var stmt = document.querySelector('.stmt');
+      var end = stmt ? stmt.offsetTop : chap.offsetHeight;
       sp.style.height = end + 'px';
       if(cap) cap.style.top = (end - 22) + 'px';
     }
@@ -518,7 +526,10 @@
     gsap.timeline({
       scrollTrigger: {
         trigger: document.body,
-        start: 'bottom bottom-=380',
+        // '+=' pushes the viewport line DOWN so the trigger reaches it earlier.
+        // With '-=' the start sat past the end of the document and the range
+        // collapsed to zero length — which is why this never played.
+        start: 'bottom bottom+=380',
         end: 'bottom bottom',
         scrub: .6, invalidateOnRefresh: true,
         // measured after every other trigger, so the pinned section's spacer is
@@ -533,7 +544,7 @@
 
     // the corner notes arrive afterwards, and they do use the unsticking animation
     ScrollTrigger.create({
-      trigger: document.body, start: 'bottom bottom-=40', once: true, refreshPriority: -10,
+      trigger: document.body, start: 'bottom bottom+=20', once: true, refreshPriority: -10,
       onEnter: function(){
         [fL, fR].forEach(function(el, i){
           if(!el) return;
@@ -568,8 +579,22 @@
     // as far apart as the words can go while still sitting whole on the screen:
     // the previous figure pushed them past the edges and clipped them
     var gap = function(){ return Math.max(16, Math.min(40, window.innerWidth * 0.03)); };
-    var spread  = function(){ return Math.max(0, (window.innerWidth - A.offsetWidth * .74) / 2 - gap()); };
-    var spreadB = function(){ return Math.max(0, (window.innerWidth - B.offsetWidth * .74) / 2 - gap()); };
+    // Anchor each word by the edge it travels toward, so shrinking never shifts
+    // that edge, and aim at an exact pixel instead of a width estimate. The old
+    // sum used offsetWidth, which is the *unscaled* layout width — scale is a
+    // transform and leaves it untouched — so both words ran off the screen.
+    gsap.set(A, {transformOrigin: 'left center'});
+    gsap.set(B, {transformOrigin: 'right center'});
+    var restA = 0, restB = 0;
+    function measure(){
+      gsap.set([A, B], {x: 0, scale: 1});
+      restA = A.getBoundingClientRect().left;
+      restB = B.getBoundingClientRect().right;
+    }
+    measure();
+    ScrollTrigger.addEventListener('refreshInit', measure);
+    var spread  = function(){ return gap() - restA; };
+    var spreadB = function(){ return (window.innerWidth - gap()) - restB; };
 
     window.__globeGrow = 0;   // 0 = below the screen, 1 = centred
     window.__globeLift = 0;   // 1 = gone off the top
@@ -587,8 +612,8 @@
     // they also shrink as they travel, which is what guarantees they stay whole
     // on screen instead of running past the edges and losing their last letters
     tl.to([A, B], {scale: .74, ease: EASE.glide, duration: .18}, 0)
-      .to(A, {x: function(){ return -spread(); }, ease: EASE.glide, duration: .18}, 0)
-      .to(B, {x: function(){ return  spreadB(); }, ease: EASE.glide, duration: .18}, 0)
+      .to(A, {x: function(){ return spread(); }, ease: EASE.glide, duration: .18}, 0)
+      .to(B, {x: function(){ return spreadB(); }, ease: EASE.glide, duration: .18}, 0)
       // the sphere rises while they are still parting, not after
       .to(window, {__globeGrow: 1, ease: EASE.glide, duration: .24}, 0.02)
       // 3: it holds centre screen, turning like something that was shoved
@@ -761,14 +786,37 @@
     });
   })();
 
+  /* ---------- the closing still: flies in, then leans toward the pointer ---------- */
+  (function(){
+    var box = document.querySelector('.close-still');
+    if(!box || reduced) return;
+    gsap.set(box, {transformPerspective: 900, transformStyle: 'preserve-3d'});
+    gsap.from(box, {
+      rotateX: -72, rotateY: 26, rotateZ: -12, yPercent: 40, scale: .72, opacity: 0,
+      duration: 1.5, ease: EASE.rise,
+      scrollTrigger: {trigger: box, start: 'top 92%', once: true}
+    });
+    if(!coarse){
+      var qx = gsap.quickTo(box, 'rotateY', {duration: .8, ease: 'power3'});
+      var qy = gsap.quickTo(box, 'rotateX', {duration: .8, ease: 'power3'});
+      window.addEventListener('pointermove', function(e){
+        var r = box.getBoundingClientRect();
+        if(r.bottom < 0 || r.top > window.innerHeight) return;
+        var cx = r.left + r.width / 2, cy = r.top + r.height / 2;
+        qx(Math.max(-18, Math.min(18, (e.clientX - cx) / 26)));
+        qy(Math.max(-14, Math.min(14, -(e.clientY - cy) / 30)));
+      }, {passive: true});
+    }
+  })();
+
   /* ---------- clock ---------- */
   (function(){
     var h = document.getElementById('clockH'), m = document.getElementById('clockM');
     if(!h || !m) return;
     function tick(){
       var d = new Date();
-      h.textContent = '( ' + String(d.getHours()).padStart(2,'0') + ' :';
-      m.textContent = ': ' + String(d.getMinutes()).padStart(2,'0') + ' )';
+      h.innerHTML = '<span>(</span><span>' + String(d.getHours()).padStart(2,'0') + '</span><span>:</span>';
+      m.innerHTML = '<span>:</span><span>' + String(d.getMinutes()).padStart(2,'0') + '</span><span>)</span>';
     }
     tick(); setInterval(tick, 20000);
   })();
@@ -908,8 +956,8 @@
         var spin = window.__globeSpin || 0;
         var d = spin - (group.__lastSpin || 0);
         group.__lastSpin = spin;
-        velX += d * 2.2;
-        group.rotation.y += .075 * dt + velX;
+        velX += d * 1.1;
+        group.rotation.y += .038 * dt + velX;
         group.rotation.x += velY;
         velX *= .945; velY *= .945;
         group.rotation.x += (0 - group.rotation.x) * .85 * dt;
