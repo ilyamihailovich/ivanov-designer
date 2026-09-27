@@ -16,8 +16,10 @@
     --ink:#0a0a0a; --paper:#f2f2f0;
     --dim:rgba(10,10,10,.45); --hair:rgba(10,10,10,.14); --ghost:rgba(10,10,10,.07);
     --accent:#f4fb00; --eo:cubic-bezier(.22,1,.36,1);
-    --gut:clamp(14px,2.4vw,30px);
-    --rule:clamp(150px,22vw,330px);   /* where the vertical hairline stands */
+    /* measured off the reference: left gutter at 4.1vw, second column at 35.7vw */
+    --gut:clamp(15px,4.1vw,64px);
+    --col:35.7vw;
+    --rule:35.7vw;
   }
   html.is-dark{
     --ink:#f2f2f0; --paper:#0a0a0a;
@@ -42,10 +44,12 @@
 
   /* Heavier and larger than before: at weight 500 the statements read thin and
      the composition had nothing to hang on. */
-  .xl{font-size:clamp(3.4rem,11.5vw,10rem);font-weight:600;line-height:.86;letter-spacing:-.05em;margin:0;}
-  .lg{font-size:clamp(2.6rem,8.6vw,7.4rem);font-weight:600;line-height:.87;letter-spacing:-.048em;margin:0;}
-  .md{font-size:clamp(1.5rem,3.8vw,2.9rem);font-weight:600;line-height:.95;letter-spacing:-.04em;margin:0;}
-  .sm{font-size:11.5px;font-weight:600;letter-spacing:.005em;line-height:1.35;}
+  /* One headline size for the whole page, exactly as the reference sets it:
+     11.5vw, weight 500, line-height .895, tracking -.052em. Weight 600 was why
+     everything read as over-inked and squashed. */
+  .xl,.lg{font-size:min(11.5vw,150px);font-weight:500;line-height:.895;letter-spacing:-.052em;margin:0;}
+  .md{font-size:min(6vw,64px);font-weight:500;line-height:.9;letter-spacing:-.05em;margin:0;}
+  .sm{font-size:11px;font-weight:500;letter-spacing:-.009em;line-height:1.02;}
   .sm.dim{color:var(--dim);}
 
   .pad{padding:0 var(--gut);}
@@ -68,9 +72,9 @@
 
   /* the hairline runs from the top of the page down to the end of the statements,
      the way the reference threads one rule through its opening chapter */
-  #spine{position:absolute;top:0;left:var(--rule);width:1px;background:var(--hair);z-index:1;
+  #spine{position:absolute;top:0;left:calc(var(--col) - clamp(10px,1.6vw,26px));width:1px;background:var(--hair);z-index:1;
     transform-origin:50% 0;}
-  #spineCap{position:absolute;left:var(--rule);transform:translateX(-50%);z-index:2;
+  #spineCap{position:absolute;left:calc(var(--col) - clamp(10px,1.6vw,26px));transform:translateX(-50%);z-index:2;
     width:44px;height:44px;border-radius:50%;border:1px solid var(--hair);background:var(--paper);
     display:flex;align-items:center;justify-content:center;font-size:10.5px;font-weight:600;color:var(--dim);}
 
@@ -88,32 +92,31 @@
   /* ---------- opening ---------- */
   .chapter{position:relative;}
   #heroFX{position:absolute;top:0;left:0;right:0;height:100svh;z-index:0;pointer-events:none;}
-  .op-1{min-height:62svh;display:flex;align-items:flex-end;position:relative;z-index:2;padding-bottom:clamp(10px,2vh,26px);}
-  .op-name{margin-left:calc(var(--rule) + clamp(12px,2vw,26px));}
-  .op-side{position:absolute;left:var(--gut);top:50%;transform:translateY(-50%);max-width:140px;}
-
-  .stmt{position:relative;z-index:2;padding:clamp(6px,1.4vh,18px) 0 clamp(50px,11vh,150px);}
-  .stmt > div{white-space:nowrap;}
-  .s-a{margin-left:clamp(16px,3vw,40px);}
-  .s-b{margin-left:clamp(16px,3vw,40px);}
-  .s-c{margin-left:clamp(16px,3vw,40px);}
-  .s-d{margin-left:calc(var(--rule) + clamp(12px,2vw,26px));}
-  .s-e{margin-left:calc(var(--rule) + clamp(12px,2vw,26px));}
-  .s-f{margin-left:calc(var(--rule) + clamp(60px,9vw,150px));}
+  /* The opening alternates between two columns — the left gutter and a second
+     column at 35.7vw — which is what gives the reference its stagger. */
+  .op-note{position:relative;z-index:2;margin-left:var(--col);padding-top:clamp(8px,1.6vh,16px);}
+  .op-1{position:relative;z-index:2;margin-top:clamp(110px,28vh,290px);}
+  .op-role{position:relative;z-index:2;margin-top:clamp(8px,1.4vh,16px);}
+  .stmt{position:relative;z-index:2;padding:clamp(2px,.6vh,8px) 0 clamp(60px,13vh,170px);}
+  .stmt > div, .op-1 > div{white-space:nowrap;}
+  .col-l{margin-left:0;}
+  .col-r{margin-left:var(--col);}
+  .ind{margin-left:calc(var(--col) + clamp(40px,7vw,130px));}
+  .blk{margin-top:.3em;}
 
   /* ---------- five squares ---------- */
   .tiles{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:clamp(8px,1.2vw,16px);
     position:relative;z-index:2;margin:clamp(20px,5vh,60px) 0 0;max-width:min(1100px,92vw);
-    margin-left:calc(var(--rule) + clamp(12px,2vw,26px));}
+    margin-left:var(--col);}
   .tile{aspect-ratio:1/1;background:var(--ghost);overflow:hidden;position:relative;}
   .tile img{width:100%;height:100%;object-fit:cover;}
   .tile.gap{background:none;}
   .tiles-note{grid-column:2 / 4;margin-top:14px;max-width:44ch;}
 
   .stmt2{position:relative;z-index:2;padding:clamp(60px,14vh,180px) 0 clamp(20px,5vh,60px);}
-  .t-a{margin-left:clamp(90px,14vw,230px);}
-  .t-b{margin-left:calc(var(--rule) + clamp(12px,2vw,26px));}
-  .t-c{margin-left:clamp(50px,8vw,140px);}
+  .t-a{margin-left:clamp(50px,9vw,170px);}
+  .t-b{margin-left:var(--col);}
+  .t-c{margin-left:0;}
 
   /* ---------- work / globe ---------- */
   .featured{position:relative;margin-top:clamp(60px,14vh,180px);}
@@ -161,7 +164,7 @@
    /* the hour sits to the left of a dead-centre still and the minutes to its
      right, the way the reference frames its image with the clock */
   .close-mid{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;
-    margin:clamp(80px,17vh,220px) 0;gap:clamp(30px,7vw,110px);}
+    margin:clamp(90px,19vh,240px) 0;gap:clamp(60px,13vw,220px);}
   .close-mid .clock{font-size:clamp(2.4rem,6.6vw,5.4rem);font-weight:600;letter-spacing:-.045em;}
   .close-mid .clock.l{justify-self:end;}
   .close-mid .clock.r{justify-self:start;}
@@ -181,13 +184,11 @@
   .tailroom{height:clamp(220px,34vh,420px);}
 
   @media (max-width:900px){
-    :root{--rule:clamp(60px,16vw,140px);}
-    .stmt > div{white-space:normal;}
-    .op-name, .s-d, .s-e, .idx-wrap{margin-left:0;}
-    .s-f{margin-left:clamp(20px,8vw,70px);}
-    .op-side{position:static;transform:none;max-width:none;margin-bottom:14px;}
-    .op-1{flex-direction:column;align-items:flex-start;justify-content:flex-end;
-      padding-bottom:clamp(90px,16vh,150px);min-height:100svh;}
+    :root{--col:24vw;}
+    .stmt > div, .op-1 > div{white-space:normal;}
+    .idx-wrap{margin-left:0;}
+    .ind{margin-left:calc(var(--col) + 6vw);}
+    .op-1{margin-top:clamp(50px,14vh,120px);}
     .tiles{grid-template-columns:repeat(2,1fr);}
     .tiles-note{grid-column:1 / -1;}
     .mark-half{font-size:clamp(2.2rem,13vw,4rem);}
@@ -223,18 +224,22 @@
     <div id="spineCap">’26</div>
     <canvas id="heroFX"></canvas>
 
+    <div class="op-note"><span class="sm dim" data-goo>Россия<br>SMM · Дизайн · Фото</span></div>
+
     <div class="op-1">
-      <div class="op-side"><span class="sm dim" data-goo>Дизайнер<br>&amp; фотограф</span></div>
-      <div class="op-name"><h1 class="xl" data-goo>Илья Иванов</h1></div>
+      <h1 class="xl col-r" data-goo>Илья</h1>
+      <div class="xl col-r" data-goo>Иванов</div>
     </div>
 
+    <div class="op-role"><span class="sm dim" data-goo>Дизайнер<br>&amp; фотограф</span></div>
+
     <div class="stmt">
-      <div class="lg s-a" data-goo>Снимаю,</div>
-      <div class="lg s-b" data-goo>собираю</div>
-      <div class="lg s-c"><span data-goo>и оживляю</span></div>
-      <div class="lg s-d"><span id="morphWord">бренды</span><span data-goo>,</span></div>
-      <div class="lg s-e" data-goo>смыслы</div>
-      <div class="lg s-f" data-goo>и кадры.</div>
+      <div class="lg col-l" data-goo>Снимаю,</div>
+      <div class="lg col-l" data-goo>собираю</div>
+      <div class="lg col-l" data-goo>и оживляю</div>
+      <div class="lg col-r blk" data-goo><span id="morphWord" style="visibility:hidden">бренды</span>,</div>
+      <div class="lg col-r" data-goo>смыслы</div>
+      <div class="lg col-r ind" data-goo>и кадры.</div>
     </div>
 
     <div class="tiles" id="tiles"></div>
@@ -261,7 +266,9 @@
   <!-- ============ CASE INDEX ============ -->
   <section class="band pad" id="cases">
     <div class="idx-wrap">
-      <h2 class="lg" data-goo>Кейсы<br>и последние работы</h2>
+      <h2 class="lg" data-goo style="margin-left:0;">Кейсы</h2>
+      <div class="lg" data-goo style="margin-left:clamp(40px,9vw,190px);">и последние</div>
+      <div class="lg" data-goo style="margin-left:clamp(16px,4vw,80px);">работы</div>
       <div class="idx-holder">
         <div class="idx" id="caseIndex"></div>
         <div id="thumb"><img alt=""></div>
@@ -305,7 +312,7 @@
     </div>
 
     <div class="tailroom"></div>
-    <span class="sm dim" data-goo style="opacity:.55;">© Илья Иванов <b id="buildStamp" style="font-weight:500;">BUILD 27.09 17:16</b></span>
+    <span class="sm dim" data-goo style="opacity:.55;">© Илья Иванов <b id="buildStamp" style="font-weight:500;">BUILD 27.09 17:28</b></span>
   </section>
 
 </main>
@@ -454,6 +461,7 @@
     var WORDS = ['бренды','кадры','истории','смыслы'], i = 0;
     var g = makeGoo();
     el.style.display = 'inline-block';
+    el.style.visibility = 'visible';
     el.style.filter = 'url(#' + g.id + ')';
     var st = {b: 0};
     function set(){ g.blur.setAttribute('stdDeviation', st.b); }
@@ -488,8 +496,10 @@
     var tl = gsap.timeline();
     tl.add(revealText(document.querySelector('.corner.tl .sm')), .05);
     tl.add(revealText(document.querySelector('.menu-pill')), .12);
-    tl.add(revealText(document.querySelector('.op-side .sm')), .2);
-    tl.add(revealText(document.querySelector('.op-name .xl')), .28);
+    tl.add(revealText(document.querySelector('.op-note .sm')), .16);
+    tl.add(revealText(document.querySelector('.op-1 h1')), .24);
+    tl.add(revealText(document.querySelector('.op-1 div')), .32);
+    tl.add(revealText(document.querySelector('.op-role .sm')), .4);
   }
 
   /* ---------- wordmark ----------
@@ -558,8 +568,8 @@
     // as far apart as the words can go while still sitting whole on the screen:
     // the previous figure pushed them past the edges and clipped them
     var gap = function(){ return Math.max(16, Math.min(40, window.innerWidth * 0.03)); };
-    var spread  = function(){ return Math.max(0, (window.innerWidth - A.offsetWidth) / 2 - gap()); };
-    var spreadB = function(){ return Math.max(0, (window.innerWidth - B.offsetWidth) / 2 - gap()); };
+    var spread  = function(){ return Math.max(0, (window.innerWidth - A.offsetWidth * .74) / 2 - gap()); };
+    var spreadB = function(){ return Math.max(0, (window.innerWidth - B.offsetWidth * .74) / 2 - gap()); };
 
     window.__globeGrow = 0;   // 0 = below the screen, 1 = centred
     window.__globeLift = 0;   // 1 = gone off the top
@@ -574,16 +584,19 @@
     });
 
     // 1 → 2: the words part. Nothing is on screen in the middle yet.
-    tl.to(A, {x: function(){ return -spread(); }, ease: EASE.glide, duration: .18}, 0)
+    // they also shrink as they travel, which is what guarantees they stay whole
+    // on screen instead of running past the edges and losing their last letters
+    tl.to([A, B], {scale: .74, ease: EASE.glide, duration: .18}, 0)
+      .to(A, {x: function(){ return -spread(); }, ease: EASE.glide, duration: .18}, 0)
       .to(B, {x: function(){ return  spreadB(); }, ease: EASE.glide, duration: .18}, 0)
-      // the sphere climbs in from below the fold into the gap they just made
-      .to(window, {__globeGrow: 1, ease: EASE.glide, duration: .26}, .14)
-      // 3: it holds centre screen — but keeps turning, and faster than its idle
+      // the sphere rises while they are still parting, not after
+      .to(window, {__globeGrow: 1, ease: EASE.glide, duration: .24}, 0.02)
+      // 3: it holds centre screen, turning like something that was shoved
       .to(window, {__globeSpin: 1, ease: 'none', duration: .28}, '>')
       // 4: it leaves off the top, and the words start rejoining as it goes
       .to(window, {__globeLift: 1, ease: EASE.glide, duration: .2}, '>')
-      .to(A, {x: 0, ease: EASE.glide, duration: .16}, '<0.04')
-      .to(B, {x: 0, ease: EASE.glide, duration: .16}, '<')
+      .to(A, {x: 0, scale: 1, ease: EASE.glide, duration: .16}, '<0.04')
+      .to(B, {x: 0, scale: 1, ease: EASE.glide, duration: .16}, '<')
       // and morph into the line: they melt out exactly as it melts in
       .to([A, B], {opacity: 0, filter: 'blur(14px)', duration: .1}, '>-0.03')
       .fromTo(link, {opacity: 0, filter: 'blur(16px)'}, {opacity: 1, filter: 'blur(0px)', duration: .13}, '<0.03')
@@ -683,9 +696,9 @@
         lastSpawn = now;
         // wide scatter and a generous radius: the smear should read as a spill,
         // not as a dot following the cursor
-        blobs.push({x: mx + (Math.random()-.5)*190, y: my + (Math.random()-.5)*190,
-                    r: 130 + Math.random()*150, life: 1});
-        if(blobs.length > 70) blobs.shift();
+        blobs.push({x: mx + (Math.random()-.5)*120, y: my + (Math.random()-.5)*120,
+                    r: 95 + Math.random()*95, life: 1});
+        if(blobs.length > 40) blobs.shift();
       }
     }, {passive: true});
     chap.addEventListener('pointerleave', function(){ inside = false; });
@@ -699,7 +712,7 @@
       if(!visible) return;
       ctx.clearRect(0, 0, W, H);
       for(var i = blobs.length - 1; i >= 0; i--){
-        blobs[i].life -= 0.0042;          // long linger, as asked
+        blobs[i].life -= 0.016;   // a brush stroke, not a smoke trail
         if(blobs[i].life <= 0) blobs.splice(i, 1);
       }
       if(!blobs.length && !inside) return;
@@ -715,19 +728,24 @@
         var a = Math.max(0, Math.min(1, b.life));
         var r = b.r * (0.6 + 0.4 * a);
         var g = mctx.createRadialGradient(b.x, b.y, 0, b.x, b.y, r);
-        g.addColorStop(0,   'rgba(255,255,255,' + (a * 0.95) + ')');
-        g.addColorStop(.55, 'rgba(255,255,255,' + (a * 0.55) + ')');
+        // nearly flat to the rim, then a short falloff: overlapping discs then
+        // read as one welded shape with a crisp outline, the way the metaball
+        // filter behaves on the text — a long feather looked like fog instead
+        g.addColorStop(0,   'rgba(255,255,255,' + a + ')');
+        g.addColorStop(.72, 'rgba(255,255,255,' + (a * 0.92) + ')');
+        g.addColorStop(.88, 'rgba(255,255,255,' + (a * 0.45) + ')');
         g.addColorStop(1,   'rgba(255,255,255,0)');
         mctx.fillStyle = g;
         mctx.beginPath(); mctx.arc(b.x, b.y, r, 0, Math.PI * 2); mctx.fill();
       });
       if(inside){
-        var gg = mctx.createRadialGradient(mx, my, 0, mx, my, 210);
+        var gg = mctx.createRadialGradient(mx, my, 0, mx, my, 150);
         gg.addColorStop(0, 'rgba(255,255,255,1)');
-        gg.addColorStop(.62, 'rgba(255,255,255,.7)');
+        gg.addColorStop(.74, 'rgba(255,255,255,.95)');
+        gg.addColorStop(.9, 'rgba(255,255,255,.4)');
         gg.addColorStop(1, 'rgba(255,255,255,0)');
         mctx.fillStyle = gg;
-        mctx.beginPath(); mctx.arc(mx, my, 210, 0, Math.PI * 2); mctx.fill();
+        mctx.beginPath(); mctx.arc(mx, my, 150, 0, Math.PI * 2); mctx.fill();
       }
 
       // 2. the covers, laid down flat
@@ -886,8 +904,12 @@
       if(!dragging){
         // it should never look parked: while the section holds it turns several
         // times faster than its resting drift
+        // the scrub feeds impulse rather than speed: a push, then it coasts down
         var spin = window.__globeSpin || 0;
-        group.rotation.y += (.075 + spin * 0.55) * dt + velX;
+        var d = spin - (group.__lastSpin || 0);
+        group.__lastSpin = spin;
+        velX += d * 2.2;
+        group.rotation.y += .075 * dt + velX;
         group.rotation.x += velY;
         velX *= .945; velY *= .945;
         group.rotation.x += (0 - group.rotation.x) * .85 * dt;
