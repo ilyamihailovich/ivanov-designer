@@ -344,7 +344,7 @@
     </div>
 
     <div class="tailroom"></div>
-    <span id="buildStamp" style="display:none">BUILD 27.09 20:23</span>
+    <span id="buildStamp" style="display:none">BUILD 27.09 20:29</span>
   </section>
 
 </main>
@@ -409,7 +409,7 @@
     return {id:id, blur:blur, cm:cm};
   }
 
-  var AMP = 26, OFF = -13, BLUR0 = 12;
+  var AMP = 26, OFF = -13, BLUR0 = 9;
 
   function revealText(el, delay){
     if(!el || el.__revealed) return null;
@@ -660,8 +660,11 @@
       gsap.timeline({
         scrollTrigger: {
           trigger: document.body,
-          start: 'bottom bottom+=150',
-          end: 'bottom bottom',
+          // ends short of the document's final pixel: with inertial scrolling the
+          // reader effectively never stops exactly on it, so anything that
+          // completed there was never seen
+          start: 'bottom bottom+=260',
+          end: 'bottom bottom+=40',
           scrub: .6, invalidateOnRefresh: true, refreshPriority: -10
         }
       })
@@ -791,7 +794,9 @@
     if(typeof WebGLFluid !== 'function') return;
 
     var ctx = cv.getContext('2d');
-    var dpr = Math.min(window.devicePixelRatio, 2);
+    // a soft reveal gains nothing from retina pixels, and dropping to 1 cuts the
+    // per-frame fill by four on a 2x display
+    var dpr = 1;
     var W = 0, H = 0, boxes = [], imgs = [];
 
     CASES.forEach(function(c){ var im = new Image(); im.src = c.img; imgs.push(im); });
@@ -821,8 +826,8 @@
     WebGLFluid(src, {
       TRANSPARENT: true,            // the dye's alpha becomes our mask
       BACK_COLOR: {r: 0, g: 0, b: 0},
-      SIM_RESOLUTION: 128,
-      DYE_RESOLUTION: 512,
+      SIM_RESOLUTION: 64,
+      DYE_RESOLUTION: 256,
       DENSITY_DISSIPATION: 2.4,     // the trail fades rather than lingering
       VELOCITY_DISSIPATION: 1.8,
       PRESSURE: 0.8,
@@ -868,8 +873,18 @@
       es.forEach(function(en){ visible = en.isIntersecting; });
     }, {threshold: .01}).observe(chap);
 
+    var lastMove = 0;
+    chap.addEventListener('pointermove', function(){ lastMove = performance.now(); }, {passive: true});
+    var cleared = false;
     gsap.ticker.add(function(){
       if(!visible) return;
+      // the dye dissipates in a couple of seconds; after that there is nothing
+      // to composite, so the whole pass is skipped until the pointer moves again
+      if(performance.now() - lastMove > 2600){
+        if(!cleared){ ctx.clearRect(0, 0, W, H); cleared = true; }
+        return;
+      }
+      cleared = false;
       ctx.clearRect(0, 0, W, H);
       ctx.globalCompositeOperation = 'source-over';
       boxes.forEach(function(b){
