@@ -364,7 +364,7 @@
     </div>
 
     <div class="tailroom"></div>
-    <span id="buildStamp" style="display:none">BUILD 27.09 20:52</span>
+    <span id="buildStamp" style="display:none">BUILD 27.09 21:04</span>
   </section>
 
 </main>
@@ -672,23 +672,38 @@
     // faint watermark for the whole page, solid ink only once joined
     .to([L, R], {color: 'var(--ink)', ease: 'none'}, 0);
 
-    // A plain one-shot entrance well before the end of the document. Tying
-    // these to a scrub that finished on the last pixel meant inertial scrolling
-    // sailed past the only place they were ever fully visible.
+    // Appearing and disappearing are the same animation in opposite directions:
+    // the blur climbs back up and the copy fades as the reader scrolls away,
+    // which is how the reference reverses its own reveals.
+    var noteFx = [fL, fR].map(function(el){
+      if(!el) return null;
+      var g = makeGoo();
+      el.style.filter = 'url(#' + g.id + ')';
+      g.blur.setAttribute('stdDeviation', 13);
+      return {el: el, g: g};
+    }).filter(Boolean);
+
+    function notesIn(){
+      noteFx.forEach(function(f, i){
+        gsap.killTweensOf([f.el, f.g.blur]);
+        f.el.style.filter = 'url(#' + f.g.id + ')';
+        gsap.timeline({delay: i * 0.1})
+          .to(f.el, {opacity: 1, duration: .45, ease: 'none'}, 0)
+          .to(f.g.blur, {attr: {stdDeviation: 0}, duration: GOO_TIME, ease: EASE.goo}, 0);
+      });
+    }
+    function notesOut(){
+      noteFx.forEach(function(f, i){
+        gsap.killTweensOf([f.el, f.g.blur]);
+        gsap.timeline({delay: i * 0.06})
+          .to(f.g.blur, {attr: {stdDeviation: 26}, duration: GOO_TIME * .7, ease: EASE.goo}, 0)
+          .to(f.el, {opacity: 0, duration: GOO_TIME * .5, ease: 'none'}, GOO_TIME * .2);
+      });
+    }
+
     ScrollTrigger.create({
-      trigger: document.body, start: 'bottom bottom+=240', once: true, refreshPriority: -10,
-      onEnter: function(){
-        [fL, fR].forEach(function(el, i){
-          if(!el) return;
-          var g = makeGoo();
-          el.style.filter = 'url(#' + g.id + ')';
-          g.blur.setAttribute('stdDeviation', 13);
-          gsap.timeline({delay: i * 0.12})
-            .to(el, {opacity: 1, duration: .5, ease: 'none'}, 0)
-            .to(g.blur, {attr: {stdDeviation: 0}, duration: GOO_TIME, ease: EASE.goo,
-              onComplete: function(){ el.style.filter = 'none'; }}, 0);
-        });
-      }
+      trigger: document.body, start: 'bottom bottom+=240', refreshPriority: -10,
+      onEnter: notesIn, onLeaveBack: notesOut
     });
   }
 
@@ -811,6 +826,9 @@
     var chap = document.getElementById('chapter');
     if(!cv || !src || !chap || reduced || coarse) return;
     if(typeof WebGLFluid !== 'function') return;
+    // the reference disables its own reveal below 992px; the effect needs a
+    // pointer and the simulation is not worth its cost on a phone
+    if(window.matchMedia('(max-width: 991px)').matches) return;
 
     var ctx = cv.getContext('2d');
     // a soft reveal gains nothing from retina pixels, and dropping to 1 cuts the
@@ -872,12 +890,19 @@
       src.dispatchEvent(ev);
     }
     // the library binds mousemove/mousedown, not the pointer events
+    // The simulation reads offsetX/offsetY. On an event made in script those are
+    // always 0 — the browser only derives them from a real hit test — so every
+    // splat was landing in the canvas's top-left corner instead of under the
+    // pointer. Defining them on the instance overrides the prototype getter.
     function forwardMouse(type, e){
       var r = chap.getBoundingClientRect();
+      var x = e.clientX - r.left, y = e.clientY - r.top;
       var ev = new MouseEvent(type, {
-        clientX: e.clientX - r.left, clientY: e.clientY - r.top,
+        clientX: e.clientX, clientY: e.clientY,
         bubbles: true, cancelable: true, buttons: 1
       });
+      Object.defineProperty(ev, 'offsetX', {value: x, configurable: true});
+      Object.defineProperty(ev, 'offsetY', {value: y, configurable: true});
       src.dispatchEvent(ev);
     }
     // The simulation injects dye on mousemove only while it considers the pointer
