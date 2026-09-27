@@ -219,7 +219,7 @@
     <div class="hero-claim">
       <div class="big l1" data-goo data-split>Снимаю,</div>
       <div class="big l2" data-goo data-split>собираю</div>
-      <div class="big l3" data-goo data-split>и оживляю.</div>
+      <div class="big l3" data-goo data-split>и оживляю <span id="morphWord">бренды</span>.</div>
     </div>
   </section>
 
@@ -250,7 +250,7 @@
       <a href="https://ivanov-designer.ru" target="_blank" rel="noopener">Текущий сайт</a>
     </div>
     <div class="colophon">
-      <span class="label dim">© Илья Иванов <b id="buildStamp" style="font-weight:500;opacity:.7;">BUILD 27.09 16:14</b></span>
+      <span class="label dim">© Илья Иванов <b id="buildStamp" style="font-weight:500;opacity:.7;">BUILD 27.09 16:16</b></span>
       <span class="label dim">Сделано в 2026</span>
     </div>
   </section>
@@ -381,6 +381,34 @@
     }, 80);
   }
 
+  /* ---------- melting word swap ----------
+     Taken from the metaball text-change pattern: the blur is driven UP first so
+     the word collapses into a blob, the text is replaced while it is unreadable,
+     and the blur falls again so it sets as a different word. Going straight down
+     — the way an entrance does — would just show the swap happening. */
+  function morphWord(){
+    var el = document.getElementById('morphWord');
+    if(!el || reduced) return;
+    var WORDS = ['бренды', 'кадры', 'истории', 'смыслы'];
+    var i = 0;
+    var g = makeGoo(el);
+    el.style.display = 'inline-block';
+    el.style.filter = 'url(#' + g.id + ')';
+    var st = {b: 0};
+    function set(){ g.blur.setAttribute('stdDeviation', st.b); }
+
+    function cycle(){
+      gsap.timeline({delay: 2.2, onComplete: cycle})
+        .to(st, {b: 22, duration: .42, ease: 'power2.in', onUpdate: set})
+        .add(function(){
+          i = (i + 1) % WORDS.length;
+          el.textContent = WORDS[i];
+        })
+        .to(st, {b: 0, duration: .52, ease: 'power2.out', onUpdate: set});
+    }
+    cycle();
+  }
+
   /* ---------- intro choreography ---------- */
   function intro(){
     var tl = gsap.timeline();
@@ -505,7 +533,7 @@
     var p = document.getElementById('pre'); if(p) p.style.display = 'none';
     scrollReveals();
   } else {
-    preload(function(){ intro(); scrollReveals(); ScrollTrigger.refresh(); });
+    preload(function(){ intro(); scrollReveals(); ScrollTrigger.refresh(); gsap.delayedCall(2.6, morphWord); });
   }
 
   /* remeasure once fonts and images have settled */
