@@ -319,7 +319,7 @@
     </div>
 
     <div class="tailroom"></div>
-    <span id="buildStamp" style="display:none">BUILD 27.09 18:52</span>
+    <span id="buildStamp" style="display:none">BUILD 27.09 19:05</span>
   </section>
 
 </main>
@@ -358,39 +358,66 @@
 
   /* ---------- goo machinery ---------- */
   var fxDefs = document.getElementById('fxDefs'), gooN = 0;
+
+  // The threshold that welds blurred glyphs back into solid shapes. Amplitude
+  // and offset are animated together with the blur so the edge firms up as the
+  // letters separate, instead of snapping hard at the end.
+  function gooMatrix(amp, off){
+    return '1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 ' + amp + ' ' + off;
+  }
+
   function makeGoo(){
     var id = 'goo-' + (gooN++), NS = 'http://www.w3.org/2000/svg';
     var f = document.createElementNS(NS,'filter');
     f.setAttribute('id', id);
-    // A filter region is re-rendered in full every frame its blur changes, so
-    // keeping it tight is the biggest single saving on large headlines.
-    f.setAttribute('x','-12%'); f.setAttribute('y','-22%');
-    f.setAttribute('width','124%'); f.setAttribute('height','144%');
+    f.setAttribute('x','-25%'); f.setAttribute('y','-25%');
+    f.setAttribute('width','150%'); f.setAttribute('height','150%');
+    // Without this the browser runs the filter in linear RGB, which costs more
+    // per frame and shifts the colour of the result.
+    f.setAttribute('color-interpolation-filters','sRGB');
     var blur = document.createElementNS(NS,'feGaussianBlur');
-    blur.setAttribute('in','SourceGraphic'); blur.setAttribute('stdDeviation','0'); blur.setAttribute('result','b');
+    blur.setAttribute('in','SourceGraphic'); blur.setAttribute('stdDeviation','0'); blur.setAttribute('result','blur');
     var cm = document.createElementNS(NS,'feColorMatrix');
-    cm.setAttribute('in','b'); cm.setAttribute('type','matrix');
-    cm.setAttribute('values','1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 26 -13');
+    cm.setAttribute('in','blur'); cm.setAttribute('type','matrix');
+    cm.setAttribute('values', gooMatrix(26, -13));
     f.appendChild(blur); f.appendChild(cm); fxDefs.appendChild(f);
-    return {id:id, blur:blur};
+    return {id:id, blur:blur, cm:cm};
   }
+
+  var AMP = 26, OFF = -13, BLUR0 = 12;
 
   function revealText(el, delay){
     if(!el || el.__revealed) return null;
     el.__revealed = true;
     el.classList.add('shown');
-    var g = makeGoo();
-    el.style.willChange = 'filter';
-    el.style.filter = 'url(#' + g.id + ')';
-    var st = {b: 11};
-    g.blur.setAttribute('stdDeviation', 11);
-    // Metaball only. The rise-and-fade that ran alongside it made every frame pay
-    // for a transform, an opacity composite and a full filter pass at once — and
-    // it is not what the reference does either.
+
+    // One filter per LINE rather than one for the whole block. A filter region
+    // is re-rendered in full on every frame its blur changes, so a line-sized
+    // region costs a fraction of a three-line one — this is the single biggest
+    // difference between this and the version that stuttered.
+    var lines = null;
+    if(window.SplitText){
+      try{ lines = new SplitText(el, {type: 'lines'}).lines; }catch(e){ lines = null; }
+    }
+    var targets = (lines && lines.length) ? lines : [el];
+
     var tl = gsap.timeline({delay: delay || 0});
-    tl.to(st, {b: 0, duration: GOO_TIME, ease: EASE.goo,
-      onUpdate: function(){ g.blur.setAttribute('stdDeviation', st.b); },
-      onComplete: function(){ el.style.filter = 'none'; el.style.willChange = 'auto'; }}, 0);
+    targets.forEach(function(line, i){
+      var g = makeGoo();
+      line.style.willChange = 'filter';
+      line.style.filter = 'url(#' + g.id + ')';
+      g.blur.setAttribute('stdDeviation', BLUR0);
+
+      // tweened as an attribute by GSAP itself — no per-frame callback per line
+      tl.to(g.blur, {attr: {stdDeviation: 0}, duration: GOO_TIME, ease: EASE.goo,
+        onComplete: function(){ line.style.filter = 'none'; line.style.willChange = 'auto'; }
+      }, i * 0.1);
+
+      var m = {amp: AMP, off: OFF};
+      tl.to(m, {amp: 1, off: 0, duration: GOO_TIME * .35, ease: 'none',
+        onUpdate: function(){ g.cm.setAttribute('values', gooMatrix(m.amp, m.off)); }
+      }, i * 0.1 + GOO_TIME * .55);
+    });
     return tl;
   }
 
@@ -507,7 +534,7 @@
       var stmt = document.querySelector('.stmt');
       var tiles = document.getElementById('tiles');
       var stmt2 = document.querySelector('.stmt2');
-      var pad = 26;
+      var pad = 8;   // just enough to clear the type, not a visible break
 
       var a1 = 0, b1 = stmt ? stmt.offsetTop - pad : chap.offsetHeight;
       sp.style.top = a1 + 'px';
@@ -577,25 +604,24 @@
     // faint watermark for the whole page, solid ink only once joined
     .to([L, R], {color: 'var(--ink)', ease: 'none'}, 0);
 
-    // the corner notes arrive afterwards, and they do use the unsticking animation
-    ScrollTrigger.create({
-      trigger: document.body, start: 'bottom bottom', once: true, refreshPriority: -10,
-      onEnter: function(){
-        [fL, fR].forEach(function(el, i){
-          if(!el) return;
-          el.style.opacity = 1;
-          el.classList.add('shown');
-          var g = makeGoo();
-          el.style.filter = 'url(#' + g.id + ')';
-          var st = {b: 14};
-          g.blur.setAttribute('stdDeviation', 14);
-          gsap.timeline({delay: i * .12})
-            .to(st, {b: 0, duration: GOO_TIME, ease: EASE.goo,
-              onUpdate: function(){ g.blur.setAttribute('stdDeviation', st.b); },
-              onComplete: function(){ el.style.filter = 'none'; }}, 0)
-            .from(el, {yPercent: 120, opacity: 0, duration: GOO_TIME, ease: EASE.rise}, 0);
-        });
-      }
+    // The notes are part of the same scrubbed join rather than a separate
+    // trigger fired at the very end: they begin to form while the two halves
+    // are still closing, and are solid by the time the halves meet.
+    [fL, fR].forEach(function(el, i){
+      if(!el) return;
+      var g = makeGoo();
+      el.style.filter = 'url(#' + g.id + ')';
+      g.blur.setAttribute('stdDeviation', 14);
+      gsap.timeline({
+        scrollTrigger: {
+          trigger: document.body,
+          start: 'bottom bottom+=150',
+          end: 'bottom bottom',
+          scrub: .6, invalidateOnRefresh: true, refreshPriority: -10
+        }
+      })
+      .to(el, {opacity: 1, duration: .5, ease: 'none'}, i * .06)
+      .to(g.blur, {attr: {stdDeviation: 0}, duration: 1, ease: 'none'}, i * .06);
     });
   }
 
