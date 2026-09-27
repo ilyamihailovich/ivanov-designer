@@ -123,16 +123,20 @@
 
   /* ---------- five squares ---------- */
   /* the loose one sits left of the rule, the run of four to the right of it */
-  /* six tracks: the loose cover in the first, an empty second for the rule to
-     breathe, then the run of four */
-  .tiles{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:clamp(20px,3vw,52px);
-    position:relative;z-index:2;margin:clamp(20px,5vh,60px) 0 0;width:100%;margin-left:0;
-    max-width:min(1180px,96vw);}
+  /* Two halves keyed to the rule itself rather than to a column count: the
+     single cover lives in the strip left of the rule, the run of four begins
+     exactly where the rule stands. This holds at any screen width, which the
+     six-track version did not. */
+  .tiles{display:grid;grid-template-columns:var(--col) 1fr;
+    position:relative;z-index:2;margin:clamp(20px,5vh,60px) 0 0;width:100%;}
+  .tiles-left{padding-right:clamp(20px,3vw,52px);}
+  .tiles-right{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));
+    gap:clamp(18px,2.6vw,46px);}
   .tile{aspect-ratio:1/1;background:var(--ghost);overflow:hidden;position:relative;}
   .tile img{width:100%;height:100%;object-fit:cover;}
   .tile.gap{background:none;}
-  /* starts on the third photo counting from the right */
-  .tiles-note{grid-column:4 / 7;margin-top:18px;max-width:44ch;}
+  /* begins under the third photo counting from the right */
+  .tiles-note{grid-column:2 / 5;margin-top:18px;max-width:44ch;}
 
   .stmt2{position:relative;z-index:2;padding:clamp(60px,14vh,180px) 0 clamp(20px,5vh,60px);}
   /* a steady descent to the right, then the last line set under the middle of
@@ -233,7 +237,9 @@
     .idx-wrap{margin-left:0;}
     .ind{margin-left:calc(var(--col) + 6vw);}
     .op-1{margin-top:clamp(50px,14vh,120px);}
-    .tiles{grid-template-columns:repeat(2,1fr);}
+    .tiles{grid-template-columns:1fr;}
+    .tiles-left{padding-right:0;margin-bottom:clamp(14px,2.4vw,30px);}
+    .tiles-right{grid-template-columns:repeat(2,1fr);}
     .tiles-note{grid-column:1 / -1;}
     .mark-half{font-size:clamp(2.2rem,13vw,4rem);}
     .close-mid{flex-direction:column;}
@@ -361,7 +367,7 @@
     </div>
 
     <div class="tailroom"></div>
-    <span id="buildStamp" style="display:none">BUILD 27.09 21:11</span>
+    <span id="buildStamp" style="display:none">BUILD 27.09 21:22</span>
   </section>
 
 </main>
@@ -435,7 +441,7 @@
   // composited on the graphics card instead. The threshold needs an opaque
   // backdrop to bite, and contrast() pivots on mid grey, so a pure white page
   // stays white and pure black type stays black while the edges weld together.
-  var GOO_BLUR = 10, GOO_CONTRAST = 18;
+  var GOO_BLUR = 7, GOO_CONTRAST = 12;
 
   function revealText(el, delay){
     if(!el || el.__revealed) return null;
@@ -450,6 +456,9 @@
 
     var st = {b: GOO_BLUR, c: GOO_CONTRAST};
     el.style.background = 'var(--paper)';
+    // promoted to its own compositing layer, so the filter is applied to a
+    // cached texture instead of forcing the text to be re-rasterised each frame
+    el.style.transform = 'translateZ(0)';
     el.style.filter = 'blur(' + st.b + 'px) contrast(' + st.c + ')';
 
     return gsap.to(st, {
@@ -457,7 +466,7 @@
       onUpdate: function(){
         el.style.filter = 'blur(' + st.b.toFixed(2) + 'px) contrast(' + st.c.toFixed(2) + ')';
       },
-      onComplete: function(){ el.style.filter = 'none'; el.style.background = 'none'; }
+      onComplete: function(){ el.style.filter = 'none'; el.style.background = 'none'; el.style.transform = 'none'; }
     });
   }
 
@@ -481,7 +490,7 @@
       if(el.__armed || el.__revealed) return;
       if(el.closest('.op-note, .op-1, .op-role, .stmt')) return;   // owned by the intro
       el.__armed = true;
-      ScrollTrigger.create({trigger: el, start: 'top 94%', once: true,
+      ScrollTrigger.create({trigger: el, start: 'top 66%', once: true,
         onEnter: function(){ revealText(el, 0); }});
     });
   }
@@ -493,22 +502,27 @@
     // the reference leaves columns deliberately empty, so the row reads as a
     // considered placement rather than a filled grid
     // one on its own at the left, then a gap, then a run of four
-    var PLAN = [CASES[0], null, CASES[1], CASES[2], CASES[3], CASES[4]];  // col 1 sits left of the rule
-    PLAN.forEach(function(c){
+    function tile(c){
       var d = document.createElement('div');
-      d.className = 'tile' + (c ? '' : ' gap');
-      if(c){ var im = document.createElement('img'); im.src = c.img; im.alt = c.t; d.appendChild(im); }
-      host.appendChild(d);
-    });
+      d.className = 'tile';
+      var im = document.createElement('img'); im.src = c.img; im.alt = c.t;
+      d.appendChild(im);
+      return d;
+    }
+    var left = document.createElement('div'); left.className = 'tiles-left';
+    left.appendChild(tile(CASES[0]));
+    var right = document.createElement('div'); right.className = 'tiles-right';
+    [CASES[1], CASES[2], CASES[3], CASES[4]].forEach(function(c){ right.appendChild(tile(c)); });
+    host.appendChild(left); host.appendChild(right);
     var note = document.createElement('p');
     note.className = 'sm dim tiles-note';
     note.style.fontSize = 'clamp(14px,1.15vw,17px)';
     note.setAttribute('data-goo','');
     note.textContent = 'Снимаю, обрабатываю и собираю визуал для брендов — от постановки света до публикации, с упором на ясность и ритм.';
-    host.appendChild(note);
+    right.appendChild(note);
 
     // tiles rise in, one after another
-    gsap.utils.toArray('#tiles .tile:not(.gap)').forEach(function(t, i){
+    gsap.utils.toArray('#tiles .tile').forEach(function(t, i){
       gsap.from(t, {yPercent: 26, opacity: 0, duration: 1.05, delay: i * .09, ease: EASE.rise,
         scrollTrigger: {trigger: host, start: 'top 88%'}});
     });
@@ -621,7 +635,7 @@
     // Resolved up front: splitting the heading inserts divs inside it, and a
     // later '.op-1 div' lookup then found one of those instead of the surname,
     // which is why the surname never became visible.
-    var step = GOO_TIME * 0.62, at = 0.1;
+    var step = GOO_TIME * 0.85, at = 0.1;
     var order = [
       document.querySelector('.op-note .sm'),
       document.querySelector('.op-1 h1'),
@@ -852,7 +866,11 @@
     new ResizeObserver(size).observe(chap);
     size();
 
-    // the pointer trail, painted into the mask
+    // A chain of followers, each lagging a little more than the one before and
+    // each a different size. Their union is an irregular, shifting shape — one
+    // disc stamped at the cursor could only ever look like a dot.
+    var CHAIN = [];
+    for(var q = 0; q < 7; q++) CHAIN.push({x: -1, y: -1, lag: 0.42 - q * 0.045, r: 150 - q * 15});
     var px = -1, py = -1, tx = -1, ty = -1, moving = 0;
     chap.addEventListener('pointermove', function(e){
       var r = chap.getBoundingClientRect();
@@ -878,24 +896,46 @@
 
     function draw(){
       if(!visible || !W) return;
-      var idle = performance.now() - moving > 2600;
+      var idle = performance.now() - moving > 900;
 
       // the trail thins out a little every frame, so it heals behind the cursor
       mctx.globalCompositeOperation = 'destination-out';
-      mctx.fillStyle = 'rgba(0,0,0,0.055)';
+      // A proportional fade approaches zero without ever arriving, which left a
+      // faint ghost of every stroke on screen. A steeper rate plus a hard clear
+      // shortly after the pointer stops removes it completely.
+      mctx.fillStyle = 'rgba(0,0,0,0.2)';
       mctx.fillRect(0, 0, W, H);
       mctx.globalCompositeOperation = 'source-over';
 
-      if(!idle && tx >= 0){
-        // stamps along the segment travelled since the last frame, so a fast
-        // sweep leaves a continuous stroke instead of a dotted line
+      if(idle){
+        mctx.clearRect(0, 0, W, H);
+        ctx.clearRect(0, 0, W, H);
+        px = py = -1;
+        for(var z = 0; z < CHAIN.length; z++){ CHAIN[z].x = -1; }
+        return;
+      }
+      if(tx >= 0){
+        // the head draws a continuous stroke along the segment covered since the
+        // last frame, so a fast sweep is a stroke rather than a dotted line
         var dx = tx - px, dy = ty - py;
         var dist = Math.sqrt(dx * dx + dy * dy);
-        var steps = Math.max(1, Math.min(24, Math.round(dist / 12)));
+        var steps = Math.max(1, Math.min(20, Math.round(dist / 16)));
         for(var i = 1; i <= steps; i++){
-          stamp(px + dx * (i / steps), py + dy * (i / steps), 130);
+          var t = i / steps;
+          stamp(px + dx * t, py + dy * t, 138);
         }
         px = tx; py = ty;
+
+        // and the chain trails behind it, each link easing toward the one ahead
+        var ax = tx, ay = ty;
+        for(var k = 0; k < CHAIN.length; k++){
+          var c = CHAIN[k];
+          if(c.x < 0){ c.x = ax; c.y = ay; }
+          c.x += (ax - c.x) * c.lag;
+          c.y += (ay - c.y) * c.lag;
+          stamp(c.x, c.y, c.r);
+          ax = c.x; ay = c.y;
+        }
       }
 
       ctx.clearRect(0, 0, W, H);
