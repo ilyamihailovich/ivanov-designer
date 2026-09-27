@@ -84,12 +84,12 @@
 
   /* ---------- opening ---------- */
   .chapter{position:relative;}
-  #heroFX{position:absolute;inset:0;z-index:0;pointer-events:none;}
-  .op-1{min-height:100svh;display:flex;align-items:center;position:relative;z-index:2;}
+  #heroFX{position:absolute;top:0;left:0;right:0;height:100svh;z-index:0;pointer-events:none;}
+  .op-1{min-height:62svh;display:flex;align-items:flex-end;position:relative;z-index:2;padding-bottom:clamp(10px,2vh,26px);}
   .op-name{margin-left:calc(var(--rule) + clamp(12px,2vw,26px));}
   .op-side{position:absolute;left:var(--gut);top:50%;transform:translateY(-50%);max-width:140px;}
 
-  .stmt{position:relative;z-index:2;padding:clamp(40px,10vh,130px) 0 clamp(60px,14vh,180px);}
+  .stmt{position:relative;z-index:2;padding:clamp(6px,1.4vh,18px) 0 clamp(50px,11vh,150px);}
   .stmt > div{white-space:nowrap;}
   .s-a{margin-left:clamp(16px,3vw,40px);}
   .s-b{margin-left:clamp(16px,3vw,40px);}
@@ -99,8 +99,9 @@
   .s-f{margin-left:calc(var(--rule) + clamp(60px,9vw,150px));}
 
   /* ---------- five squares ---------- */
-  .tiles{display:grid;grid-template-columns:repeat(5,1fr);gap:clamp(10px,1.6vw,22px);
-    position:relative;z-index:2;margin:clamp(30px,7vh,90px) 0 0;}
+  .tiles{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:clamp(8px,1.2vw,16px);
+    position:relative;z-index:2;margin:clamp(20px,5vh,60px) 0 0;max-width:min(1100px,92vw);
+    margin-left:calc(var(--rule) + clamp(12px,2vw,26px));}
   .tile{aspect-ratio:1/1;background:var(--ghost);overflow:hidden;position:relative;}
   .tile img{width:100%;height:100%;object-fit:cover;}
   .tile.gap{background:none;}
@@ -120,15 +121,18 @@
   .work-head{position:absolute;top:50%;left:0;right:0;transform:translateY(-50%);z-index:3;
     pointer-events:none;display:flex;justify-content:center;gap:clamp(10px,1.6vw,22px);}
   .work-head span{display:inline-block;will-change:transform;}
-  .work-link{position:absolute;top:50%;left:50%;z-index:4;opacity:0;pointer-events:none;
-    transform:translate(-50%,-50%);border:1px solid var(--hair);border-radius:999px;
-    padding:12px 26px;font-size:12px;font-weight:600;}
+  /* not a pill that replaces the words — the words themselves become this line,
+     and the rule underneath draws itself once they have landed */
+  .work-link{position:absolute;top:50%;left:0;right:0;z-index:4;opacity:0;pointer-events:none;
+    transform:translateY(-50%);text-align:center;font-weight:600;
+    font-size:clamp(1.3rem,3.4vw,2.6rem);letter-spacing:-.04em;}
+  .work-link i{display:block;height:2px;background:currentColor;margin:10px auto 0;width:0;}
   .globe-foot{position:absolute;bottom:clamp(20px,4vh,44px);left:0;right:0;z-index:3;pointer-events:none;
     display:flex;justify-content:space-between;padding:0 var(--gut);}
 
   /* ---------- case index: a narrow column, not the full width ---------- */
   .band{padding:clamp(80px,18vh,220px) 0;}
-  .idx-wrap{max-width:min(980px,84vw);margin-left:calc(var(--rule) + clamp(12px,2vw,26px));}
+  .idx-wrap{max-width:min(760px,88vw);margin:0 auto;}
   .idx{border-top:1px solid var(--hair);margin-top:clamp(26px,5vh,60px);}
   .idx-row{display:grid;grid-template-columns:3ch 1fr auto;gap:clamp(10px,2.4vw,34px);align-items:baseline;
     padding:clamp(12px,1.9vh,20px) 0;border-bottom:1px solid var(--hair);cursor:pointer;
@@ -141,8 +145,9 @@
   .idx-row.on .t{transform:translateX(clamp(6px,1.2vw,16px));}
   .idx-row .c{font-size:11px;color:var(--dim);font-weight:600;white-space:nowrap;}
   /* the preview holds one place instead of chasing the pointer */
-  #thumb{position:absolute;top:0;right:clamp(14px,3vw,60px);width:clamp(180px,20vw,300px);
-    aspect-ratio:4/3;pointer-events:none;opacity:0;overflow:hidden;z-index:5;}
+  /* portrait, modest, and parked clear of the column so it never covers a title */
+  #thumb{position:absolute;top:0;right:calc(-1 * clamp(150px,15vw,230px) - clamp(20px,3vw,48px));
+    width:clamp(120px,11vw,180px);aspect-ratio:3/4;pointer-events:none;opacity:0;overflow:hidden;z-index:5;}
   #thumb img{width:100%;height:100%;object-fit:cover;}
   .idx-holder{position:relative;}
 
@@ -150,15 +155,25 @@
   .close{padding:clamp(80px,18vh,220px) 0 clamp(40px,9vh,110px);position:relative;}
   .c-a{margin-left:clamp(40px,7vw,140px);}
   .c-b{margin-left:clamp(120px,19vw,330px);}
-  .close-mid{display:flex;align-items:center;justify-content:center;gap:clamp(20px,5vw,80px);
-    margin:clamp(30px,7vh,80px) 0;}
-  .close-mid .clock{font-size:clamp(2rem,5.4vw,4.2rem);font-weight:600;letter-spacing:-.04em;}
-  .close-still{width:clamp(130px,15vw,240px);aspect-ratio:3/4;overflow:hidden;background:var(--ghost);}
+   /* the hour sits to the left of a dead-centre still and the minutes to its
+     right, the way the reference frames its image with the clock */
+  .close-mid{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;
+    margin:clamp(40px,9vh,110px) 0;gap:clamp(20px,5vw,70px);}
+  .close-mid .clock{font-size:clamp(2.4rem,6.6vw,5.4rem);font-weight:600;letter-spacing:-.045em;}
+  .close-mid .clock.l{justify-self:end;}
+  .close-mid .clock.r{justify-self:start;}
+  .close-still{width:clamp(150px,17vw,280px);aspect-ratio:3/4;overflow:hidden;background:var(--ghost);justify-self:center;}
   .close-still img{width:100%;height:100%;object-fit:cover;}
   .c-c{margin-left:clamp(20px,5vw,90px);}
   .c-d{margin-left:clamp(90px,15vw,260px);}
-  .close-aside{margin-top:clamp(40px,8vh,110px);display:grid;
-    grid-template-columns:repeat(auto-fit,minmax(180px,auto));gap:clamp(16px,3vw,50px);}
+  /* three columns spread across the page instead of piling up on the left edge */
+  .close-aside{margin-top:clamp(50px,10vh,130px);display:grid;
+    grid-template-columns:repeat(3,1fr);gap:clamp(16px,4vw,60px);max-width:min(1100px,94vw);margin-left:auto;margin-right:auto;}
+  .socials{display:flex;gap:12px;margin-top:clamp(46px,9vh,110px);justify-content:center;}
+  .socials a{width:62px;height:62px;border-radius:50%;border:1px solid var(--hair);
+    display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600;
+    transition:background .3s var(--eo), color .3s var(--eo), border-color .3s var(--eo);}
+  .socials a:hover{background:var(--ink);color:var(--paper);border-color:var(--ink);}
   /* room for the wordmark to come together underneath everything */
   .tailroom{height:clamp(220px,34vh,420px);}
 
@@ -236,7 +251,7 @@
         <span class="lg" id="workA">Работы</span>
         <span class="lg" id="workB">23—26</span>
       </div>
-      <a href="#cases" class="work-link" id="workLink">Все кейсы</a>
+      <a href="#cases" class="work-link" id="workLink"><span>Перейти ко всем кейсам</span><i></i></a>
       <div class="globe-foot">
         <span class="sm dim" data-goo>Потяни, чтобы покрутить</span>
         <span class="sm dim" data-goo id="globeCount">—</span>
@@ -261,13 +276,19 @@
     <div class="lg c-b" data-goo>сначала было</div>
 
     <div class="close-mid">
-      <span class="clock" id="clock" data-goo>16:41</span>
+      <span class="clock l" id="clockH" data-goo>( 16</span>
       <div class="close-still"><img id="closeStill" src="yoga1.jpg" alt=""></div>
-      <span class="clock" data-goo>—</span>
+      <span class="clock r" id="clockM" data-goo>41 )</span>
     </div>
 
     <div class="lg c-c" data-goo>всего лишь</div>
     <div class="lg c-d" data-goo>кадром.</div>
+
+    <div class="socials">
+      <a href="https://t.me/llyaMihailovich" target="_blank" rel="noopener" data-goo>Tg</a>
+      <a href="https://www.instagram.com/llyamihailovich" target="_blank" rel="noopener" data-goo>In</a>
+      <a href="https://ivanov-designer.ru" target="_blank" rel="noopener" data-goo>Web</a>
+    </div>
 
     <div class="close-aside">
       <div>
@@ -285,7 +306,7 @@
     </div>
 
     <div class="tailroom"></div>
-    <span class="sm dim" data-goo style="opacity:.55;">© Илья Иванов <b id="buildStamp" style="font-weight:500;">BUILD 27.09 16:47</b></span>
+    <span class="sm dim" data-goo style="opacity:.55;">© Илья Иванов <b id="buildStamp" style="font-weight:500;">BUILD 27.09 17:03</b></span>
   </section>
 
 </main>
@@ -370,7 +391,7 @@
     if(!host) return;
     // the reference leaves columns deliberately empty, so the row reads as a
     // considered placement rather than a filled grid
-    var PLAN = [CASES[0], null, CASES[1], CASES[2], null];
+    var PLAN = [CASES[0], CASES[1], CASES[2], CASES[3], CASES[4]];
     PLAN.forEach(function(c){
       var d = document.createElement('div');
       d.className = 'tile' + (c ? '' : ' gap');
@@ -472,47 +493,35 @@
     tl.add(revealText(document.querySelector('.op-name .xl')), .28);
   }
 
-  /* ---------- wordmark: joins, darkens, and hands over to the corner notes ---------- */
+  /* ---------- wordmark ----------
+     Present from the first screen and parked in the margins for the whole scroll,
+     faint. It only leaves the corners at the very end of the document: the join
+     happens across the last few hundred pixels and lands exactly at the bottom. */
   function wordmark(){
     var wrap = document.getElementById('markWrap');
     if(!wrap) return;
     var L = wrap.querySelector('.mark-half.l'), R = wrap.querySelector('.mark-half.r');
     var fL = document.getElementById('footL'), fR = document.getElementById('footR');
 
-    ScrollTrigger.create({
-      trigger: '#featured', start: 'top 70%',
-      onEnter: function(){ gsap.to(wrap, {opacity: 1, duration: .9, ease: EASE.glide}); },
-      onLeaveBack: function(){ gsap.to(wrap, {opacity: 0, duration: .6, ease: EASE.glide}); }
-    });
-
-    var gooL = makeGoo(), gooR = makeGoo();
-    L.style.filter = 'url(#' + gooL.id + ')';
-    R.style.filter = 'url(#' + gooR.id + ')';
-    var blur = {v: 0};
+    // visible immediately, no entrance tied to a section
+    gsap.set(wrap, {opacity: 1});
 
     gsap.timeline({
-      scrollTrigger: {trigger: '.tailroom', start: 'top 95%', end: 'bottom 75%', scrub: .8, invalidateOnRefresh: true}
+      scrollTrigger: {
+        trigger: document.body,
+        start: 'bottom bottom-=420',
+        end: 'bottom bottom',
+        scrub: .6, invalidateOnRefresh: true
+      }
     })
-    // measured live so the halves meet exactly at any width
     .to(L, {x: function(){ return (window.innerWidth/2 - L.offsetWidth) - L.offsetLeft; }, ease: 'none'}, 0)
     .to(R, {x: function(){ return window.innerWidth/2 - R.offsetLeft; }, ease: 'none'}, 0)
-    // they stop being a watermark and become the signature
-    .to([L, R], {color: 'var(--ink)', ease: 'none'}, 0)
-    // a touch of melt while they travel, so the join reads as one word forming
-    .to(blur, {v: 9, ease: 'none',
-      onUpdate: function(){
-        gooL.blur.setAttribute('stdDeviation', blur.v);
-        gooR.blur.setAttribute('stdDeviation', blur.v);
-      }}, 0)
-    .to(blur, {v: 0, ease: 'none',
-      onUpdate: function(){
-        gooL.blur.setAttribute('stdDeviation', blur.v);
-        gooR.blur.setAttribute('stdDeviation', blur.v);
-      }}, .5);
+    // faint watermark for the whole page, solid ink only once joined
+    .to([L, R], {color: 'var(--ink)', ease: 'none'}, 0);
 
-    // the corner notes arrive afterwards, on the same unsticking animation
+    // the corner notes arrive afterwards, and they do use the unsticking animation
     ScrollTrigger.create({
-      trigger: '.tailroom', start: 'bottom 80%', once: true,
+      trigger: document.body, start: 'bottom bottom-=60', once: true,
       onEnter: function(){
         [fL, fR].forEach(function(el, i){
           if(!el) return;
@@ -532,30 +541,67 @@
     });
   }
 
-  /* ---------- work head + globe scale, driven together ---------- */
+  /* ---------- work: a sequence in four beats ----------
+     1. the words stand together in the middle
+     2. they part to the edges — and only then does the sphere rise into the gap
+     3. the sphere drifts while the words hold at the sides
+     4. the sphere leaves upward, the words rejoin and morph into the link
+     The words are never swapped for a button: the same element becomes the line. */
   function workHead(){
     var A = document.getElementById('workA'), B = document.getElementById('workB');
     var link = document.getElementById('workLink'), stage = document.getElementById('globeStage');
     if(!A || !B || !stage) return;
+    var rule = link.querySelector('i');
 
-    // far enough apart that the sphere never sits underneath the words
-    var spread = function(){ return Math.min(window.innerWidth * 0.36, 460); };
+    // pushed right out to the margins, so nothing on the sphere can reach the type
+    var spread = function(){ return Math.max(0, window.innerWidth / 2 - A.offsetWidth / 2 - 40); };
+    var spreadB = function(){ return Math.max(0, window.innerWidth / 2 - B.offsetWidth / 2 - 40); };
+
+    window.__globeGrow = 0;
+    window.__globeLift = 0;
 
     var tl = gsap.timeline({
-      scrollTrigger: {trigger: stage, start: 'top top', end: '+=' + Math.round(window.innerHeight * 2.4),
-        pin: true, scrub: .7, invalidateOnRefresh: true,
-        onUpdate: function(self){ window.__globeGrow = self.progress; }}
+      scrollTrigger: {
+        trigger: stage, start: 'top top',
+        end: '+=' + Math.round(window.innerHeight * 3.2),
+        pin: true, scrub: .8, invalidateOnRefresh: true
+      }
     });
 
-    // the words start joined in the middle, then part to make room
-    tl.to(A, {x: function(){ return -spread(); }, ease: EASE.glide, duration: .3}, 0)
-      .to(B, {x: function(){ return  spread(); }, ease: EASE.glide, duration: .3}, 0)
-      .to({}, {duration: .4})
-      // and come back together as the section lets go
-      .to(A, {x: 0, ease: EASE.glide, duration: .22}, '>')
+    // 1 → 2: part to the margins
+    tl.to(A, {x: function(){ return -spread(); }, ease: EASE.glide, duration: .22}, 0)
+      .to(B, {x: function(){ return  spreadB(); }, ease: EASE.glide, duration: .22}, 0)
+      // the sphere only starts opening once the gap exists
+      .to(window, {__globeGrow: 1, ease: EASE.glide, duration: .3}, .2)
+      // 3: it holds, drifting, while the words stay parked at the edges
+      .to({}, {duration: .3})
+      // 4: the sphere leaves upward before the words move
+      .to(window, {__globeLift: 1, __globeGrow: .2, ease: EASE.glide, duration: .25}, '>')
+      // the words come back together
+      .to(A, {x: 0, ease: EASE.glide, duration: .22}, '>-0.08')
       .to(B, {x: 0, ease: EASE.glide, duration: .22}, '<')
-      .to([A, B], {scale: .34, opacity: 0, ease: EASE.glide, duration: .12}, '>')
-      .to(link, {opacity: 1, duration: .1}, '<0.04');
+      // and morph into the line: they melt out as it melts in, same place
+      .to([A, B], {opacity: 0, filter: 'blur(14px)', duration: .12}, '>-0.04')
+      .fromTo(link, {opacity: 0, filter: 'blur(16px)'}, {opacity: 1, filter: 'blur(0px)', duration: .16}, '<0.04')
+      // the rule draws itself under the new line
+      .to(rule, {width: 'min(420px, 62vw)', duration: .14, ease: EASE.glide}, '>');
+  }
+
+  /* ---------- theme: black exactly while the words stand at the edges ---------- */
+  function themeFlip(){
+    var stage = document.getElementById('globeStage');
+    if(!stage) return;
+    var root = document.documentElement;
+    ScrollTrigger.create({
+      trigger: stage, start: 'top top', end: '+=' + Math.round(window.innerHeight * 3.2),
+      scrub: true, invalidateOnRefresh: true,
+      onUpdate: function(self){
+        // on once the words have parted, off again once the link has formed
+        var p = self.progress;
+        var on = p > 0.16 && p < 0.84;
+        root.classList.toggle('is-dark', on);
+      }
+    });
   }
 
   /* ---------- smooth scroll ---------- */
@@ -575,16 +621,8 @@
     });
   }
 
-  /* ---------- theme ---------- */
-  ScrollTrigger.create({
-    trigger: '#featured', start: 'top 60%', end: 'bottom 40%',
-    onEnter:     function(){ document.documentElement.classList.add('is-dark'); },
-    onLeave:     function(){ document.documentElement.classList.remove('is-dark'); },
-    onEnterBack: function(){ document.documentElement.classList.add('is-dark'); },
-    onLeaveBack: function(){ document.documentElement.classList.remove('is-dark'); }
-  });
-
   /* ============================================================
+     CURSOR SMEAR.  /* ============================================================
      CURSOR SMEAR. The previous attempt fused the blobs with
      `ctx.filter = blur + contrast`, which does nothing to the alpha of a
      transparent canvas in Safari — so there was never a shape to composite
@@ -613,7 +651,9 @@
       });
     }
     function size(){
-      W = chap.clientWidth; H = chap.clientHeight;
+      // only the first screen, not the whole chapter — a canvas the height of the
+      // entire section was being cleared and repainted on every single frame
+      W = chap.clientWidth; H = Math.min(window.innerHeight, chap.clientHeight);
       cv.width = Math.round(W * dpr); cv.height = Math.round(H * dpr);
       cv.style.width = W + 'px'; cv.style.height = H + 'px';
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
@@ -682,9 +722,13 @@
 
   /* ---------- clock ---------- */
   (function(){
-    var el = document.getElementById('clock');
-    if(!el) return;
-    function tick(){ el.textContent = new Date().toLocaleTimeString('ru-RU',{hour:'2-digit',minute:'2-digit'}); }
+    var h = document.getElementById('clockH'), m = document.getElementById('clockM');
+    if(!h || !m) return;
+    function tick(){
+      var d = new Date();
+      h.textContent = '( ' + String(d.getHours()).padStart(2,'0');
+      m.textContent = String(d.getMinutes()).padStart(2,'0') + ' )';
+    }
     tick(); setInterval(tick, 20000);
   })();
 
@@ -710,14 +754,14 @@
   }
 
   function start(){
-    spine(); intro(); armReveals(); wordmark(); workHead();
+    spine(); intro(); armReveals(); wordmark(); workHead(); themeFlip();
     ScrollTrigger.refresh();
     gsap.delayedCall(3.0, morphWord);
   }
   if(reduced){
     var p = document.getElementById('pre'); if(p) p.style.display = 'none';
     document.querySelectorAll('[data-goo]').forEach(function(e){ e.classList.add('shown'); });
-    spine(); armReveals(); wordmark(); workHead();
+    spine(); armReveals(); wordmark(); workHead(); themeFlip();
   } else {
     preload(start);
   }
@@ -733,8 +777,12 @@
   var canvas = document.getElementById('globeCanvas');
   var stage  = document.getElementById('globeStage');
   if(canvas && stage){
-    var CASES = window.__CASES || [];
-    var RADIUS = 2.25, TILE = 0.84;
+    var SRC = window.__CASES || [];
+    // the sphere needs enough faces to read as a sphere; with eight it was a
+    // scatter of cards with holes between them, so the covers repeat
+    var CASES = [];
+    for(var q = 0; q < 22; q++) CASES.push(SRC[q % SRC.length]);
+    var RADIUS = 2.05, TILE = 0.52;
 
     var renderer = new THREE.WebGLRenderer({canvas: canvas, antialias: true, alpha: true});
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
@@ -803,11 +851,13 @@
       if(!inView){ last = now; return; }
       var dt = Math.min((now - last)/1000, .05); last = now;
 
-      // small on arrival, opening out while the section is held, small again on exit
-      var p = window.__globeGrow || 0;
-      var bell = Math.sin(Math.min(1, Math.max(0, p)) * Math.PI);
-      var s = 0.42 + bell * 0.68;
-      group.scale.set(s, s, s);
+      // driven by the section's beats rather than a bell over the whole pin:
+      // it opens once the words have parted and leaves upward at the end
+      var grow = window.__globeGrow || 0;
+      var lift = window.__globeLift || 0;
+      var sc = 0.18 + grow * 0.74;
+      group.scale.set(sc, sc, sc);
+      group.position.y = lift * 5.2;
 
       if(!dragging){
         group.rotation.y += .075*dt + velX;
