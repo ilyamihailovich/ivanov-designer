@@ -31,8 +31,11 @@
        margin = gap = 1.1111vw, column = 11.25vw,
        and the rule sits on the right edge of column 3. */
     --gg:1.1111%;
+    --gm:1.1111%;   /* side margin; equals the gap only on desktop */
     --colw:11.25%;
     --rule:37.083%;   /* 1.1111 + 3*11.25 + 2*1.1111 */
+    --c2:13.472%;     /* column starts: 1.1111 + (N-1)*12.3611 */
+    --c3:25.833%;     /* reference measured column 3 at 514.1/1990 = 25.83% */
     --c4:38.194%;     /* start of column 4 = 760/1990 */
     --col:38.194%;
   }
@@ -50,6 +53,11 @@
     -webkit-font-smoothing:antialiased;overflow-x:hidden;max-width:100vw;
     transition:background .9s var(--eo), color .9s var(--eo);
   }
+  /* The UA stylesheet puts em-based margins on headings and paragraphs, which at
+     124px type became 83px above and below the h1 and 103px around the h2 and
+     stretched the whole vertical rhythm to nearly double the reference. */
+  h1,h2,h3,h4,h5,h6,p,ul,ol,figure,blockquote,dl,dd{margin:0;padding:0;}
+  ul,ol{list-style:none;}
   a{color:inherit;text-decoration:none;}
   img{max-width:100%;display:block;}
   ::selection{background:var(--accent);color:#0a0a0a;}
@@ -109,7 +117,7 @@
 
   /* ---------- opening ---------- */
   .chapter{position:relative;}
-  #heroFX{position:absolute;top:0;left:0;right:0;height:100svh;z-index:0;pointer-events:none;}
+  #heroFX{position:absolute;top:0;left:0;width:100%;height:100svh;z-index:0;pointer-events:none;}
 
   /* The opening alternates between two columns — the left gutter and a second
      column at 35.7vw — which is what gives the reference its stagger. */
@@ -133,13 +141,14 @@
      exactly where the rule stands. This holds at any screen width, which the
      six-track version did not. */
   .tiles{display:grid;grid-template-columns:repeat(8,minmax(0,1fr));gap:0 var(--gg);
-    margin:clamp(40px,7vh,96px) var(--gg);}
+    margin:clamp(40px,7vh,96px) var(--gm);}
     position:relative;z-index:2;margin:clamp(20px,5vh,60px) 0 0;width:100%;}
   .tile{aspect-ratio:1/1;background:var(--ghost);overflow:hidden;position:relative;}
   .tile img{width:100%;height:100%;object-fit:cover;}
   .tile.gap{background:none;}
   /* begins under the third photo counting from the right */
   .tiles-note{grid-column:4 / 6;margin-top:22px;}
+  .tiles-row{display:contents;}
   .tile{aspect-ratio:1;overflow:hidden;background:var(--ghost);}
   .tile img{width:100%;height:100%;object-fit:cover;display:block;}
   .tile.c1{grid-column:1/2;} .tile.c4{grid-column:4/5;} .tile.c5{grid-column:5/6;}
@@ -148,10 +157,13 @@
   .stmt2{position:relative;z-index:2;padding:clamp(60px,14vh,180px) 0 clamp(20px,5vh,60px);}
   /* a steady descent to the right, then the last line set under the middle of
      the one above it */
-  .t-a{margin-left:0;}
-  .t-b{margin-left:clamp(40px,8vw,150px);}
-  .t-c{margin-left:clamp(80px,16vw,300px);}
-  .t-d{margin-left:clamp(150px,29vw,540px);}
+  /* anchored to the reference's own columns: its closing statement puts the
+     first word in column 2, the answering word in column 4 across the rule,
+     and the continuation lines in column 3 */
+  .t-a{margin-left:var(--c2);}
+  .t-b{margin-left:var(--c4);}
+  .t-c{margin-left:var(--c3);}
+  .t-d{margin-left:var(--c3);}
 
   /* ---------- work / globe ---------- */
   .featured{position:relative;margin-top:clamp(60px,14vh,180px);}
@@ -173,18 +185,18 @@
 
   /* ---------- case index: a narrow column, not the full width ---------- */
   .band{padding:clamp(80px,18vh,220px) 0;}
-  .idx-wrap{max-width:min(1040px,92vw);margin:0 auto;}
+  .idx-wrap{margin:0 var(--gm);}
   .idx{border-top:1px solid var(--hair);margin-top:clamp(60px,12vh,150px);}
-  .idx-row{display:grid;grid-template-columns:3ch 1fr auto;gap:clamp(10px,2.4vw,34px);align-items:center;
+  .idx-row{display:grid;grid-template-columns:repeat(8,minmax(0,1fr));gap:0 var(--gg);align-items:center;
     padding:clamp(5px,.8vh,10px) 0;border-bottom:1px solid var(--hair);cursor:pointer;
     transition:opacity .35s var(--eo);}
   .idx.hovered .idx-row{opacity:.3;}
   .idx.hovered .idx-row.on{opacity:1;}
-  .idx-row .n{font-size:11px;color:var(--dim);font-weight:500;align-self:start;}
-  .idx-row .t{font-size:clamp(.95rem,1.7vw,1.3rem);font-weight:600;line-height:1;letter-spacing:-.035em;
+  .idx-row .n{grid-column:2;font-size:11px;color:var(--dim);font-weight:500;align-self:start;}
+  .idx-row .t{grid-column:3 / 7;font-size:clamp(.95rem,1.7vw,1.3rem);font-weight:600;line-height:1;letter-spacing:-.035em;
     transition:transform .45s var(--eo);}
   .idx-row.on .t{transform:translateX(clamp(6px,1.2vw,16px));}
-  .idx-row .c{font-size:11px;color:var(--dim);font-weight:500;white-space:nowrap;align-self:center;}
+  .idx-row .c{grid-column:7 / 8;justify-self:end;font-size:11px;color:var(--dim);font-weight:500;white-space:nowrap;align-self:center;}
   /* the preview holds one place instead of chasing the pointer */
   /* portrait, modest, and parked clear of the column so it never covers a title */
   #thumb{position:absolute;top:0;right:calc(-1 * clamp(150px,15vw,230px) - clamp(20px,3vw,48px));
@@ -230,7 +242,15 @@
   .tailroom{height:clamp(220px,34vh,420px);}
 
   @media (max-width:900px){
-    :root{--colw:22%;--rule:24%;--c4:26%;--col:26%;}
+    :root{
+      --gm:4.07%; --gg:3.053%; --colw:12.76%;
+      --rule:32.65%;                 /* 4.07 + 2*12.76 + 3.053 */
+      --c2:19.88%; --c3:35.70%;      /* 4.07 + (N-1)*15.813 */
+      --c4:51.51%; --col:51.51%;
+    }
+    .xl,.lg{font-size:11.45vw;line-height:.9;letter-spacing:-.0524em;}
+    .sm{font-size:max(11px,3.053vw);}
+    .col-l{margin-left:var(--gm);}
     /* the two labels are pinned to the grid on wide screens; at this width
        there is no room beside the name, so they return to the flow */
     /* relative, not static: the erasers that punch the rule are positioned, so
@@ -244,9 +264,17 @@
     .idx-wrap{margin-left:0;}
     .ind{margin-left:calc(var(--col) + 6vw);}
     .op-1{margin-top:clamp(50px,14vh,120px);}
-    .tiles{grid-template-columns:repeat(2,1fr);gap:clamp(10px,2.4vw,18px);}
-    .tile.c1,.tile.c4,.tile.c5,.tile.c7,.tile.c8{grid-column:auto;}
-    .tiles-note{grid-column:1 / -1;}
+    .tiles{display:block;}
+    .close-mid{grid-template-columns:1fr;gap:clamp(28px,7vh,54px);
+      margin:clamp(60px,12vh,120px) 0;}
+    .close-mid .clock{font-size:14vw;gap:8vw;}
+    .close-mid .clock.l,.close-mid .clock.r{justify-self:center;}
+    .close-still{justify-self:center;}
+    .tiles-row{display:flex;gap:var(--gg);overflow-x:auto;flex-wrap:nowrap;
+      scrollbar-width:none;-webkit-overflow-scrolling:touch;}
+    .tiles-row::-webkit-scrollbar{display:none;}
+    .tile.c1,.tile.c4,.tile.c5,.tile.c7,.tile.c8{grid-column:auto;flex:0 0 28.75vw;}
+    .tiles-note{grid-column:auto;margin-top:18px;}
     .mark-half{font-size:clamp(2.2rem,13vw,4rem);}
     .close-mid{flex-direction:column;}
     #thumb{display:none;}
@@ -371,7 +399,7 @@
     </div>
 
     <div class="tailroom"></div>
-    <span id="buildStamp" style="display:none">BUILD 27.09 21:39</span>
+    <span id="buildStamp" style="display:none">BUILD 27.09 21:49</span>
   </section>
 
 </main>
@@ -516,7 +544,12 @@
       d.appendChild(im);
       return d;
     }
-    SLOTS.forEach(function(slot, i){ host.appendChild(tile(CASES[i], slot)); });
+    // the tiles live in their own row element so that on narrow screens it can
+    // become a horizontal scroller without dragging the note along sideways;
+    // on wide screens display:contents keeps them in the page grid unchanged
+    var row = document.createElement('div'); row.className = 'tiles-row';
+    SLOTS.forEach(function(slot, i){ row.appendChild(tile(CASES[i], slot)); });
+    host.appendChild(row);
     var note = document.createElement('p');
     note.className = 'sm dim tiles-note';
     note.style.fontSize = 'clamp(14px,1.15vw,17px)';
@@ -826,7 +859,7 @@
   (function(){
     var cv = document.getElementById('heroFX');
     var chap = document.getElementById('chapter');
-    if(!cv || !chap || reduced || coarse) return;
+    if(!cv || !chap || reduced || coarse){ if(cv) cv.style.display = 'none'; return; }
 
     var ctx = cv.getContext('2d');
     var mcv = document.createElement('canvas');
