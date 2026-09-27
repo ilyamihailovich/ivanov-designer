@@ -364,7 +364,7 @@
     </div>
 
     <div class="tailroom"></div>
-    <span id="buildStamp" style="display:none">BUILD 27.09 20:46</span>
+    <span id="buildStamp" style="display:none">BUILD 27.09 20:52</span>
   </section>
 
 </main>
@@ -387,7 +387,7 @@
 
   // every unsticking takes this long — it was running at roughly half of it,
   // which is what made the effect read as a flicker rather than a morph
-  var GOO_TIME = 1.0;
+  var GOO_TIME = 0.85;
 
   var CASES = [
     {t:'Quoters Tennis Club', c:'Айдентика',           img:'quoters1.jpg'},
@@ -429,17 +429,27 @@
     return {id:id, blur:blur, cm:cm};
   }
 
-  var AMP = 26, OFF = -13, BLUR0 = 9;
+  var AMP = 26, OFF = -13, BLUR0 = 8;
 
   function revealText(el, delay){
     if(!el || el.__revealed) return null;
     el.__revealed = true;
     el.classList.add('shown');
 
-    // One filter per LINE rather than one for the whole block. A filter region
-    // is re-rendered in full on every frame its blur changes, so a line-sized
-    // region costs a fraction of a three-line one — this is the single biggest
-    // difference between this and the version that stuttered.
+    // Small copy gets a plain fade. An animated SVG filter re-renders its whole
+    // region on every frame, and there are two dozen small labels here — giving
+    // each of them a filter bought nothing visible and cost a great deal. The
+    // metaball is kept for the large type, where it actually reads.
+    var fs = parseFloat(getComputedStyle(el).fontSize) || 16;
+    if(fs < 30){
+      return gsap.fromTo(el, {opacity: 0, filter: 'blur(5px)'},
+        {opacity: 1, filter: 'blur(0px)', duration: GOO_TIME * .7, ease: EASE.glide,
+         delay: delay || 0, onComplete: function(){ el.style.filter = 'none'; }});
+    }
+
+    // One filter per LINE rather than one for the whole block: a filter region is
+    // re-rendered in full every frame its blur changes, so a line-sized region
+    // costs a fraction of a three-line one.
     // A line carrying a live child (the morphing word) must not be split:
     // SplitText rebuilds the markup and clones the child, which produced two
     // elements sharing one id — the swap then drove an empty duplicate.
@@ -459,7 +469,7 @@
       // tweened as an attribute by GSAP itself — no per-frame callback per line
       tl.to(g.blur, {attr: {stdDeviation: 0}, duration: GOO_TIME, ease: EASE.goo,
         onComplete: function(){ line.style.filter = 'none'; line.style.willChange = 'auto'; }
-      }, i * 0.1);
+      }, i * 0.14);
 
       var m = {amp: AMP, off: OFF};
       tl.to(m, {amp: 1, off: 0, duration: GOO_TIME * .35, ease: 'none',
@@ -614,7 +624,7 @@
     // Resolved up front: splitting the heading inserts divs inside it, and a
     // later '.op-1 div' lookup then found one of those instead of the surname,
     // which is why the surname never became visible.
-    var step = GOO_TIME * 0.42, at = 0.1;
+    var step = GOO_TIME * 0.62, at = 0.1;
     var order = [
       document.querySelector('.op-note .sm'),
       document.querySelector('.op-1 h1'),
@@ -870,11 +880,16 @@
       });
       src.dispatchEvent(ev);
     }
+    // The simulation injects dye on mousemove only while it considers the pointer
+    // pressed — it raises that flag on mousedown and drops it on mouseup. Moving
+    // the mouse without clicking therefore produced nothing whatsoever. One
+    // synthetic press at the start leaves it permanently in the drawing state,
+    // and no mouseup is ever sent.
+    var armed = false;
     chap.addEventListener('pointermove', function(e){
-      forward('pointermove', e); forwardMouse('mousemove', e);
-    }, {passive: true});
-    chap.addEventListener('pointerdown', function(e){
-      forward('pointerdown', e); forwardMouse('mousedown', e);
+      if(!armed){ armed = true; forwardMouse('mousedown', e); }
+      forwardMouse('mousemove', e);
+      forward('pointermove', e);
     }, {passive: true});
 
     var visible = true;
