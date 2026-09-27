@@ -50,7 +50,7 @@
      everything read as over-inked and squashed. */
   .xl,.lg{font-size:min(11.5vw,150px);font-weight:500;line-height:.895;letter-spacing:-.052em;margin:0;}
   .md{font-size:min(6vw,64px);font-weight:500;line-height:.9;letter-spacing:-.05em;margin:0;}
-  .sm{font-size:15px;font-weight:500;letter-spacing:-.008em;line-height:1.2;}
+  .sm{font-size:16px;font-weight:500;letter-spacing:-.008em;line-height:1.22;}
   .sm.dim{color:var(--dim);}
 
   .pad{padding:0 var(--gut);}
@@ -101,9 +101,12 @@
   #fluidSrc{position:absolute;top:0;left:0;width:1px;height:1px;opacity:0;pointer-events:none;}
   /* The opening alternates between two columns — the left gutter and a second
      column at 35.7vw — which is what gives the reference its stagger. */
-  .op-note{position:relative;z-index:2;margin-left:var(--col);padding-top:clamp(8px,1.6vh,16px);}
+  /* both sit against the right edge of the statement column and start level
+     with the top of the name */
+  .op-note{position:absolute;z-index:3;left:var(--col);top:clamp(14px,3vh,34px);}
   .op-1{position:relative;z-index:2;margin-top:clamp(110px,28vh,290px);}
-  .op-role{position:relative;z-index:2;margin-top:calc(-1 * clamp(14px,2.6vh,34px));}
+  .chapter{position:relative;}
+  .op-role{position:absolute;z-index:3;right:clamp(15px,4.1vw,64px);top:clamp(110px,28vh,290px);text-align:right;}
   .stmt{position:relative;z-index:2;padding:clamp(2px,.6vh,8px) 0 clamp(60px,13vh,170px);}
   .stmt > div, .op-1 > div{white-space:nowrap;}
   .col-l{margin-left:clamp(22px,6vw,110px);}
@@ -113,17 +116,23 @@
 
   /* ---------- five squares ---------- */
   /* the loose one sits left of the rule, the run of four to the right of it */
-  .tiles{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:clamp(16px,2.4vw,40px);
-    position:relative;z-index:2;margin:clamp(20px,5vh,60px) 0 0;width:100%;margin-left:0;}
+  /* six tracks: the loose cover in the first, an empty second for the rule to
+     breathe, then the run of four */
+  .tiles{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:clamp(20px,3vw,52px);
+    position:relative;z-index:2;margin:clamp(20px,5vh,60px) 0 0;width:100%;margin-left:0;
+    max-width:min(1180px,96vw);}
   .tile{aspect-ratio:1/1;background:var(--ghost);overflow:hidden;position:relative;}
   .tile img{width:100%;height:100%;object-fit:cover;}
   .tile.gap{background:none;}
-  .tiles-note{grid-column:3 / 6;margin-top:14px;max-width:44ch;}
+  /* starts on the third photo counting from the right */
+  .tiles-note{grid-column:4 / 7;margin-top:18px;max-width:44ch;}
 
   .stmt2{position:relative;z-index:2;padding:clamp(60px,14vh,180px) 0 clamp(20px,5vh,60px);}
   .t-a{margin-left:clamp(50px,9vw,170px);}
   .t-b{margin-left:var(--col);}
   .t-c{margin-left:0;}
+  /* lines up under the 'ю' of the word above it */
+  .t-d{margin-left:7.1em;}
 
   /* ---------- work / globe ---------- */
   .featured{position:relative;margin-top:clamp(60px,14vh,180px);}
@@ -189,8 +198,7 @@
   /* ranged left and set on the same margin as the closing word, instead of
      being pushed out to the edge of the screen */
   .close-aside{margin-top:clamp(50px,10vh,130px);display:flex;flex-direction:column;
-    align-items:flex-start;text-align:left;gap:clamp(18px,3.4vh,40px);
-    margin-left:clamp(90px,15vw,260px);}
+    align-items:center;text-align:center;gap:clamp(18px,3.4vh,40px);}
   .close-aside .sm{font-size:clamp(15px,1.35vw,20px);line-height:1.25;}
   .socials{display:flex;gap:12px;margin-top:clamp(46px,9vh,110px);justify-content:center;}
   .socials a{width:66px;height:66px;border-radius:50%;border:1px solid var(--hair);
@@ -261,7 +269,7 @@
       <div class="lg col-l" data-goo>Снимаю,</div>
       <div class="lg col-l" data-goo>собираю</div>
       <div class="lg col-l" data-goo>и оживляю</div>
-      <div class="lg col-r blk" data-goo><span id="morphWord" style="visibility:hidden">бренды</span><span>,</span></div>
+      <div class="lg col-r blk" data-goo data-nosplit><span id="morphWord" style="visibility:hidden">бренды</span>,</div>
       <div class="lg col-r" data-goo>продукты</div>
       <div class="lg col-r ind" data-goo>и людей.</div>
     </div>
@@ -271,7 +279,8 @@
     <div class="stmt2">
       <div class="lg t-a" data-goo>Лучшие</div>
       <div class="lg t-b" data-goo>идеи</div>
-      <div class="lg t-c" data-goo>заслуживают реализации.</div>
+      <div class="lg t-c" data-goo>заслуживают</div>
+      <div class="lg t-d" data-goo>реализации.</div>
     </div>
   </section>
 
@@ -335,7 +344,7 @@
     </div>
 
     <div class="tailroom"></div>
-    <span id="buildStamp" style="display:none">BUILD 27.09 19:53</span>
+    <span id="buildStamp" style="display:none">BUILD 27.09 20:23</span>
   </section>
 
 </main>
@@ -411,8 +420,11 @@
     // is re-rendered in full on every frame its blur changes, so a line-sized
     // region costs a fraction of a three-line one — this is the single biggest
     // difference between this and the version that stuttered.
+    // A line carrying a live child (the morphing word) must not be split:
+    // SplitText rebuilds the markup and clones the child, which produced two
+    // elements sharing one id — the swap then drove an empty duplicate.
     var lines = null;
-    if(window.SplitText){
+    if(window.SplitText && !el.hasAttribute('data-nosplit')){
       try{ lines = new SplitText(el, {type: 'lines'}).lines; }catch(e){ lines = null; }
     }
     var targets = (lines && lines.length) ? lines : [el];
@@ -586,13 +598,19 @@
     // Strictly in reading order, each one starting after the one above it has
     // had time to resolve — they used to all run at once, which both read as a
     // single blur and made every frame carry the whole block's filter work.
+    // Resolved up front: splitting the heading inserts divs inside it, and a
+    // later '.op-1 div' lookup then found one of those instead of the surname,
+    // which is why the surname never became visible.
     var step = GOO_TIME * 0.42, at = 0.1;
-    [ '.op-note .sm',
-      '.op-1 h1',
-      '.op-1 div',
-      '.op-role .sm'
-    ].forEach(function(sel){
-      tl.add(revealText(document.querySelector(sel)), at); at += step;
+    var order = [
+      document.querySelector('.op-note .sm'),
+      document.querySelector('.op-1 h1'),
+      document.querySelector('.op-1 > div'),
+      document.querySelector('.op-role .sm')
+    ];
+    order.forEach(function(el){
+      if(el) tl.add(revealText(el), at);
+      at += step;
     });
     document.querySelectorAll('.stmt > div').forEach(function(el){
       tl.add(revealText(el), at); at += step;
@@ -829,8 +847,21 @@
       });
       src.dispatchEvent(ev);
     }
-    chap.addEventListener('pointermove', function(e){ forward('pointermove', e); }, {passive: true});
-    chap.addEventListener('pointerdown', function(e){ forward('pointerdown', e); }, {passive: true});
+    // the library binds mousemove/mousedown, not the pointer events
+    function forwardMouse(type, e){
+      var r = chap.getBoundingClientRect();
+      var ev = new MouseEvent(type, {
+        clientX: e.clientX - r.left, clientY: e.clientY - r.top,
+        bubbles: true, cancelable: true, buttons: 1
+      });
+      src.dispatchEvent(ev);
+    }
+    chap.addEventListener('pointermove', function(e){
+      forward('pointermove', e); forwardMouse('mousemove', e);
+    }, {passive: true});
+    chap.addEventListener('pointerdown', function(e){
+      forward('pointerdown', e); forwardMouse('mousedown', e);
+    }, {passive: true});
 
     var visible = true;
     new IntersectionObserver(function(es){
@@ -859,13 +890,14 @@
     // fromTo, not from: a bare `from` leaves whatever state it was interrupted
     // in sitting on the element, which is how it froze as a parallelogram
     gsap.set(box, {rotateX: -70, rotateY: 24, scale: .74, opacity: 0});
-    ScrollTrigger.create({
-      trigger: box, start: 'top 95%', once: true,
-      onEnter: function(){
-        gsap.to(box, {rotateX: 0, rotateY: 0, scale: 1, opacity: 1,
-          duration: 1.4, ease: EASE.rise, onComplete: function(){ box.__live = true; }});
-      }
-    });
+    function fly(){
+      box.__live = false;
+      gsap.fromTo(box, {rotateX: -70, rotateY: 24, scale: .74, opacity: 0},
+        {rotateX: 0, rotateY: 0, scale: 1, opacity: 1, duration: 1.4, ease: EASE.rise,
+         overwrite: 'auto', onComplete: function(){ box.__live = true; }});
+    }
+    // plays again on every arrival rather than once for the life of the page
+    ScrollTrigger.create({trigger: box, start: 'top 95%', onEnter: fly, onEnterBack: fly});
     if(!coarse){
       var qx = gsap.quickTo(box, 'rotateY', {duration: .9, ease: 'power3'});
       var qy = gsap.quickTo(box, 'rotateX', {duration: .9, ease: 'power3'});
@@ -905,6 +937,8 @@
   (function(){
     var h = document.getElementById('clockH'), m = document.getElementById('clockM');
     if(!h || !m) return;
+    // built synchronously here: the spans that carry the spacing used to be
+    // created by the first interval tick, so the row sat clumped until then
     function tick(){
       var d = new Date();
       h.innerHTML = '<span>(</span><span>' + String(d.getHours()).padStart(2,'0') + '</span><span>:</span>';
@@ -970,8 +1004,7 @@
     // scatter of cards with holes between them, so the covers repeat
     var CASES = [];
     for(var q = 0; q < 22; q++) CASES.push(SRC[q % SRC.length]);
-    // a third of the former spacing between covers, tiles unchanged
-    var RADIUS = 0.72, TILE = 0.52;
+    var RADIUS = 2.05, TILE = 0.52;
 
     var renderer = new THREE.WebGLRenderer({canvas: canvas, antialias: true, alpha: true});
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
@@ -1047,10 +1080,16 @@
       // grow drives the climb from below the fold; lift takes it off the top
       // back to the earlier behaviour: the cluster rises from below and opens
       // out as a whole. Only the packing changed — see RADIUS below.
+      // Packing is a function of how far the cluster is from centre stage:
+      // tight while it is arriving or leaving, at its natural spacing whenever
+      // it holds the middle of the screen.
       var grow = window.__globeGrow || 0;
       var lift = window.__globeLift || 0;
-      var sc = 0.62 + grow * 0.34;
-      group.scale.set(sc, sc, sc);
+      var settled = grow * (1 - lift);
+      var spread = 0.34 + settled * 0.66;
+      for(var t = 0; t < tiles.length; t++){
+        tiles[t].mesh.position.copy(tiles[t].dir).multiplyScalar(RADIUS * spread);
+      }
       group.position.y = (1 - grow) * -4.6 + lift * 5.4;
 
       if(!dragging){
