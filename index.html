@@ -49,7 +49,7 @@
      everything read as over-inked and squashed. */
   .xl,.lg{font-size:min(11.5vw,150px);font-weight:500;line-height:.895;letter-spacing:-.052em;margin:0;}
   .md{font-size:min(6vw,64px);font-weight:500;line-height:.9;letter-spacing:-.05em;margin:0;}
-  .sm{font-size:11px;font-weight:500;letter-spacing:-.009em;line-height:1.02;}
+  .sm{font-size:13.5px;font-weight:500;letter-spacing:-.009em;line-height:1.14;}
   .sm.dim{color:var(--dim);}
 
   .pad{padding:0 var(--gut);}
@@ -67,8 +67,9 @@
   .corner{position:fixed;z-index:8;}
   .corner.tl{top:clamp(12px,2.2vh,22px);left:var(--gut);}
   .corner.tr{top:clamp(10px,2vh,18px);right:var(--gut);}
-  .menu-pill{background:var(--ink);color:var(--paper);border-radius:999px;padding:8px 18px;
-    font-size:11.5px;font-weight:600;transition:background .9s var(--eo), color .9s var(--eo);}
+  .menu-pill{background:var(--ink);color:var(--paper);border-radius:999px;padding:10px 22px;
+    font-size:12px;font-weight:600;line-height:1;white-space:nowrap;display:inline-block;
+    transition:background .9s var(--eo), color .9s var(--eo);}
 
   /* the hairline runs from the top of the page down to the end of the statements,
      the way the reference threads one rule through its opening chapter */
@@ -92,12 +93,14 @@
 
   /* ---------- opening ---------- */
   .chapter{position:relative;}
-  #heroFX{position:absolute;top:0;left:0;right:0;height:100svh;z-index:0;pointer-events:none;}
+  #heroFX{position:absolute;top:0;left:0;right:0;height:100svh;z-index:0;pointer-events:none;
+    -webkit-mask:url(#brushMask);mask:url(#brushMask);}
+  #heroFX img{position:absolute;object-fit:cover;}
   /* The opening alternates between two columns — the left gutter and a second
      column at 35.7vw — which is what gives the reference its stagger. */
   .op-note{position:relative;z-index:2;margin-left:var(--col);padding-top:clamp(8px,1.6vh,16px);}
   .op-1{position:relative;z-index:2;margin-top:clamp(110px,28vh,290px);}
-  .op-role{position:relative;z-index:2;margin-top:clamp(8px,1.4vh,16px);}
+  .op-role{position:relative;z-index:2;margin-top:calc(-1 * clamp(14px,2.6vh,34px));}
   .stmt{position:relative;z-index:2;padding:clamp(2px,.6vh,8px) 0 clamp(60px,13vh,170px);}
   .stmt > div, .op-1 > div{white-space:nowrap;}
   .col-l{margin-left:clamp(22px,6vw,110px);}
@@ -106,9 +109,9 @@
   .blk{margin-top:.3em;}
 
   /* ---------- five squares ---------- */
-  .tiles{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:clamp(8px,1.2vw,16px);
-    position:relative;z-index:2;margin:clamp(20px,5vh,60px) 0 0;max-width:min(1100px,92vw);
-    margin-left:var(--col);}
+  /* the loose one sits left of the rule, the run of four to the right of it */
+  .tiles{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:clamp(16px,2.4vw,40px);
+    position:relative;z-index:2;margin:clamp(20px,5vh,60px) 0 0;width:100%;margin-left:0;}
   .tile{aspect-ratio:1/1;background:var(--ghost);overflow:hidden;position:relative;}
   .tile img{width:100%;height:100%;object-fit:cover;}
   .tile.gap{background:none;}
@@ -139,10 +142,10 @@
 
   /* ---------- case index: a narrow column, not the full width ---------- */
   .band{padding:clamp(80px,18vh,220px) 0;}
-  .idx-wrap{max-width:min(520px,84vw);margin:0 auto;}
+  .idx-wrap{max-width:min(1040px,92vw);margin:0 auto;}
   .idx{border-top:1px solid var(--hair);margin-top:clamp(60px,12vh,150px);}
   .idx-row{display:grid;grid-template-columns:3ch 1fr auto;gap:clamp(10px,2.4vw,34px);align-items:center;
-    padding:clamp(12px,1.9vh,20px) 0;border-bottom:1px solid var(--hair);cursor:pointer;
+    padding:clamp(5px,.8vh,10px) 0;border-bottom:1px solid var(--hair);cursor:pointer;
     transition:opacity .35s var(--eo);}
   .idx.hovered .idx-row{opacity:.3;}
   .idx.hovered .idx-row.on{opacity:1;}
@@ -170,7 +173,7 @@
   /* one shared gap between every bracket, digit and colon, so the row reads as
      an evenly spaced expression rather than clumps */
   .close-mid .clock{font-size:min(11vw,140px);font-weight:500;letter-spacing:-.04em;
-    display:flex;align-items:center;gap:clamp(22px,4.6vw,72px);white-space:nowrap;}
+    display:flex;align-items:center;gap:clamp(34px,7vw,120px);white-space:nowrap;}
   .close-mid .clock.l{justify-self:end;}
   .close-mid .clock.r{justify-self:start;}
   .close-still{width:clamp(150px,17vw,280px);aspect-ratio:3/4;overflow:hidden;background:var(--ghost);justify-self:center;}
@@ -178,11 +181,14 @@
   .c-c{margin-left:clamp(20px,5vw,90px);}
   .c-d{margin-left:clamp(90px,15vw,260px);}
   /* three columns spread across the page instead of piling up on the left edge */
-  .close-aside{margin-top:clamp(50px,10vh,130px);display:grid;
-    grid-template-columns:repeat(3,1fr);gap:clamp(16px,4vw,60px);max-width:min(1100px,94vw);margin-left:auto;margin-right:auto;}
+  /* one column, ranged right, at reading size rather than caption size */
+  .close-aside{margin-top:clamp(50px,10vh,130px);display:flex;flex-direction:column;
+    align-items:flex-end;text-align:right;gap:clamp(18px,3.4vh,40px);}
+  .close-aside .sm{font-size:clamp(15px,1.35vw,20px);line-height:1.25;}
   .socials{display:flex;gap:12px;margin-top:clamp(46px,9vh,110px);justify-content:center;}
-  .socials a{width:62px;height:62px;border-radius:50%;border:1px solid var(--hair);
-    display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600;
+  .socials a{width:66px;height:66px;border-radius:50%;border:1px solid var(--hair);
+    display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:600;
+    letter-spacing:.06em;text-transform:uppercase;
     transition:background .3s var(--eo), color .3s var(--eo), border-color .3s var(--eo);}
   .socials a:hover{background:var(--ink);color:var(--paper);border-color:var(--ink);}
   /* room for the wordmark to come together underneath everything */
@@ -207,7 +213,19 @@
   }
 </style>
 
-<svg width="0" height="0" aria-hidden="true" style="position:absolute"><defs id="fxDefs"></defs></svg>
+<svg width="0" height="0" aria-hidden="true" style="position:absolute">
+  <defs id="fxDefs">
+    <!-- The same weld as the type: blur the discs until they touch, then a hard
+         alpha threshold turns the overlap into one outline. sRGB keeps it cheap. -->
+    <filter id="brushGoo" x="-18%" y="-18%" width="136%" height="136%" color-interpolation-filters="sRGB">
+      <feGaussianBlur in="SourceGraphic" stdDeviation="16" result="b"></feGaussianBlur>
+      <feColorMatrix in="b" type="matrix" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 22 -10"></feColorMatrix>
+    </filter>
+    <mask id="brushMask" maskUnits="userSpaceOnUse" x="0" y="0" width="4000" height="4000">
+      <g id="brushBlobs" filter="url(#brushGoo)"></g>
+    </mask>
+  </defs>
+</svg>
 
 <div id="pre"><div id="preNum">0<span>%</span></div></div>
 
@@ -229,7 +247,7 @@
     <div id="spine2"></div>
     <div id="spine3"></div>
     <div id="spineCap">’26</div>
-    <canvas id="heroFX"></canvas>
+    <div id="heroFX" aria-hidden="true"></div>
 
     <div class="op-note"><span class="sm dim" data-goo>Россия<br>SMM · Дизайн · Фото</span></div>
 
@@ -274,8 +292,8 @@
   <section class="band pad" id="cases">
     <div class="idx-wrap">
       <h2 class="lg" data-goo style="margin-left:0;">Кейсы</h2>
-      <div class="lg" data-goo style="margin-left:clamp(46px,10vw,210px);">и&nbsp;последние</div>
-      <div class="lg" data-goo style="margin-left:clamp(18px,5vw,110px);">работы</div>
+      <div class="lg" data-goo style="margin-left:clamp(46px,10vw,210px);">последние</div>
+      <div class="lg" data-goo style="margin-left:clamp(18px,5vw,110px);">и&nbsp;работы</div>
       <div class="idx-holder">
         <div class="idx" id="caseIndex"></div>
         <div id="thumb"><img alt=""></div>
@@ -298,9 +316,8 @@
     <div class="lg c-d" data-goo>кадром.</div>
 
     <div class="socials">
-      <a href="https://t.me/llyaMihailovich" target="_blank" rel="noopener" data-goo>Tg</a>
-      <a href="https://www.instagram.com/llyamihailovich" target="_blank" rel="noopener" data-goo>In</a>
-      <a href="https://ivanov-designer.ru" target="_blank" rel="noopener" data-goo>Web</a>
+      <a href="https://t.me/llyaMihailovich" target="_blank" rel="noopener" data-goo>TG</a>
+      <a href="https://www.instagram.com/llyamihailovich" target="_blank" rel="noopener" data-goo>IG</a>
     </div>
 
     <div class="close-aside">
@@ -319,7 +336,7 @@
     </div>
 
     <div class="tailroom"></div>
-    <span id="buildStamp" style="display:none">BUILD 27.09 19:05</span>
+    <span id="buildStamp" style="display:none">BUILD 27.09 19:43</span>
   </section>
 
 </main>
@@ -423,7 +440,8 @@
 
   function armReveals(root){
     (root || document).querySelectorAll('[data-goo]').forEach(function(el){
-      if(el.__armed) return;
+      if(el.__armed || el.__revealed) return;
+      if(el.closest('.op-note, .op-1, .op-role, .stmt')) return;   // owned by the intro
       el.__armed = true;
       ScrollTrigger.create({trigger: el, start: 'top 94%', once: true,
         onEnter: function(){ revealText(el, 0); }});
@@ -437,7 +455,7 @@
     // the reference leaves columns deliberately empty, so the row reads as a
     // considered placement rather than a filled grid
     // one on its own at the left, then a gap, then a run of four
-    var PLAN = [CASES[0], null, CASES[1], CASES[2], CASES[3], CASES[4]];
+    var PLAN = [CASES[0], null, CASES[1], CASES[2], CASES[3], CASES[4]];  // col 1 sits left of the rule
     PLAN.forEach(function(c){
       var d = document.createElement('div');
       d.className = 'tile' + (c ? '' : ' gap');
@@ -446,6 +464,7 @@
     });
     var note = document.createElement('p');
     note.className = 'sm dim tiles-note';
+    note.style.fontSize = 'clamp(14px,1.15vw,17px)';
     note.setAttribute('data-goo','');
     note.textContent = 'Снимаю, обрабатываю и собираю визуал для брендов — от постановки света до публикации, с упором на ясность и ритм.';
     host.appendChild(note);
@@ -510,6 +529,7 @@
     var g = makeGoo();
     el.style.display = 'inline-block';
     el.style.visibility = 'visible';
+    el.style.marginRight = '-0.06em';   // the filter box was pushing the comma off
     el.style.filter = 'url(#' + g.id + ')';
     var st = {b: 0};
     function set(){ g.blur.setAttribute('stdDeviation', st.b); }
@@ -534,7 +554,7 @@
       var stmt = document.querySelector('.stmt');
       var tiles = document.getElementById('tiles');
       var stmt2 = document.querySelector('.stmt2');
-      var pad = 8;   // just enough to clear the type, not a visible break
+      var pad = 12;  // a clean break at the type, not a visible interruption
 
       var a1 = 0, b1 = stmt ? stmt.offsetTop - pad : chap.offsetHeight;
       sp.style.top = a1 + 'px';
@@ -566,10 +586,20 @@
     var tl = gsap.timeline();
     tl.add(revealText(document.querySelector('.corner.tl .sm')), .05);
     tl.add(revealText(document.querySelector('.menu-pill')), .12);
-    tl.add(revealText(document.querySelector('.op-note .sm')), .16);
-    tl.add(revealText(document.querySelector('.op-1 h1')), .24);
-    tl.add(revealText(document.querySelector('.op-1 div')), .32);
-    tl.add(revealText(document.querySelector('.op-role .sm')), .4);
+    // Strictly in reading order, each one starting after the one above it has
+    // had time to resolve — they used to all run at once, which both read as a
+    // single blur and made every frame carry the whole block's filter work.
+    var step = GOO_TIME * 0.42, at = 0.1;
+    [ '.op-note .sm',
+      '.op-1 h1',
+      '.op-1 div',
+      '.op-role .sm'
+    ].forEach(function(sel){
+      tl.add(revealText(document.querySelector(sel)), at); at += step;
+    });
+    document.querySelectorAll('.stmt > div').forEach(function(el){
+      tl.add(revealText(el), at); at += step;
+    });
   }
 
   /* ---------- wordmark ----------
@@ -732,123 +762,58 @@
      same organic mass without needing a threshold, and work everywhere.
      ============================================================ */
   (function(){
-    var cv = document.getElementById('heroFX');
+    var layer = document.getElementById('heroFX');
+    var blobs = document.getElementById('brushBlobs');
     var chap = document.getElementById('chapter');
-    if(!cv || !chap || reduced || coarse) return;
+    if(!layer || !blobs || !chap || reduced || coarse) return;
 
-    var ctx = cv.getContext('2d');
-    // The blobs are accumulated on a canvas of their own. A compositing operator
-    // applies per draw call, so masking with one blob at a time erased everything
-    // outside it and the next blob erased everything outside itself — three blobs
-    // left their empty intersection. Built here as one picture, the mask is then
-    // applied to the covers in a single operation.
-    var mcv = document.createElement('canvas');
-    var mctx = mcv.getContext('2d');
-    var dpr = Math.min(window.devicePixelRatio, 2);
-    var W = 0, H = 0, boxes = [], imgs = [];
-
-    CASES.forEach(function(c){ var im = new Image(); im.src = c.img; imgs.push(im); });
+    // The covers sit behind the page and are only ever uncovered by the brush.
     var SPOTS = [
-      [.10,.10,.24],[.34,.30,.20],[.60,.12,.22],[.82,.26,.26],
-      [.16,.52,.22],[.46,.60,.28],[.74,.56,.20],[.30,.82,.24]
+      [.08,.08,.24],[.34,.28,.20],[.60,.10,.22],[.82,.24,.26],
+      [.14,.50,.22],[.44,.58,.28],[.72,.54,.20],[.28,.80,.24]
     ];
-    function place(){
-      boxes = imgs.map(function(im, i){
-        var s = SPOTS[i % SPOTS.length];
-        var w = Math.max(150, W * s[2]);
-        return {im: im, x: s[0] * W, y: s[1] * H, w: w, h: w * .72};
-      });
-    }
-    function size(){
-      // only the first screen, not the whole chapter — a canvas the height of the
-      // entire section was being cleared and repainted on every single frame
-      W = chap.clientWidth; H = Math.min(window.innerHeight, chap.clientHeight);
-      cv.width = Math.round(W * dpr); cv.height = Math.round(H * dpr);
-      cv.style.width = W + 'px'; cv.style.height = H + 'px';
-      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-      mcv.width = cv.width; mcv.height = cv.height;
-      mctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-      place();
-    }
-    new ResizeObserver(size).observe(chap);
-    size();
+    CASES.forEach(function(c, i){
+      var sp = SPOTS[i % SPOTS.length];
+      var im = document.createElement('img');
+      im.src = c.img; im.alt = '';
+      im.style.left = (sp[0] * 100) + '%';
+      im.style.top  = (sp[1] * 100) + '%';
+      im.style.width = (sp[2] * 100) + 'vw';
+      im.style.height = (sp[2] * 72) + 'vw';
+      layer.appendChild(im);
+    });
 
-    var blobs = [], mx = -999, my = -999, inside = false, lastSpawn = 0;
+    // A short chain of discs trailing the pointer. The filter above fuses them,
+    // so what shows is one travelling shape rather than a row of beads — the
+    // threshold is the part a canvas cannot do, since contrast() leaves the
+    // alpha of a transparent canvas untouched in Safari.
+    var N = 11, pts = [], NS = 'http://www.w3.org/2000/svg';
+    for(var i = 0; i < N; i++){
+      var c = document.createElementNS(NS, 'circle');
+      c.setAttribute('fill', '#fff');
+      c.setAttribute('r', String(64 - i * 3.4));
+      blobs.appendChild(c);
+      pts.push({x: -600, y: -600, el: c});
+    }
+    var mx = -600, my = -600, live = false;
     chap.addEventListener('pointermove', function(e){
-      var r = chap.getBoundingClientRect();
-      mx = e.clientX - r.left; my = e.clientY - r.top; inside = true;
-      var now = performance.now();
-      if(now - lastSpawn > 14){
-        lastSpawn = now;
-        // wide scatter and a generous radius: the smear should read as a spill,
-        // not as a dot following the cursor
-        // One wide stamp per step, jittered only slightly. Small scattered discs
-        // were what read as a string of beads instead of a brush; overlapping
-        // wide ones weld into a single travelling shape.
-        blobs.push({x: mx + (Math.random()-.5)*36, y: my + (Math.random()-.5)*36,
-                    r: 150 + Math.random()*60, life: 1});
-        if(blobs.length > 26) blobs.shift();
-      }
+      mx = e.clientX + window.scrollX;
+      my = e.clientY - chap.getBoundingClientRect().top;
+      live = true;
     }, {passive: true});
-    chap.addEventListener('pointerleave', function(){ inside = false; });
-
-    var visible = true;
-    new IntersectionObserver(function(es){
-      es.forEach(function(en){ visible = en.isIntersecting; });
-    }, {threshold: .01}).observe(chap);
+    chap.addEventListener('pointerleave', function(){ live = false; });
 
     gsap.ticker.add(function(){
-      if(!visible) return;
-      ctx.clearRect(0, 0, W, H);
-      for(var i = blobs.length - 1; i >= 0; i--){
-        blobs[i].life -= 0.016;   // a brush stroke, not a smoke trail
-        if(blobs[i].life <= 0) blobs.splice(i, 1);
+      var tx = live ? mx : -600, ty = live ? my : -600;
+      for(var i = 0; i < pts.length; i++){
+        var p = pts[i];
+        var gx = i === 0 ? tx : pts[i-1].x;
+        var gy = i === 0 ? ty : pts[i-1].y;
+        p.x += (gx - p.x) * 0.36;
+        p.y += (gy - p.y) * 0.36;
+        p.el.setAttribute('cx', p.x.toFixed(1));
+        p.el.setAttribute('cy', p.y.toFixed(1));
       }
-      if(!blobs.length && !inside) return;
-
-      // Covers first, then the blob shape as a mask. The previous build drew the
-      // covers one by one with `source-in`, and that operator erases everything
-      // outside each new drawing — so image two wiped away the mask image one had
-      // just used, and by the last one nothing survived. `destination-in` applies
-      // the shape once, to the finished picture.
-      // 1. the mask: blobs simply pile up, nothing is being cut yet
-      mctx.clearRect(0, 0, W, H);
-      blobs.forEach(function(b){
-        var a = Math.max(0, Math.min(1, b.life));
-        var r = b.r * (0.6 + 0.4 * a);
-        var g = mctx.createRadialGradient(b.x, b.y, 0, b.x, b.y, r);
-        // nearly flat to the rim, then a short falloff: overlapping discs then
-        // read as one welded shape with a crisp outline, the way the metaball
-        // filter behaves on the text — a long feather looked like fog instead
-        // flat almost to the rim, then a very short falloff — the same hard
-        // threshold the metaball filter gives the text
-        g.addColorStop(0,   'rgba(255,255,255,' + a + ')');
-        g.addColorStop(.86, 'rgba(255,255,255,' + a + ')');
-        g.addColorStop(.97, 'rgba(255,255,255,' + (a * 0.5) + ')');
-        g.addColorStop(1,   'rgba(255,255,255,0)');
-        mctx.fillStyle = g;
-        mctx.beginPath(); mctx.arc(b.x, b.y, r, 0, Math.PI * 2); mctx.fill();
-      });
-      if(inside){
-        var gg = mctx.createRadialGradient(mx, my, 0, mx, my, 150);
-        gg.addColorStop(0, 'rgba(255,255,255,1)');
-        gg.addColorStop(.74, 'rgba(255,255,255,.95)');
-        gg.addColorStop(.9, 'rgba(255,255,255,.4)');
-        gg.addColorStop(1, 'rgba(255,255,255,0)');
-        mctx.fillStyle = gg;
-        mctx.beginPath(); mctx.arc(mx, my, 150, 0, Math.PI * 2); mctx.fill();
-      }
-
-      // 2. the covers, laid down flat
-      ctx.globalCompositeOperation = 'source-over';
-      boxes.forEach(function(b){
-        if(b.im.complete && b.im.naturalWidth) ctx.drawImage(b.im, b.x, b.y, b.w, b.h);
-      });
-
-      // 3. the mask, applied once
-      ctx.globalCompositeOperation = 'destination-in';
-      ctx.drawImage(mcv, 0, 0, W, H);
-      ctx.globalCompositeOperation = 'source-over';
     });
   })();
 
@@ -955,6 +920,7 @@
     scene.add(group);
 
     var loader = new THREE.TextureLoader();
+    var tiles = [];
     var n = Math.max(CASES.length, 2);
     var golden = Math.PI * (3 - Math.sqrt(5));
 
@@ -970,6 +936,7 @@
       tile.lookAt(0,0,0);
       tile.rotateY(Math.PI);
       group.add(tile);
+      tiles.push({mesh: tile, dir: pos.clone().normalize()});
       loader.load(item.img, function(tex){
         tex.colorSpace = THREE.SRGBColorSpace;
         tex.anisotropy = Math.min(4, renderer.capabilities.getMaxAnisotropy());
@@ -1014,11 +981,19 @@
       // driven by the section's beats rather than a bell over the whole pin:
       // it opens once the words have parted and leaves upward at the end
       // grow drives the climb from below the fold; lift takes it off the top
+      // The opening is carried by the distance between the covers, not by
+      // scaling the whole cluster: the sphere's radius grows a lot while each
+      // tile grows barely at all, so it starts packed and loosens out.
       var grow = window.__globeGrow || 0;
       var lift = window.__globeLift || 0;
-      var sc = 0.62 + grow * 0.34;
-      group.scale.set(sc, sc, sc);
-      group.position.y = (1 - grow) * -4.6 + lift * 5.4;
+      var spread = 0.46 + grow * 0.54;
+      for(var t = 0; t < tiles.length; t++){
+        var rec = tiles[t];
+        rec.mesh.position.copy(rec.dir).multiplyScalar(RADIUS * spread);
+        var ts = 0.82 + grow * 0.18;
+        rec.mesh.scale.set(ts, ts, ts);
+      }
+      group.position.y = lift * 5.4;
 
       if(!dragging){
         // it should never look parked: while the section holds it turns several
