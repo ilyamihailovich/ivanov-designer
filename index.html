@@ -4,7 +4,7 @@
 <meta name="description" content="Илья Иванов — SMM, графический дизайн и фотосъёмка полного цикла.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Golos+Text:wght@400;500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/lenis@1.3.21/dist/lenis.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/gsap.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/ScrollTrigger.min.js"></script>
@@ -28,7 +28,10 @@
   html{overflow-x:hidden;max-width:100vw;}
   body{
     margin:0;background:var(--paper);color:var(--ink);
-    font-family:'Inter',-apple-system,BlinkMacSystemFont,Arial,sans-serif;
+    /* Helvetica Neue first: on Apple hardware it is the nearest thing to the
+       Akzidenz-Grotesk the reference licenses, and its Cyrillic is native.
+       Golos Text covers everything else without buying a licence. */
+    font-family:'Helvetica Neue','Golos Text',Helvetica,Arial,sans-serif;
     font-size:13px;line-height:1.25;letter-spacing:-.02em;font-weight:500;
     -webkit-font-smoothing:antialiased;overflow-x:hidden;max-width:100vw;
     transition:background .9s var(--eo), color .9s var(--eo);
@@ -152,13 +155,13 @@
   .idx-holder{position:relative;}
 
   /* ---------- closing statement ---------- */
-  .close{padding:clamp(80px,18vh,220px) 0 clamp(40px,9vh,110px);position:relative;}
+  .close{padding:clamp(130px,26vh,320px) 0 clamp(60px,12vh,150px);position:relative;}
   .c-a{margin-left:clamp(40px,7vw,140px);}
   .c-b{margin-left:clamp(120px,19vw,330px);}
    /* the hour sits to the left of a dead-centre still and the minutes to its
      right, the way the reference frames its image with the clock */
   .close-mid{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;
-    margin:clamp(40px,9vh,110px) 0;gap:clamp(20px,5vw,70px);}
+    margin:clamp(80px,17vh,220px) 0;gap:clamp(30px,7vw,110px);}
   .close-mid .clock{font-size:clamp(2.4rem,6.6vw,5.4rem);font-weight:600;letter-spacing:-.045em;}
   .close-mid .clock.l{justify-self:end;}
   .close-mid .clock.r{justify-self:start;}
@@ -239,7 +242,7 @@
     <div class="stmt2">
       <div class="lg t-a" data-goo>Лучшие</div>
       <div class="lg t-b" data-goo>идеи</div>
-      <div class="lg t-c" data-goo>заслуживают съёмки.</div>
+      <div class="lg t-c" data-goo>заслуживают реализации.</div>
     </div>
   </section>
 
@@ -252,17 +255,13 @@
         <span class="lg" id="workB">23—26</span>
       </div>
       <a href="#cases" class="work-link" id="workLink"><span>Перейти ко всем кейсам</span><i></i></a>
-      <div class="globe-foot">
-        <span class="sm dim" data-goo>Потяни, чтобы покрутить</span>
-        <span class="sm dim" data-goo id="globeCount">—</span>
-      </div>
     </div>
   </section>
 
   <!-- ============ CASE INDEX ============ -->
   <section class="band pad" id="cases">
     <div class="idx-wrap">
-      <h2 class="md" data-goo>Кейсы</h2>
+      <h2 class="lg" data-goo>Кейсы<br>и последние работы</h2>
       <div class="idx-holder">
         <div class="idx" id="caseIndex"></div>
         <div id="thumb"><img alt=""></div>
@@ -306,7 +305,7 @@
     </div>
 
     <div class="tailroom"></div>
-    <span class="sm dim" data-goo style="opacity:.55;">© Илья Иванов <b id="buildStamp" style="font-weight:500;">BUILD 27.09 17:03</b></span>
+    <span class="sm dim" data-goo style="opacity:.55;">© Илья Иванов <b id="buildStamp" style="font-weight:500;">BUILD 27.09 17:16</b></span>
   </section>
 
 </main>
@@ -509,9 +508,12 @@
     gsap.timeline({
       scrollTrigger: {
         trigger: document.body,
-        start: 'bottom bottom-=420',
+        start: 'bottom bottom-=380',
         end: 'bottom bottom',
-        scrub: .6, invalidateOnRefresh: true
+        scrub: .6, invalidateOnRefresh: true,
+        // measured after every other trigger, so the pinned section's spacer is
+        // already part of the page height — otherwise the join lands mid-page
+        refreshPriority: -10
       }
     })
     .to(L, {x: function(){ return (window.innerWidth/2 - L.offsetWidth) - L.offsetLeft; }, ease: 'none'}, 0)
@@ -521,7 +523,7 @@
 
     // the corner notes arrive afterwards, and they do use the unsticking animation
     ScrollTrigger.create({
-      trigger: document.body, start: 'bottom bottom-=60', once: true,
+      trigger: document.body, start: 'bottom bottom-=40', once: true, refreshPriority: -10,
       onEnter: function(){
         [fL, fR].forEach(function(el, i){
           if(!el) return;
@@ -553,38 +555,39 @@
     if(!A || !B || !stage) return;
     var rule = link.querySelector('i');
 
-    // pushed right out to the margins, so nothing on the sphere can reach the type
-    var spread = function(){ return Math.max(0, window.innerWidth / 2 - A.offsetWidth / 2 - 40); };
-    var spreadB = function(){ return Math.max(0, window.innerWidth / 2 - B.offsetWidth / 2 - 40); };
+    // as far apart as the words can go while still sitting whole on the screen:
+    // the previous figure pushed them past the edges and clipped them
+    var gap = function(){ return Math.max(16, Math.min(40, window.innerWidth * 0.03)); };
+    var spread  = function(){ return Math.max(0, (window.innerWidth - A.offsetWidth) / 2 - gap()); };
+    var spreadB = function(){ return Math.max(0, (window.innerWidth - B.offsetWidth) / 2 - gap()); };
 
-    window.__globeGrow = 0;
-    window.__globeLift = 0;
+    window.__globeGrow = 0;   // 0 = below the screen, 1 = centred
+    window.__globeLift = 0;   // 1 = gone off the top
+    window.__globeSpin = 0;   // extra rotation while it holds
 
     var tl = gsap.timeline({
       scrollTrigger: {
         trigger: stage, start: 'top top',
-        end: '+=' + Math.round(window.innerHeight * 3.2),
+        end: '+=' + Math.round(window.innerHeight * 2.4),
         pin: true, scrub: .8, invalidateOnRefresh: true
       }
     });
 
-    // 1 → 2: part to the margins
-    tl.to(A, {x: function(){ return -spread(); }, ease: EASE.glide, duration: .22}, 0)
-      .to(B, {x: function(){ return  spreadB(); }, ease: EASE.glide, duration: .22}, 0)
-      // the sphere only starts opening once the gap exists
-      .to(window, {__globeGrow: 1, ease: EASE.glide, duration: .3}, .2)
-      // 3: it holds, drifting, while the words stay parked at the edges
-      .to({}, {duration: .3})
-      // 4: the sphere leaves upward before the words move
-      .to(window, {__globeLift: 1, __globeGrow: .2, ease: EASE.glide, duration: .25}, '>')
-      // the words come back together
-      .to(A, {x: 0, ease: EASE.glide, duration: .22}, '>-0.08')
-      .to(B, {x: 0, ease: EASE.glide, duration: .22}, '<')
-      // and morph into the line: they melt out as it melts in, same place
-      .to([A, B], {opacity: 0, filter: 'blur(14px)', duration: .12}, '>-0.04')
-      .fromTo(link, {opacity: 0, filter: 'blur(16px)'}, {opacity: 1, filter: 'blur(0px)', duration: .16}, '<0.04')
-      // the rule draws itself under the new line
-      .to(rule, {width: 'min(420px, 62vw)', duration: .14, ease: EASE.glide}, '>');
+    // 1 → 2: the words part. Nothing is on screen in the middle yet.
+    tl.to(A, {x: function(){ return -spread(); }, ease: EASE.glide, duration: .18}, 0)
+      .to(B, {x: function(){ return  spreadB(); }, ease: EASE.glide, duration: .18}, 0)
+      // the sphere climbs in from below the fold into the gap they just made
+      .to(window, {__globeGrow: 1, ease: EASE.glide, duration: .26}, .14)
+      // 3: it holds centre screen — but keeps turning, and faster than its idle
+      .to(window, {__globeSpin: 1, ease: 'none', duration: .28}, '>')
+      // 4: it leaves off the top, and the words start rejoining as it goes
+      .to(window, {__globeLift: 1, ease: EASE.glide, duration: .2}, '>')
+      .to(A, {x: 0, ease: EASE.glide, duration: .16}, '<0.04')
+      .to(B, {x: 0, ease: EASE.glide, duration: .16}, '<')
+      // and morph into the line: they melt out exactly as it melts in
+      .to([A, B], {opacity: 0, filter: 'blur(14px)', duration: .1}, '>-0.03')
+      .fromTo(link, {opacity: 0, filter: 'blur(16px)'}, {opacity: 1, filter: 'blur(0px)', duration: .13}, '<0.03')
+      .to(rule, {width: 'min(420px, 62vw)', duration: .12, ease: EASE.glide}, '>');
   }
 
   /* ---------- theme: black exactly while the words stand at the edges ---------- */
@@ -593,7 +596,7 @@
     if(!stage) return;
     var root = document.documentElement;
     ScrollTrigger.create({
-      trigger: stage, start: 'top top', end: '+=' + Math.round(window.innerHeight * 3.2),
+      trigger: stage, start: 'top top', end: '+=' + Math.round(window.innerHeight * 2.4),
       scrub: true, invalidateOnRefresh: true,
       onUpdate: function(self){
         // on once the words have parted, off again once the link has formed
@@ -635,6 +638,13 @@
     if(!cv || !chap || reduced || coarse) return;
 
     var ctx = cv.getContext('2d');
+    // The blobs are accumulated on a canvas of their own. A compositing operator
+    // applies per draw call, so masking with one blob at a time erased everything
+    // outside it and the next blob erased everything outside itself — three blobs
+    // left their empty intersection. Built here as one picture, the mask is then
+    // applied to the covers in a single operation.
+    var mcv = document.createElement('canvas');
+    var mctx = mcv.getContext('2d');
     var dpr = Math.min(window.devicePixelRatio, 2);
     var W = 0, H = 0, boxes = [], imgs = [];
 
@@ -657,6 +667,8 @@
       cv.width = Math.round(W * dpr); cv.height = Math.round(H * dpr);
       cv.style.width = W + 'px'; cv.style.height = H + 'px';
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      mcv.width = cv.width; mcv.height = cv.height;
+      mctx.setTransform(dpr, 0, 0, dpr, 0, 0);
       place();
     }
     new ResizeObserver(size).observe(chap);
@@ -692,30 +704,41 @@
       }
       if(!blobs.length && !inside) return;
 
-      ctx.globalCompositeOperation = 'source-over';
+      // Covers first, then the blob shape as a mask. The previous build drew the
+      // covers one by one with `source-in`, and that operator erases everything
+      // outside each new drawing — so image two wiped away the mask image one had
+      // just used, and by the last one nothing survived. `destination-in` applies
+      // the shape once, to the finished picture.
+      // 1. the mask: blobs simply pile up, nothing is being cut yet
+      mctx.clearRect(0, 0, W, H);
       blobs.forEach(function(b){
         var a = Math.max(0, Math.min(1, b.life));
         var r = b.r * (0.6 + 0.4 * a);
-        var g = ctx.createRadialGradient(b.x, b.y, 0, b.x, b.y, r);
+        var g = mctx.createRadialGradient(b.x, b.y, 0, b.x, b.y, r);
         g.addColorStop(0,   'rgba(255,255,255,' + (a * 0.95) + ')');
         g.addColorStop(.55, 'rgba(255,255,255,' + (a * 0.55) + ')');
         g.addColorStop(1,   'rgba(255,255,255,0)');
-        ctx.fillStyle = g;
-        ctx.beginPath(); ctx.arc(b.x, b.y, r, 0, Math.PI*2); ctx.fill();
+        mctx.fillStyle = g;
+        mctx.beginPath(); mctx.arc(b.x, b.y, r, 0, Math.PI * 2); mctx.fill();
       });
       if(inside){
-        var gg = ctx.createRadialGradient(mx, my, 0, mx, my, 170);
+        var gg = mctx.createRadialGradient(mx, my, 0, mx, my, 210);
         gg.addColorStop(0, 'rgba(255,255,255,1)');
-        gg.addColorStop(.6, 'rgba(255,255,255,.6)');
+        gg.addColorStop(.62, 'rgba(255,255,255,.7)');
         gg.addColorStop(1, 'rgba(255,255,255,0)');
-        ctx.fillStyle = gg;
-        ctx.beginPath(); ctx.arc(mx, my, 170, 0, Math.PI*2); ctx.fill();
+        mctx.fillStyle = gg;
+        mctx.beginPath(); mctx.arc(mx, my, 210, 0, Math.PI * 2); mctx.fill();
       }
 
-      ctx.globalCompositeOperation = 'source-in';
+      // 2. the covers, laid down flat
+      ctx.globalCompositeOperation = 'source-over';
       boxes.forEach(function(b){
         if(b.im.complete && b.im.naturalWidth) ctx.drawImage(b.im, b.x, b.y, b.w, b.h);
       });
+
+      // 3. the mask, applied once
+      ctx.globalCompositeOperation = 'destination-in';
+      ctx.drawImage(mcv, 0, 0, W, H);
       ctx.globalCompositeOperation = 'source-over';
     });
   })();
@@ -726,8 +749,8 @@
     if(!h || !m) return;
     function tick(){
       var d = new Date();
-      h.textContent = '( ' + String(d.getHours()).padStart(2,'0');
-      m.textContent = String(d.getMinutes()).padStart(2,'0') + ' )';
+      h.textContent = '( ' + String(d.getHours()).padStart(2,'0') + ' :';
+      m.textContent = ': ' + String(d.getMinutes()).padStart(2,'0') + ' )';
     }
     tick(); setInterval(tick, 20000);
   })();
@@ -853,14 +876,18 @@
 
       // driven by the section's beats rather than a bell over the whole pin:
       // it opens once the words have parted and leaves upward at the end
+      // grow drives the climb from below the fold; lift takes it off the top
       var grow = window.__globeGrow || 0;
       var lift = window.__globeLift || 0;
-      var sc = 0.18 + grow * 0.74;
+      var sc = 0.62 + grow * 0.34;
       group.scale.set(sc, sc, sc);
-      group.position.y = lift * 5.2;
+      group.position.y = (1 - grow) * -4.6 + lift * 5.4;
 
       if(!dragging){
-        group.rotation.y += .075*dt + velX;
+        // it should never look parked: while the section holds it turns several
+        // times faster than its resting drift
+        var spin = window.__globeSpin || 0;
+        group.rotation.y += (.075 + spin * 0.55) * dt + velX;
         group.rotation.x += velY;
         velX *= .945; velY *= .945;
         group.rotation.x += (0 - group.rotation.x) * .85 * dt;
