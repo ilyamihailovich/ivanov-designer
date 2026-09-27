@@ -2,6 +2,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@400;600;800;900&family=Manrope:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/lenis@1.3.21/dist/lenis.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/gsap.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/ScrollTrigger.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/SplitText.min.js"></script>
@@ -856,7 +857,7 @@
 </section>
 
 <footer class="wrap">
-  <span>© IVANOV DESIGN — SMM &amp; graphic design <b id="buildStamp" style="font-weight:500;opacity:.55;">BUILD 27.09 14:26</b></span>
+  <span>© IVANOV DESIGN — SMM &amp; graphic design <b id="buildStamp" style="font-weight:500;opacity:.55;">BUILD 27.09 15:53</b></span>
   <span>*Instagram принадлежит Meta, признанной экстремистской и запрещённой на территории РФ</span>
 </footer>
 
@@ -970,6 +971,42 @@
   var reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   document.documentElement.classList.add('rvl-js');
   gsap.registerPlugin(ScrollTrigger);
+
+  // ---------- smooth scroll ----------
+  // Lenis replaces the browser's stepped scrolling with a weighted, inertial one. This is the single
+  // biggest contributor to how a motion-led site feels: every scroll-linked animation inherits the
+  // easing, so nothing snaps. It was previously removed because inside the artifact's sandboxed
+  // iframe it fought the host and dragged the page sideways on iOS; on our own domain there is no
+  // such conflict.
+  var lenis = null;
+  if(window.Lenis && !window.matchMedia('(prefers-reduced-motion: reduce)').matches){
+    lenis = new Lenis({
+      duration: 1.15,
+      // long, flat tail: the page keeps gliding after the finger or wheel stops
+      easing: function(t){ return Math.min(1, 1.001 - Math.pow(2, -10 * t)); },
+      smoothWheel: true,
+      syncTouch: false,          // native momentum on touch reads better than a simulated one
+      touchMultiplier: 1.6,
+      wheelMultiplier: 1.0
+    });
+    // ScrollTrigger must be told about every Lenis frame, or scrubbed animations lag behind
+    lenis.on('scroll', ScrollTrigger.update);
+    gsap.ticker.add(function(time){ lenis.raf(time * 1000); });
+    gsap.ticker.lagSmoothing(0);
+    window.lenis = lenis;
+
+    // anchors in the top bar should glide rather than jump
+    document.querySelectorAll('a[href^="#"]').forEach(function(a){
+      a.addEventListener('click', function(e){
+        var id = a.getAttribute('href');
+        if(!id || id === '#') return;
+        var target = document.querySelector(id);
+        if(!target) return;
+        e.preventDefault();
+        lenis.scrollTo(target, {offset: -80, duration: 1.4});
+      });
+    });
+  }
   ['SplitText','CustomEase','Observer','InertiaPlugin','DrawSVGPlugin','Flip'].forEach(function(n){
     if(window[n]) gsap.registerPlugin(window[n]);
   });
