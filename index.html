@@ -148,6 +148,7 @@
   .tile.gap{background:none;}
   /* begins under the third photo counting from the right */
   .tiles-note{grid-column:4 / 6;margin-top:22px;}
+  .goo-ch{display:inline-block;will-change:transform;}
   .tiles-row{display:contents;}
   .tile{aspect-ratio:1;overflow:hidden;background:var(--ghost);}
   .tile img{width:100%;height:100%;object-fit:cover;display:block;}
@@ -399,7 +400,7 @@
     </div>
 
     <div class="tailroom"></div>
-    <span id="buildStamp" style="display:none">BUILD 27.09 21:49</span>
+    <span id="buildStamp" style="display:none">BUILD 28.09 22:13</span>
   </section>
 
 </main>
@@ -475,46 +476,127 @@
   // stays white and pure black type stays black while the edges weld together.
   var GOO_BLUR = 7, GOO_CONTRAST = 12;
 
+  /* ============================================================
+     Goo text reveal, built the way the reference builds it.
+
+     The earlier version rewrote el.style.filter on every frame
+     ('blur(Xpx) contrast(Y)'). Every change to a filter string throws away
+     the element's cached raster and forces a full re-rasterisation on the
+     CPU — at 124px type, on several headings at once, that is what made it
+     stutter and show only a couple of frames.
+
+     Measured on the reference over 91 frames: its stdDeviation stays at 50,
+     its colour matrix never changes and the inline filter string never
+     changes. The filter is static. What animates is the transform of the
+     pieces underneath it, which the compositor handles on the GPU. The
+     sticking and unsticking is those pieces moving together and apart under
+     a constant blur-and-threshold.
+     ============================================================ */
+  var GOO_NS = 'http://www.w3.org/2000/svg';
+  var gooHost = null, gooCache = {};
+
+  // one <filter> per distinct blur radius, created once and then reused
+  function gooFilter(px){
+    var key = 'goo' + px;
+    if(gooCache[key]) return key;
+    if(!gooHost){
+      gooHost = document.createElementNS(GOO_NS, 'svg');
+      gooHost.setAttribute('aria-hidden', 'true');
+      gooHost.setAttribute('focusable', 'false');
+      gooHost.style.cssText = 'position:absolute;width:0;height:0;overflow:hidden;pointer-events:none';
+      document.body.appendChild(gooHost);
+    }
+    var f = document.createElementNS(GOO_NS, 'filter');
+    f.setAttribute('id', key);
+    // sRGB is both cheaper and the correct space here; the region is clamped
+    // so the browser never filters more area than the glyphs can reach
+    f.setAttribute('color-interpolation-filters', 'sRGB');
+    f.setAttribute('x', '-25%'); f.setAttribute('y', '-25%');
+    f.setAttribute('width', '150%'); f.setAttribute('height', '150%');
+    var b = document.createElementNS(GOO_NS, 'feGaussianBlur');
+    b.setAttribute('in', 'SourceGraphic');
+    b.setAttribute('stdDeviation', px);
+    b.setAttribute('result', 'b');
+    var m = document.createElementNS(GOO_NS, 'feColorMatrix');
+    m.setAttribute('in', 'b');
+    m.setAttribute('mode', 'matrix');
+    // the reference's own matrix: alpha multiplied by 20 and shifted by -8,
+    // which thresholds the blur into a hard edge
+    m.setAttribute('values', '1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 20 -8');
+    f.appendChild(b); f.appendChild(m);
+    gooCache[key] = true;
+    gooHost.appendChild(f);
+    return key;
+  }
+
+  function gooPieces(el){
+    if(el.hasAttribute('data-nosplit')) return null;
+    try{
+      var sp = new SplitText(el, {type: 'chars', charsClass: 'goo-ch'});
+      if(sp.chars && sp.chars.length) return sp;
+      sp.revert();
+    }catch(e){}
+    return null;
+  }
+
   function revealText(el, delay){
     if(!el || el.__revealed) return null;
     el.__revealed = true;
     el.classList.add('shown');
 
     var fs = parseFloat(getComputedStyle(el).fontSize) || 16;
-    if(fs < 30){
+    if(fs < 30 || reduced){
       return gsap.fromTo(el, {opacity: 0}, {opacity: 1, duration: GOO_TIME * .7,
         ease: EASE.glide, delay: delay || 0});
     }
 
-    var st = {b: GOO_BLUR, c: GOO_CONTRAST};
-    el.style.background = 'var(--paper)';
-    // promoted to its own compositing layer, so the filter is applied to a
-    // cached texture instead of forcing the text to be re-rasterised each frame
-    el.style.transform = 'translateZ(0)';
-    el.style.filter = 'blur(' + st.b + 'px) contrast(' + st.c + ')';
+    // blur scaled to the type size; the reference uses 50 at 124px
+    var px = Math.max(6, Math.round(fs * 0.40 / 4) * 4);
+    el.style.filter = 'url(#' + gooFilter(px) + ')';
 
-    return gsap.to(st, {
-      b: 0, c: 1, duration: GOO_TIME, delay: delay || 0, ease: EASE.goo,
-      onUpdate: function(){
-        el.style.filter = 'blur(' + st.b.toFixed(2) + 'px) contrast(' + st.c.toFixed(2) + ')';
-      },
-      onComplete: function(){ el.style.filter = 'none'; el.style.background = 'none'; el.style.transform = 'none'; }
-    });
+    var sp = gooPieces(el);
+    var targets = sp ? sp.chars : [el];
+    var done = function(){
+      // the filter is dropped once it has served its purpose, so nothing on
+      // the page carries a live filter into ordinary scrolling
+      el.style.filter = 'none';
+      gsap.set(targets, {clearProps: 'all'});
+      if(sp) sp.revert();
+    };
+
+    return gsap.fromTo(targets,
+      {yPercent: 34, scaleY: .34, opacity: 0},
+      {yPercent: 0, scaleY: 1, opacity: 1, duration: GOO_TIME, ease: EASE.goo,
+       delay: delay || 0, force3D: true,
+       stagger: sp ? {each: .022, from: 'start'} : 0,
+       onComplete: done});
   }
 
   // the same animation run backwards, for anything leaving the screen
   function hideText(el){
     if(!el || !el.__revealed) return null;
     el.__revealed = false;
-    var st = {b: 0, c: 1};
-    el.style.background = 'var(--paper)';
-    return gsap.to(st, {
-      b: GOO_BLUR * 1.6, c: GOO_CONTRAST, duration: GOO_TIME * .7, ease: EASE.goo,
-      onUpdate: function(){
-        el.style.filter = 'blur(' + st.b.toFixed(2) + 'px) contrast(' + st.c.toFixed(2) + ')';
-      },
-      onComplete: function(){ el.classList.remove('shown'); el.style.filter = 'none'; el.style.background = 'none'; }
-    });
+
+    var fs = parseFloat(getComputedStyle(el).fontSize) || 16;
+    if(fs < 30 || reduced){
+      return gsap.to(el, {opacity: 0, duration: GOO_TIME * .5, ease: EASE.glide,
+        onComplete: function(){ el.classList.remove('shown'); }});
+    }
+
+    var px = Math.max(6, Math.round(fs * 0.40 / 4) * 4);
+    el.style.filter = 'url(#' + gooFilter(px) + ')';
+
+    var sp = gooPieces(el);
+    var targets = sp ? sp.chars : [el];
+    return gsap.to(targets,
+      {yPercent: 26, scaleY: .4, opacity: 0, duration: GOO_TIME * .6, ease: EASE.goo,
+       force3D: true, stagger: sp ? {each: .016, from: 'end'} : 0,
+       onComplete: function(){
+         el.classList.remove('shown');
+         el.style.filter = 'none';
+         gsap.set(targets, {clearProps: 'all'});
+         if(sp) sp.revert();
+       }});
   }
 
   function armReveals(root){
@@ -614,16 +696,23 @@
     var el = document.getElementById('morphWord');
     if(!el || reduced) return;
     var WORDS = ['бренды','кадры','истории','смыслы'], i = 0;
-    var g = makeGoo();
     el.style.visibility = 'visible';
-    el.style.filter = 'url(#' + g.id + ')';
-    var st = {b: 0};
-    function set(){ g.blur.setAttribute('stdDeviation', st.b); }
+    var fs = parseFloat(getComputedStyle(el).fontSize) || 100;
+    var fid = gooFilter(Math.max(6, Math.round(fs * 0.40 / 4) * 4));
+    // The filter is attached for the length of the swap and taken off again, so
+    // the word is an ordinary painted element the rest of the time. Only its
+    // transform animates while the filter is on, which the compositor can do
+    // without re-rasterising the glyphs on every frame the way an animated
+    // stdDeviation forces it to.
     (function cycle(){
       gsap.timeline({delay: 2.6, onComplete: cycle})
-        .to(st, {b: 22, duration: GOO_TIME / 2, ease: 'power2.in', onUpdate: set})
+        .add(function(){ el.style.filter = 'url(#' + fid + ')'; })
+        .to(el, {scaleY: .26, yPercent: 16, duration: GOO_TIME / 2,
+                 ease: 'power2.in', force3D: true})
         .add(function(){ i = (i + 1) % WORDS.length; el.textContent = WORDS[i]; })
-        .to(st, {b: 0, duration: GOO_TIME / 2, ease: 'power2.out', onUpdate: set});
+        .to(el, {scaleY: 1, yPercent: 0, duration: GOO_TIME / 2,
+                 ease: 'power2.out', force3D: true})
+        .add(function(){ el.style.filter = 'none'; });
     })();
   }
 
@@ -711,27 +800,28 @@
     // which is how the reference reverses its own reveals.
     var noteFx = [fL, fR].map(function(el){
       if(!el) return null;
-      var g = makeGoo();
-      el.style.filter = 'url(#' + g.id + ')';
-      g.blur.setAttribute('stdDeviation', 13);
-      return {el: el, g: g};
+      var fs = parseFloat(getComputedStyle(el).fontSize) || 16;
+      var fid = gooFilter(Math.max(6, Math.round(fs * 0.55 / 2) * 2));
+      return {el: el, fid: fid};
     }).filter(Boolean);
 
     function notesIn(){
       noteFx.forEach(function(f, i){
-        gsap.killTweensOf([f.el, f.g.blur]);
-        f.el.style.filter = 'url(#' + f.g.id + ')';
-        gsap.timeline({delay: i * 0.1})
-          .to(f.el, {opacity: 1, duration: .45, ease: 'none'}, 0)
-          .to(f.g.blur, {attr: {stdDeviation: 0}, duration: GOO_TIME, ease: EASE.goo}, 0);
+        gsap.killTweensOf(f.el);
+        f.el.style.filter = 'url(#' + f.fid + ')';
+        gsap.timeline({delay: i * 0.1, onComplete: function(){ f.el.style.filter = 'none'; }})
+          .fromTo(f.el, {opacity: 0, yPercent: 20, scaleY: .5},
+                        {opacity: 1, yPercent: 0, scaleY: 1, duration: GOO_TIME,
+                         ease: EASE.goo, force3D: true}, 0);
       });
     }
     function notesOut(){
       noteFx.forEach(function(f, i){
-        gsap.killTweensOf([f.el, f.g.blur]);
-        gsap.timeline({delay: i * 0.06})
-          .to(f.g.blur, {attr: {stdDeviation: 26}, duration: GOO_TIME * .7, ease: EASE.goo}, 0)
-          .to(f.el, {opacity: 0, duration: GOO_TIME * .5, ease: 'none'}, GOO_TIME * .2);
+        gsap.killTweensOf(f.el);
+        f.el.style.filter = 'url(#' + f.fid + ')';
+        gsap.timeline({delay: i * 0.06, onComplete: function(){ f.el.style.filter = 'none'; }})
+          .to(f.el, {opacity: 0, yPercent: 16, scaleY: .5, duration: GOO_TIME * .7,
+                     ease: EASE.goo, force3D: true}, 0);
       });
     }
 
@@ -1052,7 +1142,8 @@
     var pre = document.getElementById('pre'), num = document.getElementById('preNum');
     if(!pre){ done(); return; }
     var urls = CASES.map(function(c){ return c.img; });
-    var total = urls.length, loaded = 0, shown = {v: 0};
+    var total = urls.length, loaded = 0, shown = {v: 0}, fired = false;
+    function finish(){ if(fired) return; fired = true; done(); }
     function paint(){ num.innerHTML = Math.round(shown.v) + '<span>%</span>'; }
     function bump(){ loaded++; gsap.to(shown, {v: Math.round(loaded/total*100), duration:.5, ease:'none', onUpdate:paint}); }
     urls.forEach(function(u){ var im = new Image(); im.onload = bump; im.onerror = bump; im.src = u; });
@@ -1061,10 +1152,20 @@
     total += 1;
     if(document.fonts && document.fonts.ready){ document.fonts.ready.then(bump); } else { bump(); }
     var guard = setTimeout(function(){ gsap.to(shown, {v:100, duration:.4, onUpdate:paint}); }, 4500);
+    // Everything above depends on the GSAP ticker: the counter is tweened and
+    // the dismissal is a timeline, and even the guard above goes through gsap.
+    // If the ticker is ever held up, the whole page stays locked behind a
+    // preloader reading 100%. This last resort touches neither gsap nor the
+    // interval, so the site can always be reached.
+    setTimeout(function(){
+      clearInterval(iv); clearTimeout(guard);
+      pre.style.display = 'none';
+      finish();
+    }, 7000);
     var iv = setInterval(function(){
       if(shown.v >= 99.5){
         clearInterval(iv); clearTimeout(guard); shown.v = 100; paint();
-        gsap.timeline({onComplete: done})
+        gsap.timeline({onComplete: finish})
           .to(num, {yPercent: 110, opacity: 0, duration: .7, ease: EASE.rise}, 0)
           .to(pre, {opacity: 0, duration: .7, ease: EASE.glide}, .15)
           .set(pre, {display: 'none'});
