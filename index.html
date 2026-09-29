@@ -149,6 +149,41 @@
   /* begins under the third photo counting from the right */
   .tiles-note{grid-column:4 / 6;margin-top:22px;}
   .goo-ch{display:inline-block;will-change:transform;}
+
+  /* The case opens as a window over the page, not as another page: the site
+     behind it keeps its scroll position and nothing has to be re-entered. */
+  /* Centred with flex, not translate(-50%,-50%): the panel's own transform has
+     to stay free, because animating yPercent on it makes GSAP take over the Y
+     axis and overwrite a -50% written in CSS, which dropped the window to
+     y=600 instead of 100. */
+  #caseWin{position:fixed;inset:0;z-index:300;display:none;}
+  #caseWin.on{display:flex;align-items:center;justify-content:center;}
+  .cw-veil{position:absolute;inset:0;background:rgba(0,0,0,.42);opacity:0;
+    backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px);}
+  .cw-panel{position:relative;
+    width:min(1360px,92vw);height:min(88vh,1000px);background:var(--paper);
+    display:flex;flex-direction:column;overflow:hidden;opacity:0;}
+  .cw-x{position:absolute;top:18px;right:20px;z-index:3;width:44px;height:44px;
+    border:0;border-radius:50%;background:var(--ink);color:var(--paper);
+    font-size:24px;line-height:1;cursor:pointer;}
+  .cw-scroll{overflow-y:auto;overscroll-behavior:contain;height:100%;
+    padding:clamp(26px,4vw,64px);-webkit-overflow-scrolling:touch;}
+  .cw-cat{font-size:max(13px,.972vw);font-weight:500;color:var(--dim);letter-spacing:-.027em;}
+  .cw-title{font-size:clamp(30px,4.4vw,74px);font-weight:500;line-height:.92;
+    letter-spacing:-.045em;margin:10px 0 26px;}
+  .cw-meta{display:flex;flex-wrap:wrap;gap:8px 34px;margin-bottom:30px;
+    padding-bottom:26px;border-bottom:1px solid var(--hair);}
+  .cw-meta div{font-size:max(13px,.972vw);font-weight:500;}
+  .cw-meta span{color:var(--dim);margin-right:8px;}
+  .cw-about p{font-size:clamp(15px,1.25vw,20px);line-height:1.45;max-width:62ch;margin-bottom:14px;}
+  .cw-shots{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));
+    gap:clamp(12px,1.6vw,26px);margin-top:clamp(26px,3.6vw,54px);}
+  .cw-shots img{width:100%;display:block;background:var(--ghost);}
+  .cw-shots img.wide{grid-column:1 / -1;}
+  @media (max-width:900px){
+    .cw-panel{width:100%;height:100%;}
+    .cw-shots{grid-template-columns:1fr;}
+  }
   .tiles-row{display:contents;}
   .tile{aspect-ratio:1;overflow:hidden;background:var(--ghost);}
   .tile img{width:100%;height:100%;object-fit:cover;display:block;}
@@ -340,6 +375,15 @@
     </div>
   </section>
 
+  <!-- ============ CASE WINDOW ============ -->
+  <div id="caseWin" aria-hidden="true">
+    <div class="cw-veil" data-close></div>
+    <article class="cw-panel" role="dialog" aria-modal="true" aria-labelledby="cwTitle">
+      <button class="cw-x" type="button" data-close aria-label="Закрыть">&times;</button>
+      <div class="cw-scroll" id="cwScroll"></div>
+    </article>
+  </div>
+
   <!-- ============ WORK ============ -->
   <section class="featured" id="featured">
     <div class="globe-stage" id="globeStage">
@@ -400,7 +444,7 @@
     </div>
 
     <div class="tailroom"></div>
-    <span id="buildStamp" style="display:none">BUILD 30.09 00:32</span>
+    <span id="buildStamp" style="display:none">BUILD 30.09 00:35</span>
   </section>
 
 </main>
@@ -670,6 +714,82 @@
     });
   })();
 
+  /* ---------- case window ----------
+     Content comes straight off the CASES entries. Any field that is missing is
+     simply not rendered, so entries can be filled in one at a time without the
+     window ever breaking. */
+  var cwEl = document.getElementById('caseWin');
+  var cwScroll = document.getElementById('cwScroll');
+  var cwLastFocus = null, cwOpen = false;
+
+  function esc(v){ return String(v == null ? '' : v)
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+  function openCase(i){
+    var c = CASES[i];
+    if(!c || !cwEl || cwOpen) return;
+    cwOpen = true;
+    cwLastFocus = document.activeElement;
+
+    var h = '';
+    if(c.c) h += '<div class="cw-cat">' + esc(c.c) + '</div>';
+    h += '<h2 class="cw-title" id="cwTitle">' + esc(c.t) + '</h2>';
+
+    var meta = '';
+    if(c.year)   meta += '<div><span>Год</span>' + esc(c.year) + '</div>';
+    if(c.role)   meta += '<div><span>Роль</span>' + esc(c.role) + '</div>';
+    if(c.client) meta += '<div><span>Клиент</span>' + esc(c.client) + '</div>';
+    if(meta) h += '<div class="cw-meta">' + meta + '</div>';
+
+    if(c.about){
+      var ps = [].concat(c.about);
+      h += '<div class="cw-about">' + ps.map(function(t){
+        return '<p>' + esc(t) + '</p>'; }).join('') + '</div>';
+    }
+
+    var shots = (c.gallery && c.gallery.length) ? c.gallery : [c.img];
+    h += '<div class="cw-shots">' + shots.map(function(src, k){
+      return '<img loading="lazy" class="' + (k === 0 ? 'wide' : '') + '" src="' +
+             esc(src) + '" alt="' + esc(c.t) + '">'; }).join('') + '</div>';
+
+    cwScroll.innerHTML = h;
+    cwScroll.scrollTop = 0;
+    cwEl.classList.add('on');
+    cwEl.setAttribute('aria-hidden', 'false');
+    if(window.lenis && lenis.stop) lenis.stop();
+
+    var veil = cwEl.querySelector('.cw-veil'), panel = cwEl.querySelector('.cw-panel');
+    gsap.timeline()
+      .fromTo(veil, {opacity: 0}, {opacity: 1, duration: .3, ease: 'none'}, 0)
+      .fromTo(panel, {opacity: 0, yPercent: 3, scale: .985},
+                     {opacity: 1, yPercent: 0, scale: 1, duration: .5, ease: EASE.rise}, .04);
+    var x = cwEl.querySelector('.cw-x'); if(x) x.focus();
+  }
+
+  function closeCase(){
+    if(!cwOpen) return;
+    cwOpen = false;
+    var veil = cwEl.querySelector('.cw-veil'), panel = cwEl.querySelector('.cw-panel');
+    gsap.timeline({onComplete: function(){
+        cwEl.classList.remove('on');
+        cwEl.setAttribute('aria-hidden', 'true');
+        cwScroll.innerHTML = '';
+        if(window.lenis && lenis.start) lenis.start();
+        if(cwLastFocus && cwLastFocus.focus) cwLastFocus.focus();
+      }})
+      .to(panel, {opacity: 0, yPercent: 2, duration: .28, ease: 'power2.in'}, 0)
+      .to(veil, {opacity: 0, duration: .28, ease: 'none'}, 0);
+  }
+
+  if(cwEl){
+    cwEl.addEventListener('click', function(e){
+      if(e.target.hasAttribute('data-close')) closeCase();
+    });
+    document.addEventListener('keydown', function(e){
+      if(e.key === 'Escape' && cwOpen) closeCase();
+    });
+  }
+
   /* ---------- case index ---------- */
   (function(){
     var host = document.getElementById('caseIndex');
@@ -683,6 +803,15 @@
       row.querySelector('.t').textContent = k.t;
       row.querySelector('.c').textContent = k.c;
       row.dataset.img = k.img;
+      // the list opens the same window as the globe, so there is one way in
+      row.dataset.idx = i;
+      row.setAttribute('role', 'button');
+      row.setAttribute('tabindex', '0');
+      row.style.cursor = 'pointer';
+      row.addEventListener('click', function(){ openCase(i); });
+      row.addEventListener('keydown', function(e){
+        if(e.key === 'Enter' || e.key === ' '){ e.preventDefault(); openCase(i); }
+      });
       host.appendChild(row);
       gsap.from(row, {yPercent: 40, opacity: 0, duration: .9, ease: EASE.rise,
         scrollTrigger: {trigger: row, start: 'top 95%'}});
@@ -1260,7 +1389,8 @@
       tile.lookAt(0,0,0);
       tile.rotateY(Math.PI);
       group.add(tile);
-      tiles.push({mesh: tile, dir: pos.clone().normalize()});
+      tile.userData.caseIndex = i;
+      tiles.push({mesh: tile, dir: pos.clone().normalize(), base: 1, want: 1});
       loader.load(item.img, function(tex){
         tex.colorSpace = THREE.SRGBColorSpace;
         tex.anisotropy = Math.min(4, renderer.capabilities.getMaxAnisotropy());
@@ -1291,6 +1421,37 @@
       canvas.addEventListener(ev, function(){ dragging = false; });
     });
 
+    /* ---- hover grows a square, a click opens it ---- */
+    var ray = new THREE.Raycaster(), ndc = new THREE.Vector2();
+    var hot = null, downAt = null;
+    function pick(e){
+      var r = canvas.getBoundingClientRect();
+      ndc.x = ((e.clientX - r.left) / r.width) * 2 - 1;
+      ndc.y = -((e.clientY - r.top) / r.height) * 2 + 1;
+      ray.setFromCamera(ndc, camera);
+      var hit = ray.intersectObjects(tiles.map(function(t){ return t.mesh; }), false);
+      return hit.length ? hit[0].object : null;
+    }
+    canvas.addEventListener('pointermove', function(e){
+      if(dragging){ hot = null; canvas.style.cursor = 'grabbing'; return; }
+      var m = pick(e);
+      hot = m;
+      canvas.style.cursor = m ? 'pointer' : 'grab';
+      tiles.forEach(function(t){ t.want = (t.mesh === m) ? 1.34 : 1; });
+    });
+    canvas.addEventListener('pointerleave', function(){
+      hot = null; tiles.forEach(function(t){ t.want = 1; });
+    });
+    canvas.addEventListener('pointerdown', function(e){ downAt = {x:e.clientX, y:e.clientY}; });
+    canvas.addEventListener('pointerup', function(e){
+      if(!downAt) return;
+      var moved = Math.abs(e.clientX - downAt.x) + Math.abs(e.clientY - downAt.y);
+      downAt = null;
+      if(moved > 6) return;                 // that was a drag of the globe
+      var m = pick(e);
+      if(m && typeof m.userData.caseIndex === 'number') openCase(m.userData.caseIndex);
+    });
+
     var inView = false;
     new IntersectionObserver(function(es){
       es.forEach(function(en){ inView = en.isIntersecting; });
@@ -1316,6 +1477,11 @@
       // held tight through the first half of its arrival, then opened
       var eased = settled < .45 ? 0 : (settled - .45) / .55;
       var spread = 0.34 + eased * 0.66;
+      for(var q = 0; q < tiles.length; q++){
+        var tq = tiles[q];
+        tq.base += (tq.want - tq.base) * Math.min(1, dt * 9);
+        tq.mesh.scale.setScalar(tq.base);
+      }
       for(var t = 0; t < tiles.length; t++){
         tiles[t].mesh.position.copy(tiles[t].dir).multiplyScalar(RADIUS * spread);
       }
