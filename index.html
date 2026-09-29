@@ -400,7 +400,7 @@
     </div>
 
     <div class="tailroom"></div>
-    <span id="buildStamp" style="display:none">BUILD 28.09 22:13</span>
+    <span id="buildStamp" style="display:none">BUILD 30.09 00:32</span>
   </section>
 
 </main>
@@ -564,12 +564,27 @@
       if(sp) sp.revert();
     };
 
+    // The blob is made by the letters STARTING on top of one another: under a
+    // fixed blur-and-threshold, overlapping glyphs fuse into a single mass.
+    // They then slide back to their own positions and the mass resolves into
+    // words. Opacity is never animated — fading a letter dissolves it out of
+    // the threshold and breaks the fusion, which is what turned this into an
+    // ordinary letter-by-letter fade-in — and there is no stagger, because the
+    // phrase has to unstick as one piece rather than arrive letter by letter.
+    var collapse = [];
+    if(sp){
+      var pr = el.getBoundingClientRect(), mid = pr.left + pr.width / 2;
+      collapse = sp.chars.map(function(ch){
+        var r = ch.getBoundingClientRect();
+        return (mid - (r.left + r.width / 2)) * 0.92;
+      });
+    }
+
     return gsap.fromTo(targets,
-      {yPercent: 34, scaleY: .34, opacity: 0},
-      {yPercent: 0, scaleY: 1, opacity: 1, duration: GOO_TIME, ease: EASE.goo,
-       delay: delay || 0, force3D: true,
-       stagger: sp ? {each: .022, from: 'start'} : 0,
-       onComplete: done});
+      sp ? {x: function(i){ return collapse[i]; }, scaleX: .62, scaleY: .52}
+         : {scaleY: .3, scaleX: .86},
+      {x: 0, scaleX: 1, scaleY: 1, duration: GOO_TIME, ease: EASE.goo,
+       delay: delay || 0, force3D: true, onComplete: done});
   }
 
   // the same animation run backwards, for anything leaving the screen
@@ -588,9 +603,18 @@
 
     var sp = gooPieces(el);
     var targets = sp ? sp.chars : [el];
+    var collapse2 = [];
+    if(sp){
+      var pr2 = el.getBoundingClientRect(), mid2 = pr2.left + pr2.width / 2;
+      collapse2 = sp.chars.map(function(ch){
+        var r = ch.getBoundingClientRect();
+        return (mid2 - (r.left + r.width / 2)) * 0.92;
+      });
+    }
     return gsap.to(targets,
-      {yPercent: 26, scaleY: .4, opacity: 0, duration: GOO_TIME * .6, ease: EASE.goo,
-       force3D: true, stagger: sp ? {each: .016, from: 'end'} : 0,
+      {x: sp ? function(i){ return collapse2[i]; } : 0,
+       scaleX: sp ? .62 : .86, scaleY: sp ? .52 : .3,
+       duration: GOO_TIME * .62, ease: EASE.goo, force3D: true,
        onComplete: function(){
          el.classList.remove('shown');
          el.style.filter = 'none';
@@ -602,7 +626,7 @@
   function armReveals(root){
     (root || document).querySelectorAll('[data-goo]').forEach(function(el){
       if(el.__armed || el.__revealed) return;
-      if(el.closest('.op-note, .op-1, .op-role, .stmt')) return;   // owned by the intro
+      if(el.closest('.op-note, .op-1, .op-role')) return;   // owned by the intro
       el.__armed = true;
       ScrollTrigger.create({trigger: el, start: 'top 66%', once: true,
         onEnter: function(){ revealText(el, 0); }});
@@ -747,7 +771,11 @@
     // Resolved up front: splitting the heading inserts divs inside it, and a
     // later '.op-1 div' lookup then found one of those instead of the surname,
     // which is why the surname never became visible.
-    var step = GOO_TIME * 0.85, at = 0.1;
+    // The steps used to be GOO_TIME * 0.85 across ten elements, so the last
+    // line landed about 7.3s after the preloader — the lag that made the whole
+    // opening feel slow. They overlap heavily now: each one starts while the
+    // one above it is still resolving, which is also how the reference reads.
+    var step = GOO_TIME * 0.28, at = 0.08;
     var order = [
       document.querySelector('.op-note .sm'),
       document.querySelector('.op-1 h1'),
@@ -758,9 +786,10 @@
       if(el) tl.add(revealText(el), at);
       at += step;
     });
-    document.querySelectorAll('.stmt > div').forEach(function(el){
-      tl.add(revealText(el), at); at += step;
-    });
+    // .stmt sits well below the fold. Running it inside the intro spent six
+    // more steps of waiting on lines nobody was looking at, and they had
+    // finished by the time the reader scrolled down to them. It is revealed on
+    // scroll instead, like every other block.
   }
 
   /* ---------- wordmark ----------
