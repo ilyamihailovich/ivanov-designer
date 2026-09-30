@@ -10,7 +10,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap&subset=cyrillic" rel="stylesheet">
 <link rel="preload" href="fonts/ak.woff2" as="font" type="font/woff2" crossorigin>
-<script src="cases.js?v=010157"></script>
+<script src="cases.js?v=010217"></script>
 <script src="https://cdn.jsdelivr.net/npm/lenis@1.3.21/dist/lenis.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/gsap.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/ScrollTrigger.min.js"></script>
@@ -122,7 +122,8 @@
   #spine{position:absolute;top:0;bottom:0;left:var(--rule);width:1px;
     background:var(--hair);z-index:1;transform-origin:50% 0;}
 
-  #spineCap{position:absolute;left:var(--rule);bottom:0;transform:translateX(-50%);z-index:2;
+  #spineCap{position:absolute;left:var(--rule);bottom:calc(-1 * clamp(26px,3.4vw,58px));
+    transform:translateX(-50%);z-index:2;
     width:44px;height:44px;border-radius:50%;border:1px solid var(--hair);background:var(--paper);
     display:flex;align-items:center;justify-content:center;font-size:10.5px;font-weight:600;color:var(--dim);}
 
@@ -399,8 +400,9 @@
      and the continuation lines in column 3 */
   .t-a{margin-left:var(--c2);}
   .t-b{margin-left:var(--c4);}
-  .t-c{margin-left:var(--c3);}
-  .t-d{margin-left:var(--c3);}
+  /* these two used to start left of the rule and ran straight through it */
+  .t-c{margin-left:var(--c4);}
+  .t-d{margin-left:var(--c4);}
 
   /* ---------- work / globe ---------- */
   .featured{position:relative;margin-top:clamp(60px,14vh,180px);}
@@ -676,7 +678,7 @@
     </div>
 
     <div class="tailroom"></div>
-    <span id="buildStamp" style="display:none">BUILD 01.10 01:57</span>
+    <span id="buildStamp" style="display:none">BUILD 01.10 02:17</span>
   </section>
 
 </main>
@@ -972,7 +974,17 @@
     // sliver of it has appeared.
     armGroup('.stmt2', '[data-goo]', 'top 67%');
     armGroup('.idx-wrap', ':scope > .lg[data-goo]', 'top 67%');
-    armGroup('.close', '[data-goo]', 'top 67%');
+    // The closing section is very tall, so hanging one trigger on its top made
+    // the lines near its foot play while they were still far below the fold —
+    // which is why «всего лишь» and «кадром» never appeared to animate at all.
+    // They are spaced far apart vertically, so a trigger each still gives the
+    // right order, and each one now waits until its own line is in view.
+    document.querySelectorAll('.close [data-goo]').forEach(function(el){
+      if(el.__armed || el.__done) return;
+      el.__armed = true;
+      ScrollTrigger.create({trigger: el, start: 'top 82%', once: true,
+        onEnter: function(){ revealText(el, 0); }});
+    });
   }
 
   /* ---------- five squares ---------- */
@@ -1004,6 +1016,35 @@
     note.setAttribute('data-goo','');
     note.textContent = 'Снимаю, обрабатываю и собираю визуал для брендов — от постановки света до публикации, с упором на ясность и ритм.';
     host.appendChild(note);
+
+    /* The five squares drift with the pointer, but not as one block: each has
+       its own axis and its own sign, so some lean with the cursor and others
+       against it. Set per tile rather than shared, or they read as one sheet
+       sliding about. */
+    if(!coarse && !reduced){
+      var drift = gsap.utils.toArray('#tiles .tile').map(function(t, i){
+        var sx = (i % 2 ? -1 : 1) * (0.7 + (i % 3) * 0.35);
+        var sy = (i % 3 === 1 ? -1 : 1) * (0.5 + (i % 2) * 0.4);
+        gsap.set(t, {transformPerspective: 800});
+        return {
+          x:  gsap.quickTo(t, 'x',         {duration: .9, ease: 'power3'}),
+          y:  gsap.quickTo(t, 'y',         {duration: .9, ease: 'power3'}),
+          rx: gsap.quickTo(t, 'rotationX', {duration: .9, ease: 'power3'}),
+          ry: gsap.quickTo(t, 'rotationY', {duration: .9, ease: 'power3'}),
+          sx: sx, sy: sy
+        };
+      });
+      window.addEventListener('pointermove', function(e){
+        var cx = window.innerWidth / 2, cy = window.innerHeight / 2;
+        var dx = (e.clientX - cx) / cx, dy = (e.clientY - cy) / cy;
+        drift.forEach(function(d){
+          d.x(dx * 16 * d.sx);
+          d.y(dy * 12 * d.sy);
+          d.ry(dx * 7 * d.sx);
+          d.rx(-dy * 6 * d.sy);
+        });
+      }, {passive: true});
+    }
 
     // tiles rise in, one after another
     gsap.utils.toArray('#tiles .tile').forEach(function(t, i){
@@ -1555,9 +1596,18 @@
     /* The preview rolls up from the bottom of its own box. Moving to another
        row rolls the old one back down from the top before the new one rolls
        up, so the two never cross-fade into each other. */
+    /* The preview normally hangs from the row and unrolls downward. When the
+       row sits near the foot of the window there is no room below it, and only
+       a sliver of the picture ever came into view — so there it is hung above
+       the row instead and unrolls upward. */
     function openThumb(row){
       timg.src = row.dataset.img;
-      gsap.set(thumb, {y: row.offsetTop, opacity: 1, clipPath: 'inset(100% 0 0 0)'});
+      var h = thumb.offsetHeight || 160;
+      var rowBottom = row.getBoundingClientRect().bottom;
+      var up = rowBottom + h + 24 > window.innerHeight;
+      var y = up ? Math.max(0, row.offsetTop + row.offsetHeight - h) : row.offsetTop;
+      gsap.set(thumb, {y: y, opacity: 1,
+        clipPath: up ? 'inset(0 0 100% 0)' : 'inset(100% 0 0 0)'});
       gsap.to(thumb, {clipPath: 'inset(0% 0 0 0)', duration: .55,
                       ease: EASE.rise, overwrite: 'auto'});
     }
@@ -1591,38 +1641,48 @@
      the peak where nothing is legible. The previous version squashed the word
      and hid it, which read as the word simply vanishing and a different one
      appearing, with a white gap in between. */
+  /* The changing word melts into a blob, swaps underneath it and re-forms.
+
+     This one uses a CSS blur with contrast rather than the SVG threshold the
+     headings use. The SVG filter re-rasterises the glyphs on the CPU for every
+     value of stdDeviation, and on a word that changes over and over that shows
+     up as two or three visible steps instead of a melt. A CSS filter on a
+     promoted layer is composited, so the same motion runs smoothly.
+
+     contrast needs something opaque under it, so the word carries a white plate
+     spread far enough that its own edge never lands inside the blur — on white
+     paper that edge is invisible. */
   function morphWord(){
     var el = document.getElementById('morphWord');
     if(!el || reduced) return;
     var WORDS = ['бренды','кадры','истории','смыслы'], i = 0;
-    el.style.visibility = 'visible';
+    var fs = fontOf(el);
+    var peak = fs * GOO.swapBlur;
 
-    // an inline box makes the filter region unreliable; give it its own box
     el.style.display = 'inline-block';
-    var g = ownFilter(el);
-    var peak = fontOf(el) * GOO.swapBlur;
+    el.style.willChange = 'filter';
+    el.style.backgroundColor = 'var(--paper)';
+    el.style.boxShadow = '0 0 0 ' + Math.ceil(peak * 3 + 20) + 'px var(--paper)';
+
     var st = {b: 0};
-    function paint(){ g.blur.setAttribute('stdDeviation', st.b.toFixed(2)); }
+    function paint(){
+      el.style.filter = st.b < 0.05 ? 'none'
+        : 'blur(' + st.b.toFixed(2) + 'px) contrast(' + (1 + st.b * 1.6).toFixed(2) + ')';
+    }
+    paint();
 
     (function cycle(){
       gsap.timeline({delay: 1.9, onComplete: cycle})
-        .add(function(){ el.style.filter = 'url(#' + g.id + ')'; })
         .to(st, {b: peak, duration: GOO.swap / 2, ease: 'power2.in', onUpdate: paint})
         .add(function(){ i = (i + 1) % WORDS.length; el.textContent = WORDS[i]; })
-        .to(st, {b: 0, duration: GOO.swap / 2, ease: 'power2.out', onUpdate: paint})
-        .add(function(){ el.style.filter = 'none'; });
+        .to(st, {b: 0, duration: GOO.swap / 2, ease: 'power2.out', onUpdate: paint});
     })();
   }
 
-  /* The menu opens downward: the items are born out of the button one after
-     another. While an item still overlaps the thing above it, the shared goo
-     filter welds them together, so each one necks away rather than simply
-     fading in. The filter comes off as soon as they are apart. */
   /* The menu is one timeline built once and played forward or in reverse.
-     The previous version created a new timeline per click and held a "busy"
-     lock until it finished, so a click inside that second did nothing at all —
-     and if the timeline was ever interrupted the lock stayed on and the menu
-     stopped opening altogether. */
+     A version that built a fresh timeline per click and held a lock until it
+     finished swallowed any click inside that second, and left the lock on for
+     good if it was ever interrupted. */
   function menu(){
     var wrap = document.getElementById('menuWrap');
     var btn  = document.getElementById('menuBtn');
@@ -1634,14 +1694,12 @@
 
     gsap.set(items, {opacity: 0, y: -30, scale: .66});
 
-    var tl = gsap.timeline({
-      paused: true,
-      onStart:          function(){ if(!reduced) list.style.filter = 'url(#' + gooPair(7) + ')'; },
-      onReverseComplete:function(){ list.style.filter = 'none'; list.classList.remove('on'); },
-      onComplete:       function(){ list.style.filter = 'none'; }
+    var tl = gsap.timeline({paused: true,
+      onReverseComplete: function(){ list.style.filter = 'none'; list.classList.remove('on'); },
+      onComplete:        function(){ list.style.filter = 'none'; }
     });
     items.forEach(function(el, i){
-      // each one starts sitting on its neighbour, so while they overlap the
+      // each starts sitting on its neighbour, so while they overlap the
       // threshold welds them and they neck apart as they travel down
       tl.to(el, {opacity: 1, y: 0, scale: 1, duration: .5, ease: EASE.rise}, i * 0.1);
     });
@@ -1651,18 +1709,13 @@
       open = to;
       btn.setAttribute('aria-expanded', to ? 'true' : 'false');
       list.setAttribute('aria-hidden', to ? 'false' : 'true');
-      if(to){
-        list.classList.add('on');
-        if(!reduced) list.style.filter = 'url(#' + gooPair(7) + ')';
-        tl.play();
-      } else {
-        tl.reverse();
-      }
+      if(!reduced) list.style.filter = 'url(#' + gooPair(7) + ')';
+      if(to){ list.classList.add('on'); tl.play(); }
+      else  { tl.reverse(); }
     }
 
     btn.addEventListener('click', function(e){
-      e.preventDefault(); e.stopPropagation();
-      run(!open);
+      e.preventDefault(); e.stopPropagation(); run(!open);
     });
     document.addEventListener('click', function(e){
       if(open && !wrap.contains(e.target)) run(false);
@@ -1683,8 +1736,8 @@
     });
   }
 
-  /* The social pills start solid and empty out when the contact block has
-     come a third of the way up the screen. */
+  /* The social pills start solid and empty out once the contact block has come
+     a third of the way up the screen. */
   function socials(){
     var box = document.querySelector('.socials');
     if(!box) return;
@@ -1896,7 +1949,9 @@
         // it and the link has finished forming at 0.754. White returns exactly
         // when the link is there, not while the words are still standing.
         var p = self.progress;
-        root.classList.toggle('is-dark', p > 0.12 && p < 0.755);
+        // white comes back as the words start melting into the link, which is
+        // the moment in Ilya's screenshot, not after the link has settled
+        root.classList.toggle('is-dark', p > 0.12 && p < 0.70);
       }
     });
   }
