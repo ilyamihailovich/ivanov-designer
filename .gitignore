@@ -1,14 +1,17 @@
-blaze/
-esnace/
-gloff/
-glum/
-quoters/
-санек/
-авария/
-байк и метро/
-кровать/
-лилии/
-луг/
-мороженное/
-покрышки/
-что-то/
+# Source folders with the original PNGs. Leading slash matters: without it these
+# patterns also matched cases/gloff/ and friends, which kept most of the
+# published images out of the deploy.
+/blaze/
+/esnace/
+/gloff/
+/glum/
+/quoters/
+/санек/
+/авария/
+/байк и метро/
+/кровать/
+/лилии/
+/луг/
+/мороженное/
+/покрышки/
+/что-то/
