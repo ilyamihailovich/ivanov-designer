@@ -17,6 +17,16 @@ io.open(p, 'w', encoding='utf-8').write(s2)
 PY
 
 MSG="${1:-обновление}"
+# bust the cached copy of the case data whenever we publish, otherwise the
+# browser keeps an old cases.js and the page renders stale content
+V=$(date +%d%H%M)
+python3 - "$V" <<'PYEOF'
+import io,re,sys
+p='index.html'; s=io.open(p,encoding='utf-8').read()
+s=re.sub(r'cases\.js(\?v=\d+)?', 'cases.js?v='+sys.argv[1], s, count=1)
+io.open(p,'w',encoding='utf-8').write(s)
+PYEOF
+
 git add -A
 git commit -q -m "$MSG" || { echo "нечего коммитить"; exit 0; }
 git push -q origin main
