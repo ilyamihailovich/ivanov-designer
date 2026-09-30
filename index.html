@@ -5,7 +5,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap&subset=cyrillic" rel="stylesheet">
 <link rel="preload" href="fonts/ak.woff2" as="font" type="font/woff2" crossorigin>
-<script src="cases.js?v=302100"></script>
+<script src="cases.js?v=010102"></script>
 <script src="https://cdn.jsdelivr.net/npm/lenis@1.3.21/dist/lenis.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/gsap.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/ScrollTrigger.min.js"></script>
@@ -120,7 +120,6 @@
 
   /* ---------- opening ---------- */
   .chapter{position:relative;}
-  #heroFX{position:absolute;top:0;left:0;width:100%;height:100svh;z-index:0;pointer-events:none;}
 
   /* The opening alternates between two columns — the left gutter and a second
      column at 35.7vw — which is what gives the reference its stagger. */
@@ -165,10 +164,19 @@
     backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px);}
   .cw-panel{position:relative;
     width:min(1358.102px,92vw);height:min(88vh,1000.113px);background:var(--paper);
-    display:flex;flex-direction:column;overflow:hidden;opacity:0;}
-  .cw-x{position:absolute;top:18px;right:20px;z-index:3;width:44px;height:44px;
-    border:0;border-radius:50%;background:var(--ink);color:var(--paper);
-    font-size:24px;line-height:1;cursor:pointer;}
+    display:flex;flex-direction:column;opacity:0;}
+  /* the panel itself must not clip, or the cross outside it disappears */
+  .cw-panel > .cw-scroll{overflow:hidden;}
+  /* The design puts the cross outside the panel, with no disc behind it:
+     33.906 square, 34.92 to the right of the panel edge and 1.85 below its top,
+     all in design pixels and scaled with everything else. */
+  .cw-x{position:absolute;z-index:3;border:0;background:none;padding:0;cursor:pointer;
+    width:calc(33.906px * var(--k,1));height:calc(33.906px * var(--k,1));
+    /* the design places the cross's LEFT edge 34.92 past the panel, so the
+       right offset is that plus its own width */
+    top:calc(1.85px * var(--k,1));right:calc(-68.83px * var(--k,1));}
+  .cw-x img{width:100%;height:100%;display:block;}
+  .cw-x:hover{opacity:.7;}
   .cw-scroll{overflow-y:auto;overscroll-behavior:contain;height:100%;
     padding:clamp(26px,4vw,64px);-webkit-overflow-scrolling:touch;}
   .cw-cat{font-size:max(13px,.972vw);font-weight:500;color:var(--dim);letter-spacing:-.027em;}
@@ -233,10 +241,15 @@
     mask-image:linear-gradient(90deg,transparent var(--m0),#000 var(--m1));}
   .cc-photo::after{content:'';position:absolute;inset:0;pointer-events:none;
     background:linear-gradient(90deg,#fff 0%,rgba(255,255,255,.72) 42%,rgba(255,255,255,0) 100%);}
-  .cc-next{position:absolute;left:1202.94px;top:580px;width:57.051px;height:57.051px;
+  /* Both paging controls live in one group. The group travels from the card's
+     position up to the header; the second disc is born out of the first and
+     moves to its left. Nothing sits at the foot of the window. */
+  .cc-nav{position:absolute;left:1202.94px;top:580px;width:57.051px;height:57.051px;}
+  .cc-nav button{position:absolute;top:0;left:0;width:57.051px;height:57.051px;
     border:0;padding:0;background:none;cursor:pointer;}
-  .cc-next img{width:100%;height:100%;display:block;transition:transform .5s var(--eo);}
-  .cc-next.flip img{transform:scaleX(-1);}
+  .cc-nav img{width:100%;height:100%;display:block;}
+  .cc-prev{opacity:0;pointer-events:none;}
+  .cc-prev img{transform:scaleX(-1);}
   .cc-next:hover{transform:scale(1.07);}
   .cc-next{transition:transform .25s var(--eo);}
   .cw-scroll.framed{padding:0;overflow:hidden;}
@@ -248,10 +261,17 @@
   /* The ribbon runs from the rule that underlines the case name down to the
      very bottom. Its box is written inline from JS, because the same values
      are animated and an inline top would otherwise fight a top set here. */
-  .cw-screen.ribbon{opacity:0;pointer-events:none;overflow:hidden;
+  .cw-screen.ribbon{opacity:0;pointer-events:none;overflow-x:auto;overflow-y:hidden;
     visibility:hidden;inset:auto;}
   .cw-screen.ribbon.live{visibility:visible;}
-  .cw-screen.ribbon iframe{width:100%;height:100%;border:0;display:block;}
+  /* The ribbon is scrolled by its own container, not by the frame: the frame is
+     laid out at the ribbon's natural size and scaled to the height of the box,
+     so no scrollbar of its own appears and no white is left under it. */
+  .cw-screen.ribbon{scrollbar-width:none;-ms-overflow-style:none;}
+  .cw-screen.ribbon::-webkit-scrollbar{display:none;}
+  .cw-screen.ribbon .rb-inner{position:relative;height:100%;}
+  .cw-screen.ribbon iframe{position:absolute;left:0;top:0;border:0;display:block;
+    transform-origin:0 0;}
   /* Paging controls sit over the ribbon. The second is born out of the first:
      both are white discs inside a wrapper carrying a goo filter, so while they
      overlap they read as one blob that splits in two. */
@@ -503,7 +523,6 @@
   <section class="chapter" id="chapter">
     <div id="spine"></div>
     <div id="spineCap">’26</div>
-    <canvas id="heroFX" aria-hidden="true"></canvas>
 
     <div class="op-note"><span class="sm dim" data-goo>Россия<br>SMM · Дизайн · Фото</span></div>
 
@@ -537,7 +556,8 @@
   <div id="caseWin" aria-hidden="true">
     <div class="cw-veil" data-close></div>
     <article class="cw-panel" role="dialog" aria-modal="true" aria-labelledby="cwTitle">
-      <button class="cw-x" type="button" data-close aria-label="Закрыть">&times;</button>
+      <button class="cw-x" type="button" data-close aria-label="Закрыть">
+        <img src="cases/sanek-tpl/close.svg" alt=""></button>
       <div class="cw-scroll" id="cwScroll" data-lenis-prevent></div>
     </article>
   </div>
@@ -602,7 +622,7 @@
     </div>
 
     <div class="tailroom"></div>
-    <span id="buildStamp" style="display:none">BUILD 30.09 21:00</span>
+    <span id="buildStamp" style="display:none">BUILD 01.10 01:02</span>
   </section>
 
 </main>
@@ -980,8 +1000,10 @@
         sec('Решение:', d.solLead, d.solBody, 703.09, 640.00) +
       '</div>' +
       (d.photo ? photoStack(d.photo) : '') +
-      (c.page ? '<button class="cc-next" type="button" data-next aria-label="Смотреть кейс">' +
-        '<img src="cases/sanek-tpl/arrow.svg" alt=""></button>' : '') +
+      (c.page ? '<div class="cc-nav">' +
+        '<button class="cc-prev" type="button" data-prev aria-label="Назад"><img src="cases/sanek-tpl/arrow.svg" alt=""></button>' +
+        '<button class="cc-next" type="button" data-next aria-label="Дальше"><img src="cases/sanek-tpl/arrow.svg" alt=""></button>' +
+      '</div>' : '') +
     '</div>';
   }
 
@@ -1015,6 +1037,8 @@
     var k = w / 1358.102;
     card.style.transform = 'scale(' + k + ')';
     cwScroll.style.setProperty('--k', k);
+    var pnl = cwEl.querySelector('.cw-panel');
+    if(pnl) pnl.style.setProperty('--k', k);
     // the rule under the case name sits at 217.32 in design pixels
     var stg = cwScroll.querySelector('.cw-stage');
     if(stg) stg.style.setProperty('--ruleY', (217.32 * k) + 'px');
@@ -1050,9 +1074,10 @@
         photo: {left: 948.26 * k, top: 314.97 * k,
                 width: 409.844 * k, height: 587.113 * k,
                 filter: 'blur(' + (26 * k).toFixed(1) + 'px)', opacity: .42},
-        open:  {left: 0, top: 217.32 * k,
+        // one design pixel below the rule, so the rule itself stays visible
+        open:  {left: 0, top: 218.32 * k,
                 width: cwScroll.clientWidth,
-                height: cwScroll.clientHeight - 217.32 * k,
+                height: cwScroll.clientHeight - 218.32 * k,
                 filter: 'blur(0px)', opacity: 1}
       };
     }
@@ -1063,7 +1088,9 @@
     // into the place the year has just left. All of it runs on the same clock
     // as the ribbon opening out of the photograph, so it reads as one move.
     var NAME_Y = {card: 108.68, open: 69.66};
-    var YEAR   = {card: {left: 1203.07, top: 155.68}, open: {left: 353.6, top: 123.66}};
+    // baselines, not box bottoms: the 80px name sits on 69.66 + 63.2 = 132.9,
+    // so a 24px year has to start at 132.9 - 19 = 113.9 to share that line
+    var YEAR   = {card: {left: 1203.07, top: 155.68}, open: {left: 353.6, top: 113.9}};
     var ARROW  = {card: 580, open: 80.16};
 
     function go(to){
@@ -1074,7 +1101,7 @@
       var cc = cardS.querySelector('.cc');
       var name = cc.querySelector('.cc-name'),
           year = cc.querySelector('.cc-year'),
-          arrow = cc.querySelector('.cc-next'),
+          arrow = cc.querySelector('.cc-nav'),
           copy = cc.querySelector('.cc-copy'),
           photo = cc.querySelector('.cc-photo');
 
@@ -1086,7 +1113,6 @@
                     top:  fwd ? YEAR.open.top  : YEAR.card.top}, 0)
         .to(arrow, {top: fwd ? ARROW.open : ARROW.card}, 0);
 
-      if(arrow) arrow.classList.toggle('flip', fwd);
 
       if(fwd){
         ribS.classList.add('live');
@@ -1107,11 +1133,6 @@
       }
     }
 
-    // one control for both directions, as in the design
-    var nextBtn = stage.querySelector('[data-next]');
-    if(nextBtn) nextBtn.addEventListener('click', function(){
-      go(at === 'card' ? 'ribbon' : 'card');
-    });
     document.addEventListener('keydown', function(e){
       if(!cwOpen) return;
       if(e.key === 'ArrowRight') go('ribbon');
@@ -1123,20 +1144,17 @@
     // threshold welds them into a single blob, and as the left one slides clear
     // the blob necks and splits. The filter comes off once they are apart, so
     // nothing on the page is left carrying one.
-    var nav = ribS.querySelector('.rb-nav');
-    var prev = nav && nav.querySelector('.rb-prev');
-    var next = nav && nav.querySelector('.rb-next');
+    var nav = cardS.querySelector('.cc-nav');
+    var prev = nav && nav.querySelector('.cc-prev');
+    var next = nav && nav.querySelector('.cc-next');
     var split = false;
 
     function scrollRibbon(dir){
-      var fr = ribS.querySelector('iframe'), doc;
-      try{ doc = fr.contentDocument; }catch(e){ return; }
-      if(!doc) return;
       // ScrollToPlugin is not loaded on this page, so the position is stepped
       // by hand on the same curve
-      var el = doc.scrollingElement || doc.documentElement;
-      var max = Math.max(0, el.scrollWidth - fr.clientWidth);
-      var to = Math.min(max, Math.max(0, el.scrollLeft + dir * fr.clientWidth * .86));
+      var el = ribS;
+      var max = Math.max(0, el.scrollWidth - el.clientWidth);
+      var to = Math.min(max, Math.max(0, el.scrollLeft + dir * el.clientWidth * .86));
       var st = {v: el.scrollLeft};
       gsap.killTweensOf(st);
       gsap.to(st, {v: to, duration: .75, ease: EASE.rise,
@@ -1150,19 +1168,58 @@
       nav.style.filter = 'url(#' + gooFilter(px) + ')';
       gsap.timeline({onComplete: function(){ nav.style.filter = 'none'; }})
         .set(prev, {opacity: 1, pointerEvents: 'auto', x: 0, scale: .72})
-        .to(prev, {x: -69, scale: 1, duration: .78, ease: EASE.rise}, 0);
+        .to(prev, {x: -76, scale: 1, duration: .78, ease: EASE.rise}, 0);
     }
 
-    if(next) next.addEventListener('click', function(){ scrollRibbon(1); birthPrev(); });
+    // On the card the right-hand disc opens the case. Once open it stays where
+    // it is and becomes the forward pager, and the backward pager is born out
+    // of it — nothing moves to the foot of the window.
+    if(next) next.addEventListener('click', function(){
+      if(at === 'card'){ go('ribbon'); return; }
+      scrollRibbon(1); birthPrev();
+    });
     if(prev) prev.addEventListener('click', function(){ scrollRibbon(-1); });
+
 
     // the ribbon can be dragged with the mouse as well as stepped through
     var fr = ribS.querySelector('iframe');
+    var inner = ribS.querySelector('.rb-inner');
+
+    // Lay the frame out at the ribbon's own size and scale it to the height of
+    // the box. The scrolling then belongs to the container, which hides its own
+    // scrollbar, and the ribbon reaches the foot of the window with no white
+    // strip under it. Ilya's file is not touched.
+    function fitRibbon(){
+      var doc;
+      try{ doc = fr.contentDocument; }catch(e){ return; }
+      if(!doc || !doc.body) return;
+      var el = doc.scrollingElement || doc.documentElement;
+      var w = Math.max(el.scrollWidth, doc.body.scrollWidth);
+      var h = Math.max(doc.body.offsetHeight, el.clientHeight) || 760;
+      var boxH = ribS.clientHeight;
+      if(!boxH || !w) return;
+      var z = boxH / h;
+      fr.style.width = w + 'px';
+      fr.style.height = h + 'px';
+      fr.style.transform = 'scale(' + z + ')';
+      inner.style.width = (w * z) + 'px';
+      // the page inside must not show a bar of its own either
+      var st = doc.getElementById('__noBar');
+      if(!st){
+        st = doc.createElement('style'); st.id = '__noBar';
+        st.textContent = 'html,body{overflow:hidden!important;margin:0!important;}' +
+          '::-webkit-scrollbar{display:none!important;}';
+        doc.head.appendChild(st);
+      }
+    }
+    fr.addEventListener('load', fitRibbon);
+    if(window.ResizeObserver) new ResizeObserver(fitRibbon).observe(ribS);
+
     fr.addEventListener('load', function(){
       var doc;
       try{ doc = fr.contentDocument; }catch(e){ return; }
       if(!doc) return;
-      var el = doc.scrollingElement || doc.documentElement;
+      var el = ribS;
       var down = false, sx = 0, sl = 0;
       doc.body.style.cursor = 'grab';
       doc.addEventListener('pointerdown', function(e){
@@ -1229,13 +1286,8 @@
       cwScroll.innerHTML =
         '<div class="cw-stage">' +
           '<div class="cw-screen card">' + renderCard(c) + '</div>' +
-          (c.page ? '<div class="cw-screen ribbon"><iframe title="' + esc(c.t) +
-            '" src="' + esc(c.page) + '"></iframe>' +
-            '<div class="rb-nav">' +
-              '<button class="rb-prev" type="button" data-page="-1" aria-label="Назад">' +
-                '<img src="cases/sanek-tpl/arrow.svg" alt=""></button>' +
-              '<button class="rb-next" type="button" data-page="1" aria-label="Дальше">' +
-                '<img src="cases/sanek-tpl/arrow.svg" alt=""></button>' +
+          (c.page ? '<div class="cw-screen ribbon"><div class="rb-inner">' +
+            '<iframe title="' + esc(c.t) + '" src="' + esc(c.page) + '"></iframe>' +
             '</div></div>' : '') +
         '</div>' +
         '';
@@ -1627,133 +1679,9 @@
      through and nothing appeared. Soft radial gradients overlap into the
      same organic mass without needing a threshold, and work everywhere.
      ============================================================ */
-  /* ============================================================
-     The reveal behind the opening screen. Every previous attempt failed
-     silently somewhere I could not see: a canvas threshold that does nothing to
-     alpha in Safari, an SVG mask too slow to paint, and a simulation whose
-     splats all landed off-canvas because the pointer offset was subtracted
-     twice. This version has no library and no coordinate translation — the
-     handler sits on the element and the trail is drawn straight into a mask
-     canvas, so there is nothing left that can quietly do nothing.
-     ============================================================ */
-  (function(){
-    var cv = document.getElementById('heroFX');
-    var chap = document.getElementById('chapter');
-    if(!cv || !chap || reduced || coarse){ if(cv) cv.style.display = 'none'; return; }
+    /* The cursor-painted reveal that used to sit behind the opening was removed
+     at Ilya's request: it added nothing and competed with the type. */
 
-    var ctx = cv.getContext('2d');
-    var mcv = document.createElement('canvas');
-    var mctx = mcv.getContext('2d');
-    var W = 0, H = 0, boxes = [], imgs = [];
-
-    CASES.forEach(function(c){ var im = new Image(); im.src = c.img; imgs.push(im); });
-    var SPOTS = [
-      [.06,.06,.26],[.32,.26,.22],[.58,.08,.24],[.80,.22,.28],
-      [.12,.48,.24],[.42,.56,.30],[.70,.52,.22],[.26,.78,.26]
-    ];
-    function place(){
-      boxes = imgs.map(function(im, i){
-        var sp = SPOTS[i % SPOTS.length];
-        var w = Math.max(160, W * sp[2]);
-        return {im: im, x: sp[0] * W, y: sp[1] * H, w: w, h: w * .72};
-      });
-    }
-    function size(){
-      W = chap.clientWidth;
-      H = Math.min(window.innerHeight, chap.clientHeight);
-      cv.width = mcv.width = Math.round(W);
-      cv.height = mcv.height = Math.round(H);
-      cv.style.width = W + 'px'; cv.style.height = H + 'px';
-      place();
-    }
-    new ResizeObserver(size).observe(chap);
-    size();
-
-    // A chain of followers, each lagging a little more than the one before and
-    // each a different size. Their union is an irregular, shifting shape — one
-    // disc stamped at the cursor could only ever look like a dot.
-    var CHAIN = [];
-    for(var q = 0; q < 7; q++) CHAIN.push({x: -1, y: -1, lag: 0.42 - q * 0.045, r: 150 - q * 15});
-    var px = -1, py = -1, tx = -1, ty = -1, moving = 0;
-    chap.addEventListener('pointermove', function(e){
-      var r = chap.getBoundingClientRect();
-      tx = e.clientX - r.left;
-      ty = e.clientY - r.top;
-      if(px < 0){ px = tx; py = ty; }
-      moving = performance.now();
-    }, {passive: true});
-
-    function stamp(x, y, r){
-      var g = mctx.createRadialGradient(x, y, 0, x, y, r);
-      g.addColorStop(0, 'rgba(255,255,255,1)');
-      g.addColorStop(.62, 'rgba(255,255,255,.9)');
-      g.addColorStop(1, 'rgba(255,255,255,0)');
-      mctx.fillStyle = g;
-      mctx.beginPath(); mctx.arc(x, y, r, 0, Math.PI * 2); mctx.fill();
-    }
-
-    var visible = true;
-    new IntersectionObserver(function(es){
-      es.forEach(function(en){ visible = en.isIntersecting; });
-    }, {threshold: .01}).observe(chap);
-
-    function draw(){
-      if(!visible || !W) return;
-      var idle = performance.now() - moving > 900;
-
-      // the trail thins out a little every frame, so it heals behind the cursor
-      mctx.globalCompositeOperation = 'destination-out';
-      // A proportional fade approaches zero without ever arriving, which left a
-      // faint ghost of every stroke on screen. A steeper rate plus a hard clear
-      // shortly after the pointer stops removes it completely.
-      mctx.fillStyle = 'rgba(0,0,0,0.2)';
-      mctx.fillRect(0, 0, W, H);
-      mctx.globalCompositeOperation = 'source-over';
-
-      if(idle){
-        mctx.clearRect(0, 0, W, H);
-        ctx.clearRect(0, 0, W, H);
-        px = py = -1;
-        for(var z = 0; z < CHAIN.length; z++){ CHAIN[z].x = -1; }
-        return;
-      }
-      if(tx >= 0){
-        // the head draws a continuous stroke along the segment covered since the
-        // last frame, so a fast sweep is a stroke rather than a dotted line
-        var dx = tx - px, dy = ty - py;
-        var dist = Math.sqrt(dx * dx + dy * dy);
-        var steps = Math.max(1, Math.min(20, Math.round(dist / 16)));
-        for(var i = 1; i <= steps; i++){
-          var t = i / steps;
-          stamp(px + dx * t, py + dy * t, 138);
-        }
-        px = tx; py = ty;
-
-        // and the chain trails behind it, each link easing toward the one ahead
-        var ax = tx, ay = ty;
-        for(var k = 0; k < CHAIN.length; k++){
-          var c = CHAIN[k];
-          if(c.x < 0){ c.x = ax; c.y = ay; }
-          c.x += (ax - c.x) * c.lag;
-          c.y += (ay - c.y) * c.lag;
-          stamp(c.x, c.y, c.r);
-          ax = c.x; ay = c.y;
-        }
-      }
-
-      ctx.clearRect(0, 0, W, H);
-      ctx.globalCompositeOperation = 'source-over';
-      boxes.forEach(function(b){
-        if(b.im.complete && b.im.naturalWidth) ctx.drawImage(b.im, b.x, b.y, b.w, b.h);
-      });
-      ctx.globalCompositeOperation = 'destination-in';
-      ctx.drawImage(mcv, 0, 0);
-      ctx.globalCompositeOperation = 'source-over';
-    }
-    gsap.ticker.add(draw);
-    // exposed so the drawing can be stepped and measured without a live ticker
-    window.__heroDraw = draw;
-  })();
 
   /* ---------- the closing still: flies in, then leans toward the pointer ---------- */
   (function(){
