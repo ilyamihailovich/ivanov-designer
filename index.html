@@ -10,7 +10,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap&subset=cyrillic" rel="stylesheet">
 <link rel="preload" href="fonts/ak.woff2" as="font" type="font/woff2" crossorigin>
-<script src="cases.js?v=010228"></script>
+<script src="cases.js?v=010239"></script>
 <script src="https://cdn.jsdelivr.net/npm/lenis@1.3.21/dist/lenis.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/gsap.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/ScrollTrigger.min.js"></script>
@@ -119,11 +119,15 @@
      the way the reference threads one rule through its opening chapter */
   /* One unbroken rule from the top of the chapter to the year badge, drawn
      behind the type. It is not interrupted anywhere. */
+  /* Drawn above the type, not under it. The changing word needs an opaque
+     plate for its threshold to bite on, and that plate reaches far enough to
+     cover the rule — with the rule on top it stays visible regardless. At one
+     pixel and fourteen percent it is invisible where it crosses black type. */
   #spine{position:absolute;top:0;bottom:0;left:var(--rule);width:1px;
-    background:var(--hair);z-index:1;transform-origin:50% 0;}
+    background:var(--hair);z-index:4;transform-origin:50% 0;}
 
   #spineCap{position:absolute;left:var(--rule);bottom:calc(-1 * clamp(26px,3.4vw,58px));
-    transform:translateX(-50%);z-index:2;
+    transform:translateX(-50%);z-index:4;
     width:44px;height:44px;border-radius:50%;border:1px solid var(--hair);background:var(--paper);
     display:flex;align-items:center;justify-content:center;font-size:10.5px;font-weight:600;color:var(--dim);}
 
@@ -254,7 +258,8 @@
      copies of the same image, each blurred more than the one below it and each
      masked so the sharper copies only show towards the right. */
   .cc-photo{position:absolute;left:948.26px;top:314.97px;width:409.844px;height:587.113px;
-    overflow:hidden;}
+    overflow:hidden;will-change:opacity;}
+  .cc-photo i{will-change:filter;}
   .cc-photo i{position:absolute;inset:0;display:block;
     background-image:var(--src);background-size:117.08% 100%;background-position:0 0;
     background-repeat:no-repeat;
@@ -677,7 +682,7 @@
     </div>
 
     <div class="tailroom"></div>
-    <span id="buildStamp" style="display:none">BUILD 01.10 02:28</span>
+    <span id="buildStamp" style="display:none">BUILD 01.10 02:39</span>
   </section>
 
 </main>
@@ -830,7 +835,7 @@
   var GOO = {
     blur:    0.34,   // peak blur as a share of the font size
     reveal:  0.62,   // seconds for a line to resolve
-    swap:    0.62,   // seconds for a word to melt, change and re-form
+    swap:    0.90,   // seconds for a word to melt, change and re-form
     swapBlur:0.15,   // peak blur for a swap, as a share of the font size:
                      // low enough that the word stays a visible blob instead
                      // of thinning past the threshold and vanishing, which is
@@ -1262,7 +1267,7 @@
 
       var tl = gsap.timeline({defaults: {duration: .82, ease: EASE.rise}});
       tl.to(copy,  {opacity: fwd ? 0 : 1, duration: fwd ? .4 : .55}, 0)
-        .to(photo, {opacity: fwd ? 0 : 1, duration: fwd ? .3 : .5}, fwd ? 0 : .3)
+        .to(photo, {opacity: fwd ? 0 : 1, duration: fwd ? .3 : .55}, 0)
         .to(name,  {top: fwd ? NAME_Y.open : NAME_Y.card}, 0)
         .to(year,  {left: fwd ? YEAR.open.left : YEAR.card.left,
                     top:  fwd ? YEAR.open.top  : YEAR.card.top}, 0)
@@ -1361,7 +1366,9 @@
     // back into its neighbour, the year goes home, the arrow drops to the
     // middle and the photograph settles back into its half-blur.
     if(prev) prev.addEventListener('click', function(){
-      if(ribS.scrollLeft <= 2){ swallowPrev(function(){ go('card'); }); return; }
+      // both at once: waiting for the disc to retract first added a second of
+      // nothing happening before the card came back
+      if(ribS.scrollLeft <= 2){ swallowPrev(); go('card'); return; }
       scrollRibbon(-1);
     });
 
@@ -1665,29 +1672,40 @@
      The blur is quantised to half a pixel before it is written, so the filter
      is only rebuilt when the value actually changes — that is what keeps it
      from stepping instead of melting. */
+  /* The changing word melts into a blob, swaps underneath it and re-forms.
+
+     This one is a CSS blur with contrast, not the SVG threshold the headings
+     use. An SVG filter re-rasterises the glyphs on the CPU for every value of
+     stdDeviation; on a word that melts over and over Safari only manages a
+     handful of frames, which is why it read as word, blob, word instead of a
+     melt. A CSS filter on a promoted layer is composited and runs smoothly.
+
+     contrast needs something opaque beneath it. The plate reaches past the
+     vertical rule, so the rule is drawn above the type instead — see #spine.
+  */
   function morphWord(){
     var el = document.getElementById('morphWord');
     if(!el || reduced) return;
     var WORDS = ['бренды','кадры','истории','смыслы'], i = 0;
+    var peak = fontOf(el) * GOO.swapBlur;
 
     el.style.display = 'inline-block';
-    var g = ownFilter(el);
-    var peak = fontOf(el) * GOO.swapBlur;
-    var st = {b: 0}, last = -1;
+    el.style.willChange = 'filter';
+    el.style.backgroundColor = 'var(--paper)';
+    el.style.boxShadow = '0 0 0 ' + Math.ceil(peak * 2.2) + 'px var(--paper)';
+
+    var st = {b: 0};
     function paint(){
-      var v = Math.round(st.b * 2) / 2;
-      if(v === last) return;
-      last = v;
-      g.blur.setAttribute('stdDeviation', v);
+      el.style.filter = st.b < 0.06 ? 'none'
+        : 'blur(' + st.b.toFixed(2) + 'px) contrast(' + (1 + st.b * 1.9).toFixed(2) + ')';
     }
+    paint();
 
     (function cycle(){
       gsap.timeline({delay: 1.9, onComplete: cycle})
-        .add(function(){ el.style.filter = 'url(#' + g.id + ')'; })
-        .to(st, {b: peak, duration: GOO.swap / 2, ease: 'power2.in', onUpdate: paint})
+        .to(st, {b: peak, duration: GOO.swap * .55, ease: 'power2.in', onUpdate: paint})
         .add(function(){ i = (i + 1) % WORDS.length; el.textContent = WORDS[i]; })
-        .to(st, {b: 0, duration: GOO.swap / 2, ease: 'power2.out', onUpdate: paint})
-        .add(function(){ el.style.filter = 'none'; last = -1; });
+        .to(st, {b: 0, duration: GOO.swap * .55, ease: 'power2.out', onUpdate: paint});
     })();
   }
 
