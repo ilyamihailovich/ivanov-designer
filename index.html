@@ -5,7 +5,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap&subset=cyrillic" rel="stylesheet">
 <link rel="preload" href="fonts/ak.woff2" as="font" type="font/woff2" crossorigin>
-<script src="cases.js?v=302051"></script>
+<script src="cases.js?v=302100"></script>
 <script src="https://cdn.jsdelivr.net/npm/lenis@1.3.21/dist/lenis.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/gsap.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/ScrollTrigger.min.js"></script>
@@ -212,6 +212,7 @@
   .cc-h{left:95.11px;font-size:36px;}
   .cc-rule{position:absolute;left:98.11px;top:217.32px;width:1161.88px;height:1px;
     background:#000;opacity:.43;}
+  .cc-copy{position:absolute;inset:0;}
   .cc-b{position:absolute;left:96.12px;width:703.539px;}
   .cc-b .lead{font-weight:500;font-size:20px;line-height:.98;letter-spacing:-.01em;
     color:#000;margin:0;}
@@ -234,7 +235,8 @@
     background:linear-gradient(90deg,#fff 0%,rgba(255,255,255,.72) 42%,rgba(255,255,255,0) 100%);}
   .cc-next{position:absolute;left:1202.94px;top:580px;width:57.051px;height:57.051px;
     border:0;padding:0;background:none;cursor:pointer;}
-  .cc-next img{width:100%;height:100%;display:block;}
+  .cc-next img{width:100%;height:100%;display:block;transition:transform .5s var(--eo);}
+  .cc-next.flip img{transform:scaleX(-1);}
   .cc-next:hover{transform:scale(1.07);}
   .cc-next{transition:transform .25s var(--eo);}
   .cw-scroll.framed{padding:0;overflow:hidden;}
@@ -250,6 +252,16 @@
     visibility:hidden;inset:auto;}
   .cw-screen.ribbon.live{visibility:visible;}
   .cw-screen.ribbon iframe{width:100%;height:100%;border:0;display:block;}
+  /* Paging controls sit over the ribbon. The second is born out of the first:
+     both are white discs inside a wrapper carrying a goo filter, so while they
+     overlap they read as one blob that splits in two. */
+  .rb-nav{position:absolute;right:26px;bottom:26px;z-index:6;width:126px;height:57px;
+    pointer-events:none;}
+  .rb-nav button{position:absolute;top:0;right:0;width:57px;height:57px;border:0;
+    padding:0;background:none;cursor:pointer;pointer-events:auto;}
+  .rb-nav button img{width:100%;height:100%;display:block;}
+  .rb-prev{opacity:0;pointer-events:none;}
+  .rb-prev img{transform:scaleX(-1);}
   .cw-back{position:absolute;left:24px;top:24px;z-index:4;width:44px;height:44px;
     border:1px solid rgba(0,0,0,.35);border-radius:50%;background:#fff;cursor:pointer;
     font-size:19px;line-height:1;opacity:0;pointer-events:none;
@@ -590,7 +602,7 @@
     </div>
 
     <div class="tailroom"></div>
-    <span id="buildStamp" style="display:none">BUILD 30.09 20:51</span>
+    <span id="buildStamp" style="display:none">BUILD 30.09 21:00</span>
   </section>
 
 </main>
@@ -963,8 +975,10 @@
       '<div class="cc-t cc-name">' + esc(c.t) + '</div>' +
       '<div class="cc-t cc-year">' + esc(d.year || '') + '</div>' +
       '<div class="cc-rule"></div>' +
-      sec('Задача:', d.taskLead, d.taskBody, 367.51, 304.41) +
-      sec('Решение:', d.solLead, d.solBody, 703.09, 640.00) +
+      '<div class="cc-copy">' +
+        sec('Задача:', d.taskLead, d.taskBody, 367.51, 304.41) +
+        sec('Решение:', d.solLead, d.solBody, 703.09, 640.00) +
+      '</div>' +
       (d.photo ? photoStack(d.photo) : '') +
       (c.page ? '<button class="cc-next" type="button" data-next aria-label="Смотреть кейс">' +
         '<img src="cases/sanek-tpl/arrow.svg" alt=""></button>' : '') +
@@ -1043,40 +1057,104 @@
       };
     }
 
+    // The header does not go away when the case opens — it re-forms. The name
+    // rises until it sits centred between the top of the window and the rule,
+    // the year tucks in beside it aligned on its foot, and the arrow travels up
+    // into the place the year has just left. All of it runs on the same clock
+    // as the ribbon opening out of the photograph, so it reads as one move.
+    var NAME_Y = {card: 108.68, open: 69.66};
+    var YEAR   = {card: {left: 1203.07, top: 155.68}, open: {left: 353.6, top: 123.66}};
+    var ARROW  = {card: 580, open: 80.16};
+
     function go(to){
       if(at === to) return;
       at = to;
       var fwd = to === 'ribbon';
       var b = boxes();
+      var cc = cardS.querySelector('.cc');
+      var name = cc.querySelector('.cc-name'),
+          year = cc.querySelector('.cc-year'),
+          arrow = cc.querySelector('.cc-next'),
+          copy = cc.querySelector('.cc-copy'),
+          photo = cc.querySelector('.cc-photo');
+
       var tl = gsap.timeline({defaults: {duration: .82, ease: EASE.rise}});
-      tl.to(cardS, {opacity: fwd ? 0 : 1, duration: fwd ? .45 : .6}, 0);
+      tl.to(copy,  {opacity: fwd ? 0 : 1, duration: fwd ? .4 : .55}, 0)
+        .to(photo, {opacity: fwd ? 0 : 1, duration: fwd ? .3 : .5}, fwd ? 0 : .3)
+        .to(name,  {top: fwd ? NAME_Y.open : NAME_Y.card}, 0)
+        .to(year,  {left: fwd ? YEAR.open.left : YEAR.card.left,
+                    top:  fwd ? YEAR.open.top  : YEAR.card.top}, 0)
+        .to(arrow, {top: fwd ? ARROW.open : ARROW.card}, 0);
+
+      if(arrow) arrow.classList.toggle('flip', fwd);
+
       if(fwd){
         ribS.classList.add('live');
         gsap.set(ribS, {pointerEvents: 'auto'});
         tl.fromTo(ribS, b.photo, b.open, 0);
       } else {
-        // back to the photograph, then out of sight entirely — leaving it at the
-        // photo's opacity is what made the ribbon sit visible on the card
+        // On the way back the ribbon must be gone before it reaches the photo's
+        // box, otherwise it lands there still showing its own first slide while
+        // the card's photograph fades in underneath — two different pictures in
+        // the same place, which is the flicker on collapse.
         tl.fromTo(ribS, b.open,
-          Object.assign({}, b.photo, {
-            pointerEvents: 'none',
+          Object.assign({}, b.photo, {opacity: 0, pointerEvents: 'none'}), 0)
+          .to(ribS, {opacity: 0, duration: .34, ease: 'power2.in',
             onComplete: function(){
               ribS.classList.remove('live');
               gsap.set(ribS, {clearProps: 'all'});
-            }
-          }), 0);
+            }}, 0);
       }
-      if(back) back.classList.toggle('on', fwd);
     }
 
+    // one control for both directions, as in the design
     var nextBtn = stage.querySelector('[data-next]');
-    if(nextBtn) nextBtn.addEventListener('click', function(){ go('ribbon'); });
-    if(back) back.addEventListener('click', function(){ go('card'); });
+    if(nextBtn) nextBtn.addEventListener('click', function(){
+      go(at === 'card' ? 'ribbon' : 'card');
+    });
     document.addEventListener('keydown', function(e){
       if(!cwOpen) return;
       if(e.key === 'ArrowRight') go('ribbon');
       if(e.key === 'ArrowLeft') go('card');
     });
+
+    // The second control is born out of the first. Both discs start on top of
+    // one another inside a wrapper carrying the goo filter: overlapping, the
+    // threshold welds them into a single blob, and as the left one slides clear
+    // the blob necks and splits. The filter comes off once they are apart, so
+    // nothing on the page is left carrying one.
+    var nav = ribS.querySelector('.rb-nav');
+    var prev = nav && nav.querySelector('.rb-prev');
+    var next = nav && nav.querySelector('.rb-next');
+    var split = false;
+
+    function scrollRibbon(dir){
+      var fr = ribS.querySelector('iframe'), doc;
+      try{ doc = fr.contentDocument; }catch(e){ return; }
+      if(!doc) return;
+      // ScrollToPlugin is not loaded on this page, so the position is stepped
+      // by hand on the same curve
+      var el = doc.scrollingElement || doc.documentElement;
+      var max = Math.max(0, el.scrollWidth - fr.clientWidth);
+      var to = Math.min(max, Math.max(0, el.scrollLeft + dir * fr.clientWidth * .86));
+      var st = {v: el.scrollLeft};
+      gsap.killTweensOf(st);
+      gsap.to(st, {v: to, duration: .75, ease: EASE.rise,
+        onUpdate: function(){ el.scrollLeft = st.v; }});
+    }
+
+    function birthPrev(){
+      if(split || !prev || !nav) return;
+      split = true;
+      var px = Math.max(6, Math.round(57 * 0.34 / 2) * 2);
+      nav.style.filter = 'url(#' + gooFilter(px) + ')';
+      gsap.timeline({onComplete: function(){ nav.style.filter = 'none'; }})
+        .set(prev, {opacity: 1, pointerEvents: 'auto', x: 0, scale: .72})
+        .to(prev, {x: -69, scale: 1, duration: .78, ease: EASE.rise}, 0);
+    }
+
+    if(next) next.addEventListener('click', function(){ scrollRibbon(1); birthPrev(); });
+    if(prev) prev.addEventListener('click', function(){ scrollRibbon(-1); });
 
     // the ribbon can be dragged with the mouse as well as stepped through
     var fr = ribS.querySelector('iframe');
@@ -1152,9 +1230,15 @@
         '<div class="cw-stage">' +
           '<div class="cw-screen card">' + renderCard(c) + '</div>' +
           (c.page ? '<div class="cw-screen ribbon"><iframe title="' + esc(c.t) +
-            '" src="' + esc(c.page) + '"></iframe></div>' : '') +
+            '" src="' + esc(c.page) + '"></iframe>' +
+            '<div class="rb-nav">' +
+              '<button class="rb-prev" type="button" data-page="-1" aria-label="Назад">' +
+                '<img src="cases/sanek-tpl/arrow.svg" alt=""></button>' +
+              '<button class="rb-next" type="button" data-page="1" aria-label="Дальше">' +
+                '<img src="cases/sanek-tpl/arrow.svg" alt=""></button>' +
+            '</div></div>' : '') +
         '</div>' +
-        (c.page ? '<button class="cw-back" type="button" data-back aria-label="Назад к описанию">&#8592;</button>' : '');
+        '';
       fitCard();
       wireCase();
       cwEl.classList.add('on');
