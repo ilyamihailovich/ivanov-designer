@@ -3,7 +3,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="description" content="Илья Иванов — SMM, графический дизайн и фотосъёмка полного цикла.">
 <link rel="preload" href="fonts/ak.woff2" as="font" type="font/woff2" crossorigin>
-<script src="cases.js?v=301436"></script>
+<script src="cases.js?v=301441"></script>
 <script src="https://cdn.jsdelivr.net/npm/lenis@1.3.21/dist/lenis.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/gsap.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/ScrollTrigger.min.js"></script>
@@ -523,7 +523,7 @@
     </div>
 
     <div class="tailroom"></div>
-    <span id="buildStamp" style="display:none">BUILD 30.09 14:36</span>
+    <span id="buildStamp" style="display:none">BUILD 30.09 14:41</span>
   </section>
 
 </main>
@@ -698,6 +698,12 @@
     el.style.willChange = 'filter';
     el.style.transform = 'translateZ(0)';
     el.style.backgroundColor = 'var(--paper)';
+    // The threshold needs an opaque backing, but the backing's own edge gets
+    // blurred too and showed up as a pale rectangle around the line on the
+    // first frames. A solid spread of the page colour pushes that edge far
+    // outside the blur radius, where it lands on matching paper and cannot be
+    // seen. box-shadow paints it without taking part in layout.
+    el.style.boxShadow = '0 0 0 ' + Math.ceil(from * fs * 2.6 + 24) + 'px var(--paper)';
     function paint(){
       el.style.filter = 'blur(' + st.b.toFixed(2) + 'px) contrast(' + st.c.toFixed(2) + ')';
     }
@@ -710,6 +716,7 @@
         el.style.willChange = 'auto';
         el.style.transform = 'none';
         el.style.backgroundColor = 'transparent';
+        el.style.boxShadow = 'none';
         if(done) done();
       }
     });
