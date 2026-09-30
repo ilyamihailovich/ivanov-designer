@@ -3,6 +3,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="description" content="Илья Иванов — SMM, графический дизайн и фотосъёмка полного цикла.">
 <link rel="preload" href="fonts/ak.woff2" as="font" type="font/woff2" crossorigin>
+<script src="cases.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/lenis@1.3.21/dist/lenis.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/gsap.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/ScrollTrigger.min.js"></script>
@@ -175,7 +176,16 @@
     padding-bottom:26px;border-bottom:1px solid var(--hair);}
   .cw-meta div{font-size:max(13px,.972vw);font-weight:500;}
   .cw-meta span{color:var(--dim);margin-right:8px;}
+  .cw-about h3{font-size:clamp(17px,1.5vw,24px);font-weight:500;letter-spacing:-.03em;
+    margin:34px 0 12px;}
+  .cw-about h3:first-child{margin-top:0;}
   .cw-about p{font-size:clamp(15px,1.25vw,20px);line-height:1.45;max-width:62ch;margin-bottom:14px;}
+  .cw-about ul{max-width:62ch;margin-bottom:14px;}
+  .cw-about li{font-size:clamp(15px,1.25vw,20px);line-height:1.45;padding-left:20px;
+    position:relative;margin-bottom:6px;}
+  .cw-about li::before{content:'';position:absolute;left:4px;top:.62em;width:5px;height:1px;
+    background:var(--ink);}
+  .cw-note{color:var(--dim);font-size:max(12px,.85vw)!important;margin-top:26px;}
   .cw-shots{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));
     gap:clamp(12px,1.6vw,26px);margin-top:clamp(26px,3.6vw,54px);}
   .cw-shots img{width:100%;display:block;background:var(--ghost);}
@@ -444,7 +454,7 @@
     </div>
 
     <div class="tailroom"></div>
-    <span id="buildStamp" style="display:none">BUILD 30.09 00:35</span>
+    <span id="buildStamp" style="display:none">BUILD 30.09 13:52</span>
   </section>
 
 </main>
@@ -469,17 +479,12 @@
   // which is what made the effect read as a flicker rather than a morph
   var GOO_TIME = 0.85;
 
-  var CASES = [
-    {t:'Quoters Tennis Club', c:'Айдентика',           img:'quoters1.jpg'},
-    {t:'Blaze',               c:'Съёмка · Приложение', img:'blaze1.jpg'},
-    {t:'GLOFF',               c:'Наружная реклама',    img:'gloff1.jpg'},
-    {t:'Алтейя Арома',        c:'SMM',                 img:'altey1.jpg'},
-    {t:'Йога в поле',         c:'Фотография',          img:'yoga1.jpg'},
-    {t:'Город',               c:'Фотография',          img:'ph_urban.jpg'},
-    {t:'Гараж',               c:'Фотография',          img:'ph_garage.jpg'},
-    {t:'Портрет',             c:'Фотография',          img:'ph_portrait.jpg'}
-  ];
+  // Content lives in cases.js. The globe and the tile row need a cover image,
+  // so entries without one stay in the index and the window only.
+  var ALL_CASES = window.CASES_DATA || [];
+  var CASES = ALL_CASES.filter(function(c){ return !!c.img; });
   window.__CASES = CASES;
+  window.__ALL_CASES = ALL_CASES;
 
   /* ---------- goo machinery ---------- */
   var fxDefs = document.getElementById('fxDefs'), gooN = 0;
@@ -725,8 +730,9 @@
   function esc(v){ return String(v == null ? '' : v)
     .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
 
-  function openCase(i){
-    var c = CASES[i];
+  function openCaseAll(i){ return openWindowFor((window.__ALL_CASES || [])[i]); }
+  function openCase(i){ return openWindowFor(CASES[i]); }
+  function openWindowFor(c){
     if(!c || !cwEl || cwOpen) return;
     cwOpen = true;
     cwLastFocus = document.activeElement;
@@ -741,16 +747,25 @@
     if(c.client) meta += '<div><span>Клиент</span>' + esc(c.client) + '</div>';
     if(meta) h += '<div class="cw-meta">' + meta + '</div>';
 
-    if(c.about){
-      var ps = [].concat(c.about);
-      h += '<div class="cw-about">' + ps.map(function(t){
-        return '<p>' + esc(t) + '</p>'; }).join('') + '</div>';
+    if(c.about && c.about.length){
+      h += '<div class="cw-about">' + c.about.map(function(b){
+        if(typeof b === 'string') return '<p>' + esc(b) + '</p>';
+        var out = '';
+        if(b.h) out += '<h3>' + esc(b.h) + '</h3>';
+        if(b.p) out += b.p.map(function(t){ return '<p>' + esc(t) + '</p>'; }).join('');
+        if(b.list) out += '<ul>' + b.list.map(function(t){
+          return '<li>' + esc(t) + '</li>'; }).join('') + '</ul>';
+        if(b.note) out += '<p class="cw-note">' + esc(b.note) + '</p>';
+        return out;
+      }).join('') + '</div>';
     }
 
-    var shots = (c.gallery && c.gallery.length) ? c.gallery : [c.img];
-    h += '<div class="cw-shots">' + shots.map(function(src, k){
-      return '<img loading="lazy" class="' + (k === 0 ? 'wide' : '') + '" src="' +
-             esc(src) + '" alt="' + esc(c.t) + '">'; }).join('') + '</div>';
+    var shots = (c.gallery && c.gallery.length) ? c.gallery : (c.img ? [c.img] : []);
+    if(shots.length){
+      h += '<div class="cw-shots">' + shots.map(function(src, k){
+        return '<img loading="lazy" class="' + (k === 0 ? 'wide' : '') + '" src="' +
+               esc(src) + '" alt="' + esc(c.t) + '">'; }).join('') + '</div>';
+    }
 
     cwScroll.innerHTML = h;
     cwScroll.scrollTop = 0;
@@ -796,7 +811,7 @@
     var thumb = document.getElementById('thumb');
     var timg = thumb ? thumb.querySelector('img') : null;
     if(!host) return;
-    CASES.forEach(function(k, i){
+    ALL_CASES.forEach(function(k, i){
       var row = document.createElement('div');
       row.className = 'idx-row';
       row.innerHTML = '<span class="n">' + String(i+1).padStart(2,'0') + '</span><span class="t"></span><span class="c"></span>';
@@ -808,9 +823,9 @@
       row.setAttribute('role', 'button');
       row.setAttribute('tabindex', '0');
       row.style.cursor = 'pointer';
-      row.addEventListener('click', function(){ openCase(i); });
+      row.addEventListener('click', function(){ openCaseAll(i); });
       row.addEventListener('keydown', function(e){
-        if(e.key === 'Enter' || e.key === ' '){ e.preventDefault(); openCase(i); }
+        if(e.key === 'Enter' || e.key === ' '){ e.preventDefault(); openCaseAll(i); }
       });
       host.appendChild(row);
       gsap.from(row, {yPercent: 40, opacity: 0, duration: .9, ease: EASE.rise,
