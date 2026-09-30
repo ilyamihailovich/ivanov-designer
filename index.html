@@ -10,7 +10,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap&subset=cyrillic" rel="stylesheet">
 <link rel="preload" href="fonts/ak.woff2" as="font" type="font/woff2" crossorigin>
-<script src="cases.js?v=010217"></script>
+<script src="cases.js?v=010228"></script>
 <script src="https://cdn.jsdelivr.net/npm/lenis@1.3.21/dist/lenis.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/gsap.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/ScrollTrigger.min.js"></script>
@@ -400,9 +400,8 @@
      and the continuation lines in column 3 */
   .t-a{margin-left:var(--c2);}
   .t-b{margin-left:var(--c4);}
-  /* these two used to start left of the rule and ran straight through it */
-  .t-c{margin-left:var(--c4);}
-  .t-d{margin-left:var(--c4);}
+  .t-c{margin-left:var(--c3);}
+  .t-d{margin-left:var(--c3);}
 
   /* ---------- work / globe ---------- */
   .featured{position:relative;margin-top:clamp(60px,14vh,180px);}
@@ -678,7 +677,7 @@
     </div>
 
     <div class="tailroom"></div>
-    <span id="buildStamp" style="display:none">BUILD 01.10 02:17</span>
+    <span id="buildStamp" style="display:none">BUILD 01.10 02:28</span>
   </section>
 
 </main>
@@ -1022,10 +1021,16 @@
        against it. Set per tile rather than shared, or they read as one sheet
        sliding about. */
     if(!coarse && !reduced){
+      // The perspective belongs to the row, not to each square: a shared
+      // vanishing point is what makes them lean in depth instead of spinning
+      // flat in the plane.
+      var row = document.querySelector('#tiles .tiles-row') || host;
+      row.style.perspective = '900px';
+      row.style.transformStyle = 'preserve-3d';
       var drift = gsap.utils.toArray('#tiles .tile').map(function(t, i){
         var sx = (i % 2 ? -1 : 1) * (0.7 + (i % 3) * 0.35);
         var sy = (i % 3 === 1 ? -1 : 1) * (0.5 + (i % 2) * 0.4);
-        gsap.set(t, {transformPerspective: 800});
+        gsap.set(t, {transformStyle: 'preserve-3d'});
         return {
           x:  gsap.quickTo(t, 'x',         {duration: .9, ease: 'power3'}),
           y:  gsap.quickTo(t, 'y',         {duration: .9, ease: 'power3'}),
@@ -1040,8 +1045,8 @@
         drift.forEach(function(d){
           d.x(dx * 16 * d.sx);
           d.y(dy * 12 * d.sy);
-          d.ry(dx * 7 * d.sx);
-          d.rx(-dy * 6 * d.sy);
+          d.ry(dx * 17 * d.sx);
+          d.rx(-dy * 14 * d.sy);
         });
       }, {passive: true});
     }
@@ -1324,10 +1329,11 @@
       // Filtering the whole group flooded both discs into one grey oval and
       // took the right-hand arrow off screen while it ran. Only the disc that
       // is actually moving carries the filter.
-      var px = Math.max(5, Math.round(57 * 0.22 / 2) * 2);
-      prev.style.filter = 'url(#' + gooPair(px) + ')';
+      // No goo filter on these two. The arrow asset is a white disc with a
+      // hairline outline: an alpha threshold eats the outline and leaves a
+      // soft grey blob, which is the grey circle that kept appearing where the
+      // buttons should be. They travel on scale and position alone.
       gsap.timeline({onComplete: function(){
-          prev.style.filter = 'none';
           gsap.set(prev, {opacity: 0, pointerEvents: 'none', x: 0, scale: 1});
           if(then) then();
         }})
@@ -1338,10 +1344,8 @@
     function birthPrev(){
       if(split || !prev || !nav) return;
       split = true;
-      var px = Math.max(5, Math.round(57 * 0.22 / 2) * 2);
-      prev.style.filter = 'url(#' + gooPair(px) + ')';
-      gsap.timeline({onComplete: function(){ prev.style.filter = 'none'; }})
-        .set(prev, {opacity: 1, pointerEvents: 'auto', x: 0, scale: .72})
+      gsap.timeline()
+        .set(prev, {opacity: 1, pointerEvents: 'auto', x: 0, scale: .55})
         .to(prev, {x: -76, scale: 1, duration: .78, ease: EASE.rise}, 0);
     }
 
@@ -1652,30 +1656,38 @@
      contrast needs something opaque under it, so the word carries a white plate
      spread far enough that its own edge never lands inside the blur — on white
      paper that edge is invisible. */
+  /* The changing word melts into a blob, swaps underneath it and re-forms.
+
+     The threshold is the SVG one, on alpha. A CSS contrast needs an opaque
+     plate under the text, and that plate reached across the vertical rule and
+     showed as a white band beside the word. Alpha needs no plate at all.
+
+     The blur is quantised to half a pixel before it is written, so the filter
+     is only rebuilt when the value actually changes — that is what keeps it
+     from stepping instead of melting. */
   function morphWord(){
     var el = document.getElementById('morphWord');
     if(!el || reduced) return;
     var WORDS = ['бренды','кадры','истории','смыслы'], i = 0;
-    var fs = fontOf(el);
-    var peak = fs * GOO.swapBlur;
 
     el.style.display = 'inline-block';
-    el.style.willChange = 'filter';
-    el.style.backgroundColor = 'var(--paper)';
-    el.style.boxShadow = '0 0 0 ' + Math.ceil(peak * 3 + 20) + 'px var(--paper)';
-
-    var st = {b: 0};
+    var g = ownFilter(el);
+    var peak = fontOf(el) * GOO.swapBlur;
+    var st = {b: 0}, last = -1;
     function paint(){
-      el.style.filter = st.b < 0.05 ? 'none'
-        : 'blur(' + st.b.toFixed(2) + 'px) contrast(' + (1 + st.b * 1.6).toFixed(2) + ')';
+      var v = Math.round(st.b * 2) / 2;
+      if(v === last) return;
+      last = v;
+      g.blur.setAttribute('stdDeviation', v);
     }
-    paint();
 
     (function cycle(){
       gsap.timeline({delay: 1.9, onComplete: cycle})
+        .add(function(){ el.style.filter = 'url(#' + g.id + ')'; })
         .to(st, {b: peak, duration: GOO.swap / 2, ease: 'power2.in', onUpdate: paint})
         .add(function(){ i = (i + 1) % WORDS.length; el.textContent = WORDS[i]; })
-        .to(st, {b: 0, duration: GOO.swap / 2, ease: 'power2.out', onUpdate: paint});
+        .to(st, {b: 0, duration: GOO.swap / 2, ease: 'power2.out', onUpdate: paint})
+        .add(function(){ el.style.filter = 'none'; last = -1; });
     })();
   }
 
@@ -1694,14 +1706,16 @@
 
     gsap.set(items, {opacity: 0, y: -30, scale: .66});
 
+    // No filter on the list either. These pills are outlines, and a threshold
+    // floods an outline into a solid shape — the motion was there but it read
+    // as the items simply appearing. They travel on their own.
     var tl = gsap.timeline({paused: true,
-      onReverseComplete: function(){ list.style.filter = 'none'; list.classList.remove('on'); },
-      onComplete:        function(){ list.style.filter = 'none'; }
+      onReverseComplete: function(){ list.classList.remove('on'); }
     });
     items.forEach(function(el, i){
       // each starts sitting on its neighbour, so while they overlap the
       // threshold welds them and they neck apart as they travel down
-      tl.to(el, {opacity: 1, y: 0, scale: 1, duration: .5, ease: EASE.rise}, i * 0.1);
+      tl.to(el, {opacity: 1, y: 0, scale: 1, duration: .55, ease: EASE.rise}, i * 0.13);
     });
 
     function run(to){
@@ -1709,7 +1723,6 @@
       open = to;
       btn.setAttribute('aria-expanded', to ? 'true' : 'false');
       list.setAttribute('aria-hidden', to ? 'false' : 'true');
-      if(!reduced) list.style.filter = 'url(#' + gooPair(7) + ')';
       if(to){ list.classList.add('on'); tl.play(); }
       else  { tl.reverse(); }
     }
@@ -1951,7 +1964,9 @@
         var p = self.progress;
         // white comes back as the words start melting into the link, which is
         // the moment in Ilya's screenshot, not after the link has settled
-        root.classList.toggle('is-dark', p > 0.12 && p < 0.70);
+        // black before the words have even finished parting, not once the
+        // sphere is already turning
+        root.classList.toggle('is-dark', p > 0.04 && p < 0.70);
       }
     });
   }
