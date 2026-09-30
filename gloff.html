@@ -1,0 +1,235 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>GLOFF — кейс</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<!-- Standalone copy of the GLOFF case window, written as plain static markup so
+     that HTML-to-Design style importers can read it: no scripts, no overlay, and
+     every image referenced by an absolute URL. -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<style>
+  @font-face{font-family:'AK';src:url('https://ilyamihailovich.github.io/ivanov-designer/fonts/ak.woff2') format('woff2');
+    font-weight:100 900;font-style:normal;font-display:swap;}
+  *,*::before,*::after{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{font-family:'AK',Arial,Helvetica,sans-serif;background:#d9d9d6;}
+  h1,h2,h3,h4,h5,h6,p,ul,ol,figure{margin:0;padding:0;}
+  ul{list-style:none;}
+  .page{--cbg:#f4f4f1;--cfg:#111111;--cac:#8ec63f;--cmu:rgba(17,17,17,.55);
+    width:1360px;max-width:100%;margin:0 auto;background:var(--cbg);color:var(--cfg);}
+  img{display:block;width:100%;}
+  /* ---- case layouts: each case brings its own environment ---- */
+  
+  
+  .cw-plate{background:#000;color:var(--cac);
+    text-align:center;padding:20px 0;font-size:clamp(26px,3.4vw,54px);font-weight:700;
+    letter-spacing:-.02em;}
+  .cb{position:relative;padding:clamp(40px,6vw,104px) clamp(20px,4vw,72px);}
+  .cb p{font-size:clamp(15px,1.12vw,19px);line-height:1.42;margin-bottom:15px;max-width:52ch;}
+  .cb img{display:block;width:100%;border-radius:4px;}
+
+  /* paint running down out of the section above */
+  .drip{position:absolute;top:0;width:clamp(26px,3.4vw,58px);height:clamp(90px,13vw,210px);
+    z-index:2;pointer-events:none;border-radius:0 0 50% 50%/0 0 100% 100%;}
+  .drip.mint{left:6%;background:linear-gradient(#7fd8c8,#7fd8c8);}
+  .drip.green{right:12%;background:linear-gradient(#8ec63f,#a6dc55);}
+  .drip.yellow{right:6%;height:clamp(60px,8vw,130px);background:#f5d020;}
+  .drip.orange{left:38%;background:linear-gradient(#f07a1b,#ff9a3c);}
+
+  .cb-hero{text-align:center;padding-top:clamp(56px,8vw,120px);}
+  .cb-hero .mark{font-size:clamp(54px,11vw,190px);font-weight:700;letter-spacing:-.04em;
+    color:var(--cac);line-height:.9;}
+  .cb-hero .mark sup{font-size:.22em;vertical-align:super;}
+  .cb-hero .obj{max-width:min(640px,72%);margin:clamp(20px,3vw,46px) auto 0;}
+
+  .cb-split{display:grid;gap:clamp(22px,3.4vw,60px);align-items:start;}
+  .cb-split.tl{grid-template-columns:minmax(0,1.05fr) minmax(0,.95fr);}
+  .cb-split.il{grid-template-columns:minmax(0,.95fr) minmax(0,1.05fr);}
+  .cb-split .stack{display:grid;gap:clamp(12px,1.6vw,26px);}
+  /* photographs that run off the edge of the page, as in the original */
+  .cb-bleed{display:grid;gap:clamp(12px,1.6vw,24px);}
+  .cb-bleed img{border-radius:4px 0 0 4px;}
+  .cb .obj-c{max-width:min(520px,60%);margin:clamp(24px,3vw,52px) auto 0;}
+
+  .cb-grid{display:grid;gap:clamp(12px,1.6vw,26px);}
+  .cb-grid.c1{grid-template-columns:1fr;}
+  .cb-grid.c2{grid-template-columns:repeat(2,minmax(0,1fr));}
+  .cb-grid.c3{grid-template-columns:repeat(3,minmax(0,1fr));}
+
+  .cb-badge{display:inline-block;font-size:clamp(22px,3vw,48px);font-weight:700;
+    font-style:italic;color:#fff;padding:.18em .7em;border-radius:999px;
+    background:linear-gradient(100deg,#8ec63f 0 48%,#e8386d 48% 100%);
+    box-shadow:0 8px 22px rgba(0,0,0,.16);margin:8px 0 22px;}
+  .cb-list{list-style:none;margin:0 0 26px;padding:0;max-width:52ch;}
+  .cb-list li{position:relative;padding-left:34px;margin-bottom:11px;font-style:italic;
+    font-size:clamp(14px,1.05vw,18px);line-height:1.35;}
+  .cb-list li::before{content:'';position:absolute;left:0;top:.28em;width:20px;height:14px;
+    border-radius:60% 40% 55% 45%/60% 55% 45% 40%;}
+  .cb-list li.green::before{background:#8ec63f;}
+  .cb-list li.pink::before{background:#e8386d;}
+  .cb-list li.blue::before{background:#3aa0e8;}
+  .cb-list li.orange::before{background:#f0a01b;}
+  .cb-callout{border:2px solid #8ec63f;border-radius:16px;padding:clamp(16px,2vw,30px);
+    background:linear-gradient(#eaf7d4,#f7fdef);text-align:center;max-width:56ch;
+    box-shadow:0 0 28px rgba(142,198,63,.35);}
+  .cb-callout p{margin:0 0 10px;max-width:none;font-size:clamp(13px,1vw,16px);}
+  .cb-callout p:last-child{margin:0;}
+
+  .cb-full figcaption{margin-top:14px;font-size:clamp(13px,1vw,16px);color:var(--cmu);}
+  .cb-final{display:grid;grid-template-columns:minmax(0,.8fr) minmax(0,1.2fr);
+    gap:clamp(22px,3vw,54px);align-items:start;}
+  .cb-final .photo img{border-radius:0 4px 4px 0;}
+  .cb-objs{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));
+    gap:clamp(10px,1.4vw,22px);margin-top:clamp(20px,2.6vw,44px);grid-column:1 / -1;}
+
+  @media (max-width:900px){
+    .cb-split.tl,.cb-split.il,.cb-final{grid-template-columns:1fr;}
+    .cb-grid.c2,.cb-grid.c3{grid-template-columns:1fr;}
+    .cb-split.il .stack{order:2;}
+  }
+  .cw-shots{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));
+    gap:clamp(12px,1.6vw,26px);margin-top:clamp(26px,3.6vw,54px);}
+  .cw-shots img{width:100%;display:block;background:var(--ghost);}
+  .cw-shots img.wide{grid-column:1 / -1;}
+  @media (max-width:900px){
+    .cw-panel{width:100%;height:100%;}
+    .cw-shots{grid-template-columns:1fr;}
+  }
+  .tiles-row{display:contents;}
+  .tile{aspect-ratio:1;overflow:hidden;background:var(--ghost);}
+  .tile img{width:100%;height:100%;object-fit:cover;display:block;}
+  .tile.c1{grid-column:1/2;} .tile.c4{grid-column:4/5;} .tile.c5{grid-column:5/6;}
+  .tile.c7{grid-column:7/8;} .tile.c8{grid-column:8/9;}
+
+  .stmt2{position:relative;z-index:2;padding:clamp(60px,14vh,180px) 0 clamp(20px,5vh,60px);}
+  /* a steady descent to the right, then the last line set under the middle of
+     the one above it */
+  /* anchored to the reference's own columns: its closing statement puts the
+     first word in column 2, the answering word in column 4 across the rule,
+     and the continuation lines in column 3 */
+  .t-a{margin-left:var(--c2);}
+  .t-b{margin-left:var(--c4);}
+  .t-c{margin-left:var(--c3);}
+  .t-d{margin-left:var(--c3);}
+
+  /* ---------- work / globe ---------- */
+  .featured{position:relative;margin-top:clamp(60px,14vh,180px);}
+  .globe-stage{height:100svh;position:relative;overflow:hidden;}
+  #globeCanvas{position:absolute;inset:0;width:100%;height:100%;display:block;touch-action:none;cursor:grab;}
+  #globeCanvas:active{cursor:grabbing;}
+  /* the two words sit on a row of their own, clear of the sphere */
+  .work-head{position:absolute;top:50%;left:0;right:0;transform:translateY(-50%);z-index:3;
+    pointer-events:none;display:flex;justify-content:center;gap:clamp(10px,1.6vw,22px);}
+  .work-head span{display:inline-block;will-change:transform;}
+  /* not a pill that replaces the words — the words themselves become this line,
+     and the rule underneath draws itself once they have landed */
+  .work-link{position:absolute;top:50%;left:0;right:0;z-index:4;opacity:0;pointer-events:none;
+    transform:translateY(-50%);text-align:center;font-weight:600;
+    font-size:clamp(1.3rem,3.4vw,2.6rem);letter-spacing:-.04em;}
+  .work-link i{display:block;height:2px;background:currentColor;margin:10px auto 0;width:0;}
+  .globe-foot{position:absolute;bottom:clamp(20px,4vh,44px);left:0;right:0;z-index:3;pointer-events:none;
+    display:flex;justify-content:space-between;padding:0 var(--gut);}
+
+  /* ---------- case index: a narrow column, not the full width ---------- */
+  .band{padding:clamp(80px,18vh,220px) 0;}
+  .idx-wrap{margin:0 var(--gm);}
+  .idx{border-top:1px solid var(--hair);margin-top:clamp(60px,12vh,150px);}
+  .idx-row{display:grid;grid-template-columns:repeat(8,minmax(0,1fr));gap:0 var(--gg);align-items:center;
+    padding:clamp(5px,.8vh,10px) 0;border-bottom:1px solid var(--hair);cursor:pointer;
+    transition:opacity .35s var(--eo);}
+  .idx.hovered .idx-row{opacity:.3;}
+  .idx.hovered .idx-row.on{opacity:1;}
+  .idx-row .n{grid-column:2;font-size:11px;color:var(--dim);font-weight:500;align-self:start;}
+  .idx-row .t{grid-column:3 / 7;font-size:clamp(.95rem,1.7vw,1.3rem);font-weight:600;line-height:1;letter-spacing:-.035em;
+    transition:transform .45s var(--eo);}
+  .idx-row.on .t{transform:translateX(clamp(6px,1.2vw,16px));}
+  .idx-row .c{grid-column:7 / 8;justify-self:end;font-size:11px;color:var(--dim);font-weight:500;white-space:nowrap;align-self:center;}
+  /* the preview holds one place instead of chasing the pointer */
+  /* portrait, modest, and parked clear of the column so it never covers a title */
+  #thumb{position:absolute;top:0;right:calc(-1 * clamp(150px,15vw,230px) - clamp(20px,3vw,48px));
+    width:clamp(120px,11vw,180px);aspect-ratio:3/4;pointer-events:none;opacity:0;overflow:hidden;z-index:5;
+    clip-path:inset(100% 0 0 0);}
+  #thumb img{width:100%;height:100%;object-fit:cover;}
+  .idx-holder{position:relative;}
+
+  /* ---------- closing statement ---------- */
+  .close{padding:clamp(130px,26vh,320px) 0 clamp(60px,12vh,150px);position:relative;}
+  .c-a{margin-left:clamp(40px,7vw,140px);}
+  .c-b{margin-left:clamp(120px,19vw,330px);}
+   /* the hour sits to the left of a dead-centre still and the minutes to its
+     right, the way the reference frames its image with the clock */
+  .close-mid{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;
+    margin:clamp(90px,19vh,240px) 0;gap:clamp(60px,13vw,220px);}
+  /* one shared gap between every bracket, digit and colon, so the row reads as
+     an evenly spaced expression rather than clumps */
+  .close-mid .clock{font-size:min(11vw,140px);font-weight:500;letter-spacing:-.04em;
+    display:flex;align-items:center;gap:clamp(34px,7vw,120px);white-space:nowrap;}
+  .close-mid .clock > span{display:block;}
+  .close-mid .clock.l{justify-self:end;}
+  .close-mid .clock.r{justify-self:start;}
+  .close-still{width:clamp(150px,17vw,280px);aspect-ratio:3/4;overflow:hidden;background:var(--ghost);justify-self:center;}
+  .close-still .still-tilt{width:100%;height:100%;will-change:transform;}
+  .close-still img{width:100%;height:100%;object-fit:cover;}
+  .c-c{margin-left:clamp(20px,5vw,90px);}
+  .c-d{margin-left:clamp(90px,15vw,260px);}
+  /* three columns spread across the page instead of piling up on the left edge */
+  /* one column, ranged right, at reading size rather than caption size */
+  /* ranged left and set on the same margin as the closing word, instead of
+     being pushed out to the edge of the screen */
+  .close-aside{margin-top:clamp(50px,10vh,130px);display:flex;flex-direction:column;
+    align-items:center;text-align:center;gap:clamp(18px,3.4vh,40px);}
+  .close-aside .sm{font-size:clamp(15px,1.35vw,20px);line-height:1.25;}
+  .socials{display:flex;gap:12px;margin-top:clamp(46px,9vh,110px);justify-content:center;}
+  .socials a{width:66px;height:66px;border-radius:50%;border:1px solid var(--hair);
+    display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:600;
+    letter-spacing:.06em;text-transform:uppercase;
+    transition:background .3s var(--eo), color .3s var(--eo), border-color .3s var(--eo);}
+  .socials a:hover{background:var(--ink);color:var(--paper);border-color:var(--ink);}
+  /* room for the wordmark to come together underneath everything */
+  .tailroom{height:clamp(220px,34vh,420px);}
+
+  @media (max-width:900px){
+    :root{
+      --gm:4.07%; --gg:3.053%; --colw:12.76%;
+      --rule:32.65%;                 /* 4.07 + 2*12.76 + 3.053 */
+      --c2:19.88%; --c3:35.70%;      /* 4.07 + (N-1)*15.813 */
+      --c4:51.51%; --col:51.51%;
+    }
+    .xl,.lg{font-size:11.45vw;line-height:.9;letter-spacing:-.0524em;}
+    .sm{font-size:max(11px,3.053vw);}
+    .col-l{margin-left:var(--gm);}
+    /* the two labels are pinned to the grid on wide screens; at this width
+       there is no room beside the name, so they return to the flow */
+    /* relative, not static: the erasers that punch the rule are positioned, so
+       any text that has to sit above them needs a stacking context too */
+    /* relative, not static: the erasers that punch the rule are positioned, so
+       text that must sit above them needs a stacking context. The offsets from
+       the wide layout have to be cleared, or `top` shifts the block instead. */
+    .op-note{margin-left:0;padding-top:clamp(52px,9vh,80px);}
+    .op-role{margin-left:0;}
+    .stmt > div, .op-1 > div{white-space:normal;}
+    .idx-wrap{margin-left:0;}
+    .ind{margin-left:calc(var(--col) + 6vw);}
+    .op-1{margin-top:clamp(50px,14vh,120px);}
+    .tiles{display:block;}
+    .close-mid{grid-template-columns:1fr;gap:clamp(28px,7vh,54px);
+      margin:clamp(60px,12vh,120px) 0;}
+    .close-mid .clock{font-size:14vw;gap:8vw;}
+    .close-mid .clock.l,.close-mid .clock.r{justify-self:center;}
+    .close-still{justify-self:center;}
+    .tiles-row{display:flex;gap:var(--gg);overflow-x:auto;flex-wrap:nowrap;
+      scrollbar-width:none;-webkit-overflow-scrolling:touch;}
+    .tiles-row::-webkit-scrollbar{display:none;}
+    .tile.c1,.tile.c4,.tile.c5,.tile.c7,.tile.c8{grid-column:auto;flex:0 0 28.75vw;}
+    .tiles-note{grid-column:auto;margin-top:18px;}
+    .mark-half{font-size:clamp(2.2rem,13vw,4rem);}
+    .close-mid{flex-direction:column;}
+    #thumb{display:none;}
+  }
+  @media (prefers-reduced-motion: reduce){
+    *{animation:none!important;transition:none!important;}
+    #pre{display:none;}
+    html.js [data-goo]{visibility:visible;}
+  }
+
+</style>
+<div class="page"><div class="cw-plate">GLOFF</div><section class="cb cb-hero"><span class="drip mint"></span><span class="drip green"></span><span class="drip yellow"></span><div class="mark">GLOFF<sup>&copy;</sup></div><div class="obj"><img src="https://ilyamihailovich.github.io/ivanov-designer/cases/gloff/18.jpg" alt="GLOFF"></div></section><section class="cb"><div class="cb-split tl"><div class="col"><p>GLOFF — это стильный и современный бренд эко-маркета, ориентированный на самую широкую аудиторию, которая ценит качество, полезность и эстетическое наслаждение от продуктов.</p><p>Дизайн GLOFF построен на сочетании органичности и современности, что отражается в визуальном языке.</p><p>Это модульная визуальная система, построенная вокруг натуральной продуктовой фотографии, яркой зелёной палитры и «органических» графичных элементов.</p><p>Система совместно работает на упаковке, форме сотрудников и наружной рекламе, создавая заметный, молодой и дружелюбный образ марки.</p></div><div class="cb-bleed"><img src="https://ilyamihailovich.github.io/ivanov-designer/cases/gloff/19.jpg" alt="GLOFF"><img src="https://ilyamihailovich.github.io/ivanov-designer/cases/gloff/15.jpg" alt="GLOFF"></div></div><div class="obj-c"><img src="https://ilyamihailovich.github.io/ivanov-designer/cases/gloff/13.jpg" alt="GLOFF"></div></section><section class="cb"><div class="cb-grid c1"><img src="https://ilyamihailovich.github.io/ivanov-designer/cases/gloff/15.jpg" alt="GLOFF"><img src="https://ilyamihailovich.github.io/ivanov-designer/cases/gloff/19.jpg" alt="GLOFF"></div></section><section class="cb"><div class="cb-split tl"><div class="col"><p>Для усиления визуального восприятия и акцентирования важной информации мы используем:</p><div class="cb-badge">жидкие стикеры</div><p>Такие стикеры выделяются за счёт насыщенной палитры цветов и трёхмерного эффекта, создавая ощущение тактильности и привлечения внимания.</p><p>Основной функционал стикеров:</p><ul class="cb-list"><li class="green">подчёркивание уникальных свойств продукта</li><li class="pink">информирование об акциях, новинках или специальных условиях покупки</li><li class="blue">обозначение срока годности или советы по хранению</li><li class="orange">усиление брендинга за счёт фирменных элементов, логотипов или слоганов</li></ul><div class="cb-callout"><p>За счёт своей формы и визуального объёма эти элементы сразу притягивают внимание, разбивают привычную плоскую эко-стилистику, что делает упаковку живой и динамичной.</p><p>В отличие от конкурентов, которые часто используют строгие и однообразные плашки или мелкий текст, такие элементы работают как визуальные якоря, ускоряют выбор продукта на полке, вовлекая к импульсным покупкам.</p></div></div><div class="cb-bleed"><img src="https://ilyamihailovich.github.io/ivanov-designer/cases/gloff/22.jpg" alt="GLOFF"><img src="https://ilyamihailovich.github.io/ivanov-designer/cases/gloff/12.jpg" alt="GLOFF"></div></div></section><section class="cb"><span class="drip green"></span><div class="cb-split il"><div class="stack"><img src="https://ilyamihailovich.github.io/ivanov-designer/cases/gloff/09.jpg" alt="GLOFF"><img src="https://ilyamihailovich.github.io/ivanov-designer/cases/gloff/04.jpg" alt="GLOFF"><img src="https://ilyamihailovich.github.io/ivanov-designer/cases/gloff/03.jpg" alt="GLOFF"></div><div class="col"><p>Упаковка построена на прозрачности. Продукт либо виден сквозь неё, либо показан крупной реалистичной фотографией.</p><p>Чистая вёрстка, фирменный зелёный и чёткая структура позволяют считать категорию и свойства за секунду.</p><p>Стикеры добавляют упаковке объём и динамику и при этом не ломают общий стиль.</p></div></div></section><section class="cb"><div class="cb-grid c3"><img src="https://ilyamihailovich.github.io/ivanov-designer/cases/gloff/12.jpg" alt="GLOFF"><img src="https://ilyamihailovich.github.io/ivanov-designer/cases/gloff/22.jpg" alt="GLOFF"><img src="https://ilyamihailovich.github.io/ivanov-designer/cases/gloff/23.jpg" alt="GLOFF"></div></section><section class="cb"><div class="cb-split tl"><div class="col"><p>Реклама строится на крупных, насыщенных изображениях фруктов, овощей и готовых блюд: облепиха, черешня, томат, груша, инжир. Необычный ракурс и увеличенный масштаб создают ощущение, что продукт выходит в пространство города.</p><p>Фирменный зелёный работает как фон или крупная графическая форма, которая объединяет композицию и усиливает ассоциацию со свежестью.</p><p>Минимум слов, чёткая типографика и QR-коды для быстрого заказа делают баннеры функциональными.</p></div><div class="cb-bleed"><img src="https://ilyamihailovich.github.io/ivanov-designer/cases/gloff/06.jpg" alt="GLOFF"><img src="https://ilyamihailovich.github.io/ivanov-designer/cases/gloff/16.jpg" alt="GLOFF"></div></div></section><section class="cb"><div class="cb-grid c2"><img src="https://ilyamihailovich.github.io/ivanov-designer/cases/gloff/11.jpg" alt="GLOFF"><img src="https://ilyamihailovich.github.io/ivanov-designer/cases/gloff/14.jpg" alt="GLOFF"><img src="https://ilyamihailovich.github.io/ivanov-designer/cases/gloff/10.jpg" alt="GLOFF"><img src="https://ilyamihailovich.github.io/ivanov-designer/cases/gloff/25.jpg" alt="GLOFF"></div></section><section class="cb"><figure class="cb-full"><img src="https://ilyamihailovich.github.io/ivanov-designer/cases/gloff/21.jpg" alt="GLOFF"><figcaption>Система перенесена на грузовики доставки, пакеты, корзины и digital-носители.</figcaption></figure></section><section class="cb"><div class="cb-split il"><div class="stack"><img src="https://ilyamihailovich.github.io/ivanov-designer/cases/gloff/20.jpg" alt="GLOFF"><img src="https://ilyamihailovich.github.io/ivanov-designer/cases/gloff/24.jpg" alt="GLOFF"><img src="https://ilyamihailovich.github.io/ivanov-designer/cases/gloff/01.jpg" alt="GLOFF"></div><div class="col"><p>Практичные современные силуэты и чистая палитра: фирменный зелёный в сочетании со светлыми нейтральными оттенками. Дизайн лёгкий и не перегружен деталями, что поддерживает ощущение опрятности, свежести и доверия.</p><p>Логотип и графические элементы размещены так, чтобы их было видно и в торговом зале, и на улице.</p><p>Стикеры-бейджи «агент качества», «агент доставки» перекликаются с упаковкой и рекламой и усиливают узнаваемость бренда.</p></div></div></section><section class="cb"><div class="cb-split tl"><div class="col"><p>Этот блок отвечает за характер бренда: энергию и удовольствие от продукта. GLOFF сознательно отходит от спокойной нейтральной эстетики большинства эко-марок.</p><p>Крупные планы, резкое движение, активная мимика и взаимодействие с продуктом создают ощущение импульса и внутренней энергии.</p><p>Продукт воспринимается не как «правильный», а как желанный: тот, который хочется открыть прямо сейчас.</p></div><div class="cb-bleed"><img src="https://ilyamihailovich.github.io/ivanov-designer/cases/gloff/05.jpg" alt="GLOFF"><img src="https://ilyamihailovich.github.io/ivanov-designer/cases/gloff/07.jpg" alt="GLOFF"></div></div></section><section class="cb"><span class="drip orange"></span><span class="drip green"></span><div class="cb-final"><div class="photo"><img src="https://ilyamihailovich.github.io/ivanov-designer/cases/gloff/17.jpg" alt="GLOFF"></div><div class="col"><p>В результате бренд формирует цельный и легко узнаваемый образ, в котором дизайн, упаковка, реклама и digital-коммуникация работают как единая система. Визуальный язык сочетает экологичность с энергией и эмоцией, делая полезный продукт частью активного городского лайфстайла, а не абстрактной идеей «здорового питания».</p><p>За счёт фирменных жидких стикеров, сильной фотостилистики и вовлекающего UGC бренд выстраивает живой диалог с аудиторией и уверенно выделяется среди конкурентов. Это не просто экомаркет, а современная платформа, которая говорит с молодой аудиторией на понятном ей языке и формирует устойчивую эмоциональную связь.</p></div><div class="cb-objs"><img src="https://ilyamihailovich.github.io/ivanov-designer/cases/gloff/02.jpg" alt="GLOFF"><img src="https://ilyamihailovich.github.io/ivanov-designer/cases/gloff/08.jpg" alt="GLOFF"></div></div></section></div>
