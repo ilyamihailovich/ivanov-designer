@@ -454,7 +454,7 @@
     </div>
 
     <div class="tailroom"></div>
-    <span id="buildStamp" style="display:none">BUILD 30.09 13:54</span>
+    <span id="buildStamp" style="display:none">BUILD 30.09 14:14</span>
   </section>
 
 </main>
@@ -581,7 +581,7 @@
   function gooPieces(el){
     if(el.hasAttribute('data-nosplit')) return null;
     try{
-      var sp = new SplitText(el, {type: 'chars', charsClass: 'goo-ch'});
+      var sp = new SplitText(el, {type: 'chars', charsClass: 'goo-ch', aria: 'auto'});
       if(sp.chars && sp.chars.length) return sp;
       sp.revert();
     }catch(e){}
@@ -620,20 +620,23 @@
     // the threshold and breaks the fusion, which is what turned this into an
     // ordinary letter-by-letter fade-in — and there is no stagger, because the
     // phrase has to unstick as one piece rather than arrive letter by letter.
-    var collapse = [];
-    if(sp){
-      var pr = el.getBoundingClientRect(), mid = pr.left + pr.width / 2;
-      collapse = sp.chars.map(function(ch){
-        var r = ch.getBoundingClientRect();
-        return (mid - (r.left + r.width / 2)) * 0.92;
-      });
-    }
+    // Nothing translates. The previous version slid every letter toward the
+    // centre of the line, which is literally a horizontal move and read as the
+    // text flying in from the side. Here each letter stays exactly where it
+    // belongs and is only stretched wide and squat, so neighbouring glyphs
+    // overlap each other and the constant blur-and-threshold welds them into
+    // one smear. As they settle back to their true proportions the smear comes
+    // unstuck into words.
+    var tw = gsap.fromTo(targets,
+      {scaleX: 1.72, scaleY: .58},
+      {scaleX: 1, scaleY: 1, duration: GOO_TIME, ease: EASE.goo,
+       delay: delay || 0, force3D: true, paused: true, onComplete: done});
 
-    return gsap.fromTo(targets,
-      sp ? {x: function(i){ return collapse[i]; }, scaleX: .62, scaleY: .52}
-         : {scaleY: .3, scaleX: .86},
-      {x: 0, scaleX: 1, scaleY: 1, duration: GOO_TIME, ease: EASE.goo,
-       delay: delay || 0, force3D: true, onComplete: done});
+    // Render the finished state once and rewind. That makes the browser
+    // rasterise the filtered result before the animation starts playing, so
+    // the first frame does not have to pay for it and drop.
+    tw.progress(1, true).progress(0, true);
+    return tw.play();
   }
 
   // the same animation run backwards, for anything leaving the screen
@@ -652,17 +655,8 @@
 
     var sp = gooPieces(el);
     var targets = sp ? sp.chars : [el];
-    var collapse2 = [];
-    if(sp){
-      var pr2 = el.getBoundingClientRect(), mid2 = pr2.left + pr2.width / 2;
-      collapse2 = sp.chars.map(function(ch){
-        var r = ch.getBoundingClientRect();
-        return (mid2 - (r.left + r.width / 2)) * 0.92;
-      });
-    }
     return gsap.to(targets,
-      {x: sp ? function(i){ return collapse2[i]; } : 0,
-       scaleX: sp ? .62 : .86, scaleY: sp ? .52 : .3,
+      {scaleX: 1.72, scaleY: .58,
        duration: GOO_TIME * .62, ease: EASE.goo, force3D: true,
        onComplete: function(){
          el.classList.remove('shown');
