@@ -10,7 +10,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap&subset=cyrillic" rel="stylesheet">
 <link rel="preload" href="fonts/ak.woff2" as="font" type="font/woff2" crossorigin>
-<script src="cases.js?v=010146"></script>
+<script src="cases.js?v=010157"></script>
 <script src="https://cdn.jsdelivr.net/npm/lenis@1.3.21/dist/lenis.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/gsap.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/ScrollTrigger.min.js"></script>
@@ -105,7 +105,8 @@
   .menu-pill:hover,.menu-pill[aria-expanded="true"]{background:var(--ink);color:var(--paper);}
   /* The list hangs under the button; the items are born out of it one after
      another under the goo filter, so each one necks away from the one above. */
-  .menu-list{position:absolute;top:calc(100% + 18px);right:0;display:flex;
+  /* a wider gap under the button than between the items themselves */
+  .menu-list{position:absolute;top:calc(100% + 26px);right:0;display:flex;
     flex-direction:column;align-items:flex-end;gap:16px;pointer-events:none;}
   .menu-item{background:none;color:var(--ink);border:1px solid var(--ink);
     border-radius:999px;padding:10px 22px;font-size:12px;font-weight:600;line-height:1;
@@ -440,9 +441,13 @@
     white-space:nowrap;align-self:center;}
   /* the preview holds one place instead of chasing the pointer */
   /* portrait, modest, and parked clear of the column so it never covers a title */
-  #thumb{position:absolute;top:0;right:calc(-1 * clamp(150px,15vw,230px) - clamp(20px,3vw,48px));
-    width:clamp(120px,11vw,180px);aspect-ratio:3/4;pointer-events:none;opacity:0;overflow:hidden;z-index:5;
-    clip-path:inset(100% 0 0 0);}
+  /* The preview used to hang off the right edge with a negative offset. Once
+     the rows were widened to the last column that offset put it past the edge
+     of the window, where it could not be seen. It lives in the first column
+     instead, which the rows leave empty. */
+  #thumb{position:absolute;top:0;left:0;
+    width:clamp(110px,11.25%,190px);aspect-ratio:3/4;pointer-events:none;opacity:0;
+    overflow:hidden;z-index:5;clip-path:inset(100% 0 0 0);}
   #thumb img{width:100%;height:100%;object-fit:cover;}
   .idx-holder{position:relative;}
 
@@ -671,7 +676,7 @@
     </div>
 
     <div class="tailroom"></div>
-    <span id="buildStamp" style="display:none">BUILD 01.10 01:46</span>
+    <span id="buildStamp" style="display:none">BUILD 01.10 01:57</span>
   </section>
 
 </main>
@@ -825,6 +830,10 @@
     blur:    0.34,   // peak blur as a share of the font size
     reveal:  0.62,   // seconds for a line to resolve
     swap:    0.62,   // seconds for a word to melt, change and re-form
+    swapBlur:0.15,   // peak blur for a swap, as a share of the font size:
+                     // low enough that the word stays a visible blob instead
+                     // of thinning past the threshold and vanishing, which is
+                     // what left a white gap where the word should be
     step:    0.13,   // seconds between one line and the next
     minSize: 26,     // below this font size a plain fade reads better
     amp:     20,     // alpha multiplier — how hard the threshold bites
@@ -1218,6 +1227,9 @@
         ribS.classList.add('live');
         gsap.set(ribS, {pointerEvents: 'auto'});
         tl.fromTo(ribS, b.photo, b.open, 0);
+        // the way back has to exist from the moment the case opens, not only
+        // after the reader has paged forward once
+        tl.add(function(){ birthPrev(); }, .35);
       } else {
         if(split) swallowPrev();
         // On the way back the ribbon must be gone before it reaches the photo's
@@ -1348,15 +1360,24 @@
       try{ doc = fr.contentDocument; }catch(e){ return; }
       if(!doc) return;
       var el = ribS;
-      var down = false, sx = 0, sl = 0;
+      // Writing scrollLeft straight from every pointer event made the ribbon
+      // judder, because those events arrive far more often than the screen
+      // refreshes. The target is stored and applied once per frame instead.
+      var down = false, sx = 0, sl = 0, want = 0, raf = 0;
       doc.body.style.cursor = 'grab';
+      function apply(){
+        raf = 0;
+        var max = Math.max(0, el.scrollWidth - el.clientWidth);
+        el.scrollLeft = Math.min(max, Math.max(0, want));
+      }
       doc.addEventListener('pointerdown', function(e){
-        down = true; sx = e.clientX; sl = el.scrollLeft;
+        down = true; sx = e.clientX; sl = el.scrollLeft; want = sl;
         doc.body.style.cursor = 'grabbing';
       });
       doc.addEventListener('pointermove', function(e){
         if(!down) return;
-        el.scrollLeft = sl - (e.clientX - sx);
+        want = sl - (e.clientX - sx);
+        if(!raf) raf = requestAnimationFrame(apply);
       });
       ['pointerup','pointerleave','pointercancel'].forEach(function(ev){
         doc.addEventListener(ev, function(){ down = false; doc.body.style.cursor = 'grab'; });
@@ -1576,8 +1597,10 @@
     var WORDS = ['бренды','кадры','истории','смыслы'], i = 0;
     el.style.visibility = 'visible';
 
+    // an inline box makes the filter region unreliable; give it its own box
+    el.style.display = 'inline-block';
     var g = ownFilter(el);
-    var peak = fontOf(el) * GOO.blur;
+    var peak = fontOf(el) * GOO.swapBlur;
     var st = {b: 0};
     function paint(){ g.blur.setAttribute('stdDeviation', st.b.toFixed(2)); }
 
@@ -1595,42 +1618,52 @@
      another. While an item still overlaps the thing above it, the shared goo
      filter welds them together, so each one necks away rather than simply
      fading in. The filter comes off as soon as they are apart. */
+  /* The menu is one timeline built once and played forward or in reverse.
+     The previous version created a new timeline per click and held a "busy"
+     lock until it finished, so a click inside that second did nothing at all —
+     and if the timeline was ever interrupted the lock stayed on and the menu
+     stopped opening altogether. */
   function menu(){
     var wrap = document.getElementById('menuWrap');
     var btn  = document.getElementById('menuBtn');
     var list = document.getElementById('menuList');
     if(!wrap || !btn || !list) return;
     var items = [].slice.call(list.querySelectorAll('.menu-item'));
-    var open = false, busy = false;
+    if(!items.length) return;
+    var open = false;
+
+    gsap.set(items, {opacity: 0, y: -30, scale: .66});
+
+    var tl = gsap.timeline({
+      paused: true,
+      onStart:          function(){ if(!reduced) list.style.filter = 'url(#' + gooPair(7) + ')'; },
+      onReverseComplete:function(){ list.style.filter = 'none'; list.classList.remove('on'); },
+      onComplete:       function(){ list.style.filter = 'none'; }
+    });
+    items.forEach(function(el, i){
+      // each one starts sitting on its neighbour, so while they overlap the
+      // threshold welds them and they neck apart as they travel down
+      tl.to(el, {opacity: 1, y: 0, scale: 1, duration: .5, ease: EASE.rise}, i * 0.1);
+    });
 
     function run(to){
-      if(busy || open === to) return;
-      busy = true; open = to;
+      if(open === to) return;
+      open = to;
       btn.setAttribute('aria-expanded', to ? 'true' : 'false');
       list.setAttribute('aria-hidden', to ? 'false' : 'true');
-      list.classList.toggle('on', to);
-      // The filter used to sit on the whole wrapper, button included, so the
-      // threshold flooded the outlined pill into a solid black oval and the
-      // items simply appeared inside it. It goes on the list alone, and only
-      // while the items still overlap one another.
-      if(!reduced) list.style.filter = 'url(#' + gooPair(7) + ')';
-
-      var tl = gsap.timeline({onComplete: function(){
-        list.style.filter = 'none';
-        busy = false;
-      }});
-      items.forEach(function(el, i){
-        var k = to ? i : (items.length - 1 - i);
-        // each item starts sitting on the one above it, so while they overlap
-        // the threshold welds them and they neck apart as they travel
-        tl.fromTo(items[k],
-          {opacity: to ? 0 : 1, y: to ? -34 : 0, scale: to ? .62 : 1},
-          {opacity: to ? 1 : 0, y: to ? 0 : -34, scale: to ? 1 : .62,
-           duration: .56, ease: EASE.rise}, i * 0.12);
-      });
+      if(to){
+        list.classList.add('on');
+        if(!reduced) list.style.filter = 'url(#' + gooPair(7) + ')';
+        tl.play();
+      } else {
+        tl.reverse();
+      }
     }
 
-    btn.addEventListener('click', function(e){ e.preventDefault(); run(!open); });
+    btn.addEventListener('click', function(e){
+      e.preventDefault(); e.stopPropagation();
+      run(!open);
+    });
     document.addEventListener('click', function(e){
       if(open && !wrap.contains(e.target)) run(false);
     });
@@ -1638,7 +1671,6 @@
       if(e.key === 'Escape' && open) run(false);
     });
 
-    // smooth travel to the section, through Lenis when it is running
     items.forEach(function(a){
       a.addEventListener('click', function(e){
         var target = document.getElementById(a.dataset.to);
@@ -1724,9 +1756,9 @@
     gsap.set(wrap, {opacity: 1});
     if(!reduced){
       gsap.fromTo(L, {xPercent: -118, opacity: 0},
-        {xPercent: 0, opacity: 1, duration: 1.15, delay: 1, ease: EASE.rise});
+        {xPercent: 0, opacity: 1, duration: 1.3, delay: 3, ease: EASE.rise});
       gsap.fromTo(R, {xPercent: 118, opacity: 0},
-        {xPercent: 0, opacity: 1, duration: 1.15, delay: 1, ease: EASE.rise});
+        {xPercent: 0, opacity: 1, duration: 1.3, delay: 3, ease: EASE.rise});
     }
 
     gsap.timeline({
@@ -1780,6 +1812,11 @@
      3. the sphere drifts while the words hold at the sides
      4. the sphere leaves upward, the words rejoin and morph into the link
      The words are never swapped for a button: the same element becomes the line. */
+  // How much scroll the pinned globe occupies. The theme flip runs over the
+  // same distance, so both must read the same number — they had drifted apart,
+  // which is why the page turned white while the words were still on screen.
+  var GLOBE_SCREENS = 6.5;
+
   function workHead(){
     var A = document.getElementById('workA'), B = document.getElementById('workB');
     var link = document.getElementById('workLink'), stage = document.getElementById('globeStage');
@@ -1813,9 +1850,7 @@
     var tl = gsap.timeline({
       scrollTrigger: {
         trigger: stage, start: 'top top',
-        // longer than the motion needs, because two holds were added below and
-        // a hold only reads as a pause if there is scroll distance under it
-        end: '+=' + Math.round(window.innerHeight * 5.2),
+        end: '+=' + Math.round(window.innerHeight * GLOBE_SCREENS),
         pin: true, scrub: .8, invalidateOnRefresh: true
       }
     });
@@ -1837,13 +1872,14 @@
       // 5: a beat with the words standing rejoined and nothing moving. Without
       // it a fast scroll carried straight past the link to the case index and
       // the reader never saw that it was there.
-      .to({}, {duration: .16})
+      .to({}, {duration: .45})
       // and morph into the line: they melt out exactly as it melts in
       .to([A, B], {opacity: 0, filter: 'blur(14px)', duration: .1}, '>')
       .fromTo(link, {opacity: 0, filter: 'blur(16px)'}, {opacity: 1, filter: 'blur(0px)', duration: .13}, '<0.03')
       .to(rule, {width: 'min(420px, 62vw)', duration: .12, ease: EASE.glide}, '>')
-      // 6: and a second beat with the link fully formed, so it can be read
-      .to({}, {duration: .22});
+      // 6: and a longer beat with the link fully formed, so that even a fast
+      // scroll has to sit on it before the page moves on
+      .to({}, {duration: .40});
   }
 
   /* ---------- theme: black exactly while the words stand at the edges ---------- */
@@ -1852,13 +1888,15 @@
     if(!stage) return;
     var root = document.documentElement;
     ScrollTrigger.create({
-      trigger: stage, start: 'top top', end: '+=' + Math.round(window.innerHeight * 4.2),
+      trigger: stage, start: 'top top',
+      end: '+=' + Math.round(window.innerHeight * GLOBE_SCREENS),
       scrub: true, invalidateOnRefresh: true,
       onUpdate: function(self){
-        // on once the words have parted, off again once the link has formed
+        // Measured against the head's own timeline: the words part at 0.11 of
+        // it and the link has finished forming at 0.754. White returns exactly
+        // when the link is there, not while the words are still standing.
         var p = self.progress;
-        var on = p > 0.16 && p < 0.84;
-        root.classList.toggle('is-dark', on);
+        root.classList.toggle('is-dark', p > 0.12 && p < 0.755);
       }
     });
   }
