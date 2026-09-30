@@ -10,7 +10,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap&subset=cyrillic" rel="stylesheet">
 <link rel="preload" href="fonts/ak.woff2" as="font" type="font/woff2" crossorigin>
-<script src="cases.js?v=010127"></script>
+<script src="cases.js?v=010146"></script>
 <script src="https://cdn.jsdelivr.net/npm/lenis@1.3.21/dist/lenis.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/gsap.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/ScrollTrigger.min.js"></script>
@@ -105,8 +105,8 @@
   .menu-pill:hover,.menu-pill[aria-expanded="true"]{background:var(--ink);color:var(--paper);}
   /* The list hangs under the button; the items are born out of it one after
      another under the goo filter, so each one necks away from the one above. */
-  .menu-list{position:absolute;top:calc(100% + 10px);right:0;display:flex;
-    flex-direction:column;align-items:flex-end;gap:8px;pointer-events:none;}
+  .menu-list{position:absolute;top:calc(100% + 18px);right:0;display:flex;
+    flex-direction:column;align-items:flex-end;gap:16px;pointer-events:none;}
   .menu-item{background:none;color:var(--ink);border:1px solid var(--ink);
     border-radius:999px;padding:10px 22px;font-size:12px;font-weight:600;line-height:1;
     white-space:nowrap;text-decoration:none;opacity:0;
@@ -428,11 +428,16 @@
     transition:opacity .35s var(--eo);}
   .idx.hovered .idx-row{opacity:.3;}
   .idx.hovered .idx-row.on{opacity:1;}
-  .idx-row .n{grid-column:2;font-size:11px;color:var(--dim);font-weight:500;align-self:start;}
+  .idx-row .n{grid-column:2;font-size:max(12px,.83vw);color:var(--dim);font-weight:500;
+    letter-spacing:-.027em;align-self:start;}
   .idx-row .t{grid-column:3 / 7;font-size:clamp(.95rem,1.7vw,1.3rem);font-weight:600;line-height:1;letter-spacing:-.035em;
     transition:transform .45s var(--eo);}
   .idx-row.on .t{transform:translateX(clamp(6px,1.2vw,16px));}
-  .idx-row .c{grid-column:7 / 8;justify-self:end;font-size:11px;color:var(--dim);font-weight:500;white-space:nowrap;align-self:center;}
+  /* the category sits out on the last column and is set in the site's own small
+     style rather than a one-off 11px */
+  .idx-row .c{grid-column:8 / 9;justify-self:end;font-size:max(12px,.83vw);
+    color:var(--dim);font-weight:500;letter-spacing:-.027em;line-height:1.07;
+    white-space:nowrap;align-self:center;}
   /* the preview holds one place instead of chasing the pointer */
   /* portrait, modest, and parked clear of the column so it never covers a title */
   #thumb{position:absolute;top:0;right:calc(-1 * clamp(150px,15vw,230px) - clamp(20px,3vw,48px));
@@ -482,6 +487,11 @@
     letter-spacing:.06em;text-transform:uppercase;
     transition:background .3s var(--eo), color .3s var(--eo), border-color .3s var(--eo);}
   .socials a:hover{background:var(--ink);color:var(--paper);border-color:var(--ink);}
+  /* they arrive filled and empty out once the block is properly in view */
+  .socials a{background:var(--ink);color:var(--paper);border-color:var(--ink);
+    transition:background .6s var(--eo), color .6s var(--eo), border-color .6s var(--eo);}
+  .socials.lit a{background:none;color:var(--ink);border-color:var(--ink);}
+  .socials.lit a:hover{background:var(--ink);color:var(--paper);}
   /* room for the wordmark to come together underneath everything */
   .tailroom{height:clamp(220px,34vh,420px);}
 
@@ -576,7 +586,7 @@
       <div class="lg col-l" data-goo>Снимаю,</div>
       <div class="lg col-l" data-goo>собираю</div>
       <div class="lg col-l" data-goo>и оживляю</div>
-      <div class="lg col-r blk" data-goo data-nosplit><span id="morphWord" style="visibility:hidden">бренды</span>,</div>
+      <div class="lg col-r blk" data-goo data-nosplit><span id="morphWord">бренды</span>,</div>
       <div class="lg col-r" data-goo>продукты</div>
       <div class="lg col-r ind" data-goo>и людей.</div>
     </div>
@@ -616,9 +626,9 @@
   <!-- ============ CASE INDEX ============ -->
   <section class="band pad" id="cases">
     <div class="idx-wrap">
-      <h2 class="lg" data-goo style="margin-left:0;">Кейсы</h2>
-      <div class="lg" data-goo style="margin-left:clamp(46px,10vw,210px);">и&nbsp;последние</div>
-      <div class="lg" data-goo style="margin-left:clamp(18px,5vw,110px);">работы</div>
+      <h2 class="lg" data-goo style="margin-left:var(--c3);">Кейсы</h2>
+      <div class="lg" data-goo style="margin-left:calc(var(--c3) + var(--colw));">и&nbsp;последние</div>
+      <div class="lg" data-goo style="margin-left:calc(var(--c3) + var(--gg));">работы</div>
       <div class="idx-holder">
         <div class="idx" id="caseIndex"></div>
         <div id="thumb"><img alt=""></div>
@@ -661,7 +671,7 @@
     </div>
 
     <div class="tailroom"></div>
-    <span id="buildStamp" style="display:none">BUILD 01.10 01:27</span>
+    <span id="buildStamp" style="display:none">BUILD 01.10 01:46</span>
   </section>
 
 </main>
@@ -814,7 +824,7 @@
   var GOO = {
     blur:    0.34,   // peak blur as a share of the font size
     reveal:  0.62,   // seconds for a line to resolve
-    swap:    1.00,   // seconds for a word to melt, change and re-form
+    swap:    0.62,   // seconds for a word to melt, change and re-form
     step:    0.13,   // seconds between one line and the next
     minSize: 26,     // below this font size a plain fade reads better
     amp:     20,     // alpha multiplier — how hard the threshold bites
@@ -948,10 +958,12 @@
     // arrive top to bottom. The closing block is caught early, because its
     // clock sits halfway down it and used to wait until the middle of the
     // section reached the middle of the screen before showing up.
-    armGroup('.stmt', '[data-goo]');
-    armGroup('.stmt2', '[data-goo]');
-    armGroup('.idx-wrap', ':scope > .lg[data-goo]');
-    armGroup('.close', '[data-goo]', 'top 88%');
+    // A third up from the bottom of the screen: late enough that the line is
+    // properly in view before it starts, rather than resolving while only a
+    // sliver of it has appeared.
+    armGroup('.stmt2', '[data-goo]', 'top 67%');
+    armGroup('.idx-wrap', ':scope > .lg[data-goo]', 'top 67%');
+    armGroup('.close', '[data-goo]', 'top 67%');
   }
 
   /* ---------- five squares ---------- */
@@ -1256,10 +1268,13 @@
     function swallowPrev(then){
       if(!split || !prev || !nav){ if(then) then(); return; }
       split = false;
-      var px = Math.max(6, Math.round(57 * 0.34 / 2) * 2);
-      nav.style.filter = 'url(#' + gooPair(px) + ')';
+      // Filtering the whole group flooded both discs into one grey oval and
+      // took the right-hand arrow off screen while it ran. Only the disc that
+      // is actually moving carries the filter.
+      var px = Math.max(5, Math.round(57 * 0.22 / 2) * 2);
+      prev.style.filter = 'url(#' + gooPair(px) + ')';
       gsap.timeline({onComplete: function(){
-          nav.style.filter = 'none';
+          prev.style.filter = 'none';
           gsap.set(prev, {opacity: 0, pointerEvents: 'none', x: 0, scale: 1});
           if(then) then();
         }})
@@ -1270,9 +1285,9 @@
     function birthPrev(){
       if(split || !prev || !nav) return;
       split = true;
-      var px = Math.max(6, Math.round(57 * 0.34 / 2) * 2);
-      nav.style.filter = 'url(#' + gooPair(px) + ')';
-      gsap.timeline({onComplete: function(){ nav.style.filter = 'none'; }})
+      var px = Math.max(5, Math.round(57 * 0.22 / 2) * 2);
+      prev.style.filter = 'url(#' + gooPair(px) + ')';
+      gsap.timeline({onComplete: function(){ prev.style.filter = 'none'; }})
         .set(prev, {opacity: 1, pointerEvents: 'auto', x: 0, scale: .72})
         .to(prev, {x: -76, scale: 1, duration: .78, ease: EASE.rise}, 0);
     }
@@ -1284,10 +1299,13 @@
       if(at === 'card'){ go('ribbon'); return; }
       scrollRibbon(1); birthPrev();
     });
+    // The left disc pages back through the ribbon. From the very first screen
+    // it instead returns the case to exactly how it opened: the disc is drawn
+    // back into its neighbour, the year goes home, the arrow drops to the
+    // middle and the photograph settles back into its half-blur.
     if(prev) prev.addEventListener('click', function(){
-      // stepping back past the start puts the whole case back as it opened
       if(ribS.scrollLeft <= 2){ swallowPrev(function(){ go('card'); }); return; }
-      scrollRibbon(-1, function(){ if(ribS.scrollLeft <= 2) swallowPrev(); });
+      scrollRibbon(-1);
     });
 
 
@@ -1513,27 +1531,36 @@
     if(c) c.textContent = CASES.length + ' проектов';
 
     if(!thumb || reduced || coarse) return;
+    /* The preview rolls up from the bottom of its own box. Moving to another
+       row rolls the old one back down from the top before the new one rolls
+       up, so the two never cross-fade into each other. */
+    function openThumb(row){
+      timg.src = row.dataset.img;
+      gsap.set(thumb, {y: row.offsetTop, opacity: 1, clipPath: 'inset(100% 0 0 0)'});
+      gsap.to(thumb, {clipPath: 'inset(0% 0 0 0)', duration: .55,
+                      ease: EASE.rise, overwrite: 'auto'});
+    }
+    function closeThumb(then){
+      gsap.to(thumb, {clipPath: 'inset(0 0 100% 0)', duration: .38,
+        ease: EASE.glide, overwrite: 'auto',
+        onComplete: function(){ gsap.set(thumb, {opacity: 0}); if(then) then(); }});
+    }
+
     host.addEventListener('pointerover', function(e){
       var row = e.target.closest('.idx-row');
-      if(!row) return;
+      if(!row || row === host.__row) return;
       host.classList.add('hovered');
       host.querySelectorAll('.idx-row').forEach(function(r){ r.classList.toggle('on', r === row); });
-      if(timg.getAttribute('src') !== row.dataset.img) timg.src = row.dataset.img;
-      // the preview stays put and slides the row's own distance down the column
-      gsap.to(thumb, {opacity: 1, y: row.offsetTop, duration: .5, ease: EASE.glide, overwrite: 'auto'});
-      // Only unroll when it was actually hidden. Restarting the wipe for every
-      // row the cursor crossed is what made it flicker on a fast sweep.
-      if(!host.__open){
-        host.__open = true;
-        gsap.fromTo(thumb, {clipPath: 'inset(100% 0 0 0)'},
-          {clipPath: 'inset(0% 0 0 0)', duration: .6, ease: EASE.rise, overwrite: 'auto'});
-      }
+      var had = host.__row;
+      host.__row = row;
+      if(had) closeThumb(function(){ if(host.__row === row) openThumb(row); });
+      else openThumb(row);
     });
     host.addEventListener('pointerleave', function(){
       host.classList.remove('hovered');
       host.querySelectorAll('.idx-row').forEach(function(r){ r.classList.remove('on'); });
-      host.__open = false;
-      gsap.to(thumb, {opacity: 0, clipPath: 'inset(100% 0 0 0)', duration: .4, ease: EASE.glide, overwrite: 'auto'});
+      host.__row = null;
+      closeThumb();
     });
   })();
 
@@ -1555,7 +1582,7 @@
     function paint(){ g.blur.setAttribute('stdDeviation', st.b.toFixed(2)); }
 
     (function cycle(){
-      gsap.timeline({delay: 2.4, onComplete: cycle})
+      gsap.timeline({delay: 1.9, onComplete: cycle})
         .add(function(){ el.style.filter = 'url(#' + g.id + ')'; })
         .to(st, {b: peak, duration: GOO.swap / 2, ease: 'power2.in', onUpdate: paint})
         .add(function(){ i = (i + 1) % WORDS.length; el.textContent = WORDS[i]; })
@@ -1582,18 +1609,24 @@
       btn.setAttribute('aria-expanded', to ? 'true' : 'false');
       list.setAttribute('aria-hidden', to ? 'false' : 'true');
       list.classList.toggle('on', to);
-      if(!reduced) wrap.style.filter = 'url(#' + gooPair(9) + ')';
+      // The filter used to sit on the whole wrapper, button included, so the
+      // threshold flooded the outlined pill into a solid black oval and the
+      // items simply appeared inside it. It goes on the list alone, and only
+      // while the items still overlap one another.
+      if(!reduced) list.style.filter = 'url(#' + gooPair(7) + ')';
 
       var tl = gsap.timeline({onComplete: function(){
-        wrap.style.filter = 'none';
+        list.style.filter = 'none';
         busy = false;
       }});
       items.forEach(function(el, i){
         var k = to ? i : (items.length - 1 - i);
+        // each item starts sitting on the one above it, so while they overlap
+        // the threshold welds them and they neck apart as they travel
         tl.fromTo(items[k],
-          {opacity: to ? 0 : 1, y: to ? -26 : 0, scale: to ? .8 : 1},
-          {opacity: to ? 1 : 0, y: to ? 0 : -26, scale: to ? 1 : .8,
-           duration: .5, ease: EASE.rise}, i * 0.09);
+          {opacity: to ? 0 : 1, y: to ? -34 : 0, scale: to ? .62 : 1},
+          {opacity: to ? 1 : 0, y: to ? 0 : -34, scale: to ? 1 : .62,
+           duration: .56, ease: EASE.rise}, i * 0.12);
       });
     }
 
@@ -1615,6 +1648,18 @@
         if(window.lenis && lenis.scrollTo) lenis.scrollTo(target, {duration: 1.1});
         else target.scrollIntoView({behavior: 'smooth'});
       });
+    });
+  }
+
+  /* The social pills start solid and empty out when the contact block has
+     come a third of the way up the screen. */
+  function socials(){
+    var box = document.querySelector('.socials');
+    if(!box) return;
+    ScrollTrigger.create({
+      trigger: box, start: 'top 67%',
+      onEnter:     function(){ box.classList.add('lit'); },
+      onLeaveBack: function(){ box.classList.remove('lit'); }
     });
   }
 
@@ -1643,6 +1688,11 @@
      place line, the first name, the surname, the role. One timeline, one
      order, no chance of them arriving shuffled. */
   function intro(){
+    // The statement block is visible the moment the page opens, so leaving it
+    // to a scroll trigger meant its trigger fired in the very same frame as the
+    // opening and the whole thing resolved inside one tick — which is why those
+    // lines simply appeared, with no animation at all. It runs in the opening
+    // sequence instead, in reading order.
     var order = [
       document.querySelector('.corner.tl .sm'),
       document.querySelector('.menu-pill'),
@@ -1650,8 +1700,12 @@
       document.querySelector('.op-1 h1'),
       document.querySelector('.op-1 > div'),
       document.querySelector('.op-role .sm')
-    ].filter(Boolean);
-    revealGroup(order, 0.08);
+    ].concat([].slice.call(document.querySelectorAll('.stmt [data-goo]')))
+     .filter(Boolean);
+    var tl = revealGroup(order, 0.08);
+    // the changing word starts cycling as soon as its line has resolved,
+    // instead of waiting three seconds and arriving after everything else
+    tl.add(function(){ morphWord(); });
   }
 
   /* ---------- wordmark ----------
@@ -1664,8 +1718,16 @@
     var L = wrap.querySelector('.mark-half.l'), R = wrap.querySelector('.mark-half.r');
     var fL = document.getElementById('footL'), fR = document.getElementById('footR');
 
-    // visible immediately, no entrance tied to a section
+    // The two halves slide in from the edges a second after the page opens.
+    // The entrance uses xPercent and the scroll join uses x, so the two never
+    // overwrite one another.
     gsap.set(wrap, {opacity: 1});
+    if(!reduced){
+      gsap.fromTo(L, {xPercent: -118, opacity: 0},
+        {xPercent: 0, opacity: 1, duration: 1.15, delay: 1, ease: EASE.rise});
+      gsap.fromTo(R, {xPercent: 118, opacity: 0},
+        {xPercent: 0, opacity: 1, duration: 1.15, delay: 1, ease: EASE.rise});
+    }
 
     gsap.timeline({
       scrollTrigger: {
@@ -1686,35 +1748,25 @@
     // faint watermark for the whole page, solid ink only once joined
     .to([L, R], {color: 'var(--ink)', ease: 'none'}, 0);
 
-    // Appearing and disappearing are the same animation in opposite directions:
-    // the blur climbs back up and the copy fades as the reader scrolls away,
-    // which is how the reference reverses its own reveals.
-    var noteFx = [fL, fR].map(function(el){
-      if(!el) return null;
-      var fs = parseFloat(getComputedStyle(el).fontSize) || 16;
-      var fid = gooFilter(Math.max(6, Math.round(fs * 0.55 / 2) * 2));
-      return {el: el, fid: fid};
-    }).filter(Boolean);
-
-    function notesIn(){
-      noteFx.forEach(function(f, i){
-        gsap.killTweensOf(f.el);
-        f.el.style.filter = 'url(#' + f.fid + ')';
-        gsap.timeline({delay: i * 0.1, onComplete: function(){ f.el.style.filter = 'none'; }})
-          .fromTo(f.el, {opacity: 0, yPercent: 20, scaleY: .5},
-                        {opacity: 1, yPercent: 0, scaleY: 1, duration: GOO_TIME,
-                         ease: EASE.goo, force3D: true}, 0);
-      });
+    // The two footer notes come and go on the same metaball as everything
+    // else: only their blur moves. They were squashing and fading before, which
+    // read as no animation at all.
+    function noteFx(el, show, delay){
+      if(!el) return;
+      gsap.killTweensOf(el);
+      var g = ownFilter(el), fs = fontOf(el), peak = fs * GOO.blur * 1.6;
+      var st = {b: show ? peak : 0};
+      el.style.filter = 'url(#' + g.id + ')';
+      g.blur.setAttribute('stdDeviation', st.b);
+      gsap.timeline({delay: delay || 0,
+          onComplete: function(){ el.style.filter = 'none'; }})
+        .to(st, {b: show ? 0 : peak, duration: GOO.reveal,
+                 ease: EASE.goo,
+                 onUpdate: function(){ g.blur.setAttribute('stdDeviation', st.b.toFixed(2)); }}, 0)
+        .to(el, {opacity: show ? 1 : 0, duration: GOO.reveal * .8, ease: 'none'}, 0);
     }
-    function notesOut(){
-      noteFx.forEach(function(f, i){
-        gsap.killTweensOf(f.el);
-        f.el.style.filter = 'url(#' + f.fid + ')';
-        gsap.timeline({delay: i * 0.06, onComplete: function(){ f.el.style.filter = 'none'; }})
-          .to(f.el, {opacity: 0, yPercent: 16, scaleY: .5, duration: GOO_TIME * .7,
-                     ease: EASE.goo, force3D: true}, 0);
-      });
-    }
+    function notesIn(){  noteFx(fL, true, 0);  noteFx(fR, true, .1); }
+    function notesOut(){ noteFx(fL, false, 0); noteFx(fR, false, .06); }
 
     ScrollTrigger.create({
       trigger: document.body, start: 'bottom bottom+=240', refreshPriority: -10,
@@ -1761,7 +1813,9 @@
     var tl = gsap.timeline({
       scrollTrigger: {
         trigger: stage, start: 'top top',
-        end: '+=' + Math.round(window.innerHeight * 4.2),
+        // longer than the motion needs, because two holds were added below and
+        // a hold only reads as a pause if there is scroll distance under it
+        end: '+=' + Math.round(window.innerHeight * 5.2),
         pin: true, scrub: .8, invalidateOnRefresh: true
       }
     });
@@ -1780,10 +1834,16 @@
       .to(window, {__globeLift: 1, ease: EASE.glide, duration: .2}, '>')
       .to(A, {x: 0, scale: 1, ease: EASE.glide, duration: .16}, '<0.04')
       .to(B, {x: 0, scale: 1, ease: EASE.glide, duration: .16}, '<')
+      // 5: a beat with the words standing rejoined and nothing moving. Without
+      // it a fast scroll carried straight past the link to the case index and
+      // the reader never saw that it was there.
+      .to({}, {duration: .16})
       // and morph into the line: they melt out exactly as it melts in
-      .to([A, B], {opacity: 0, filter: 'blur(14px)', duration: .1}, '>-0.03')
+      .to([A, B], {opacity: 0, filter: 'blur(14px)', duration: .1}, '>')
       .fromTo(link, {opacity: 0, filter: 'blur(16px)'}, {opacity: 1, filter: 'blur(0px)', duration: .13}, '<0.03')
-      .to(rule, {width: 'min(420px, 62vw)', duration: .12, ease: EASE.glide}, '>');
+      .to(rule, {width: 'min(420px, 62vw)', duration: .12, ease: EASE.glide}, '>')
+      // 6: and a second beat with the link fully formed, so it can be read
+      .to({}, {duration: .22});
   }
 
   /* ---------- theme: black exactly while the words stand at the edges ---------- */
@@ -1944,14 +2004,13 @@
   }
 
   function start(){
-    spine(); intro(); armReveals(); wordmark(); workHead(); themeFlip(); menu();
+    spine(); intro(); armReveals(); wordmark(); workHead(); themeFlip(); menu(); socials();
     ScrollTrigger.refresh();
-    gsap.delayedCall(3.0, morphWord);
   }
   if(reduced){
     var p = document.getElementById('pre'); if(p) p.style.display = 'none';
     document.querySelectorAll('[data-goo]').forEach(function(e){ e.classList.add('shown'); });
-    spine(); armReveals(); wordmark(); workHead(); themeFlip(); menu();
+    spine(); armReveals(); wordmark(); workHead(); themeFlip(); menu(); socials();
   } else {
     preload(start);
   }
