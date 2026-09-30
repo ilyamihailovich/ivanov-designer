@@ -10,7 +10,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap&subset=cyrillic" rel="stylesheet">
 <link rel="preload" href="fonts/ak.woff2" as="font" type="font/woff2" crossorigin>
-<script src="cases.js?v=010105"></script>
+<script src="cases.js?v=010127"></script>
 <script src="https://cdn.jsdelivr.net/npm/lenis@1.3.21/dist/lenis.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/gsap.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/ScrollTrigger.min.js"></script>
@@ -95,9 +95,24 @@
   .corner{position:fixed;z-index:8;}
   .corner.tl{top:clamp(12px,2.2vh,22px);left:var(--gut);}
   .corner.tr{top:clamp(10px,2vh,18px);right:var(--gut);}
-  .menu-pill{background:var(--ink);color:var(--paper);border-radius:999px;padding:10px 22px;
+  /* The menu control keeps the pill shape but is drawn as an outline rather
+     than a solid, and its items share that shape exactly. */
+  .menu-wrap{position:relative;display:inline-block;}
+  .menu-pill{background:none;color:var(--ink);border:1px solid var(--ink);
+    border-radius:999px;padding:10px 22px;font:inherit;
     font-size:12px;font-weight:600;line-height:1;white-space:nowrap;display:inline-block;
-    transition:background .9s var(--eo), color .9s var(--eo);}
+    cursor:pointer;transition:background .35s var(--eo), color .35s var(--eo);}
+  .menu-pill:hover,.menu-pill[aria-expanded="true"]{background:var(--ink);color:var(--paper);}
+  /* The list hangs under the button; the items are born out of it one after
+     another under the goo filter, so each one necks away from the one above. */
+  .menu-list{position:absolute;top:calc(100% + 10px);right:0;display:flex;
+    flex-direction:column;align-items:flex-end;gap:8px;pointer-events:none;}
+  .menu-item{background:none;color:var(--ink);border:1px solid var(--ink);
+    border-radius:999px;padding:10px 22px;font-size:12px;font-weight:600;line-height:1;
+    white-space:nowrap;text-decoration:none;opacity:0;
+    transition:background .3s var(--eo), color .3s var(--eo);}
+  .menu-item:hover{background:var(--ink);color:var(--paper);}
+  .menu-list.on{pointer-events:auto;}
 
   /* the hairline runs from the top of the page down to the end of the statements,
      the way the reference threads one rule through its opening chapter */
@@ -252,7 +267,9 @@
   .cc-nav{position:absolute;left:1202.94px;top:580px;width:57.051px;height:57.051px;}
   .cc-nav button{position:absolute;top:0;left:0;width:57.051px;height:57.051px;
     border:0;padding:0;background:none;cursor:pointer;}
-  .cc-nav img{width:100%;height:100%;display:block;}
+  .cc-nav img{width:100%;height:100%;display:block;transition:transform .25s var(--eo);}
+  .cc-next:hover img{transform:scale(1.09);}
+  .cc-prev:hover img{transform:scaleX(-1) scale(1.09);}
   .cc-prev{opacity:0;pointer-events:none;}
   .cc-prev img{transform:scaleX(-1);}
   .cc-next:hover{transform:scale(1.07);}
@@ -439,8 +456,16 @@
   .close-mid .clock > span{display:block;}
   .close-mid .clock.l{justify-self:end;}
   .close-mid .clock.r{justify-self:start;}
-  .close-still{width:clamp(150px,17vw,280px);aspect-ratio:3/4;overflow:hidden;background:var(--ghost);justify-self:center;}
-  .close-still .still-tilt{width:100%;height:100%;will-change:transform;}
+  /* Three layers, because one element cannot carry two transforms at once:
+     the outer one only supplies perspective, the middle one flies in, and the
+     inner one leans after the pointer. The clip lives on the innermost layer,
+     so leaning the card no longer just skews the picture inside a frame that
+     stays put — which is why the lean was invisible before. */
+  .close-still{width:clamp(150px,17vw,280px);aspect-ratio:3/4;justify-self:center;
+    perspective:900px;}
+  .close-still .still-fly{width:100%;height:100%;will-change:transform;}
+  .close-still .still-tilt{width:100%;height:100%;overflow:hidden;
+    background:var(--ghost);will-change:transform;transform-style:preserve-3d;}
   .close-still img{width:100%;height:100%;object-fit:cover;}
   .c-c{margin-left:clamp(20px,5vw,90px);}
   .c-d{margin-left:clamp(90px,15vw,260px);}
@@ -513,7 +538,16 @@
 <div id="pre"><div id="preNum">0<span>%</span></div></div>
 
 <div class="corner tl"><span class="sm" data-goo>Илья Иванов</span></div>
-<div class="corner tr"><a href="#contact" class="menu-pill" data-goo>Связаться</a></div>
+<div class="corner tr">
+  <div class="menu-wrap" id="menuWrap">
+    <button class="menu-pill" type="button" id="menuBtn" data-goo aria-expanded="false">Меню</button>
+    <div class="menu-list" id="menuList" aria-hidden="true">
+      <a class="menu-item" href="#featured" data-to="featured">23&#8209;26</a>
+      <a class="menu-item" href="#cases" data-to="cases">Кейсы</a>
+      <a class="menu-item" href="#contact" data-to="contact">Связаться</a>
+    </div>
+  </div>
+</div>
 
 <div id="markWrap" aria-hidden="true">
   <span class="mark-half l">ivanov</span>
@@ -599,7 +633,7 @@
 
     <div class="close-mid">
       <span class="clock l" id="clockH" data-goo data-nosplit>( 16</span>
-      <div class="close-still"><div class="still-tilt"><img id="closeStill" src="yoga1.jpg" alt=""></div></div>
+      <div class="close-still"><div class="still-fly"><div class="still-tilt"><img id="closeStill" src="yoga1.jpg" alt=""></div></div></div>
       <span class="clock r" id="clockM" data-goo data-nosplit>41 )</span>
     </div>
 
@@ -627,7 +661,7 @@
     </div>
 
     <div class="tailroom"></div>
-    <span id="buildStamp" style="display:none">BUILD 01.10 01:05</span>
+    <span id="buildStamp" style="display:none">BUILD 01.10 01:27</span>
   </section>
 
 </main>
@@ -762,113 +796,162 @@
   }
 
   /* ============================================================
-     Metaball reveal — the effect Ilya approved.
+     Metaball text reveal.
 
-     A heavy blur is laid over the line and a threshold is applied on top of
-     it: everything past the midpoint snaps to solid. Blurred neighbouring
-     glyphs bleed into one another and the threshold welds them into a single
-     blob. As the blur falls to zero the blob comes unstuck into letters.
+     The letters blur until they run into one another, a threshold welds the
+     blurred shapes into solid blobs, and as the blur falls away the blob comes
+     unstuck into words. Only the blur is animated — that is the whole effect.
 
-     The blur HAS to animate — that is what the effect is. The previous
-     attempts to avoid animating it (sliding letters sideways, then squashing
-     them) produced a different animation, which is not what was asked for.
-     What was asked for was this one, made to run smoothly. So the cost is
-     attacked instead:
+     The threshold is done in SVG, on the ALPHA channel, rather than with CSS
+     contrast(). CSS contrast only touches colour, so it needs an opaque plate
+     behind the text to bite on; the edge of that plate blurs along with
+     everything else and shows up as a pale rectangle around the line. That is
+     the white frame. Thresholding alpha needs no plate at all, so the frame
+     cannot happen.
 
-       - the element is promoted to its own compositing layer with
-         will-change and translateZ, so the glyphs are rasterised once and
-         only the filter re-runs over the cached texture;
-       - the line is never split, so there is one filtered box per heading
-         instead of one per letter;
-       - the opening sequence overlaps its headings closely instead of firing
-         all ten at once, and the rest are spaced out by scrolling;
-       - the finished frame is rendered and rewound before play, so the first
-         frame does not pay for the initial rasterisation;
-       - the filter is dropped entirely on completion, so nothing carries a
-         live filter into ordinary scrolling.
+     Every tunable sits in GOO.
      ============================================================ */
-  // A strict queue was tried here and was wrong: a heading scrolled into view
-  // had to wait out every heading queued before it, which on the opening
-  // sequence was over three seconds of nothing happening. Reveals run as they
-  // are triggered; the intro staggers its own, and scrolling naturally spaces
-  // the rest out, so only one or two are ever filtered at the same time.
-  function gooRun(job){ job(function(){}); }
+  var GOO = {
+    blur:    0.34,   // peak blur as a share of the font size
+    reveal:  0.62,   // seconds for a line to resolve
+    swap:    1.00,   // seconds for a word to melt, change and re-form
+    step:    0.13,   // seconds between one line and the next
+    minSize: 26,     // below this font size a plain fade reads better
+    amp:     20,     // alpha multiplier — how hard the threshold bites
+    off:     -8      // alpha offset — where the threshold sits
+  };
 
-  function metaball(el, from, to, done){
-    var fs = parseFloat(getComputedStyle(el).fontSize) || 16;
-    var st = {b: from * fs, c: 1 + 16 * (from > 0 ? 1 : 0)};
-    // one layer for the whole line; the glyphs are rasterised once and the
-    // filter then runs over that texture instead of re-rendering the type
-    el.style.willChange = 'filter';
-    el.style.transform = 'translateZ(0)';
-    el.style.backgroundColor = 'var(--paper)';
-    // The threshold needs an opaque backing, but the backing's own edge gets
-    // blurred too and showed up as a pale rectangle around the line on the
-    // first frames. A solid spread of the page colour pushes that edge far
-    // outside the blur radius, where it lands on matching paper and cannot be
-    // seen. box-shadow paints it without taking part in layout.
-    el.style.boxShadow = '0 0 0 ' + Math.ceil(from * fs * 2.6 + 24) + 'px var(--paper)';
-    function paint(){
-      el.style.filter = 'blur(' + st.b.toFixed(2) + 'px) contrast(' + st.c.toFixed(2) + ')';
+  var GOO_NS = 'http://www.w3.org/2000/svg', gooHost = null;
+
+  function gooRoot(){
+    if(!gooHost){
+      gooHost = document.createElementNS(GOO_NS, 'svg');
+      gooHost.setAttribute('aria-hidden', 'true');
+      gooHost.style.cssText = 'position:absolute;width:0;height:0;overflow:hidden';
+      document.body.appendChild(gooHost);
     }
-    paint();
-    var tw = gsap.to(st, {
-      b: to * fs, c: to > 0 ? 17 : 1, duration: GOO_TIME, ease: EASE.goo,
-      paused: true, onUpdate: paint,
-      onComplete: function(){
-        el.style.filter = 'none';
-        el.style.willChange = 'auto';
-        el.style.transform = 'none';
-        el.style.backgroundColor = 'transparent';
-        el.style.boxShadow = 'none';
-        if(done) done();
-      }
-    });
-    tw.progress(1, true).progress(0, true);   // rasterise the end state once
-    paint();
-    return tw.play();
+    return gooHost;
   }
 
+  // Each animated element owns a filter node, because its blur is what moves.
+  function ownFilter(el){
+    if(el.__goo) return el.__goo;
+    var id = 'goo_' + Math.random().toString(36).slice(2, 8);
+    var f = document.createElementNS(GOO_NS, 'filter');
+    f.setAttribute('id', id);
+    f.setAttribute('color-interpolation-filters', 'sRGB');
+    f.setAttribute('x', '-30%'); f.setAttribute('y', '-30%');
+    f.setAttribute('width', '160%'); f.setAttribute('height', '160%');
+    var b = document.createElementNS(GOO_NS, 'feGaussianBlur');
+    b.setAttribute('in', 'SourceGraphic');
+    b.setAttribute('stdDeviation', 0);
+    b.setAttribute('result', 'b');
+    var m = document.createElementNS(GOO_NS, 'feColorMatrix');
+    m.setAttribute('in', 'b');
+    m.setAttribute('mode', 'matrix');
+    m.setAttribute('values',
+      '1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 ' + GOO.amp + ' ' + GOO.off);
+    f.appendChild(b); f.appendChild(m);
+    gooRoot().appendChild(f);
+    el.__goo = {id: id, blur: b};
+    return el.__goo;
+  }
+
+  // a fixed-radius filter shared by anything that only needs two shapes to
+  // weld and part, such as the pair of paging discs
+  var pairCache = {};
+  function gooPair(px){
+    var key = 'goop' + px;
+    if(pairCache[key]) return key;
+    var f = document.createElementNS(GOO_NS, 'filter');
+    f.setAttribute('id', key);
+    f.setAttribute('color-interpolation-filters', 'sRGB');
+    f.setAttribute('x', '-40%'); f.setAttribute('y', '-40%');
+    f.setAttribute('width', '180%'); f.setAttribute('height', '180%');
+    var b = document.createElementNS(GOO_NS, 'feGaussianBlur');
+    b.setAttribute('in', 'SourceGraphic');
+    b.setAttribute('stdDeviation', px);
+    b.setAttribute('result', 'b');
+    var m = document.createElementNS(GOO_NS, 'feColorMatrix');
+    m.setAttribute('in', 'b'); m.setAttribute('mode', 'matrix');
+    m.setAttribute('values',
+      '1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 ' + GOO.amp + ' ' + GOO.off);
+    f.appendChild(b); f.appendChild(m);
+    gooRoot().appendChild(f);
+    pairCache[key] = true;
+    return key;
+  }
+
+  function fontOf(el){ return parseFloat(getComputedStyle(el).fontSize) || 16; }
+
+  /* One line resolving out of a blob. It fires once and never again: the flag
+     is set before anything starts and is never cleared, which is what stopped
+     the same heading playing two and three times on the way back up. */
   function revealText(el, delay){
-    if(!el || el.__revealed) return null;
-    el.__revealed = true;
+    if(!el || el.__done) return null;
+    el.__done = true;
     el.classList.add('shown');
 
-    var fs = parseFloat(getComputedStyle(el).fontSize) || 16;
-    if(fs < 30 || reduced){
-      return gsap.fromTo(el, {opacity: 0}, {opacity: 1, duration: GOO_TIME * .7,
-        ease: EASE.glide, delay: delay || 0});
+    var fs = fontOf(el);
+    if(fs < GOO.minSize || reduced){
+      return gsap.fromTo(el, {opacity: 0},
+        {opacity: 1, duration: GOO.reveal, ease: EASE.glide, delay: delay || 0});
     }
-    // a real tween is returned because intro() places these on a timeline
-    return gsap.delayedCall(delay || 0, function(){
-      gooRun(function(next){ metaball(el, 0.30, 0, next); });
+
+    var g = ownFilter(el), st = {b: fs * GOO.blur};
+    el.style.filter = 'url(#' + g.id + ')';
+    el.style.willChange = 'filter';
+    g.blur.setAttribute('stdDeviation', st.b);
+
+    return gsap.to(st, {
+      b: 0, duration: GOO.reveal, delay: delay || 0, ease: EASE.goo,
+      onUpdate: function(){ g.blur.setAttribute('stdDeviation', st.b.toFixed(2)); },
+      onComplete: function(){ el.style.filter = 'none'; el.style.willChange = 'auto'; }
     });
   }
 
-  // the same animation run backwards, for anything leaving the screen
-  function hideText(el){
-    if(!el || !el.__revealed) return null;
-    el.__revealed = false;
-    var fs = parseFloat(getComputedStyle(el).fontSize) || 16;
-    if(fs < 30 || reduced){
-      return gsap.to(el, {opacity: 0, duration: GOO_TIME * .5, ease: EASE.glide,
-        onComplete: function(){ el.classList.remove('shown'); }});
-    }
-    return gsap.delayedCall(0, function(){
-      gooRun(function(next){
-        metaball(el, 0, 0.34, function(){ el.classList.remove('shown'); next(); });
-      });
+  /* A group resolves strictly in document order, one line after the next.
+     Each line used to carry its own scroll trigger, and they fired in whatever
+     order the triggers happened to be evaluated — which is why the lines
+     arrived shuffled. One trigger now drives a whole group. */
+  function revealGroup(nodes, delay){
+    var list = [].slice.call(nodes).filter(function(el){ return el && !el.__done; });
+    var tl = gsap.timeline({delay: delay || 0});
+    list.forEach(function(el, i){
+      var t = revealText(el, 0);
+      if(t) tl.add(t, i * GOO.step);
+    });
+    return tl;
+  }
+
+  function armGroup(sel, childSel, start){
+    var container = document.querySelector(sel);
+    if(!container) return;
+    var nodes = container.querySelectorAll(childSel);
+    if(!nodes.length) return;
+    ScrollTrigger.create({
+      trigger: container, start: start || 'top 80%', once: true,
+      onEnter: function(){ revealGroup(nodes); }
     });
   }
 
+  /* Anything not part of an ordered group: single labels and links. */
   function armReveals(root){
     (root || document).querySelectorAll('[data-goo]').forEach(function(el){
-      if(el.__armed || el.__revealed) return;
-      if(el.closest('.op-note, .op-1, .op-role')) return;   // owned by the intro
+      if(el.__armed || el.__done) return;
+      if(el.closest('.op-note, .op-1, .op-role, .stmt, .stmt2, .idx-wrap, .close, #workHead')) return;
       el.__armed = true;
-      ScrollTrigger.create({trigger: el, start: 'top 66%', once: true,
+      ScrollTrigger.create({trigger: el, start: 'top 84%', once: true,
         onEnter: function(){ revealText(el, 0); }});
     });
+    // The ordered groups, each driven by one trigger so the lines can only
+    // arrive top to bottom. The closing block is caught early, because its
+    // clock sits halfway down it and used to wait until the middle of the
+    // section reached the middle of the screen before showing up.
+    armGroup('.stmt', '[data-goo]');
+    armGroup('.stmt2', '[data-goo]');
+    armGroup('.idx-wrap', ':scope > .lg[data-goo]');
+    armGroup('.close', '[data-goo]', 'top 88%');
   }
 
   /* ---------- five squares ---------- */
@@ -1124,6 +1207,7 @@
         gsap.set(ribS, {pointerEvents: 'auto'});
         tl.fromTo(ribS, b.photo, b.open, 0);
       } else {
+        if(split) swallowPrev();
         // On the way back the ribbon must be gone before it reaches the photo's
         // box, otherwise it lands there still showing its own first slide while
         // the card's photograph fades in underneath — two different pictures in
@@ -1154,7 +1238,7 @@
     var next = nav && nav.querySelector('.cc-next');
     var split = false;
 
-    function scrollRibbon(dir){
+    function scrollRibbon(dir, then){
       // ScrollToPlugin is not loaded on this page, so the position is stepped
       // by hand on the same curve
       var el = ribS;
@@ -1163,14 +1247,31 @@
       var st = {v: el.scrollLeft};
       gsap.killTweensOf(st);
       gsap.to(st, {v: to, duration: .75, ease: EASE.rise,
-        onUpdate: function(){ el.scrollLeft = st.v; }});
+        onUpdate: function(){ el.scrollLeft = st.v; },
+        onComplete: function(){ if(then) then(); }});
+    }
+
+    // the reverse of birthPrev: the left disc is drawn back into the right one
+    // under the same filter
+    function swallowPrev(then){
+      if(!split || !prev || !nav){ if(then) then(); return; }
+      split = false;
+      var px = Math.max(6, Math.round(57 * 0.34 / 2) * 2);
+      nav.style.filter = 'url(#' + gooPair(px) + ')';
+      gsap.timeline({onComplete: function(){
+          nav.style.filter = 'none';
+          gsap.set(prev, {opacity: 0, pointerEvents: 'none', x: 0, scale: 1});
+          if(then) then();
+        }})
+        .to(prev, {x: 0, scale: .72, duration: .62, ease: EASE.rise}, 0)
+        .to(prev, {opacity: 0, duration: .22, ease: 'none'}, .4);
     }
 
     function birthPrev(){
       if(split || !prev || !nav) return;
       split = true;
       var px = Math.max(6, Math.round(57 * 0.34 / 2) * 2);
-      nav.style.filter = 'url(#' + gooFilter(px) + ')';
+      nav.style.filter = 'url(#' + gooPair(px) + ')';
       gsap.timeline({onComplete: function(){ nav.style.filter = 'none'; }})
         .set(prev, {opacity: 1, pointerEvents: 'auto', x: 0, scale: .72})
         .to(prev, {x: -76, scale: 1, duration: .78, ease: EASE.rise}, 0);
@@ -1183,7 +1284,11 @@
       if(at === 'card'){ go('ribbon'); return; }
       scrollRibbon(1); birthPrev();
     });
-    if(prev) prev.addEventListener('click', function(){ scrollRibbon(-1); });
+    if(prev) prev.addEventListener('click', function(){
+      // stepping back past the start puts the whole case back as it opened
+      if(ribS.scrollLeft <= 2){ swallowPrev(function(){ go('card'); }); return; }
+      scrollRibbon(-1, function(){ if(ribS.scrollLeft <= 2) swallowPrev(); });
+    });
 
 
     // the ribbon can be dragged with the mouse as well as stepped through
@@ -1368,7 +1473,10 @@
 
   if(cwEl){
     cwEl.addEventListener('click', function(e){
-      if(e.target.hasAttribute('data-close')) closeCase();
+      // the cross holds an <img>, so the click lands on the image rather than
+      // on the button that carries the attribute
+      var hit = e.target.closest ? e.target.closest('[data-close]') : null;
+      if(hit) closeCase();
     });
     document.addEventListener('keydown', function(e){
       if(e.key === 'Escape' && cwOpen) closeCase();
@@ -1430,28 +1538,84 @@
   })();
 
   /* ---------- melting word ---------- */
+  /* The changing word melts into a blob, swaps underneath it and re-forms.
+     Same filter as everything else: only the blur moves, the swap happens at
+     the peak where nothing is legible. The previous version squashed the word
+     and hid it, which read as the word simply vanishing and a different one
+     appearing, with a white gap in between. */
   function morphWord(){
     var el = document.getElementById('morphWord');
     if(!el || reduced) return;
     var WORDS = ['бренды','кадры','истории','смыслы'], i = 0;
     el.style.visibility = 'visible';
-    var fs = parseFloat(getComputedStyle(el).fontSize) || 100;
-    var fid = gooFilter(Math.max(6, Math.round(fs * 0.40 / 4) * 4));
-    // The filter is attached for the length of the swap and taken off again, so
-    // the word is an ordinary painted element the rest of the time. Only its
-    // transform animates while the filter is on, which the compositor can do
-    // without re-rasterising the glyphs on every frame the way an animated
-    // stdDeviation forces it to.
+
+    var g = ownFilter(el);
+    var peak = fontOf(el) * GOO.blur;
+    var st = {b: 0};
+    function paint(){ g.blur.setAttribute('stdDeviation', st.b.toFixed(2)); }
+
     (function cycle(){
-      gsap.timeline({delay: 2.6, onComplete: cycle})
-        .add(function(){ el.style.filter = 'url(#' + fid + ')'; })
-        .to(el, {scaleY: .26, yPercent: 16, duration: GOO_TIME / 2,
-                 ease: 'power2.in', force3D: true})
+      gsap.timeline({delay: 2.4, onComplete: cycle})
+        .add(function(){ el.style.filter = 'url(#' + g.id + ')'; })
+        .to(st, {b: peak, duration: GOO.swap / 2, ease: 'power2.in', onUpdate: paint})
         .add(function(){ i = (i + 1) % WORDS.length; el.textContent = WORDS[i]; })
-        .to(el, {scaleY: 1, yPercent: 0, duration: GOO_TIME / 2,
-                 ease: 'power2.out', force3D: true})
+        .to(st, {b: 0, duration: GOO.swap / 2, ease: 'power2.out', onUpdate: paint})
         .add(function(){ el.style.filter = 'none'; });
     })();
+  }
+
+  /* The menu opens downward: the items are born out of the button one after
+     another. While an item still overlaps the thing above it, the shared goo
+     filter welds them together, so each one necks away rather than simply
+     fading in. The filter comes off as soon as they are apart. */
+  function menu(){
+    var wrap = document.getElementById('menuWrap');
+    var btn  = document.getElementById('menuBtn');
+    var list = document.getElementById('menuList');
+    if(!wrap || !btn || !list) return;
+    var items = [].slice.call(list.querySelectorAll('.menu-item'));
+    var open = false, busy = false;
+
+    function run(to){
+      if(busy || open === to) return;
+      busy = true; open = to;
+      btn.setAttribute('aria-expanded', to ? 'true' : 'false');
+      list.setAttribute('aria-hidden', to ? 'false' : 'true');
+      list.classList.toggle('on', to);
+      if(!reduced) wrap.style.filter = 'url(#' + gooPair(9) + ')';
+
+      var tl = gsap.timeline({onComplete: function(){
+        wrap.style.filter = 'none';
+        busy = false;
+      }});
+      items.forEach(function(el, i){
+        var k = to ? i : (items.length - 1 - i);
+        tl.fromTo(items[k],
+          {opacity: to ? 0 : 1, y: to ? -26 : 0, scale: to ? .8 : 1},
+          {opacity: to ? 1 : 0, y: to ? 0 : -26, scale: to ? 1 : .8,
+           duration: .5, ease: EASE.rise}, i * 0.09);
+      });
+    }
+
+    btn.addEventListener('click', function(e){ e.preventDefault(); run(!open); });
+    document.addEventListener('click', function(e){
+      if(open && !wrap.contains(e.target)) run(false);
+    });
+    document.addEventListener('keydown', function(e){
+      if(e.key === 'Escape' && open) run(false);
+    });
+
+    // smooth travel to the section, through Lenis when it is running
+    items.forEach(function(a){
+      a.addEventListener('click', function(e){
+        var target = document.getElementById(a.dataset.to);
+        if(!target) return;
+        e.preventDefault();
+        run(false);
+        if(window.lenis && lenis.scrollTo) lenis.scrollTo(target, {duration: 1.1});
+        else target.scrollIntoView({behavior: 'smooth'});
+      });
+    });
   }
 
   /* ---------- spine ---------- */
@@ -1475,39 +1639,19 @@
   }
 
   /* ---------- opening choreography ---------- */
+  /* The opening, strictly in reading order: the corner label, the menu, the
+     place line, the first name, the surname, the role. One timeline, one
+     order, no chance of them arriving shuffled. */
   function intro(){
-    var tl = gsap.timeline();
-    // revealText returns nothing when the element is absent, and gsap.add(null)
-    // throws — which killed intro() before it reached armReveals, leaving every
-    // scroll-revealed heading unarmed
-    function at(el, pos){ var t = revealText(el); if(t) tl.add(t, pos); }
-    at(document.querySelector('.corner.tl .sm'), .05);
-    at(document.querySelector('.menu-pill'), .12);
-    // Strictly in reading order, each one starting after the one above it has
-    // had time to resolve — they used to all run at once, which both read as a
-    // single blur and made every frame carry the whole block's filter work.
-    // Resolved up front: splitting the heading inserts divs inside it, and a
-    // later '.op-1 div' lookup then found one of those instead of the surname,
-    // which is why the surname never became visible.
-    // The steps used to be GOO_TIME * 0.85 across ten elements, so the last
-    // line landed about 7.3s after the preloader — the lag that made the whole
-    // opening feel slow. They overlap heavily now: each one starts while the
-    // one above it is still resolving, which is also how the reference reads.
-    var step = GOO_TIME * 0.28, cue = 0.08;
     var order = [
+      document.querySelector('.corner.tl .sm'),
+      document.querySelector('.menu-pill'),
       document.querySelector('.op-note .sm'),
       document.querySelector('.op-1 h1'),
       document.querySelector('.op-1 > div'),
       document.querySelector('.op-role .sm')
-    ];
-    order.forEach(function(el){
-      if(el){ var t = revealText(el); if(t) tl.add(t, cue); }
-      cue += step;
-    });
-    // .stmt sits well below the fold. Running it inside the intro spent six
-    // more steps of waiting on lines nobody was looking at, and they had
-    // finished by the time the reader scrolled down to them. It is revealed on
-    // scroll instead, like every other block.
+    ].filter(Boolean);
+    revealGroup(order, 0.08);
   }
 
   /* ---------- wordmark ----------
@@ -1692,25 +1836,28 @@
   (function(){
     var box = document.querySelector('.close-still');
     if(!box || reduced) return;
-    gsap.set(box, {transformPerspective: 900});
+    var fly = box.querySelector('.still-fly') || box;
     // fromTo, not from: a bare `from` leaves whatever state it was interrupted
     // in sitting on the element, which is how it froze as a parallelogram
-    gsap.set(box, {rotateX: -70, rotateY: 24, scale: .74, opacity: 0});
-    function fly(){
+    gsap.set(fly, {rotateX: -70, rotateY: 24, scale: .74, opacity: 0});
+    function flyIn(){
       box.__live = false;
-      gsap.fromTo(box, {rotateX: -70, rotateY: 24, scale: .74, opacity: 0},
+      gsap.fromTo(fly, {rotateX: -70, rotateY: 24, scale: .74, opacity: 0},
         {rotateX: 0, rotateY: 0, scale: 1, opacity: 1, duration: 1.4, ease: EASE.rise,
          overwrite: 'auto', onComplete: function(){ box.__live = true; }});
     }
     // plays again on every arrival rather than once for the life of the page
-    ScrollTrigger.create({trigger: box, start: 'top 95%', onEnter: fly, onEnterBack: fly});
+    ScrollTrigger.create({trigger: box, start: 'top 95%', onEnter: flyIn, onEnterBack: flyIn});
     if(!coarse){
       // a separate element from the one the fly-in animates, so the two never
       // overwrite each other's transform
-      var tilt = box.querySelector('.still-tilt') || box;
-      gsap.set(tilt, {transformPerspective: 900});
-      var qx = gsap.quickTo(tilt, 'rotateY', {duration: .9, ease: 'power3'});
-      var qy = gsap.quickTo(tilt, 'rotateX', {duration: .9, ease: 'power3'});
+      var tilt = box.querySelector('.still-tilt');
+      // GSAP's own names are rotationX / rotationY; passing rotateX / rotateY
+      // as a quickTo property string is not recognised and silently writes a
+      // zero rotation, which is why the card never leaned
+      gsap.set(tilt, {transformPerspective: 900, transformOrigin: '50% 50%'});
+      var qx = gsap.quickTo(tilt, 'rotationY', {duration: .7, ease: 'power3'});
+      var qy = gsap.quickTo(tilt, 'rotationX', {duration: .7, ease: 'power3'});
       // it leans toward the pointer wherever it is on the page, not only when
       // the pointer is over the picture itself
       window.addEventListener('pointermove', function(e){
@@ -1797,14 +1944,14 @@
   }
 
   function start(){
-    spine(); intro(); armReveals(); wordmark(); workHead(); themeFlip();
+    spine(); intro(); armReveals(); wordmark(); workHead(); themeFlip(); menu();
     ScrollTrigger.refresh();
     gsap.delayedCall(3.0, morphWord);
   }
   if(reduced){
     var p = document.getElementById('pre'); if(p) p.style.display = 'none';
     document.querySelectorAll('[data-goo]').forEach(function(e){ e.classList.add('shown'); });
-    spine(); armReveals(); wordmark(); workHead(); themeFlip();
+    spine(); armReveals(); wordmark(); workHead(); themeFlip(); menu();
   } else {
     preload(start);
   }
