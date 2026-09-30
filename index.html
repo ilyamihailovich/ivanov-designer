@@ -454,7 +454,7 @@
     </div>
 
     <div class="tailroom"></div>
-    <span id="buildStamp" style="display:none">BUILD 30.09 14:14</span>
+    <span id="buildStamp" style="display:none">BUILD 30.09 14:30</span>
   </section>
 
 </main>
@@ -588,6 +588,67 @@
     return null;
   }
 
+  /* ============================================================
+     Metaball reveal — the effect Ilya approved.
+
+     A heavy blur is laid over the line and a threshold is applied on top of
+     it: everything past the midpoint snaps to solid. Blurred neighbouring
+     glyphs bleed into one another and the threshold welds them into a single
+     blob. As the blur falls to zero the blob comes unstuck into letters.
+
+     The blur HAS to animate — that is what the effect is. The previous
+     attempts to avoid animating it (sliding letters sideways, then squashing
+     them) produced a different animation, which is not what was asked for.
+     What was asked for was this one, made to run smoothly. So the cost is
+     attacked instead:
+
+       - the element is promoted to its own compositing layer with
+         will-change and translateZ, so the glyphs are rasterised once and
+         only the filter re-runs over the cached texture;
+       - the line is never split, so there is one filtered box per heading
+         instead of one per letter;
+       - the opening sequence overlaps its headings closely instead of firing
+         all ten at once, and the rest are spaced out by scrolling;
+       - the finished frame is rendered and rewound before play, so the first
+         frame does not pay for the initial rasterisation;
+       - the filter is dropped entirely on completion, so nothing carries a
+         live filter into ordinary scrolling.
+     ============================================================ */
+  // A strict queue was tried here and was wrong: a heading scrolled into view
+  // had to wait out every heading queued before it, which on the opening
+  // sequence was over three seconds of nothing happening. Reveals run as they
+  // are triggered; the intro staggers its own, and scrolling naturally spaces
+  // the rest out, so only one or two are ever filtered at the same time.
+  function gooRun(job){ job(function(){}); }
+
+  function metaball(el, from, to, done){
+    var fs = parseFloat(getComputedStyle(el).fontSize) || 16;
+    var st = {b: from * fs, c: 1 + 16 * (from > 0 ? 1 : 0)};
+    // one layer for the whole line; the glyphs are rasterised once and the
+    // filter then runs over that texture instead of re-rendering the type
+    el.style.willChange = 'filter';
+    el.style.transform = 'translateZ(0)';
+    el.style.backgroundColor = 'var(--paper)';
+    function paint(){
+      el.style.filter = 'blur(' + st.b.toFixed(2) + 'px) contrast(' + st.c.toFixed(2) + ')';
+    }
+    paint();
+    var tw = gsap.to(st, {
+      b: to * fs, c: to > 0 ? 17 : 1, duration: GOO_TIME, ease: EASE.goo,
+      paused: true, onUpdate: paint,
+      onComplete: function(){
+        el.style.filter = 'none';
+        el.style.willChange = 'auto';
+        el.style.transform = 'none';
+        el.style.backgroundColor = 'transparent';
+        if(done) done();
+      }
+    });
+    tw.progress(1, true).progress(0, true);   // rasterise the end state once
+    paint();
+    return tw.play();
+  }
+
   function revealText(el, delay){
     if(!el || el.__revealed) return null;
     el.__revealed = true;
@@ -598,72 +659,26 @@
       return gsap.fromTo(el, {opacity: 0}, {opacity: 1, duration: GOO_TIME * .7,
         ease: EASE.glide, delay: delay || 0});
     }
-
-    // blur scaled to the type size; the reference uses 50 at 124px
-    var px = Math.max(6, Math.round(fs * 0.40 / 4) * 4);
-    el.style.filter = 'url(#' + gooFilter(px) + ')';
-
-    var sp = gooPieces(el);
-    var targets = sp ? sp.chars : [el];
-    var done = function(){
-      // the filter is dropped once it has served its purpose, so nothing on
-      // the page carries a live filter into ordinary scrolling
-      el.style.filter = 'none';
-      gsap.set(targets, {clearProps: 'all'});
-      if(sp) sp.revert();
-    };
-
-    // The blob is made by the letters STARTING on top of one another: under a
-    // fixed blur-and-threshold, overlapping glyphs fuse into a single mass.
-    // They then slide back to their own positions and the mass resolves into
-    // words. Opacity is never animated — fading a letter dissolves it out of
-    // the threshold and breaks the fusion, which is what turned this into an
-    // ordinary letter-by-letter fade-in — and there is no stagger, because the
-    // phrase has to unstick as one piece rather than arrive letter by letter.
-    // Nothing translates. The previous version slid every letter toward the
-    // centre of the line, which is literally a horizontal move and read as the
-    // text flying in from the side. Here each letter stays exactly where it
-    // belongs and is only stretched wide and squat, so neighbouring glyphs
-    // overlap each other and the constant blur-and-threshold welds them into
-    // one smear. As they settle back to their true proportions the smear comes
-    // unstuck into words.
-    var tw = gsap.fromTo(targets,
-      {scaleX: 1.72, scaleY: .58},
-      {scaleX: 1, scaleY: 1, duration: GOO_TIME, ease: EASE.goo,
-       delay: delay || 0, force3D: true, paused: true, onComplete: done});
-
-    // Render the finished state once and rewind. That makes the browser
-    // rasterise the filtered result before the animation starts playing, so
-    // the first frame does not have to pay for it and drop.
-    tw.progress(1, true).progress(0, true);
-    return tw.play();
+    // a real tween is returned because intro() places these on a timeline
+    return gsap.delayedCall(delay || 0, function(){
+      gooRun(function(next){ metaball(el, 0.30, 0, next); });
+    });
   }
 
   // the same animation run backwards, for anything leaving the screen
   function hideText(el){
     if(!el || !el.__revealed) return null;
     el.__revealed = false;
-
     var fs = parseFloat(getComputedStyle(el).fontSize) || 16;
     if(fs < 30 || reduced){
       return gsap.to(el, {opacity: 0, duration: GOO_TIME * .5, ease: EASE.glide,
         onComplete: function(){ el.classList.remove('shown'); }});
     }
-
-    var px = Math.max(6, Math.round(fs * 0.40 / 4) * 4);
-    el.style.filter = 'url(#' + gooFilter(px) + ')';
-
-    var sp = gooPieces(el);
-    var targets = sp ? sp.chars : [el];
-    return gsap.to(targets,
-      {scaleX: 1.72, scaleY: .58,
-       duration: GOO_TIME * .62, ease: EASE.goo, force3D: true,
-       onComplete: function(){
-         el.classList.remove('shown');
-         el.style.filter = 'none';
-         gsap.set(targets, {clearProps: 'all'});
-         if(sp) sp.revert();
-       }});
+    return gsap.delayedCall(0, function(){
+      gooRun(function(next){
+        metaball(el, 0, 0.34, function(){ el.classList.remove('shown'); next(); });
+      });
+    });
   }
 
   function armReveals(root){
@@ -901,8 +916,12 @@
   /* ---------- opening choreography ---------- */
   function intro(){
     var tl = gsap.timeline();
-    tl.add(revealText(document.querySelector('.corner.tl .sm')), .05);
-    tl.add(revealText(document.querySelector('.menu-pill')), .12);
+    // revealText returns nothing when the element is absent, and gsap.add(null)
+    // throws — which killed intro() before it reached armReveals, leaving every
+    // scroll-revealed heading unarmed
+    function at(el, pos){ var t = revealText(el); if(t) tl.add(t, pos); }
+    at(document.querySelector('.corner.tl .sm'), .05);
+    at(document.querySelector('.menu-pill'), .12);
     // Strictly in reading order, each one starting after the one above it has
     // had time to resolve — they used to all run at once, which both read as a
     // single blur and made every frame carry the whole block's filter work.
@@ -913,7 +932,7 @@
     // line landed about 7.3s after the preloader — the lag that made the whole
     // opening feel slow. They overlap heavily now: each one starts while the
     // one above it is still resolving, which is also how the reference reads.
-    var step = GOO_TIME * 0.28, at = 0.08;
+    var step = GOO_TIME * 0.28, cue = 0.08;
     var order = [
       document.querySelector('.op-note .sm'),
       document.querySelector('.op-1 h1'),
@@ -921,8 +940,8 @@
       document.querySelector('.op-role .sm')
     ];
     order.forEach(function(el){
-      if(el) tl.add(revealText(el), at);
-      at += step;
+      if(el){ var t = revealText(el); if(t) tl.add(t, cue); }
+      cue += step;
     });
     // .stmt sits well below the fold. Running it inside the intro spent six
     // more steps of waiting on lines nobody was looking at, and they had
