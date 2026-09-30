@@ -1,6 +1,8 @@
 /* Case content. Texts are the ones Ilya wrote, unabridged.
-   `layout` reproduces the block order of his own case page; entries without
-   one fall back to plain text plus a gallery. */
+   `page` points at a self-contained case page of his own: it is shown inside
+   the case window in a frame, so his stylesheet stays isolated from the site.
+   `layout` builds a case out of blocks; entries with neither fall back to
+   plain text plus a gallery. */
 window.CASES_DATA = [
  {
   "t": "GLOFF",
@@ -545,7 +547,8 @@ window.CASES_DATA = [
      "Отметки и упоминания в соцсетях, количество пользовательского контента, повторные визиты, продажи мерча, стоимость привлечения гостя."
     ]
    }
-  ]
+  ],
+  "page": "sanek.html"
  },
  {
   "t": "Quoters",

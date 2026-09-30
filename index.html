@@ -3,7 +3,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="description" content="Илья Иванов — SMM, графический дизайн и фотосъёмка полного цикла.">
 <link rel="preload" href="fonts/ak.woff2" as="font" type="font/woff2" crossorigin>
-<script src="cases.js?v=301909"></script>
+<script src="cases.js?v=301919"></script>
 <script src="https://cdn.jsdelivr.net/npm/lenis@1.3.21/dist/lenis.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/gsap.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/ScrollTrigger.min.js"></script>
@@ -189,6 +189,11 @@
   /* ---- case layouts: each case brings its own environment ---- */
   .cw-panel{--cbg:var(--paper);--cfg:var(--ink);--cac:var(--ink);--cmu:var(--dim);}
   .cw-scroll.laid{padding:0;background:var(--cbg);color:var(--cfg);}
+  /* A case page of Ilya's own is shown in a frame. His file carries its own
+     stylesheet and webfont; inlining it would leak those onto the whole site,
+     so it is isolated here and scrolls inside the window on its own. */
+  .cw-scroll.framed{padding:0;overflow:hidden;}
+  .cw-frame{width:100%;height:100%;border:0;display:block;background:var(--paper);}
   .cw-plate{position:sticky;top:0;z-index:5;background:#000;color:var(--cac);
     text-align:center;padding:20px 0;font-size:clamp(26px,3.4vw,54px);font-weight:700;
     letter-spacing:-.02em;}
@@ -523,7 +528,7 @@
     </div>
 
     <div class="tailroom"></div>
-    <span id="buildStamp" style="display:none">BUILD 30.09 19:09</span>
+    <span id="buildStamp" style="display:none">BUILD 30.09 19:19</span>
   </section>
 
 </main>
@@ -919,6 +924,22 @@
     }
 
     var panel0 = cwEl.querySelector('.cw-panel');
+    if(c.page){
+      cwScroll.className = 'cw-scroll framed';
+      panel0.removeAttribute('style');
+      cwScroll.innerHTML = '<iframe class="cw-frame" title="' + esc(c.t) +
+        '" loading="lazy" src="' + esc(c.page) + '"></iframe>';
+      cwEl.classList.add('on');
+      cwEl.setAttribute('aria-hidden', 'false');
+      if(window.lenis && lenis.stop) lenis.stop();
+      var veilF = cwEl.querySelector('.cw-veil'), panelF = cwEl.querySelector('.cw-panel');
+      gsap.timeline()
+        .fromTo(veilF, {opacity: 0}, {opacity: 1, duration: .3, ease: 'none'}, 0)
+        .fromTo(panelF, {opacity: 0, yPercent: 3, scale: .985},
+                        {opacity: 1, yPercent: 0, scale: 1, duration: .5, ease: EASE.rise}, .04);
+      var xF = cwEl.querySelector('.cw-x'); if(xF) xF.focus();
+      return;
+    }
     if(c.layout && c.layout.length){
       var th = c.theme || {};
       panel0.style.setProperty('--cbg', th.bg || '#ffffff');
