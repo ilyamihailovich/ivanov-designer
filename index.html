@@ -10,7 +10,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap&subset=cyrillic" rel="stylesheet">
 <link rel="preload" href="fonts/ak.woff2" as="font" type="font/woff2" crossorigin>
-<script src="cases.js?v=010239"></script>
+<script src="cases.js?v=011144"></script>
 <script src="https://cdn.jsdelivr.net/npm/lenis@1.3.21/dist/lenis.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/gsap.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/ScrollTrigger.min.js"></script>
@@ -682,7 +682,7 @@
     </div>
 
     <div class="tailroom"></div>
-    <span id="buildStamp" style="display:none">BUILD 01.10 02:39</span>
+    <span id="buildStamp" style="display:none">BUILD 01.10 11:44</span>
   </section>
 
 </main>
@@ -1026,12 +1026,13 @@
        against it. Set per tile rather than shared, or they read as one sheet
        sliding about. */
     if(!coarse && !reduced){
-      // The perspective belongs to the row, not to each square: a shared
-      // vanishing point is what makes them lean in depth instead of spinning
-      // flat in the plane.
-      var row = document.querySelector('#tiles .tiles-row') || host;
-      row.style.perspective = '900px';
-      row.style.transformStyle = 'preserve-3d';
+      // The perspective has to sit on the element that actually generates the
+      // tiles' containing block. It was on .tiles-row, which is display:contents
+      // on wide screens — such an element produces no box at all, so the
+      // perspective was silently dropped and the rotation flattened into a
+      // squash, leaving only the sideways drift visible.
+      host.style.perspective = '820px';
+      host.style.perspectiveOrigin = '50% 50%';
       var drift = gsap.utils.toArray('#tiles .tile').map(function(t, i){
         var sx = (i % 2 ? -1 : 1) * (0.7 + (i % 3) * 0.35);
         var sy = (i % 3 === 1 ? -1 : 1) * (0.5 + (i % 2) * 0.4);
@@ -1047,11 +1048,13 @@
       window.addEventListener('pointermove', function(e){
         var cx = window.innerWidth / 2, cy = window.innerHeight / 2;
         var dx = (e.clientX - cx) / cx, dy = (e.clientY - cy) / cy;
+        // mostly rotation, only a touch of travel — the drift used to be big
+        // enough to read as sliding rather than leaning
         drift.forEach(function(d){
-          d.x(dx * 16 * d.sx);
-          d.y(dy * 12 * d.sy);
-          d.ry(dx * 17 * d.sx);
-          d.rx(-dy * 14 * d.sy);
+          d.x(dx * 5 * d.sx);
+          d.y(dy * 4 * d.sy);
+          d.ry(dx * 22 * d.sx);
+          d.rx(-dy * 18 * d.sy);
         });
       }, {passive: true});
     }
