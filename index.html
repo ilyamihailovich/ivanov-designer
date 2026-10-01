@@ -10,7 +10,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap&subset=cyrillic" rel="stylesheet">
 <link rel="preload" href="fonts/ak.woff2" as="font" type="font/woff2" crossorigin>
-<script src="cases.js?v=012231"></script>
+<script src="cases.js?v=012350"></script>
 <script src="https://cdn.jsdelivr.net/npm/lenis@1.3.21/dist/lenis.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/gsap.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/ScrollTrigger.min.js"></script>
@@ -280,7 +280,20 @@
      inside the filtered element, so the threshold still has something opaque
      to work against. */
   #morphText{font-style:inherit;}
-  #morphWord{display:inline-block;}
+  /* Слипание букв делается CSS-фильтром blur()+contrast(): он композитится на
+     видеокарте, тогда как анимированный feGaussianBlur в Safari растеризуется
+     процессором и показывает два кадра вместо анимации.
+     Порог у contrast() цепляется только за непрозрачную подложку, а её край
+     размывается вместе со всем и после contrast() даёт светлую рамку. Поэтому
+     подложка уходит далеко за слово (padding 60), а обёртка обрезает всё, что
+     дальше 7 px от него: край подложки оказывается за обрезкой, внутри неё
+     подложка сплошная, и рамке взяться неоткуда.
+     7 px — это зазор до соседних строк (снизу «продукты», сверху «и оживляю»),
+     так что обрезка ничего чужого не накрывает, а вертикальная линия остаётся
+     левее обрезки и не задевается. */
+  #morphClip{display:inline-block;vertical-align:top;overflow:hidden;
+    padding:7px;margin:-7px;}
+  #morphWord{display:inline-block;padding:60px;margin:-60px;}
   .cc-photo i{position:absolute;inset:0;display:block;
     background-image:var(--src);background-size:117.08% 100%;background-position:0 0;
     background-repeat:no-repeat;
@@ -621,7 +634,7 @@
       <div class="lg s-1" data-goo>Снимаю,</div>
       <div class="lg s-2" data-goo>собираю</div>
       <div class="lg s-3" data-goo>и оживляю</div>
-      <div class="lg col-r blk" data-goo data-nosplit><span id="morphWord"><i id="morphText">бренды</i>,</span></div>
+      <div class="lg col-r blk" data-goo data-nosplit><span id="morphClip"><span id="morphWord"><i id="morphText">бренды</i>,</span></span></div>
       <div class="lg col-r" data-goo>продукты</div>
       <div class="lg col-r ind" data-goo>и людей.</div>
     </div>
@@ -706,7 +719,7 @@
     </div>
 
     <div class="tailroom"></div>
-    <span id="buildStamp" style="display:none">BUILD 01.10 22:31</span>
+    <span id="buildStamp" style="display:none">BUILD 01.10 23:50</span>
   </section>
 
 </main>
@@ -1292,8 +1305,18 @@
     // as the ribbon opening out of the photograph, so it reads as one move.
     var NAME_Y = {card: 108.68, open: 69.66};
     // baselines, not box bottoms: the 80px name sits on 69.66 + 63.2 = 132.9,
-    // so a 24px year has to start at 132.9 - 19 = 113.9 to share that line
+    // so a 24px year has to start at 132.9 - 19 = 113.9 to share that line.
+    // The open-state left used to be the constant 353.6, which was the width of
+    // one particular name; a longer one ran straight under the year. It is
+    // measured from the name itself, so the year always tucks in beside it.
     var YEAR   = {card: {left: 1203.07, top: 155.68}, open: {left: 353.6, top: 113.9}};
+    // Замер делается в момент раскрытия, а не при сборке: на сборке окно ещё
+    // скрыто и ширина имени равна нулю, отчего год уезжал под имя.
+    function yearOpenLeft(){
+      var nm = cardS.querySelector('.cc-name');
+      if(!nm || !nm.offsetWidth) return YEAR.open.left;
+      return Math.round((nm.offsetLeft + nm.offsetWidth + 26) * 10) / 10;
+    }
     var ARROW  = {card: 580, open: 80.16};
 
     function go(to){
@@ -1312,7 +1335,7 @@
       tl.to(copy,  {opacity: fwd ? 0 : 1, duration: fwd ? .4 : .55}, 0)
         .to(photo, {opacity: fwd ? 0 : 1, duration: fwd ? .3 : .55}, 0)
         .to(name,  {top: fwd ? NAME_Y.open : NAME_Y.card}, 0)
-        .to(year,  {left: fwd ? YEAR.open.left : YEAR.card.left,
+        .to(year,  {left: fwd ? yearOpenLeft() : YEAR.card.left,
                     top:  fwd ? YEAR.open.top  : YEAR.card.top}, 0)
         .to(arrow, {top: fwd ? ARROW.open : ARROW.card}, 0);
 
@@ -1356,12 +1379,52 @@
     var next = nav && nav.querySelector('.cc-next');
     var split = false;
 
+    /* Лента листается не на долю экрана, а по промежуткам между блоками.
+       Каждая лента несёт в data-stops координаты пустых колонок своего макета,
+       и шаг всегда заканчивается в такой колонке — поэтому текст не обрезается
+       ни справа, ни слева. Шаг доли экрана резал блок пополам: после перехода
+       он оказывался обрезан уже с другой стороны и целиком не читался. */
+    function ribbonStops(){
+      var doc;
+      try{ doc = fr.contentDocument; }catch(e){ return null; }
+      var lane = doc && doc.querySelector('.lane[data-stops]');
+      if(!lane) return null;
+      var m = /scale\(([0-9.]+)\)/.exec(fr.style.transform || '');
+      var z = m ? parseFloat(m[1]) : 1;
+      var out = lane.getAttribute('data-stops').split(',').map(function(v){
+        return parseFloat(v) * z;
+      });
+      return out.length > 1 ? out : null;
+    }
+
     function scrollRibbon(dir, then){
       // ScrollToPlugin is not loaded on this page, so the position is stepped
       // by hand on the same curve
       var el = ribS;
       var max = Math.max(0, el.scrollWidth - el.clientWidth);
-      var to = Math.min(max, Math.max(0, el.scrollLeft + dir * el.clientWidth * .86));
+      var now = el.scrollLeft, page = el.clientWidth;
+      var to = Math.min(max, Math.max(0, now + dir * page * .86));
+      var stops = ribbonStops();
+      if(stops){
+        var i, s;
+        if(dir > 0){
+          var fwd = now + page, best = null;
+          for(i = 0; i < stops.length; i++){
+            s = stops[i];
+            if(s > now + 2 && s <= fwd + 1 && (best === null || s > best)) best = s;
+          }
+          // блок шире экрана: целиком всё равно не помещается, шагаем на экран
+          to = best === null ? Math.min(max, now + page) : best;
+        } else {
+          var back = now - page, bestB = null;
+          for(i = 0; i < stops.length; i++){
+            s = stops[i];
+            if(s < now - 2 && s >= back - 1 && (bestB === null || s < bestB)) bestB = s;
+          }
+          to = bestB === null ? Math.max(0, now - page) : bestB;
+        }
+        to = Math.min(max, Math.max(0, to));
+      }
       var st = {v: el.scrollLeft};
       gsap.killTweensOf(st);
       gsap.to(st, {v: to, duration: .75, ease: EASE.rise,
@@ -1742,32 +1805,31 @@
 
      The background is put on only while a swap is running and taken off again,
      so it can never meet the reveal's filter. */
-  /* Смена слова. Порог берётся по АЛЬФА-каналу тем же SVG-фильтром, что и у
-     остальных заголовков. Прежняя версия welded CSS-фильтром blur()+contrast(),
-     которому нужен непрозрачный подклад под строкой: край этого подклада
-     размывался вместе со всем остальным и после contrast() превращался в
-     жёсткую светлую рамку вокруг строки. Она же вставала в 16 px от
-     вертикальной линии и зрительно разрывала её. Порог по альфе подклада не
-     требует, поэтому рамки быть не может.
-
-     Фильтр висит на самом слове, а не на строке: строка — блок во всю ширину,
-     и всё, что рисуется по ней, дотягивается до линии. */
+  /* Смена слова. Фильтр — CSS blur()+contrast(), он идёт на видеокарте.
+     Подложка, нужная порогу contrast(), вынесена далеко за слово и обрезана
+     обёрткой #morphClip, поэтому её край не виден (см. стили выше). */
   function morphWord(){
     var txt = document.getElementById('morphText');
     if(!txt || reduced) return;
-    var host = document.getElementById('morphWord') || txt.parentElement;
+    var host = document.getElementById('morphWord');
+    if(!host) return;
     var WORDS = ['бренды','кадры','истории','смыслы'], i = 0;
 
-    var g = ownFilter(host), st = {b: 0};
-    function peakNow(){ return fontOf(host) * GOO.swapBlur; }
-    function paint(){ g.blur.setAttribute('stdDeviation', st.b.toFixed(2)); }
+    function peakNow(){
+      return Math.max(5, (parseFloat(getComputedStyle(host).fontSize) || 56) * GOO.swapBlur);
+    }
+
+    var st = {b: 0};
+    function paint(){
+      host.style.filter = st.b < 0.06 ? 'none'
+        : 'blur(' + st.b.toFixed(2) + 'px) contrast(' + (1 + st.b * 1.9).toFixed(2) + ')';
+    }
 
     (function cycle(){
       var peak = peakNow();
       gsap.timeline({delay: 1.9, onComplete: cycle})
         .add(function(){
-          g.blur.setAttribute('stdDeviation', 0);
-          host.style.filter = 'url(#' + g.id + ')';
+          host.style.backgroundColor = 'var(--paper)';
           host.style.willChange = 'filter';
         })
         .to(st, {b: peak, duration: GOO.swap * .55, ease: 'power2.in', onUpdate: paint})
@@ -1775,6 +1837,7 @@
         .to(st, {b: 0, duration: GOO.swap * .55, ease: 'power2.out', onUpdate: paint})
         .add(function(){
           host.style.filter = 'none';
+          host.style.backgroundColor = 'transparent';
           host.style.willChange = 'auto';
         });
     })();
