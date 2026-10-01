@@ -10,7 +10,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap&subset=cyrillic" rel="stylesheet">
 <link rel="preload" href="fonts/ak.woff2" as="font" type="font/woff2" crossorigin>
-<script src="cases.js?v=020002"></script>
+<script src="cases.js?v=020025"></script>
 <script src="https://cdn.jsdelivr.net/npm/lenis@1.3.21/dist/lenis.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/gsap.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/ScrollTrigger.min.js"></script>
@@ -316,6 +316,12 @@
   .cc-next:hover{transform:scale(1.07);}
   .cc-next{transition:transform .25s var(--eo);}
   .cw-scroll.framed{padding:0;overflow:hidden;}
+  /* Фотокейс: текстового экрана нет, лента занимает всё окно и листается
+     теми же дисками. */
+  .cw-screen.ribbon.solo{inset:0;visibility:visible;opacity:1;pointer-events:auto;}
+  .cc-nav.solo{position:absolute;left:auto;right:26px;top:auto;bottom:26px;
+    width:126px;height:57px;z-index:6;}
+  .cc-nav.solo button{left:auto;right:0;}
   /* the card and the ribbon live in the same box; the ribbon starts pushed
      away and comes forward as the card recedes, which reads as moving into
      the case rather than as one panel being swapped for another */
@@ -719,7 +725,7 @@
     </div>
 
     <div class="tailroom"></div>
-    <span id="buildStamp" style="display:none">BUILD 02.10 00:02</span>
+    <span id="buildStamp" style="display:none">BUILD 02.10 00:25</span>
   </section>
 
 </main>
@@ -1267,6 +1273,101 @@
   // The arrow moves from the description into the ribbon: the card falls back
   // and fades while the ribbon comes forward from slightly beyond, so the two
   // read as one continuous move inward rather than a cut.
+  /* ---------- лента фотокейса ----------
+     Те же измерение, масштаб и шаг листания, что у кейса с карточкой, только
+     без карточки: окно сразу занято лентой. */
+  function fitRibbonIn(ribS){
+    var fr = ribS.querySelector('iframe'), inner = ribS.querySelector('.rb-inner');
+    var doc;
+    try{ doc = fr.contentDocument; }catch(e){ return; }
+    if(!doc || !doc.body) return;
+    var el = doc.scrollingElement || doc.documentElement;
+    var w = Math.max(el.scrollWidth, doc.body.scrollWidth);
+    var h = Math.max(doc.body.offsetHeight, el.clientHeight) || 760;
+    var boxH = ribS.clientHeight;
+    if(!boxH || !w) return;
+    var z = boxH / h;
+    fr.style.width = w + 'px';
+    fr.style.height = h + 'px';
+    fr.style.transform = 'scale(' + z + ')';
+    inner.style.width = (w * z) + 'px';
+    var st = doc.getElementById('__noBar');
+    if(!st){
+      st = doc.createElement('style'); st.id = '__noBar';
+      st.textContent = 'html,body{overflow:hidden!important;margin:0!important;}' +
+        '::-webkit-scrollbar{display:none!important;}';
+      doc.head.appendChild(st);
+    }
+  }
+
+  function stopsIn(ribS){
+    var fr = ribS.querySelector('iframe'), doc;
+    try{ doc = fr.contentDocument; }catch(e){ return null; }
+    var lane = doc && doc.querySelector('.lane[data-stops]');
+    if(!lane) return null;
+    var m = /scale\(([0-9.]+)\)/.exec(fr.style.transform || '');
+    var z = m ? parseFloat(m[1]) : 1;
+    var out = lane.getAttribute('data-stops').split(',').map(function(v){
+      return parseFloat(v) * z;
+    });
+    return out.length > 1 ? out : null;
+  }
+
+  function pageRibbon(ribS, dir, then){
+    var max = Math.max(0, ribS.scrollWidth - ribS.clientWidth);
+    var now = ribS.scrollLeft, page = ribS.clientWidth;
+    var to = Math.min(max, Math.max(0, now + dir * page * .86));
+    var stops = stopsIn(ribS), i, s;
+    if(stops){
+      if(dir > 0){
+        var fwd = now + page, best = null;
+        for(i = 0; i < stops.length; i++){
+          s = stops[i];
+          if(s > now + 2 && s <= fwd + 1 && (best === null || s > best)) best = s;
+        }
+        to = best === null ? Math.min(max, now + page) : best;
+      } else {
+        var back = now - page, bb = null;
+        for(i = 0; i < stops.length; i++){
+          s = stops[i];
+          if(s < now - 2 && s >= back - 1 && (bb === null || s < bb)) bb = s;
+        }
+        to = bb === null ? Math.max(0, now - page) : bb;
+      }
+      to = Math.min(max, Math.max(0, to));
+    }
+    var st = {v: ribS.scrollLeft};
+    gsap.killTweensOf(st);
+    gsap.to(st, {v: to, duration: .75, ease: EASE.rise,
+      onUpdate: function(){ ribS.scrollLeft = st.v; },
+      onComplete: function(){ if(then) then(); }});
+  }
+
+  function wireRibbonOnly(){
+    var ribS = cwScroll.querySelector('.cw-screen.ribbon.solo');
+    if(!ribS) return;
+    var fr = ribS.querySelector('iframe');
+    var nav = cwScroll.querySelector('.cc-nav.solo');
+    var prev = nav.querySelector('.cc-prev'), next = nav.querySelector('.cc-next');
+    fr.addEventListener('load', function(){ fitRibbonIn(ribS); });
+    if(window.ResizeObserver) new ResizeObserver(function(){ fitRibbonIn(ribS); }).observe(ribS);
+    gsap.set(prev, {x: -76, opacity: 0});
+    function syncNav(){
+      var atStart = ribS.scrollLeft <= 2;
+      prev.style.pointerEvents = atStart ? 'none' : 'auto';
+      gsap.to(prev, {opacity: atStart ? 0 : 1, duration: .3, ease: 'none'});
+    }
+    next.addEventListener('click', function(){ pageRibbon(ribS, 1, syncNav); syncNav(); });
+    prev.addEventListener('click', function(){ pageRibbon(ribS, -1, syncNav); });
+    ribS.addEventListener('scroll', syncNav);
+    document.addEventListener('keydown', function(e){
+      if(!cwOpen || !ribS.isConnected) return;
+      if(e.key === 'ArrowRight'){ pageRibbon(ribS, 1, syncNav); syncNav(); }
+      if(e.key === 'ArrowLeft'){ pageRibbon(ribS, -1, syncNav); }
+    });
+    syncNav();
+  }
+
   function wireCase(){
     var stage = cwScroll.querySelector('.cw-stage');
     if(!stage) return;
@@ -1284,17 +1385,25 @@
     // animated `top` to 0 treating it as an offset inside the ribbon's own box,
     // which overrode the resting top and landed the ribbon at the top of the
     // panel instead of on the rule.
+    /* Лента всегда лежит в своей раскрытой коробке, а переход к фотографии и
+       обратно делается трансформацией. Раньше анимировались left/top/width/
+       height: каждый кадр заставлял браузер пересчитывать раскладку и заново
+       растрировать масштабированный кадр внутри — отсюда рывки на сворачивании.
+       Трансформация и прозрачность считаются на видеокарте. */
     function boxes(){
       var k = cwScroll.clientWidth / 1358.102;
+      // одна проектная точка ниже линейки, чтобы сама линейка осталась видна
+      var open = {left: 0, top: 218.32 * k,
+                  width: cwScroll.clientWidth,
+                  height: cwScroll.clientHeight - 218.32 * k};
+      var ph = {left: 948.26 * k, top: 314.97 * k,
+                width: 409.844 * k, height: 587.113 * k};
       return {
-        photo: {left: 948.26 * k, top: 314.97 * k,
-                width: 409.844 * k, height: 587.113 * k,
+        box: open,
+        photo: {x: ph.left, y: ph.top - open.top,
+                scaleX: ph.width / open.width, scaleY: ph.height / open.height,
                 filter: 'blur(' + (26 * k).toFixed(1) + 'px)', opacity: .42},
-        // one design pixel below the rule, so the rule itself stays visible
-        open:  {left: 0, top: 218.32 * k,
-                width: cwScroll.clientWidth,
-                height: cwScroll.clientHeight - 218.32 * k,
-                filter: 'blur(0px)', opacity: 1}
+        open:  {x: 0, y: 0, scaleX: 1, scaleY: 1, filter: 'blur(0px)', opacity: 1}
       };
     }
 
@@ -1342,7 +1451,7 @@
 
       if(fwd){
         ribS.classList.add('live');
-        gsap.set(ribS, {pointerEvents: 'auto'});
+        gsap.set(ribS, Object.assign({pointerEvents: 'auto', transformOrigin: '0 0'}, b.box));
         tl.fromTo(ribS, b.photo, b.open, 0);
         // the way back has to exist from the moment the case opens, not only
         // after the reader has paged forward once
@@ -1353,8 +1462,9 @@
         // box, otherwise it lands there still showing its own first slide while
         // the card's photograph fades in underneath — two different pictures in
         // the same place, which is the flicker on collapse.
+        gsap.set(ribS, Object.assign({transformOrigin: '0 0'}, b.box));
         tl.fromTo(ribS, b.open,
-          Object.assign({}, b.photo, {opacity: 0, pointerEvents: 'none'}), 0)
+          Object.assign({}, b.photo, {pointerEvents: 'none'}), 0)
           .to(ribS, {opacity: 0, duration: .34, ease: 'power2.in',
             onComplete: function(){
               ribS.classList.remove('live');
@@ -1610,6 +1720,34 @@
         .fromTo(panelC, {opacity: 0, yPercent: 3, scale: .985},
                         {opacity: 1, yPercent: 0, scale: 1, duration: .5, ease: EASE.rise}, .04);
       var xC = cwEl.querySelector('.cw-x'); if(xC) xC.focus();
+      return;
+    }
+    /* Фотокейс открывается прямо в ленте: описания у него нет, читать нечего,
+       и лишний экран только мешает добраться до съёмки. */
+    if(c.page && c.ribbonOnly){
+      cwScroll.className = 'cw-scroll card';
+      panel0.removeAttribute('style');
+      cwScroll.innerHTML =
+        '<div class="cw-stage">' +
+          '<div class="cw-screen ribbon live solo"><div class="rb-inner">' +
+            '<iframe title="' + esc(c.t) + '" src="' + esc(c.page) + '"></iframe>' +
+          '</div></div>' +
+          '<div class="cc-nav solo">' +
+            '<button class="cc-prev" type="button" aria-label="Назад"><img src="cases/sanek-tpl/arrow.svg" alt=""></button>' +
+            '<button class="cc-next" type="button" aria-label="Дальше"><img src="cases/sanek-tpl/arrow.svg" alt=""></button>' +
+          '</div>' +
+        '</div>';
+      wireRibbonOnly();
+      cwEl.classList.add('on');
+      cwEl.setAttribute('aria-hidden', 'false');
+      if(window.lenis && lenis.stop) lenis.stop();
+      document.documentElement.classList.add('cw-locked');
+      var veilR = cwEl.querySelector('.cw-veil'), panelR = cwEl.querySelector('.cw-panel');
+      gsap.timeline()
+        .fromTo(veilR, {opacity: 0}, {opacity: 1, duration: .3, ease: 'none'}, 0)
+        .fromTo(panelR, {opacity: 0, yPercent: 3, scale: .985},
+                        {opacity: 1, yPercent: 0, scale: 1, duration: .5, ease: EASE.rise}, .04);
+      var xR = cwEl.querySelector('.cw-x'); if(xR) xR.focus();
       return;
     }
     if(c.page){
@@ -1949,15 +2087,22 @@
         if(last && b[0] <= last[1] + 1) last[1] = Math.max(last[1], b[1]);
         else merged.push([b[0], b[1]]);
       });
-      // Разрыв во фрейме начинается на 6 px ниже верха первой перекрывающей
-      // строки и заканчивается на 3 px ниже низа последней.
-      merged = merged.map(function(b){ return [b[0] + 6, b[1] + 3]; });
+      // Отступ внутрь одинаковый сверху и снизу: иначе расстояние от линии до
+      // строки над разрывом и под ним получается разным.
+      merged = merged.map(function(b){ return [b[0] + 6, b[1] + 6]; });
       var y = 0, html = '';
       merged.forEach(function(b){
         if(b[0] > y) html += '<i style="top:' + y.toFixed(1) + 'px;height:' + (b[0] - y).toFixed(1) + 'px"></i>';
         y = Math.max(y, b[1]);
       });
-      if(y < H) html += '<i style="top:' + y.toFixed(1) + 'px;height:' + (H - y).toFixed(1) + 'px"></i>';
+      // Линия должна дойти до кружка «'26», а не оборваться на своей высоте:
+      // кружок висит ниже низа #spine, и между ними оставался просвет.
+      var end = H;
+      if(cap){
+        var cr2 = cap.getBoundingClientRect();
+        end = Math.max(H, cr2.top - cr.top);   // до верхнего края кружка
+      }
+      if(end > y) html += '<i style="top:' + y.toFixed(1) + 'px;height:' + (end - y).toFixed(1) + 'px"></i>';
       sp.innerHTML = html;
     }
     measure();

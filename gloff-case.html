@@ -5,26 +5,25 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>GLOFF — презентация бренда</title>
 <style>
-  /* Лента выложена в натуральную величину макета (6636 x 760). Окно кейса
-     само измеряет эту ширину и масштабирует кадр по своей высоте — так же,
-     как это сделано для Санька. */
+  /* Лента в натуральную величину (6636 x 760). Окно кейса измеряет её и
+     масштабирует по своей высоте — так же, как у Санька. */
   html,body{margin:0;padding:0;background:#fff;overflow:hidden;}
-  .lane{position:relative;width:6636px;height:760px;font-size:0;white-space:nowrap;}
-  .lane img{display:inline-block;height:760px;vertical-align:top;border:0;}
+  .lane{position:relative;width:6636px;height:760px;}
+  .lane img{position:absolute;top:0;height:760px;display:block;border:0;}
 </style>
 </head>
 <body>
 <div class="lane" data-stops="0,375,462,571,934,1534,1644,1787,1932,1996,2099,2376,2869,3033,3123,3229,3547,4581,4768,4863,5029,5397,5528,5602,5663,6241,6308,6378,6555,6636">
-  <img src="cases/gloff-ribbon/01.jpg" width="700" height="760" alt="" fetchpriority="high">
-  <img src="cases/gloff-ribbon/02.jpg" width="700" height="760" alt="" fetchpriority="high">
-  <img src="cases/gloff-ribbon/03.jpg" width="700" height="760" alt="" loading="lazy">
-  <img src="cases/gloff-ribbon/04.jpg" width="700" height="760" alt="" loading="lazy">
-  <img src="cases/gloff-ribbon/05.jpg" width="700" height="760" alt="" loading="lazy">
-  <img src="cases/gloff-ribbon/06.jpg" width="700" height="760" alt="" loading="lazy">
-  <img src="cases/gloff-ribbon/07.jpg" width="700" height="760" alt="" loading="lazy">
-  <img src="cases/gloff-ribbon/08.jpg" width="700" height="760" alt="" loading="lazy">
-  <img src="cases/gloff-ribbon/09.jpg" width="700" height="760" alt="" loading="lazy">
-  <img src="cases/gloff-ribbon/10.jpg" width="336" height="760" alt="" loading="lazy">
+  <img src="cases/gloff-ribbon/01.jpg" style="left:0px;width:701px" alt="" fetchpriority="high">
+  <img src="cases/gloff-ribbon/02.jpg" style="left:700px;width:701px" alt="" fetchpriority="high">
+  <img src="cases/gloff-ribbon/03.jpg" style="left:1400px;width:701px" alt="" loading="lazy">
+  <img src="cases/gloff-ribbon/04.jpg" style="left:2100px;width:701px" alt="" loading="lazy">
+  <img src="cases/gloff-ribbon/05.jpg" style="left:2800px;width:701px" alt="" loading="lazy">
+  <img src="cases/gloff-ribbon/06.jpg" style="left:3500px;width:701px" alt="" loading="lazy">
+  <img src="cases/gloff-ribbon/07.jpg" style="left:4200px;width:701px" alt="" loading="lazy">
+  <img src="cases/gloff-ribbon/08.jpg" style="left:4900px;width:701px" alt="" loading="lazy">
+  <img src="cases/gloff-ribbon/09.jpg" style="left:5600px;width:701px" alt="" loading="lazy">
+  <img src="cases/gloff-ribbon/10.jpg" style="left:6300px;width:336px" alt="" loading="lazy">
 </div>
 </body>
 </html>

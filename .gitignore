@@ -32,3 +32,6 @@ ivanov-portfolio.html
 ivanov-site-live.html
 # Akzidenz-Grotesk — коммерческий шрифт Berthold, в публичный репозиторий не кладём.
 fonts/AkzidenzGroteskPro-Md.ttf
+
+# Исходники фотокейсов (многомегабайтные PNG) в репозиторий не кладём.
+/невинность/

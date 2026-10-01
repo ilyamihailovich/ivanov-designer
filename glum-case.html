@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>GLUM — съёмка</title>
+<style>
+  /* Лента в натуральную величину (5751 x 760). Окно кейса измеряет её и
+     масштабирует по своей высоте — так же, как у Санька. */
+  html,body{margin:0;padding:0;background:#fff;overflow:hidden;}
+  .lane{position:relative;width:5751px;height:760px;}
+  .lane img{position:absolute;top:0;height:760px;display:block;border:0;}
+</style>
+</head>
+<body>
+<div class="lane" data-stops="0,1005,1432,2489,3583,4316,5751">
+  <img src="cases/glum-ribbon/01.jpg" style="left:0px;width:1006px" alt="" fetchpriority="high">
+  <img src="cases/glum-ribbon/02.jpg" style="left:1005px;width:428px" alt="" fetchpriority="high">
+  <img src="cases/glum-ribbon/03.jpg" style="left:1432px;width:1058px" alt="" loading="lazy">
+  <img src="cases/glum-ribbon/04.jpg" style="left:2489px;width:1095px" alt="" loading="lazy">
+  <img src="cases/glum-ribbon/05.jpg" style="left:3583px;width:734px" alt="" loading="lazy">
+  <img src="cases/glum-ribbon/06.jpg" style="left:4316px;width:1435px" alt="" loading="lazy">
+</div>
+</body>
+</html>

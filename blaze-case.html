@@ -5,21 +5,23 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Blaze — презентация бренда</title>
 <style>
+  /* Лента в натуральную величину (5423 x 760). Окно кейса измеряет её и
+     масштабирует по своей высоте — так же, как у Санька. */
   html,body{margin:0;padding:0;background:#fff;overflow:hidden;}
-  .lane{position:relative;width:5423px;height:760px;font-size:0;white-space:nowrap;}
-  .lane img{display:inline-block;height:760px;vertical-align:top;border:0;}
+  .lane{position:relative;width:5423px;height:760px;}
+  .lane img{position:absolute;top:0;height:760px;display:block;border:0;}
 </style>
 </head>
 <body>
 <div class="lane" data-stops="0,169,248,391,554,672,736,1015,1467,2005,2161,2377,2485,2736,2987,3440,3560,3684,3747,3824,3905,4781,4900,5253,5362,5423">
-  <img src="cases/blaze-ribbon/01.jpg" width="700" height="760" alt="" fetchpriority="high">
-  <img src="cases/blaze-ribbon/02.jpg" width="700" height="760" alt="" fetchpriority="high">
-  <img src="cases/blaze-ribbon/03.jpg" width="700" height="760" alt="" loading="lazy">
-  <img src="cases/blaze-ribbon/04.jpg" width="700" height="760" alt="" loading="lazy">
-  <img src="cases/blaze-ribbon/05.jpg" width="700" height="760" alt="" loading="lazy">
-  <img src="cases/blaze-ribbon/06.jpg" width="700" height="760" alt="" loading="lazy">
-  <img src="cases/blaze-ribbon/07.jpg" width="700" height="760" alt="" loading="lazy">
-  <img src="cases/blaze-ribbon/08.jpg" width="523" height="760" alt="" loading="lazy">
+  <img src="cases/blaze-ribbon/01.jpg" style="left:0px;width:701px" alt="" fetchpriority="high">
+  <img src="cases/blaze-ribbon/02.jpg" style="left:700px;width:701px" alt="" fetchpriority="high">
+  <img src="cases/blaze-ribbon/03.jpg" style="left:1400px;width:701px" alt="" loading="lazy">
+  <img src="cases/blaze-ribbon/04.jpg" style="left:2100px;width:701px" alt="" loading="lazy">
+  <img src="cases/blaze-ribbon/05.jpg" style="left:2800px;width:701px" alt="" loading="lazy">
+  <img src="cases/blaze-ribbon/06.jpg" style="left:3500px;width:701px" alt="" loading="lazy">
+  <img src="cases/blaze-ribbon/07.jpg" style="left:4200px;width:701px" alt="" loading="lazy">
+  <img src="cases/blaze-ribbon/08.jpg" style="left:4900px;width:523px" alt="" loading="lazy">
 </div>
 </body>
 </html>
