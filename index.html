@@ -10,7 +10,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap&subset=cyrillic" rel="stylesheet">
 <link rel="preload" href="fonts/ak.woff2" as="font" type="font/woff2" crossorigin>
-<script src="cases.js?v=011956"></script>
+<script src="cases.js?v=012017"></script>
 <script src="https://cdn.jsdelivr.net/npm/lenis@1.3.21/dist/lenis.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/gsap.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/ScrollTrigger.min.js"></script>
@@ -191,8 +191,14 @@
   .cw-panel{position:relative;
     width:min(1358.102px,92vw);height:min(88vh,1000.113px);background:var(--paper);
     display:flex;flex-direction:column;opacity:0;}
-  /* the panel itself must not clip, or the cross outside it disappears */
-  .cw-panel > .cw-scroll{overflow:hidden;}
+  /* The panel itself must not clip, or the cross outside it disappears. This
+     belongs on the panel: putting it on .cw-scroll outweighed that element's
+     own overflow-y:auto and left the case window unable to scroll at all, so
+     the wheel fell through to the page behind it. */
+  .cw-panel{overflow:visible;}
+  /* While a case is open the page underneath must not move. Lenis.stop() only
+     pauses its own loop; native wheel scrolling continues without this. */
+  html.cw-locked, html.cw-locked body{overflow:hidden;}
   /* The design puts the cross outside the panel, with no disc behind it:
      33.906 square, 34.92 to the right of the panel edge and 1.85 below its top,
      all in design pixels and scaled with everything else. */
@@ -687,7 +693,7 @@
     </div>
 
     <div class="tailroom"></div>
-    <span id="buildStamp" style="display:none">BUILD 01.10 19:56</span>
+    <span id="buildStamp" style="display:none">BUILD 01.10 20:17</span>
   </section>
 
 </main>
@@ -1513,6 +1519,7 @@
       cwEl.classList.add('on');
       cwEl.setAttribute('aria-hidden', 'false');
       if(window.lenis && lenis.stop) lenis.stop();
+      document.documentElement.classList.add('cw-locked');
       var veilC = cwEl.querySelector('.cw-veil'), panelC = cwEl.querySelector('.cw-panel');
       gsap.timeline()
         .fromTo(veilC, {opacity: 0}, {opacity: 1, duration: .3, ease: 'none'}, 0)
@@ -1529,6 +1536,7 @@
       cwEl.classList.add('on');
       cwEl.setAttribute('aria-hidden', 'false');
       if(window.lenis && lenis.stop) lenis.stop();
+      document.documentElement.classList.add('cw-locked');
       var veilF = cwEl.querySelector('.cw-veil'), panelF = cwEl.querySelector('.cw-panel');
       gsap.timeline()
         .fromTo(veilF, {opacity: 0}, {opacity: 1, duration: .3, ease: 'none'}, 0)
@@ -1554,6 +1562,7 @@
     cwEl.classList.add('on');
     cwEl.setAttribute('aria-hidden', 'false');
     if(window.lenis && lenis.stop) lenis.stop();
+      document.documentElement.classList.add('cw-locked');
 
     var veil = cwEl.querySelector('.cw-veil'), panel = cwEl.querySelector('.cw-panel');
     gsap.timeline()
@@ -1571,6 +1580,7 @@
         cwEl.classList.remove('on');
         cwEl.setAttribute('aria-hidden', 'true');
         cwScroll.innerHTML = '';
+        document.documentElement.classList.remove('cw-locked');
         if(window.lenis && lenis.start) lenis.start();
         if(cwLastFocus && cwLastFocus.focus) cwLastFocus.focus();
       }})
