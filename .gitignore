@@ -15,3 +15,20 @@
 /мороженное/
 /покрышки/
 /что-то/
+
+# The five tile photographs are published from tiles/ as compressed JPEGs;
+# the multi-megabyte PNG originals stay out of the repository.
+/5 фото/
+
+# Рабочие файлы, не относящиеся к опубликованному сайту.
+.claude/
+figma_boards/
+case_imgs/
+glass_src/
+site_dist/
+diag_*.png
+*.bak
+ivanov-portfolio.html
+ivanov-site-live.html
+# Akzidenz-Grotesk — коммерческий шрифт Berthold, в публичный репозиторий не кладём.
+fonts/AkzidenzGroteskPro-Md.ttf

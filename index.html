@@ -10,7 +10,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap&subset=cyrillic" rel="stylesheet">
 <link rel="preload" href="fonts/ak.woff2" as="font" type="font/woff2" crossorigin>
-<script src="cases.js?v=011530"></script>
+<script src="cases.js?v=011956"></script>
 <script src="https://cdn.jsdelivr.net/npm/lenis@1.3.21/dist/lenis.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/gsap.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/ScrollTrigger.min.js"></script>
@@ -687,7 +687,7 @@
     </div>
 
     <div class="tailroom"></div>
-    <span id="buildStamp" style="display:none">BUILD 01.10 15:30</span>
+    <span id="buildStamp" style="display:none">BUILD 01.10 19:56</span>
   </section>
 
 </main>
@@ -1006,10 +1006,13 @@
     // columns measured off the reference: 1, 4, 5, 7, 8 are filled, the rest
     // are deliberately left empty so the row reads as placement, not a fill
     var SLOTS = ['c1','c4','c5','c7','c8'];
-    function tile(c, slot){
+    // The squares are a hand-picked set of photographs, not case covers. They
+    // are numbered 1..5 and hang left to right in that order.
+    var TILE_IMGS = ['tiles/1.jpg','tiles/2.jpg','tiles/3.jpg','tiles/4.jpg','tiles/5.jpg'];
+    function tile(src, slot){
       var d = document.createElement('div');
       d.className = 'tile ' + slot;
-      var im = document.createElement('img'); im.src = c.img; im.alt = c.t;
+      var im = document.createElement('img'); im.src = src; im.alt = '';
       d.appendChild(im);
       return d;
     }
@@ -1017,7 +1020,7 @@
     // become a horizontal scroller without dragging the note along sideways;
     // on wide screens display:contents keeps them in the page grid unchanged
     var row = document.createElement('div'); row.className = 'tiles-row';
-    SLOTS.forEach(function(slot, i){ row.appendChild(tile(CASES[i], slot)); });
+    SLOTS.forEach(function(slot, i){ row.appendChild(tile(TILE_IMGS[i], slot)); });
     host.appendChild(row);
     var note = document.createElement('p');
     note.className = 'sm dim tiles-note';
@@ -1103,7 +1106,12 @@
       }
       if(b.t === 'split'){
         var left = b.side === 'text-left';
-        var textCol = '<div class="col">' + ps(b.text) + '</div>';
+        // Some split blocks carry the board's coloured product markers, so the
+        // same list markup the sticker block uses is available here too.
+        var textCol = '<div class="col">' + ps(b.text) +
+          (b.list ? '<ul class="cb-list">' + b.list.map(function(it){
+            return '<li class="' + esc(it[0]) + '">' + esc(it[1]) + '</li>'; }).join('') + '</ul>' : '') +
+        '</div>';
         var imgCol = left
           ? '<div class="cb-bleed">' + (b.bleed||[]).map(function(s){ return img(s); }).join('') + '</div>'
           : '<div class="stack">' + (b.imgs||[]).map(function(s){ return img(s); }).join('') + '</div>';
