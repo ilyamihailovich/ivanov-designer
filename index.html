@@ -10,7 +10,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap&subset=cyrillic" rel="stylesheet">
 <link rel="preload" href="fonts/ak.woff2" as="font" type="font/woff2" crossorigin>
-<script src="cases.js?v=011249"></script>
+<script src="cases.js?v=011530"></script>
 <script src="https://cdn.jsdelivr.net/npm/lenis@1.3.21/dist/lenis.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/gsap.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/ScrollTrigger.min.js"></script>
@@ -264,8 +264,6 @@
      it can neither cover the comma that follows nor the rule beside it. It is
      inside the filtered element, so the threshold still has something opaque
      to work against. */
-  #morphWord::before{content:'';position:absolute;z-index:-1;
-    inset:calc(-1 * var(--plate,20px));background:var(--paper);}
   #morphText{font-style:inherit;}
   .cc-photo i{position:absolute;inset:0;display:block;
     background-image:var(--src);background-size:117.08% 100%;background-position:0 0;
@@ -689,7 +687,7 @@
     </div>
 
     <div class="tailroom"></div>
-    <span id="buildStamp" style="display:none">BUILD 01.10 12:49</span>
+    <span id="buildStamp" style="display:none">BUILD 01.10 15:30</span>
   </section>
 
 </main>
@@ -1693,38 +1691,50 @@
      contrast needs something opaque beneath it. The plate reaches past the
      vertical rule, so the rule is drawn above the type instead — see #spine.
   */
-  function morphWord(){
-    var el = document.getElementById('morphWord');
-    var txt = document.getElementById('morphText');
-    if(!el || !txt || reduced) return;
-    var WORDS = ['бренды','кадры','истории','смыслы'], i = 0;
-    // Taken from the rendered line box rather than the computed font size.
-    // The computed value is not reliable before the face and the layout have
-    // settled — it came back far too small, which left the plate's edge inside
-    // the blur, where it showed as a white halo.
-    function peakNow(){
-      var h = el.offsetHeight || parseFloat(getComputedStyle(el).fontSize) || 64;
-      return Math.max(6, h * 0.82 * GOO.swapBlur);
-    }
+  /* The changing word melts into a blob, swaps underneath it and re-forms.
 
-    el.style.display = 'inline-block';
-    el.style.position = 'relative';
-    el.style.willChange = 'filter';
+     The blur and the contrast are put on the LINE, not on the word. contrast
+     needs something opaque to bite on, and every attempt to give the word its
+     own plate went wrong: a plate large enough to keep its own edge out of the
+     blur stuck out past the word and covered the line below, and when the
+     opening reveal ran its threshold over that plate it turned into a large
+     grey slab. The line's own box is already exactly the right size and sits
+     on white paper, so nothing protrudes and nothing shows.
+
+     The background is put on only while a swap is running and taken off again,
+     so it can never meet the reveal's filter. */
+  function morphWord(){
+    var txt = document.getElementById('morphText');
+    if(!txt || reduced) return;
+    var line = txt.closest('[data-goo]') || txt.parentElement;
+    var WORDS = ['бренды','кадры','истории','смыслы'], i = 0;
+
+    function peakNow(){
+      var h = line.offsetHeight || 56;
+      return Math.max(5, h * 0.82 * GOO.swapBlur);
+    }
 
     var st = {b: 0};
     function paint(){
-      el.style.filter = st.b < 0.06 ? 'none'
+      line.style.filter = st.b < 0.06 ? 'none'
         : 'blur(' + st.b.toFixed(2) + 'px) contrast(' + (1 + st.b * 1.9).toFixed(2) + ')';
     }
-    paint();
 
     (function cycle(){
       var peak = peakNow();
-      el.style.setProperty('--plate', Math.ceil(peak * 3 + 10) + 'px');
       gsap.timeline({delay: 1.9, onComplete: cycle})
+        .add(function(){
+          line.style.backgroundColor = 'var(--paper)';
+          line.style.willChange = 'filter';
+        })
         .to(st, {b: peak, duration: GOO.swap * .55, ease: 'power2.in', onUpdate: paint})
         .add(function(){ i = (i + 1) % WORDS.length; txt.textContent = WORDS[i]; })
-        .to(st, {b: 0, duration: GOO.swap * .55, ease: 'power2.out', onUpdate: paint});
+        .to(st, {b: 0, duration: GOO.swap * .55, ease: 'power2.out', onUpdate: paint})
+        .add(function(){
+          line.style.filter = 'none';
+          line.style.backgroundColor = 'transparent';
+          line.style.willChange = 'auto';
+        });
     })();
   }
 
