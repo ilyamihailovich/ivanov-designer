@@ -10,7 +10,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap&subset=cyrillic" rel="stylesheet">
 <link rel="preload" href="fonts/ak.woff2" as="font" type="font/woff2" crossorigin>
-<script src="cases.js?v=030045"></script>
+<script src="cases.js?v=030103"></script>
 <script src="https://cdn.jsdelivr.net/npm/lenis@1.3.21/dist/lenis.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/gsap.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/ScrollTrigger.min.js"></script>
@@ -53,7 +53,7 @@
   }
 
   *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
-  html{overflow-x:hidden;max-width:100vw;}
+  html,body{overflow-x:hidden;max-width:100%;overscroll-behavior-x:none;}
   body{
     margin:0;background:var(--paper);color:var(--ink);
     font-family:'AK','Helvetica Neue',Helvetica,Arial,sans-serif;
@@ -98,6 +98,19 @@
     background:var(--hair);transform:translateX(-.5px);}
 
   /* ---------- fixed chrome ---------- */
+  /* Кромки экрана: содержимое уходит в размытие и в белый под шапкой и
+     над нижним краем. Маска делает переход постепенным, а не полосой. */
+  .edge-fade{display:none;position:fixed;left:0;right:0;z-index:7;
+    pointer-events:none;backdrop-filter:blur(7px);-webkit-backdrop-filter:blur(7px);}
+  .edge-fade.top{top:0;height:84px;
+    -webkit-mask-image:linear-gradient(to bottom,#000 32%,transparent 100%);
+    mask-image:linear-gradient(to bottom,#000 32%,transparent 100%);
+    background:linear-gradient(to bottom,var(--paper) 18%,transparent 100%);}
+  .edge-fade.bot{bottom:0;height:74px;
+    -webkit-mask-image:linear-gradient(to top,#000 32%,transparent 100%);
+    mask-image:linear-gradient(to top,#000 32%,transparent 100%);
+    background:linear-gradient(to top,var(--paper) 18%,transparent 100%);}
+  @media (max-width:900px){ .edge-fade{display:block;} }
   .corner{position:fixed;z-index:8;}
   .corner.tl{top:clamp(12px,2.2vh,22px);left:var(--gut);}
   .corner.tr{top:clamp(10px,2vh,18px);right:var(--gut);}
@@ -114,6 +127,15 @@
   /* a wider gap under the button than between the items themselves */
   .menu-list{position:absolute;top:calc(100% + 26px);right:0;display:flex;
     flex-direction:column;align-items:flex-end;gap:16px;pointer-events:none;}
+  /* Подложка меню: не прямоугольник за каждой кнопкой, а один мягкий овал за
+     всеми сразу — фон под ним размывается и к кнопкам уходит в белый. */
+  .menu-list::before{content:'';position:absolute;z-index:-1;
+    left:-46px;right:-34px;top:-40px;bottom:-40px;border-radius:50%;
+    backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);
+    background:radial-gradient(60% 55% at 72% 50%,
+      var(--paper) 0%, rgba(255,255,255,.72) 52%, rgba(255,255,255,0) 100%);
+    opacity:0;transition:opacity .45s var(--eo);}
+  .menu-wrap.on .menu-list::before{opacity:1;}
   .menu-item{background:none;color:var(--ink);border:1px solid var(--ink);
     border-radius:999px;padding:10px 22px;font-size:12px;font-weight:600;line-height:1;
     white-space:nowrap;text-decoration:none;opacity:0;
@@ -525,9 +547,9 @@
     /* текст кейса: плотнее и с иерархией */
     .cc-copy{padding:0 20px;}
     .cc-h{font-size:13px;font-weight:600;letter-spacing:.02em;opacity:.42;
-      text-transform:uppercase;margin-top:22px;}
+      text-transform:uppercase;margin-top:36px;}
     .cc-b{margin-top:7px;}
-    .cc-b .lead{font-size:15px;line-height:1.24;font-weight:600;letter-spacing:-.02em;}
+    .cc-b .lead{font-size:15px;line-height:1.14;font-weight:600;letter-spacing:-.02em;}
     .cc-b .body{font-size:12.5px;line-height:1.42;margin-top:9px;opacity:.56;
       font-weight:400;}
     .cc-photo{display:none;}
@@ -563,8 +585,8 @@
     .m-page{position:absolute;top:24px;right:16px;z-index:8;display:none;
       gap:7px;}
     .cw-panel.m-open .m-page{display:flex;}
-    .m-page button{width:34px;height:34px;border-radius:50%;border:1px solid var(--hair);
-      background:var(--paper);padding:0;display:flex;align-items:center;
+    .m-page button{width:34px;height:34px;border-radius:50%;border:0;
+      background:none;padding:0;display:flex;align-items:center;
       justify-content:center;cursor:pointer;transition:opacity .3s var(--eo);}
     .m-page img{width:22px;height:22px;display:block;}
     .m-page .m-prev img{transform:rotate(180deg);}
@@ -575,7 +597,7 @@
     .cc-nav.solo{position:absolute;left:auto;right:16px;top:24px;bottom:auto;
       transform:none;width:38px;height:38px;}
     .cc-nav.solo button{left:0;right:auto;width:34px;height:34px;
-      border:1px solid var(--hair);border-radius:50%;background:var(--paper);}
+      border:0;border-radius:50%;background:none;}
     .cc-nav.solo img{width:22px;height:22px;}
     .cw-sets{display:grid!important;grid-template-columns:1fr 1fr;
       gap:3vw;padding:20px var(--gm) 26px!important;}
@@ -765,7 +787,7 @@
     .globe-stage{position:relative;height:100svh;overflow:hidden;}
     .work-head{position:absolute;inset:0;transform:none;display:block;
       z-index:3;pointer-events:none;}
-    .work-head span{position:absolute;left:var(--gm);right:var(--gm);top:50%;
+    .work-head span{position:absolute;left:0;right:0;top:50%;
       margin-top:-.5em;text-align:center;display:block;will-change:transform;}
     .m-rail{position:absolute;left:0;right:0;top:50%;height:25.9svh;
       margin-top:-12.95svh;overflow:hidden;z-index:2;}
@@ -781,7 +803,9 @@
       text-align:left;text-shadow:0 1px 12px rgba(0,0,0,.45);
       background:linear-gradient(to top,rgba(0,0,0,.55),transparent);}
     .work-link{position:absolute;left:0;right:0;top:50%;transform:translateY(-50%);
-      opacity:0;pointer-events:auto;padding:0;z-index:4;}
+      opacity:0;pointer-events:auto;padding:0;z-index:4;text-align:center;}
+    /* линия чуть у́же самой надписи */
+    .work-link i{width:0;max-width:52%;}
     /* ---------- первый экран и заявление по его макету ----------
        Координаты сняты с узлов страницы «САЙТ — ТЕЛЕФОН»: доли — от ширины
        окна 375, по вертикали его же пиксели. Крупные строки заявления у него
@@ -803,6 +827,8 @@
        три уезжали вниз на 3,6–4,3: у строки со сменяющимся словом своя
        высота строки, и она накапливалась. */
     .chapter{height:1836px;}
+    /* линия колонки кончается там же, где у него: 1036 от верха главы */
+    #spine{height:1036px!important;}
     .featured{margin-top:114px;}
     .stmt{padding:0;height:0;position:static;}
     .stmt > div{position:absolute;margin:0;}
@@ -890,19 +916,21 @@
     /* координаты из фрейма 407:3, не по центру */
     .m-bye{display:block;top:838.7px;left:0;right:0;}
     .b-a{margin-left:6.53%;}
-    .b-b{margin-left:17.25%;margin-top:5.6px;}
+    .b-b{margin-left:17.25%;margin-top:-5px;}
     /* «Открыт для новых проектов.» у него справа на 151, «Написать напрямую:»
        слева на 29, адрес — плашкой под ним */
-    .close-aside{top:932px;left:0;right:0;display:block;padding:0;}
+    .close-aside{top:952px;left:0;right:0;display:block;padding:0;}
     .close-aside > div{position:absolute;}
     .close-aside > div:nth-of-type(1){left:40.27%;top:0;}
-    .close-aside > div:nth-of-type(2){left:7.73%;top:43px;}
+    .close-aside > div:nth-of-type(2){left:auto;right:7.73%;top:43px;
+      text-align:right;}
     .close-aside .sm{font-size:12px;text-align:left;}
+    .close-aside > div:nth-of-type(2) .sm{text-align:right;}
     .close-aside > div:nth-of-type(2) .sm:last-child{font-size:10px;
-      border:1px solid var(--hair);border-radius:11px;padding:3px 12px;
-      display:inline-block;margin-top:5px;}
+      border:1px solid var(--hair);border-radius:12px;padding:4px 14px;
+      display:inline-block;margin-top:7px;}
     .m-mark{display:block;top:1104.3px;left:0;right:0;text-align:center;}
-    .m-mark .lg{font-size:19.47vw;opacity:.4;line-height:1;display:block;}
+    .m-mark .lg{font-size:19.47vw;opacity:.4;line-height:38.6px;display:block;}
     .m-copy{display:block;top:1158.7px;left:0;right:0;text-align:center;}
     .m-copy .sm{font-size:7px;opacity:.6;}
     /* закреплённые словомарка и копирайт на телефоне не нужны: его вариант
@@ -945,6 +973,9 @@
 <button class="sm dim foot-note r" id="footR" type="button">Вернуться ↑</button>
 
 <main>
+
+  <i class="edge-fade top" aria-hidden="true"></i>
+  <i class="edge-fade bot" aria-hidden="true"></i>
 
   <!-- ============ OPENING CHAPTER ============ -->
   <section class="chapter" id="chapter">
@@ -1071,7 +1102,7 @@
     <div class="m-copy"><span class="sm" data-goo data-fade>’26 © All Right Reserved</span></div>
 
     <div class="tailroom"></div>
-    <span id="buildStamp" style="display:none">BUILD 03.10 00:45</span>
+    <span id="buildStamp" style="display:none">BUILD 03.10 01:03</span>
   </section>
 
 </main>
@@ -1760,7 +1791,7 @@
 
   /* Стрелки листания в шапке окна на телефоне. Делаются один раз на кейс и
      живут, пока окно открыто. */
-  function mPage(ribS){
+  function mPage(ribS, back){
     var head = cwScroll.querySelector('.cc');
     if(!head || head.querySelector('.m-page')) return;
     var box = document.createElement('div');
@@ -1772,9 +1803,15 @@
         '<img src="cases/sanek-tpl/arrow.svg" alt=""></button>';
     head.appendChild(box);
     var prev = box.querySelector('.m-prev'), next = box.querySelector('.m-next');
-    function sync(){ prev.hidden = ribS.scrollLeft <= 2; }
-    next.addEventListener('click', function(){ pageRibbon(ribS, 1, sync); sync(); });
-    prev.addEventListener('click', function(){ pageRibbon(ribS, -1, sync); });
+    /* «Назад» виден всегда: в начале ленты он возвращает к описанию, дальше
+       листает кадр назад. Раньше из ленты выйти было нечем. */
+    prev.hidden = false;
+    function sync(){}
+    next.addEventListener('click', function(){ pageRibbon(ribS, 1, sync); });
+    prev.addEventListener('click', function(){
+      if(ribS.scrollLeft <= 2){ if(back) back(); return; }
+      pageRibbon(ribS, -1, sync);
+    });
     ribS.addEventListener('scroll', sync);
     sync();
   }
@@ -1854,7 +1891,7 @@
         gsap.set(ribS, {clearProps: 'all'});
         pnl.classList.toggle('m-open', fwd);
         if(fwd){
-          mPage(ribS);
+          mPage(ribS, function(){ go('card'); });
           setTimeout(function(){ fitRibbon(); }, 80);
           setTimeout(function(){ fitRibbon(); }, 700);
         }
@@ -2556,6 +2593,7 @@
       open = to;
       btn.setAttribute('aria-expanded', to ? 'true' : 'false');
       list.setAttribute('aria-hidden', to ? 'false' : 'true');
+      wrap.classList.toggle('on', !!to);   // овал-подложка за меню
       if(to){ list.classList.add('on'); tl.play(); }
       else  { tl.reverse(); }
     }
@@ -2812,7 +2850,8 @@
     // Строки не сливаются в одну точку: на референсе они сходятся до полутора
     // кеглей от середины и на этом их подменяет ссылка. Сведённые в ноль, они
     // просто легли бы друг на друга.
-    var near = function(){ return (parseFloat(getComputedStyle(A).fontSize) || 40) * 1.48; };
+    // строки сходятся вплотную, и только тогда их подменяет ссылка
+    var near = function(){ return (parseFloat(getComputedStyle(A).fontSize) || 40) * 0.56; };
 
     gsap.set(A, {y: function(){ return -off(); }});
     gsap.set(B, {y: function(){ return  off(); }});
@@ -2865,14 +2904,14 @@
       .fromTo(track, {x: function(){ return window.innerWidth; }},
                      {x: function(){ return -track.scrollWidth; },
                       ease: 'none', duration: .72}, 0)
-      .to(A, {y: function(){ return -near(); }, ease: 'none', duration: .9}, 0)
-      .to(B, {y: function(){ return  near(); }, ease: 'none', duration: .9}, 0)
+      .to(A, {y: function(){ return -near(); }, ease: 'none', duration: .88}, 0)
+      .to(B, {y: function(){ return  near(); }, ease: 'none', duration: .88}, 0)
       /* Строки не просто гаснут: они уходят в размытие, и из размытия
          проявляется «Перейти ко всем кейсам» — как он и просил. */
-      .to([A, B], {opacity: 0, filter: 'blur(14px)', duration: .07, ease: 'none'}, .89)
-      .fromTo(link, {opacity: 0, filter: 'blur(14px)'},
-                    {opacity: 1, filter: 'blur(0px)', duration: .09, ease: 'none'}, .91)
-      .to(rule, {width: '62%', ease: 'none', duration: .1}, .92);
+      .to([A, B], {opacity: 0, filter: 'blur(16px)', duration: .06, ease: 'none'}, .88)
+      .fromTo(link, {opacity: 0, filter: 'blur(16px)'},
+                    {opacity: 1, filter: 'blur(0px)', duration: .08, ease: 'none'}, .9)
+      .to(rule, {width: '52%', ease: 'none', duration: .09, immediateRender: false}, .92);
   }
 
   function workHead(){
@@ -3547,6 +3586,7 @@ import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.m
   var t = 0;
   function step(dt){
     t += dt;
+    var ks = dt / 0.016667;            // доля от кадра при 60 Гц
     hover += (hoverWant - hover) * 0.07;
     // Под курсором ветер крепчал втрое — вдвое спокойнее; рывок рукой
     // живёт отдельно и не трогается.
@@ -3560,7 +3600,7 @@ import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.m
       wz = (Math.sin(px * 3.1 + t * 1.25) * 0.55 + Math.sin(py * 2.2 - t * 0.83) * 0.45) * 0.0008 * gust;
       wx = Math.sin(py * 1.7 + t * 0.95) * 0.00045 * gust;
       wy = GRAV;                             // тяжесть: см. GRAV выше
-      acc[i3] += wx; acc[i3+1] += wy; acc[i3+2] += wz;
+      acc[i3] += wx * ks; acc[i3+1] += wy * ks; acc[i3+2] += wz * ks;
     }
     if(pullPow > 0.004){
       for(var j = 0; j < N; j++){
@@ -3570,7 +3610,7 @@ import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.m
         var d2 = dx*dx + dy*dy;
         var f = Math.exp(-d2 * 26) * pullPow * 0.012;
         if(f < 1e-5) continue;
-        acc[j3] += pull.x * f; acc[j3+1] += pull.y * f; acc[j3+2] += pull.z * f;
+        acc[j3] += pull.x * f * ks; acc[j3+1] += pull.y * f * ks; acc[j3+2] += pull.z * f * ks;
       }
       pullPow *= 0.9;
     }
@@ -3680,7 +3720,7 @@ import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.m
   /* Плотный шар: кадров много, они небольшие и стоят почти вплотную. При 44
      плитках шаг по сфере ~0,534, плитка 0,5 оставляет зазор 0,034 — вдвое
      меньше прежнего. Каждая обложка встаёт на шар четырежды. */
-  var RADIUS = 1.0, TILE = 0.5, REPEAT = 4;
+  var RADIUS = 1.0, TILE = 1.0, REPEAT = 4;   // кадры вдвое крупнее, шар плотный
   var loader = new THREE.TextureLoader();
   ORBIT.forEach(function(item, i){
     var y = 1 - (i / (n - 1)) * 2;
