@@ -10,7 +10,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap&subset=cyrillic" rel="stylesheet">
 <link rel="preload" href="fonts/ak.woff2" as="font" type="font/woff2" crossorigin>
-<script src="cases.js?v=021824"></script>
+<script src="cases.js?v=021911"></script>
 <script src="https://cdn.jsdelivr.net/npm/lenis@1.3.21/dist/lenis.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/gsap.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/ScrollTrigger.min.js"></script>
@@ -495,6 +495,12 @@
   .tile.c7{grid-column:7/8;} .tile.c8{grid-column:8/9;}
 
   .stmt2{position:relative;z-index:2;padding:clamp(60px,14vh,180px) 0 clamp(20px,5vh,60px);}
+  /* Колесо работ. Стоит не внутри блока, а рядом с ним в той же главе и ниже
+     по слоям: строки заявления идут на z-index 1 и 2, колесо на 0 — значит оно
+     проходит за текстом, как на его схеме. Коробка шире и выше самого блока:
+     кадры уходят далеко за его края. */
+  #reelWrap{position:absolute;z-index:0;pointer-events:none;}
+  #reelWrap canvas{width:100%;height:100%;display:block;}
   /* a steady descent to the right, then the last line set under the middle of
      the one above it */
   /* anchored to the reference's own columns: its closing statement puts the
@@ -751,6 +757,7 @@
 
     <div class="tiles" id="tiles"></div>
 
+    <div id="reelWrap"><canvas id="reelCanvas"></canvas></div>
     <div class="stmt2">
       <div class="lg t-a" data-goo>Лучшие</div>
       <div class="lg t-b" data-goo>идеи</div>
@@ -829,7 +836,7 @@
     </div>
 
     <div class="tailroom"></div>
-    <span id="buildStamp" style="display:none">BUILD 02.10 18:24</span>
+    <span id="buildStamp" style="display:none">BUILD 02.10 19:11</span>
   </section>
 
 </main>
@@ -3253,5 +3260,153 @@ import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.m
     renderer.render(scene, camera);
   }
   requestAnimationFrame(frame);
+})();
+</script>
+
+<script type="module">
+/* ============================================================
+   КОЛЕСО РАБОТ
+
+   За строками «Лучшие идеи заслуживают реализации» по кольцу идут обложки
+   кейсов. Кольцо охватывает камеру: его дальняя точка приходится на середину
+   экрана, ближние — на левый и правый края. Поэтому кадр выходит слева
+   крупным, к середине уходит вглубь и мельчает, к правому краю снова
+   разрастается и уходит за камеру, чтобы вернуться слева.
+
+   Деформация не считается отдельно: карточка — это кусок самого кольца,
+   разбитый на полосы и выгнутый по его дуге. Перспектива тогда сама даёт и
+   сужение к дальней точке, и скос краёв по касательной, причём верно в любом
+   положении.
+
+   Крутит прокрутка: один проход по блоку — один полный оборот, и все работы
+   успевают пролететь ровно по разу.
+   ============================================================ */
+import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js';
+
+(function(){
+  var wrap = document.getElementById('reelWrap');
+  var canvas = document.getElementById('reelCanvas');
+  var block = document.querySelector('.stmt2');
+  if(!wrap || !canvas || !block) return;
+  if(window.matchMedia('(prefers-reduced-motion: reduce)').matches){ wrap.remove(); return; }
+  if(!window.gsap || !window.ScrollTrigger){ wrap.remove(); return; }
+
+  var covers = (window.CASES_DATA || []).filter(function(c){ return c.globe; })
+                                        .map(function(c){ return c.globe; });
+  if(covers.length < 3){ wrap.remove(); return; }
+  var N = covers.length;
+
+  var SMALL = window.matchMedia('(max-width:900px)').matches;
+  var renderer = new THREE.WebGLRenderer({canvas: canvas, alpha: true, antialias: !SMALL});
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio, SMALL ? 1.5 : 2));
+  var scene = new THREE.Scene();
+  var camera = new THREE.PerspectiveCamera(52, 1, 0.1, 200);
+
+  /* Радиус кольца и вынос его центра вперёд. Чем меньше вынос при том же
+     радиусе, тем ближе кадр проходит мимо камеры у края кадра и тем сильнее
+     разница между краем и серединой. */
+  var R = 10, ZC = 7.6;
+  /* Наклон: на схеме кольцо не стоит поперёк взгляда, а завалено от зрителя —
+     дальняя дуга уходит вверх и проходит НАД строками, а не сквозь них, текст
+     остаётся в его отверстии. Наклон живёт на внешней группе, оборот — на
+     внутренней, иначе они перемешиваются и ось оборота уезжает вместе с
+     наклоном. */
+  var TILT = -0.34, LIFT = -1.9;
+  var tilt = new THREE.Group();
+  tilt.position.set(0, LIFT, -ZC);
+  tilt.rotation.x = TILT;
+  scene.add(tilt);
+  var ring = new THREE.Group();
+  tilt.add(ring);
+
+  var PITCH = Math.PI * 2 / N;         // угол на одну работу
+  var FILL  = 0.66;                    // доля угла под кадр, остальное просвет
+  var HALF  = PITCH * FILL / 2;
+  var SEG   = 18;                      // полос поперёк кадра — ими он и гнётся
+  var HH    = R * PITCH * FILL * 0.31;  // полувысота: лента, а не стена
+
+  var loader = new THREE.TextureLoader();
+  for(var i = 0; i < N; i++){
+    var pos = [], uv = [], idx = [];
+    for(var s = 0; s <= SEG; s++){
+      var t = s / SEG, a = -HALF + 2 * HALF * t;
+      var x = R * Math.sin(a), z = -R * Math.cos(a);
+      pos.push(x, HH, z, x, -HH, z);
+      uv.push(t, 1, t, 0);
+    }
+    for(var s2 = 0; s2 < SEG; s2++){
+      var b = s2 * 2;
+      idx.push(b, b + 1, b + 2, b + 1, b + 3, b + 2);
+    }
+    var g = new THREE.BufferGeometry();
+    g.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3));
+    g.setAttribute('uv', new THREE.Float32BufferAttribute(uv, 2));
+    g.setIndex(idx);
+    var m = new THREE.MeshBasicMaterial({side: THREE.DoubleSide, transparent: true, opacity: 0});
+    (function(mat, src){
+      loader.load(src, function(tex){
+        tex.colorSpace = THREE.SRGBColorSpace;
+        tex.anisotropy = Math.min(4, renderer.capabilities.getMaxAnisotropy());
+        mat.map = tex; mat.needsUpdate = true;
+        gsap.to(mat, {opacity: 1, duration: .5, ease: 'none'});
+      });
+    })(m, covers[i]);
+    var mesh = new THREE.Mesh(g, m);
+    mesh.rotation.y = i * PITCH;       // карточка встаёт на своё место кольца
+    ring.add(mesh);
+  }
+
+  /* ---------- коробка ----------
+     Колесо шире и выше блока: на схеме кадры уходят далеко за его края. */
+  var OVER_W = 2.0, OVER_H = 2.2;
+  function place(){
+    var bw = block.offsetWidth, bh = block.offsetHeight;
+    if(!bw || !bh) return;
+    var w = Math.round(bw * OVER_W), h = Math.round(bh * OVER_H);
+    wrap.style.width  = w + 'px';
+    wrap.style.height = h + 'px';
+    wrap.style.left   = (block.offsetLeft - (w - bw) / 2) + 'px';
+    wrap.style.top    = (block.offsetTop  - (h - bh) / 2) + 'px';
+    renderer.setSize(w, h, false);
+    camera.aspect = w / h;
+    camera.updateProjectionMatrix();
+  }
+  place();
+  window.addEventListener('resize', place);
+  if(window.ResizeObserver) new ResizeObserver(place).observe(block);
+
+  /* ---------- ход ---------- */
+  var spin = {v: 0};
+  gsap.to(spin, {
+    v: Math.PI * 2, ease: 'none',
+    scrollTrigger: {trigger: block, start: 'top bottom', end: 'bottom top',
+                    scrub: .4, invalidateOnRefresh: true}
+  });
+
+  var live = true;
+  if(window.IntersectionObserver){
+    new IntersectionObserver(function(e){ live = e[0].isIntersecting; },
+      {rootMargin: '250px'}).observe(wrap);
+  }
+  (function frame(){
+    requestAnimationFrame(frame);
+    if(!live) return;
+    ring.rotation.y = spin.v;
+    renderer.render(scene, camera);
+  })();
+
+  // ручка для подгонки: __reel({R, ZC, fov, over})
+  window.__reel = function(o){
+    if(o){
+      if(o.ZC != null){ ZC = o.ZC; tilt.position.z = -ZC; }
+      if(o.tilt != null){ TILT = o.tilt; tilt.rotation.x = TILT; }
+      if(o.lift != null){ LIFT = o.lift; tilt.position.y = LIFT; }
+      if(o.fov != null){ camera.fov = o.fov; camera.updateProjectionMatrix(); }
+      if(o.overW != null){ OVER_W = o.overW; place(); }
+      if(o.overH != null){ OVER_H = o.overH; place(); }
+      if(o.spin != null) spin.v = o.spin;
+    }
+    return {R: R, ZC: ZC, tilt: TILT, lift: LIFT, fov: camera.fov, N: N, overW: OVER_W, overH: OVER_H};
+  };
 })();
 </script>
