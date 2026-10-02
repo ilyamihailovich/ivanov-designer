@@ -10,7 +10,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap&subset=cyrillic" rel="stylesheet">
 <link rel="preload" href="fonts/ak.woff2" as="font" type="font/woff2" crossorigin>
-<script src="cases.js?v=020405"></script>
+<script src="cases.js?v=021339"></script>
 <script src="https://cdn.jsdelivr.net/npm/lenis@1.3.21/dist/lenis.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/gsap.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/ScrollTrigger.min.js"></script>
@@ -134,6 +134,18 @@
     transform:translateX(-50%);z-index:4;
     width:44px;height:44px;border-radius:50%;border:1px solid var(--hair);background:var(--paper);
     display:flex;align-items:center;justify-content:center;font-size:10.5px;font-weight:600;color:var(--dim);}
+
+  /* ---------- полотно ----------
+     Висит в свободном поле справа от имени, над рядом плиток. На десктопе
+     вынесено из потока, чтобы не сдвинуть ни одной строки; на телефоне
+     встаёт между фразой и плитками, где место есть. */
+  #cloth{position:absolute;right:var(--gm);top:clamp(96px,12vh,170px);
+    width:21.5%;aspect-ratio:.63;z-index:1;touch-action:none;}
+  #cloth canvas{width:100%;height:100%;display:block;}
+  @media (max-width:900px){
+    #cloth{position:relative;right:auto;top:auto;width:auto;aspect-ratio:.78;
+      margin:clamp(30px,6vh,60px) var(--gm) clamp(10px,2vh,20px);}
+  }
 
   /* ---------- torn wordmark ---------- */
   #markWrap{position:fixed;left:0;right:0;bottom:-.14em;z-index:3;pointer-events:none;opacity:0;}
@@ -597,7 +609,9 @@
       --gm:4.07%; --gg:3.053%; --colw:12.76%;
       --rule:32.65%;                 /* 4.07 + 2*12.76 + 3.053 */
       --c2:19.88%; --c3:35.70%;      /* 4.07 + (N-1)*15.813 */
-      --c4:51.51%; --col:51.51%;
+      /* правая колонка начиналась на 51,5% — «продукты» упиралось в край,
+         а «и людей.» ломалось на две строки. 40% оставляет им место. */
+      --c4:40%; --col:40%;
     }
     .xl,.lg{font-size:11.45vw;line-height:.9;letter-spacing:-.0524em;}
     .sm{font-size:max(11px,3.053vw);}
@@ -626,6 +640,34 @@
     .tiles-row::-webkit-scrollbar{display:none;}
     .tile.c1,.tile.c4,.tile.c5,.tile.c7,.tile.c8{grid-column:auto;flex:0 0 28.75vw;}
     .tiles-note{grid-column:auto;margin-top:18px;}
+    /* ---------- телефон ----------
+       Шара нет: WebGL-сфера на телефоне и не читается, и держит 6,5 экранов
+       закреплённой прокрутки впустую. Вместо неё — сетка тех же квадратных
+       обложек, по которым кейс открывается в одно касание. */
+    #globeCanvas{display:none;}
+    .globe-stage{height:auto;overflow:visible;}
+    .featured{min-height:0;}
+    .work-head{position:static;transform:none;display:flex;justify-content:center;
+      gap:3.2vw;padding:clamp(40px,9vh,90px) var(--gm) clamp(18px,3vh,30px);}
+    .work-head span{opacity:1!important;transform:none!important;}
+    .work-link{position:static;transform:none;opacity:1;pointer-events:auto;
+      padding:clamp(22px,4vh,40px) 0 clamp(48px,9vh,90px);}
+    .work-grid{display:grid;grid-template-columns:1fr 1fr;gap:var(--gg);
+      padding:0 var(--gm);}
+    .work-grid button{position:relative;border:0;padding:0;background:none;
+      aspect-ratio:1;overflow:hidden;cursor:pointer;}
+    .work-grid img{width:100%;height:100%;object-fit:cover;display:block;}
+    .work-grid b{position:absolute;left:0;right:0;bottom:0;padding:8% 7%;
+      font-size:max(12px,3.2vw);font-weight:600;letter-spacing:-.03em;color:#fff;
+      text-align:left;text-shadow:0 1px 12px rgba(0,0,0,.45);
+      background:linear-gradient(to top,rgba(0,0,0,.55),transparent);}
+    /* подпись кейса уезжала за край: на телефоне она встаёт под название */
+    .idx-row{grid-template-columns:auto 1fr;gap:0 3vw;align-items:baseline;
+      padding:clamp(9px,1.6vh,14px) 0;}
+    .idx-row .n{grid-column:1;}
+    .idx-row .t{grid-column:2;font-size:max(15px,4.3vw);}
+    .idx-row .c{grid-column:2;text-align:left;margin-top:4px;justify-self:start;
+      font-size:max(10px,2.9vw);line-height:1.2;white-space:normal;}
     .mark-half{font-size:clamp(2.2rem,13vw,4rem);}
     .close-mid{flex-direction:column;}
     #thumb{display:none;}
@@ -687,6 +729,10 @@
       <div class="lg col-r" data-goo>продукты</div>
       <div class="lg col-r ind" data-goo>и людей.</div>
     </div>
+
+    <!-- Полотно: фотография, натянутая на ткань. Само по себе едва колышется,
+         под курсором (на телефоне — по касанию) ведётся за ним сильнее. -->
+    <div id="cloth"><canvas id="clothCanvas"></canvas></div>
 
     <div class="tiles" id="tiles"></div>
 
@@ -768,7 +814,7 @@
     </div>
 
     <div class="tailroom"></div>
-    <span id="buildStamp" style="display:none">BUILD 02.10 04:05</span>
+    <span id="buildStamp" style="display:none">BUILD 02.10 13:39</span>
   </section>
 
 </main>
@@ -2229,12 +2275,17 @@
       var H = sp.offsetHeight;
       if(!H) return;
       var bands = [];
-      chap.querySelectorAll('.lg, .xl').forEach(function(el){
+      // Полотно рвёт линию так же, как строка: оно непрозрачное, и линия
+      // поперёк фотографии читается как брак.
+      chap.querySelectorAll('.lg, .xl, #cloth').forEach(function(el){
         var box = el.getBoundingClientRect();
         if(box.height <= 0) return;
-        var rng = document.createRange();
-        rng.selectNodeContents(el);
-        var ink = rng.getBoundingClientRect();
+        var ink = box;
+        if(el.id !== 'cloth'){
+          var rng = document.createRange();
+          rng.selectNodeContents(el);
+          ink = rng.getBoundingClientRect();
+        }
         if(ink.width <= 0) return;
         if(ink.left >= sx || ink.right <= sx) return;
         bands.push([box.top - cr.top, box.bottom - cr.top]);
@@ -2243,17 +2294,19 @@
       var merged = [];
       bands.forEach(function(b){
         var last = merged[merged.length - 1];
-        if(last && b[0] <= last[1] + 1) last[1] = Math.max(last[1], b[1]);
+        // Допуск в одну строку: если между перекрывающими полосами меньше
+        // строки, линии там всё равно не на что лечь — оставался бы обрубок.
+        // Разные блоки отстоят на сотни точек и не склеиваются.
+        var tol = Math.max(16, (b[1] - b[0]) * 1.2);
+        if(last && b[0] <= last[1] + tol) last[1] = Math.max(last[1], b[1]);
         else merged.push([b[0], b[1]]);
       });
       // Отступ внутрь одинаковый сверху и снизу: иначе расстояние от линии до
       // строки над разрывом и под ним получается разным.
       merged = merged.map(function(b){ return [b[0] + 6, b[1] + 6]; });
-      var y = 0, html = '';
-      merged.forEach(function(b){
-        if(b[0] > y) html += '<i style="top:' + y.toFixed(1) + 'px;height:' + (b[0] - y).toFixed(1) + 'px"></i>';
-        y = Math.max(y, b[1]);
-      });
+      // Отрезок короче строки не рисуется: на такой длине линия читается как
+      // обрубок, а не как линия. Так короткий кусок невозможен в принципе.
+      var MINSEG = 56;
       // Линия должна дойти до кружка «'26», а не оборваться на своей высоте:
       // кружок висит ниже низа #spine, и между ними оставался просвет.
       var end = H;
@@ -2261,7 +2314,16 @@
         var cr2 = cap.getBoundingClientRect();
         end = Math.max(H, cr2.top - cr.top);   // до верхнего края кружка
       }
-      if(end > y) html += '<i style="top:' + y.toFixed(1) + 'px;height:' + (end - y).toFixed(1) + 'px"></i>';
+      // Хвост до кружка короче порога — значит последний разрыв сливается с
+      // ним: линия обязана доходить до кружка, а не обрываться перед ним.
+      while(merged.length && end - merged[merged.length - 1][1] < MINSEG) merged.pop();
+
+      var y = 0, html = '';
+      merged.forEach(function(b){
+        if(b[0] - y >= MINSEG) html += '<i style="top:' + y.toFixed(1) + 'px;height:' + (b[0] - y).toFixed(1) + 'px"></i>';
+        y = Math.max(y, b[1]);
+      });
+      if(end - y >= MINSEG) html += '<i style="top:' + y.toFixed(1) + 'px;height:' + (end - y).toFixed(1) + 'px"></i>';
       sp.innerHTML = html;
     }
     measure();
@@ -2377,6 +2439,35 @@
   // same distance, so both must read the same number — they had drifted apart,
   // which is why the page turned white while the words were still on screen.
   var GLOBE_SCREENS = 6.5;
+
+  // Телефон: другая логика блока «Работы». Закреплённой прокрутки и WebGL нет.
+  var MOBILE = window.matchMedia('(max-width:900px)').matches;
+
+  /* Сетка обложек вместо шара. Берутся те же квадратные кадры, что висят на
+     сфере, и открывают те же кейсы. */
+  function workGrid(){
+    var stage = document.getElementById('globeStage');
+    if(!stage) return;
+    var all = window.__ALL_CASES || [];
+    var list = all.filter(function(c){ return !!c.globe; });
+    if(!list.length) return;
+    var grid = document.createElement('div');
+    grid.className = 'work-grid';
+    list.forEach(function(c){
+      var b = document.createElement('button');
+      b.type = 'button';
+      b.innerHTML = '<img loading="lazy" src="' + esc(c.globe) + '" alt="">' +
+                    '<b>' + esc(c.t) + '</b>';
+      b.addEventListener('click', function(){ openWindowFor(c); });
+      grid.appendChild(b);
+    });
+    var link = stage.querySelector('.work-link');
+    stage.insertBefore(grid, link);
+    gsap.utils.toArray(grid.children).forEach(function(el, i){
+      gsap.from(el, {opacity: 0, y: 18, duration: .6, ease: EASE.rise,
+        scrollTrigger: {trigger: el, start: 'top 92%'}, delay: (i % 2) * .06});
+    });
+  }
 
   function workHead(){
     var A = document.getElementById('workA'), B = document.getElementById('workB');
@@ -2607,13 +2698,15 @@
   }
 
   function start(){
-    spine(); intro(); armReveals(); wordmark(); workHead(); themeFlip(); menu(); socials();
+    spine(); intro(); armReveals(); wordmark(); menu(); socials();
+    if(MOBILE) workGrid(); else { workHead(); themeFlip(); }
     ScrollTrigger.refresh();
   }
   if(reduced){
     var p = document.getElementById('pre'); if(p) p.style.display = 'none';
     document.querySelectorAll('[data-goo]').forEach(function(e){ e.classList.add('shown'); });
-    spine(); armReveals(); wordmark(); workHead(); themeFlip(); menu(); socials();
+    spine(); armReveals(); wordmark(); menu(); socials();
+    if(MOBILE) workGrid(); else { workHead(); themeFlip(); }
   } else {
     preload(start);
   }
@@ -2628,7 +2721,8 @@
 
   var canvas = document.getElementById('globeCanvas');
   var stage  = document.getElementById('globeStage');
-  if(canvas && stage){
+  // на телефоне сферы нет — там сетка обложек
+  if(canvas && stage && !window.matchMedia('(max-width:900px)').matches){
     var SRC = window.__CASES || [];
     // the sphere needs enough faces to read as a sphere; with eight it was a
     // scatter of cards with holes between them, so the covers repeat
@@ -2785,4 +2879,213 @@
       renderer.render(scene, camera);
     })(performance.now());
   }
+</script>
+
+<script type="module">
+/* ============================================================
+   ПОЛОТНО
+
+   Фотография натянута на ткань: сетка узлов, связанных пружинами, которую
+   считает интегратор Верле. Он хранит прошлое и текущее положение вместо
+   скорости и потому устойчив при многих итерациях за кадр.
+
+   Ткань всё время чуть дышит от «ветра» — две бегущие волны разной частоты,
+   чтобы движение не читалось как period. Под курсором к ближайшим узлам
+   добавляется импульс по направлению его движения: полотно тянется за рукой
+   и качается сильнее. На телефоне то же делает касание.
+
+   Тяжёлого здесь только пересчёт узлов, поэтому: сетка мельче на телефоне,
+   сглаживание там выключено, плотность пикселей ограничена, а пока полотно
+   за экраном — кадры не рисуются вовсе.
+   ============================================================ */
+import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js';
+
+(function(){
+  var holder = document.getElementById('cloth');
+  var canvas = document.getElementById('clothCanvas');
+  if(!holder || !canvas) return;
+  if(window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
+  var SMALL = window.matchMedia('(max-width:900px)').matches;
+  var COLS = SMALL ? 14 : 22, ROWS = SMALL ? 18 : 28;
+  var W = 1.0, H = W / 0.63;                 // пропорции совпадают с коробкой
+  var REST_X = W / COLS, REST_Y = H / ROWS;
+
+  var renderer = new THREE.WebGLRenderer({canvas: canvas, antialias: !SMALL, alpha: true});
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio, SMALL ? 1.5 : 2));
+  var scene = new THREE.Scene();
+  var camera = new THREE.PerspectiveCamera(32, 0.63, 0.1, 50);
+  camera.position.set(0, 0, 3.05);
+
+  scene.add(new THREE.AmbientLight(0xffffff, 0.86));
+  var key = new THREE.DirectionalLight(0xffffff, 0.72);
+  key.position.set(-0.6, 0.9, 1.4);
+  scene.add(key);
+
+  var geo = new THREE.PlaneGeometry(W, H, COLS, ROWS);
+  var mat = new THREE.MeshLambertMaterial({transparent: true, side: THREE.DoubleSide});
+  new THREE.TextureLoader().load('cloth-photo.jpg', function(tex){
+    tex.colorSpace = THREE.SRGBColorSpace;
+    tex.anisotropy = Math.min(4, renderer.capabilities.getMaxAnisotropy());
+    mat.map = tex; mat.needsUpdate = true;
+  });
+  var mesh = new THREE.Mesh(geo, mat);
+  scene.add(mesh);
+
+  /* ---------- узлы ---------- */
+  var NX = COLS + 1, NY = ROWS + 1, N = NX * NY;
+  var pos = new Float32Array(N * 3), prev = new Float32Array(N * 3), acc = new Float32Array(N * 3);
+  var pinned = new Uint8Array(N);
+  var src = geo.attributes.position.array;
+  for(var i = 0; i < N; i++){
+    pos[i*3] = prev[i*3] = src[i*3];
+    pos[i*3+1] = prev[i*3+1] = src[i*3+1];
+    pos[i*3+2] = prev[i*3+2] = src[i*3+2];
+  }
+  // верхний ряд закреплён — полотно висит, как на прищепках
+  for(var x = 0; x < NX; x++) pinned[x] = 1;
+
+  // пружины: соседние узлы, диагонали и через один — последние держат форму,
+  // иначе ткань складывается сама в себя
+  var links = [];
+  function link(a, b){
+    var dx = pos[a*3] - pos[b*3], dy = pos[a*3+1] - pos[b*3+1];
+    links.push(a, b, Math.sqrt(dx*dx + dy*dy));
+  }
+  for(var y = 0; y < NY; y++) for(var x2 = 0; x2 < NX; x2++){
+    var id = y * NX + x2;
+    if(x2 < NX - 1) link(id, id + 1);
+    if(y < NY - 1) link(id, id + NX);
+    if(x2 < NX - 1 && y < NY - 1){ link(id, id + NX + 1); link(id + 1, id + NX); }
+    if(x2 < NX - 2) link(id, id + 2);
+    if(y < NY - 2) link(id, id + NX * 2);
+  }
+  var LN = links.length / 3;
+
+  /* ---------- ввод ---------- */
+  var ray = new THREE.Raycaster(), ndc = new THREE.Vector2();
+  var hover = 0, hoverWant = 0;
+  var hit = new THREE.Vector3(), hitPrev = new THREE.Vector3(), hasHit = false;
+  var pull = new THREE.Vector3(), pullAt = new THREE.Vector3(), pullPow = 0;
+
+  function aim(e){
+    var r = canvas.getBoundingClientRect();
+    if(!r.width || !r.height) return false;
+    ndc.x = ((e.clientX - r.left) / r.width) * 2 - 1;
+    ndc.y = -((e.clientY - r.top) / r.height) * 2 + 1;
+    ray.setFromCamera(ndc, camera);
+    var h = ray.intersectObject(mesh, false)[0];
+    if(!h) return false;
+    hitPrev.copy(hasHit ? hit : h.point);
+    hit.copy(h.point);
+    hasHit = true;
+    return true;
+  }
+
+  holder.addEventListener('pointerenter', function(){ hoverWant = 1; });
+  holder.addEventListener('pointerleave', function(){ hoverWant = 0; hasHit = false; });
+  holder.addEventListener('pointermove', function(e){
+    if(!aim(e)) return;
+    hoverWant = 1;
+    pullAt.copy(hit);
+    pull.subVectors(hit, hitPrev).multiplyScalar(26);
+    pull.z += 0.5;                         // немного на себя, чтобы пошла волна
+    pullPow = Math.min(1, pullPow + 0.5);
+  }, {passive: true});
+  // телефон: касание даёт один заметный толчок в точке тапа
+  holder.addEventListener('pointerdown', function(e){
+    if(!aim(e)) return;
+    pullAt.copy(hit);
+    pull.set((Math.random() - .5) * .5, (Math.random() - .5) * .5, 1.9);
+    pullPow = 1;
+    hoverWant = 1;
+    setTimeout(function(){ hoverWant = 0; }, 1500);
+  }, {passive: true});
+
+  /* ---------- шаг ---------- */
+  var t = 0;
+  function step(dt){
+    t += dt;
+    hover += (hoverWant - hover) * 0.07;
+    var gust = 0.55 + hover * 1.5;          // под курсором ветер крепчает
+    var i3, wx, wy, wz;
+    for(var i = 0; i < N; i++){
+      if(pinned[i]) continue;
+      i3 = i * 3;
+      var px = pos[i3], py = pos[i3+1];
+      // две волны разной частоты — движение не читается как повтор
+      wz = (Math.sin(px * 3.1 + t * 1.25) * 0.55 + Math.sin(py * 2.2 - t * 0.83) * 0.45) * 0.0016 * gust;
+      wx = Math.sin(py * 1.7 + t * 0.95) * 0.0009 * gust;
+      wy = -0.0022;                         // тяжесть
+      acc[i3] += wx; acc[i3+1] += wy; acc[i3+2] += wz;
+    }
+    if(pullPow > 0.004){
+      for(var j = 0; j < N; j++){
+        if(pinned[j]) continue;
+        var j3 = j * 3;
+        var dx = pos[j3] - pullAt.x, dy = pos[j3+1] - pullAt.y;
+        var d2 = dx*dx + dy*dy;
+        var f = Math.exp(-d2 * 26) * pullPow * 0.012;
+        if(f < 1e-5) continue;
+        acc[j3] += pull.x * f; acc[j3+1] += pull.y * f; acc[j3+2] += pull.z * f;
+      }
+      pullPow *= 0.9;
+    }
+    // Верле: следующее положение из текущего, прошлого и ускорения
+    var damp = 0.986;
+    for(var k = 0; k < N; k++){
+      if(pinned[k]){ acc[k*3]=acc[k*3+1]=acc[k*3+2]=0; continue; }
+      var k3 = k * 3;
+      for(var c = 0; c < 3; c++){
+        var cur = pos[k3+c];
+        var nxt = cur + (cur - prev[k3+c]) * damp + acc[k3+c];
+        prev[k3+c] = cur; pos[k3+c] = nxt; acc[k3+c] = 0;
+      }
+    }
+    // пружины: несколько проходов, иначе ткань тянется как резина
+    for(var pass = 0; pass < 3; pass++){
+      for(var l = 0; l < LN; l++){
+        var a = links[l*3], b = links[l*3+1], rest = links[l*3+2];
+        var a3 = a*3, b3 = b*3;
+        var ex = pos[b3]-pos[a3], ey = pos[b3+1]-pos[a3+1], ez = pos[b3+2]-pos[a3+2];
+        var dist = Math.sqrt(ex*ex + ey*ey + ez*ez) || 1e-6;
+        var diff = (dist - rest) / dist * 0.5;
+        var mxa = pinned[a] ? 0 : 1, mxb = pinned[b] ? 0 : 1;
+        var tot = mxa + mxb; if(!tot) continue;
+        var sa = mxa / tot, sb = mxb / tot;
+        pos[a3] += ex*diff*sa*2*0.5; pos[a3+1] += ey*diff*sa*2*0.5; pos[a3+2] += ez*diff*sa*2*0.5;
+        pos[b3] -= ex*diff*sb*2*0.5; pos[b3+1] -= ey*diff*sb*2*0.5; pos[b3+2] -= ez*diff*sb*2*0.5;
+      }
+    }
+  }
+
+  /* ---------- кадр ---------- */
+  function resize(){
+    var w = holder.clientWidth, h = holder.clientHeight;
+    if(!w || !h) return;
+    renderer.setSize(w, h, false);
+    camera.aspect = w / h; camera.updateProjectionMatrix();
+  }
+  resize();
+  window.addEventListener('resize', resize);
+
+  var live = true;
+  if(window.IntersectionObserver){
+    new IntersectionObserver(function(es){ live = es[0].isIntersecting; },
+      {rootMargin: '140px'}).observe(holder);
+  }
+
+  var attr = geo.attributes.position, last = performance.now();
+  function frame(now){
+    requestAnimationFrame(frame);
+    var dt = Math.min(0.033, (now - last) / 1000); last = now;
+    if(!live || !dt) return;
+    step(dt);
+    attr.array.set(pos);
+    attr.needsUpdate = true;
+    geo.computeVertexNormals();
+    renderer.render(scene, camera);
+  }
+  requestAnimationFrame(frame);
+})();
 </script>
