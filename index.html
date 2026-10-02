@@ -10,7 +10,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap&subset=cyrillic" rel="stylesheet">
 <link rel="preload" href="fonts/ak.woff2" as="font" type="font/woff2" crossorigin>
-<script src="cases.js?v=021358"></script>
+<script src="cases.js?v=021429"></script>
 <script src="https://cdn.jsdelivr.net/npm/lenis@1.3.21/dist/lenis.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/gsap.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/ScrollTrigger.min.js"></script>
@@ -141,7 +141,14 @@
      встаёт между фразой и плитками, где место есть. */
   #cloth{position:absolute;right:7.4%;top:clamp(96px,12vh,170px);
     width:24%;aspect-ratio:1;z-index:1;touch-action:none;}
-  #cloth canvas{width:100%;height:100%;display:block;}
+  /* Холст в полтора раза больше своей коробки и смещён на четверть в каждую
+     сторону: ткань на размахе выходит за собственный квадрат, и при холсте
+     впритык низ срезался ровно по его границе. Камера отодвинута во столько
+     же раз, так что полотно на экране прежней величины. Событий холст не
+     ловит — иначе его поля перекрыли бы соседний текст; мышь слушает сама
+     коробка, которая осталась на месте. */
+  #cloth canvas{position:absolute;left:-25%;top:-25%;width:150%;height:150%;
+    display:block;pointer-events:none;}
   @media (max-width:900px){
     #cloth{position:relative;right:auto;top:auto;width:auto;aspect-ratio:1;
       margin:clamp(30px,6vh,60px) var(--gm) clamp(10px,2vh,20px);}
@@ -346,7 +353,7 @@
      открытия, и класс его перебить не может. */
   .cw-panel.lifted{top:-4.6vh;}
   .cw-all{position:absolute;left:50%;top:calc(100% + 3.1vh);transform:translateX(-50%);
-    z-index:6;border:0;background:none;cursor:pointer;color:var(--paper);
+    z-index:6;border:0;background:none;cursor:pointer;color:#fff;
     font:600 max(14px,1.05vw)/1 'AK','Helvetica Neue',Arial,sans-serif;letter-spacing:-.03em;
     opacity:0;animation:cwAllIn .5s var(--eo) .3s forwards;white-space:nowrap;}
   @keyframes cwAllIn{from{opacity:0;transform:translate(-50%,10px)}
@@ -370,9 +377,9 @@
     color:#fff;text-shadow:0 1px 14px rgba(0,0,0,.35);}
   .cw-set s{position:absolute;left:0;right:0;bottom:0;height:34%;display:block;
     background:linear-gradient(to bottom,transparent,rgba(0,0,0,.52));}
-  .cc-nav.solo{position:absolute;left:auto;right:26px;top:auto;bottom:26px;
-    width:126px;height:57px;z-index:6;}
-  .cc-nav.solo button{left:auto;right:0;}
+  .cc-nav.solo{position:absolute;left:1202.94px;top:80.16px;right:auto;bottom:auto;
+    width:57.051px;height:57.051px;z-index:6;pointer-events:auto;}
+  .cc-nav.solo button{left:0;right:auto;}
   /* the card and the ribbon live in the same box; the ribbon starts pushed
      away and comes forward as the card recedes, which reads as moving into
      the case rather than as one panel being swapped for another */
@@ -686,10 +693,10 @@
 
 <div id="pre"><div id="preNum">0<span>%</span></div></div>
 
-<div class="corner tl"><span class="sm" data-goo>Илья Иванов</span></div>
+<div class="corner tl"><span class="sm" data-goo data-fade>Илья Иванов</span></div>
 <div class="corner tr">
   <div class="menu-wrap" id="menuWrap">
-    <button class="menu-pill" type="button" id="menuBtn" data-goo aria-expanded="false">Меню</button>
+    <button class="menu-pill" type="button" id="menuBtn" data-goo data-fade aria-expanded="false">Меню</button>
     <div class="menu-list" id="menuList" aria-hidden="true">
       <a class="menu-item" href="#featured" data-to="featured">23&#8209;26</a>
       <a class="menu-item" href="#cases" data-to="cases">Кейсы</a>
@@ -712,14 +719,14 @@
     <div id="spine"></div>
     <div id="spineCap">’26</div>
 
-    <div class="op-note"><span class="sm dim" data-goo>Россия<br>SMM · Дизайн · Фото</span></div>
+    <div class="op-note"><span class="sm dim" data-goo data-fade>Россия<br>SMM · Дизайн · Фото</span></div>
 
     <div class="op-1">
       <h1 class="xl col-r" data-goo>Илья</h1>
       <div class="xl col-r" data-goo>Иванов</div>
     </div>
 
-    <div class="op-role"><span class="sm dim" data-goo>Дизайнер<br>&amp; фотограф</span></div>
+    <div class="op-role"><span class="sm dim" data-goo data-fade>Дизайнер<br>&amp; фотограф</span></div>
 
     <div class="stmt">
       <div class="lg s-1" data-goo>Снимаю,</div>
@@ -794,27 +801,27 @@
     <div class="lg c-d" data-goo>прекрасной идеей.</div>
 
     <div class="socials">
-      <a href="https://t.me/llyaMihailovich" target="_blank" rel="noopener" data-goo>TG</a>
-      <a href="https://www.instagram.com/llyamihailovich" target="_blank" rel="noopener" data-goo>IG</a>
+      <a href="https://t.me/llyaMihailovich" target="_blank" rel="noopener" data-goo data-fade>TG</a>
+      <a href="https://www.instagram.com/llyamihailovich" target="_blank" rel="noopener" data-goo data-fade>IG</a>
     </div>
 
     <div class="close-aside">
       <div>
-        <p class="sm" data-goo style="margin:0 0 6px;">Беру избранные проекты</p>
-        <p class="sm dim" data-goo style="margin:0;">Свободен с ноября</p>
+        <p class="sm" data-goo data-fade style="margin:0 0 6px;">Беру избранные проекты</p>
+        <p class="sm dim" data-goo data-fade style="margin:0;">Свободен с ноября</p>
       </div>
       <div>
-        <p class="sm dim" data-goo style="margin:0 0 6px;">Написать напрямую:</p>
-        <p class="sm" data-goo style="margin:0;"><a href="https://t.me/llyaMihailovich" target="_blank" rel="noopener">@llyaMihailovich</a></p>
+        <p class="sm dim" data-goo data-fade style="margin:0 0 6px;">Написать напрямую:</p>
+        <p class="sm" data-goo data-fade style="margin:0;"><a href="https://t.me/llyaMihailovich" target="_blank" rel="noopener">@llyaMihailovich</a></p>
       </div>
       <div>
-        <p class="sm dim" data-goo style="margin:0 0 6px;">Ещё:</p>
-        <p class="sm" data-goo style="margin:0;"><a href="https://www.instagram.com/llyamihailovich" target="_blank" rel="noopener">Instagram</a></p>
+        <p class="sm dim" data-goo data-fade style="margin:0 0 6px;">Ещё:</p>
+        <p class="sm" data-goo data-fade style="margin:0;"><a href="https://www.instagram.com/llyamihailovich" target="_blank" rel="noopener">Instagram</a></p>
       </div>
     </div>
 
     <div class="tailroom"></div>
-    <span id="buildStamp" style="display:none">BUILD 02.10 13:58</span>
+    <span id="buildStamp" style="display:none">BUILD 02.10 14:29</span>
   </section>
 
 </main>
@@ -1050,7 +1057,10 @@
     el.classList.add('shown');
 
     var fs = fontOf(el);
-    if(fs < GOO.minSize || reduced){
+    // data-fade — подписи по краям: они мелкие, и порог на них читается как
+    // грязь, а не как проявление. Решает признак, а не кегль: кегль зависит
+    // от ширины окна и на большом экране порог переставал срабатывать.
+    if(el.hasAttribute('data-fade') || fs < GOO.minSize || reduced){
       return gsap.fromTo(el, {opacity: 0},
         {opacity: 1, duration: GOO.reveal, ease: EASE.glide, delay: delay || 0});
     }
@@ -1440,6 +1450,10 @@
       '<div class="cc-t cc-year" id="soloYear" style="top:113.9px">' +
         esc(((c.card || {}).year) || '') + '</div>' +
       '<div class="cc-rule"></div>' +
+      '<div class="cc-nav solo">' +
+        '<button class="cc-prev" type="button" aria-label="Назад"><img src="cases/sanek-tpl/arrow.svg" alt=""></button>' +
+        '<button class="cc-next" type="button" aria-label="Дальше"><img src="cases/sanek-tpl/arrow.svg" alt=""></button>' +
+      '</div>' +
     '</div>';
   }
 
@@ -1854,6 +1868,9 @@
               '<s></s><i></i><b>' + esc(st.t) + '</b></button>';
           }).join('') + '</div>' +
         '</div>';
+      // на витрине листать нечего: стрелки ждут, пока откроется набор
+      var navSets = cwScroll.querySelector('.cc-nav.solo');
+      if(navSets) navSets.style.display = 'none';
       fitCard();
       placeSoloYear();
       (function(){
@@ -1870,11 +1887,8 @@
               stage.insertAdjacentHTML('beforeend',
                 '<div class="cw-screen ribbon live solo"><div class="rb-inner">' +
                   '<iframe title="' + esc(st.t) + '" src="' + esc(st.page) + '"></iframe>' +
-                '</div></div>' +
-                '<div class="cc-nav solo">' +
-                  '<button class="cc-prev" type="button" aria-label="Назад"><img src="cases/sanek-tpl/arrow.svg" alt=""></button>' +
-                  '<button class="cc-next" type="button" aria-label="Дальше"><img src="cases/sanek-tpl/arrow.svg" alt=""></button>' +
-                '</div>');
+                '</div></div>');
+              if(navSets) navSets.style.display = '';
               var rib = stage.querySelector('.cw-screen.ribbon.solo');
               gsap.fromTo(rib, {opacity: 0}, {opacity: 1, duration: .45, ease: 'none'});
               wireRibbonOnly();
@@ -1908,10 +1922,6 @@
           '<div class="cw-screen ribbon live solo"><div class="rb-inner">' +
             '<iframe title="' + esc(c.t) + '" src="' + esc(c.page) + '"></iframe>' +
           '</div></div>' +
-          '<div class="cc-nav solo">' +
-            '<button class="cc-prev" type="button" aria-label="Назад"><img src="cases/sanek-tpl/arrow.svg" alt=""></button>' +
-            '<button class="cc-next" type="button" aria-label="Дальше"><img src="cases/sanek-tpl/arrow.svg" alt=""></button>' +
-          '</div>' +
         '</div>';
       fitCard();
       wireRibbonOnly();
@@ -2069,7 +2079,11 @@
        a sliver of the picture ever came into view — so there it is hung above
        the row instead and unrolls upward. */
     function openThumb(row){
-      timg.src = row.dataset.img;
+      var src = row.dataset.img;
+      // без снимка открывать нечего: пустой src — это битая картинка, а на её
+      // месте браузер рисует рамку, которая и оставалась после ухода мыши
+      if(!src){ gsap.set(thumb, {opacity: 0}); return; }
+      timg.src = src;
       var h = thumb.offsetHeight || 160;
       var rowBottom = row.getBoundingClientRect().bottom;
       var up = rowBottom + h + 24 > window.innerHeight;
@@ -2092,7 +2106,7 @@
       host.querySelectorAll('.idx-row').forEach(function(r){ r.classList.toggle('on', r === row); });
       var had = host.__row;
       host.__row = row;
-      if(had) closeThumb(function(){ if(host.__row === row) openThumb(row); });
+      if(had) closeThumb(function(){ if(host.__row) openThumb(host.__row); });
       else openThumb(row);
     });
     host.addEventListener('pointerleave', function(){
@@ -2928,20 +2942,27 @@ import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.m
   // Кадр заметно шире полотна: когда ткань раскачивается, её края выходят за
   // собственный размер, и при впритык подобранной камере она обрезалась о
   // границу контейнера. Запас примерно в полтора раза это снимает.
-  camera.position.set(0, 0, 2.42);
+  var OVER = 1.5;                      // во столько раз холст шире коробки
+  camera.position.set(0, 0, 2.42 * OVER);
 
   // Свет сбоку и сверху: складки читаются только если они затенены. При ровной
   // засветке ткань выглядела плоской фотографией.
-  scene.add(new THREE.AmbientLight(0xffffff, 0.62));
-  var key = new THREE.DirectionalLight(0xffffff, 0.95);
-  key.position.set(-1.1, 1.0, 0.85);
+  // Рассеянного меньше, бокового больше: на референсе залом читается парой —
+  // тень в его глубине и светлая полоса на гребне. При ровной засветке не
+  // видно ни того, ни другого.
+  scene.add(new THREE.AmbientLight(0xffffff, 0.46));
+  var key = new THREE.DirectionalLight(0xffffff, 1.12);
+  key.position.set(-1.25, 0.9, 0.8);
   scene.add(key);
-  var fill = new THREE.DirectionalLight(0xffffff, 0.32);
+  var fill = new THREE.DirectionalLight(0xffffff, 0.3);
   fill.position.set(1.0, -0.4, 1.2);
   scene.add(fill);
 
   var geo = new THREE.PlaneGeometry(W, H, COLS, ROWS);
-  var mat = new THREE.MeshLambertMaterial({transparent: true, side: THREE.DoubleSide});
+  // Phong, а не Lambert: рефлекс на гребне залома даёт только зеркальная
+  // составляющая, у матового материала её нет и ткань читается как бумага.
+  var mat = new THREE.MeshPhongMaterial({transparent: true, side: THREE.DoubleSide,
+    shininess: 24, specular: new THREE.Color(0x3a3a3a)});
   new THREE.TextureLoader().load('cloth-photo.jpg', function(tex){
     tex.colorSpace = THREE.SRGBColorSpace;
     tex.anisotropy = Math.min(4, renderer.capabilities.getMaxAnisotropy());
@@ -2960,18 +2981,12 @@ import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.m
     pos[i*3+1] = prev[i*3+1] = src[i*3+1];
     pos[i*3+2] = prev[i*3+2] = src[i*3+2];
   }
-  /* Подвес в трёх точках: два верхних угла и середина. На целом верхнем ряду
-     полотно висело ровной шторой без единой складки; на двух углах провисало
-     так глубоко, что верх квадрата пустел. Третья точка, опущенная чуть ниже
-     углов, даёт две неглубокие дуги — ткань заполняет квадрат и идёт заломами
-     от каждой точки вниз. */
-  var MID = (NX - 1) >> 1;
-  [0, MID, NX - 1].forEach(function(id){ pinned[id] = 1; });
-  pos[MID*3+1] -= 0.055; prev[MID*3+1] = pos[MID*3+1];
   mesh.position.y = 0.04;
 
   // пружины: соседние узлы, диагонали и через один — последние держат форму,
   // иначе ткань складывается сама в себя
+  // Длины покоя снимаются с нетронутой сетки, до подвеса: именно разница
+  // между ними и подвесом и собирает ткань в складки.
   var links = [];
   function link(a, b){
     var dx = pos[a*3] - pos[b*3], dy = pos[a*3+1] - pos[b*3+1];
@@ -2986,6 +3001,23 @@ import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.m
     if(y < NY - 2) link(id, id + NX * 2);
   }
   var LN = links.length / 3;
+
+  /* Подвес по всему верхнему ряду — так у ткани прямой верхний край. Раньше
+     она висела на трёх точках, и верх уходил двумя провисами: квадрат сверху
+     оказывался выкушен, что и было видно на снимке.
+
+     Складки берутся не от подвеса, а от избытка ткани: верхний ряд сжат по
+     ширине, длины же пружин остались от несжатой сетки — лишняя ткань некуда
+     деть, и она уходит в вертикальные заломы, как у собранной шторы. Лёгкая
+     гофра по глубине задаёт им шаг, иначе сторона залома выбирается случайно
+     и ткань может пойти одной широкой волной. */
+  var GATHER = 0.90;                 // во столько раз подвес уже самой ткани
+  for(var px0 = 0; px0 < NX; px0++){
+    var u = NX > 1 ? px0 / (NX - 1) : 0;
+    pinned[px0] = 1;
+    pos[px0*3]   = prev[px0*3]   = src[px0*3] * GATHER;
+    pos[px0*3+2] = prev[px0*3+2] = Math.sin(u * Math.PI * 4) * 0.05;
+  }
 
   /* ---------- ввод ---------- */
   var ray = new THREE.Raycaster(), ndc = new THREE.Vector2();

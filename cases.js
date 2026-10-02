@@ -7,7 +7,7 @@ window.CASES_DATA = [
   "c": "SMM-стратегия и визуальная концепция бренда уличной одежды",
   "year": "Концепт-проект",
   "role": "Исследование, позиционирование, визуальная концепция, tone of voice, контент-план",
-  "img": "",
+  "img": "cases/globe/flamestar.jpg",
   "gallery": [],
   "about": [
    {
@@ -620,7 +620,7 @@ window.CASES_DATA = [
   "c": "SMM-стратегия и визуальная концепция бренда натуральной парфюмерии",
   "year": "Концепт-проект",
   "role": "Исследование, визуальная концепция, tone of voice, рубрикатор, контент-план",
-  "img": "",
+  "img": "cases/alteya-ribbon/thumb.jpg",
   "gallery": [],
   "about": [
    {
@@ -1360,7 +1360,7 @@ window.CASES_DATA = [
   "c": "Карточки товаров для маркетплейсов",
   "year": "Концепт-проект",
   "role": "Логика карточки, дизайн слайдов",
-  "img": "",
+  "img": "cases/infographics-ribbon/thumb.jpg",
   "gallery": [],
   "card": {
    "year": "2026"
