@@ -10,7 +10,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap&subset=cyrillic" rel="stylesheet">
 <link rel="preload" href="fonts/ak.woff2" as="font" type="font/woff2" crossorigin>
-<script src="cases.js?v=021442"></script>
+<script src="cases.js?v=021455"></script>
 <script src="https://cdn.jsdelivr.net/npm/lenis@1.3.21/dist/lenis.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/gsap.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/ScrollTrigger.min.js"></script>
@@ -139,18 +139,23 @@
      Висит в свободном поле справа от имени, над рядом плиток. На десктопе
      вынесено из потока, чтобы не сдвинуть ни одной строки; на телефоне
      встаёт между фразой и плитками, где место есть. */
-  #cloth{position:absolute;right:7.4%;top:clamp(96px,12vh,170px);
-    width:24%;aspect-ratio:1;z-index:1;touch-action:none;}
+  /* Коробка снята с его разметки: 580 x 675 при окне 1985 x 1145, правый край
+     в 99 px от края вёрстки, верх в 189 px от верха окна. Пропорция держится
+     на aspect-ratio, так что на любой ширине кадр тот же. */
+  #cloth{position:absolute;right:5.02%;top:clamp(120px,16.5vh,230px);
+    width:29.44%;aspect-ratio:580/675;z-index:4;touch-action:none;
+    cursor:grab;-webkit-user-select:none;user-select:none;}
+  #cloth.dragging{cursor:grabbing;}
   /* Холст в полтора раза больше своей коробки и смещён на четверть в каждую
      сторону: ткань на размахе выходит за собственный квадрат, и при холсте
      впритык низ срезался ровно по его границе. Камера отодвинута во столько
      же раз, так что полотно на экране прежней величины. Событий холст не
      ловит — иначе его поля перекрыли бы соседний текст; мышь слушает сама
      коробка, которая осталась на месте. */
-  #cloth canvas{position:absolute;left:-25%;top:-25%;width:150%;height:150%;
+  #cloth canvas{position:absolute;left:-37.5%;top:-37.5%;width:175%;height:175%;
     display:block;pointer-events:none;}
   @media (max-width:900px){
-    #cloth{position:relative;right:auto;top:auto;width:auto;aspect-ratio:1;
+    #cloth{position:relative;right:auto;top:auto;width:auto;aspect-ratio:580/675;
       margin:clamp(30px,6vh,60px) var(--gm) clamp(10px,2vh,20px);}
   }
 
@@ -174,7 +179,9 @@
      column at 35.7vw — which is what gives the reference its stagger. */
   /* kept in the flow, above the name, in the same column: absolute offsets went
      on landing on top of the heading at widths I could not check */
-  .op-note{position:relative;z-index:3;margin-left:var(--col);padding-top:clamp(56px,9vh,110px);}
+  /* Начало текста — по линии, которую он провёл: низ угловой подписи, 44 px
+     от верха окна при 1145 его высоты. Отступы внутри блока не тронуты. */
+  .op-note{position:relative;z-index:3;margin-left:var(--col);padding-top:clamp(30px,4.02vh,60px);}
   .op-1{position:relative;z-index:2;margin-top:clamp(18px,3vh,40px);}
   .chapter{position:relative;}
   .op-role{position:relative;z-index:3;margin-left:var(--col);margin-top:clamp(10px,1.8vh,22px);}
@@ -824,7 +831,7 @@
     </div>
 
     <div class="tailroom"></div>
-    <span id="buildStamp" style="display:none">BUILD 02.10 14:42</span>
+    <span id="buildStamp" style="display:none">BUILD 02.10 14:55</span>
   </section>
 
 </main>
@@ -978,7 +985,7 @@
     blur:    0.34,   // peak blur as a share of the font size
     reveal:  0.62,   // seconds for a line to resolve
     swap:    0.90,   // seconds for a word to melt, change and re-form
-    swapBlur:0.15,   // peak blur for a swap, as a share of the font size:
+    swapBlur:0.26,   // peak blur for a swap, as a share of the font size:
                      // low enough that the word stays a visible blob instead
                      // of thinning past the threshold and vanishing, which is
                      // what left a white gap where the word should be
@@ -2185,23 +2192,18 @@
 
     var st = {b: 0};
     function paint(){
-      host.style.filter = st.b < 0.06 ? 'none'
-        : 'blur(' + st.b.toFixed(2) + 'px) contrast(' + (1 + st.b * 1.9).toFixed(2) + ')';
+      host.style.filter = st.b < 0.06 ? 'none' : 'blur(' + st.b.toFixed(2) + 'px)';
     }
 
     (function cycle(){
       var peak = peakNow();
       gsap.timeline({delay: 1.9, onComplete: cycle})
-        .add(function(){
-          host.style.backgroundColor = 'var(--paper)';
-          host.style.willChange = 'filter';
-        })
+        .add(function(){ host.style.willChange = 'filter'; })
         .to(st, {b: peak, duration: GOO.swap * .55, ease: 'power2.in', onUpdate: paint})
         .add(function(){ i = (i + 1) % WORDS.length; txt.textContent = WORDS[i]; })
         .to(st, {b: 0, duration: GOO.swap * .55, ease: 'power2.out', onUpdate: paint})
         .add(function(){
           host.style.filter = 'none';
-          host.style.backgroundColor = 'transparent';
           host.style.willChange = 'auto';
         });
     })();
@@ -2935,8 +2937,14 @@ import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.m
   if(window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
 
   var SMALL = window.matchMedia('(max-width:900px)').matches;
-  var COLS = SMALL ? 16 : 24, ROWS = COLS;   // полотно квадратное
-  var W = 1.0, H = 1.0;
+  var COLS = SMALL ? 16 : 24, ROWS = COLS;
+  var GATHER = 0.90;                 // во столько раз подвес уже самой ткани
+  /* Пропорция берётся с коробки, а не задаётся числом: так разметка и сцена
+     не могут разойтись. Ширина делится на сбор — ткань садится по ширине на
+     те же 10 %, и в коробку она приходит ровно его кадром. */
+  var bx = holder.getBoundingClientRect();
+  var AR = (bx.width && bx.height) ? bx.width / bx.height : 1;
+  var H = 1.0, W = AR;
 
   var renderer = new THREE.WebGLRenderer({canvas: canvas, antialias: !SMALL, alpha: true});
   renderer.setPixelRatio(Math.min(window.devicePixelRatio, SMALL ? 1.5 : 2));
@@ -2945,8 +2953,16 @@ import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.m
   // Кадр заметно шире полотна: когда ткань раскачивается, её края выходят за
   // собственный размер, и при впритык подобранной камере она обрезалась о
   // границу контейнера. Запас примерно в полтора раза это снимает.
-  var OVER = 1.5;                      // во столько раз холст шире коробки
-  camera.position.set(0, 0, 2.42 * OVER);
+  /* Холст шире коробки, камера видит ровно эту ширину — значит полотно
+     занимает свою коробку целиком, а поля вокруг остаются ткани на размах и
+     на рывок рукой. */
+  var OVER = 1.75;
+  var FOV = 32;
+  camera.fov = FOV;
+  camera.position.set(0, 0, OVER / (2 * Math.tan(FOV * Math.PI / 360)));
+  camera.updateProjectionMatrix();
+  // половина видимого кадра в мировых единицах — по ней ограничивается рывок
+  var VIS_H = OVER / 2, VIS_W = VIS_H * AR;
 
   // Свет сбоку и сверху: складки читаются только если они затенены. При ровной
   // засветке ткань выглядела плоской фотографией.
@@ -2984,7 +3000,7 @@ import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.m
     pos[i*3+1] = prev[i*3+1] = src[i*3+1];
     pos[i*3+2] = prev[i*3+2] = src[i*3+2];
   }
-  mesh.position.y = 0.04;
+  mesh.position.y = 0;
 
   // пружины: соседние узлы, диагонали и через один — последние держат форму,
   // иначе ткань складывается сама в себя
@@ -3014,7 +3030,6 @@ import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.m
      деть, и она уходит в вертикальные заломы, как у собранной шторы. Лёгкая
      гофра по глубине задаёт им шаг, иначе сторона залома выбирается случайно
      и ткань может пойти одной широкой волной. */
-  var GATHER = 0.90;                 // во столько раз подвес уже самой ткани
   for(var px0 = 0; px0 < NX; px0++){
     var u = NX > 1 ? px0 / (NX - 1) : 0;
     pinned[px0] = 1;
@@ -3042,9 +3057,49 @@ import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.m
     return true;
   }
 
+  /* ---------- рука ----------
+     Зажатая кнопка берёт ближайший свободный узел и ведёт его за курсором.
+     Узел на время становится точкой подвеса, остальная ткань тянется за ним
+     по связям — поэтому полотно идёт складками в сторону руки, а не сдвигается
+     целиком. Отпускание возвращает узел в расчёт со скоростью последнего
+     движения руки, и ткань доигрывает бросок сама. */
+  var grab = -1, grabPlane = new THREE.Plane(new THREE.Vector3(0, 0, 1), 0);
+  var grabPt = new THREE.Vector3();
+
+  function nearestFree(p){
+    var best = -1, bd = Infinity;
+    for(var i = 0; i < N; i++){
+      if(pinned[i]) continue;
+      var dx = pos[i*3] - p.x, dy = pos[i*3+1] - (p.y - mesh.position.y), dz = pos[i*3+2] - p.z;
+      var d = dx*dx + dy*dy + dz*dz;
+      if(d < bd){ bd = d; best = i; }
+    }
+    return best;
+  }
+
+  function dragTo(e){
+    var r = canvas.getBoundingClientRect();
+    if(!r.width || !r.height) return;
+    ndc.x = ((e.clientX - r.left) / r.width) * 2 - 1;
+    ndc.y = -((e.clientY - r.top) / r.height) * 2 + 1;
+    ray.setFromCamera(ndc, camera);
+    // ведём узел в плоскости той глубины, на которой его взяли
+    grabPlane.constant = -pos[grab*3+2];
+    if(!ray.ray.intersectPlane(grabPlane, grabPt)) return;
+    var g3 = grab * 3;
+    // за кадр уходить нельзя, иначе ткань утаскивается из поля зрения
+    var nx = Math.max(-VIS_W * .96, Math.min(VIS_W * .96, grabPt.x));
+    var ny = Math.max(-VIS_H * .96, Math.min(VIS_H * .96, grabPt.y - mesh.position.y));
+    prev[g3] = pos[g3]; prev[g3+1] = pos[g3+1];
+    pos[g3] = nx; pos[g3+1] = ny;
+  }
+
   holder.addEventListener('pointerenter', function(){ hoverWant = 1; });
-  holder.addEventListener('pointerleave', function(){ hoverWant = 0; hasHit = false; });
+  holder.addEventListener('pointerleave', function(){
+    if(grab < 0){ hoverWant = 0; hasHit = false; }
+  });
   holder.addEventListener('pointermove', function(e){
+    if(grab >= 0){ dragTo(e); return; }
     if(!aim(e)) return;
     hoverWant = 1;
     pullAt.copy(hit);
@@ -3052,15 +3107,29 @@ import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.m
     pull.z += 0.5;                         // немного на себя, чтобы пошла волна
     pullPow = Math.min(1, pullPow + 0.5);
   }, {passive: true});
-  // телефон: касание даёт один заметный толчок в точке тапа
+
   holder.addEventListener('pointerdown', function(e){
+    // иначе браузер начинает выделять текст и тянет его вместо ткани
+    e.preventDefault();
     if(!aim(e)) return;
-    pullAt.copy(hit);
-    pull.set((Math.random() - .5) * .5, (Math.random() - .5) * .5, 1.9);
-    pullPow = 1;
+    grab = nearestFree(hit);
+    if(grab < 0) return;
+    pinned[grab] = 1;
     hoverWant = 1;
-    setTimeout(function(){ hoverWant = 0; }, 1500);
-  }, {passive: true});
+    holder.classList.add('dragging');
+    try{ holder.setPointerCapture(e.pointerId); }catch(err){}
+  });
+
+  function release(){
+    if(grab < 0) return;
+    pinned[grab] = 0;                      // скорость у узла уже есть — бросок
+    grab = -1;
+    holder.classList.remove('dragging');
+    setTimeout(function(){ hoverWant = 0; }, 1200);
+  }
+  holder.addEventListener('pointerup', release);
+  holder.addEventListener('pointercancel', release);
+  window.addEventListener('blur', release);
 
   /* ---------- шаг ---------- */
   var t = 0;
@@ -3076,7 +3145,7 @@ import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.m
       // две волны разной частоты — движение не читается как повтор
       wz = (Math.sin(px * 3.1 + t * 1.25) * 0.55 + Math.sin(py * 2.2 - t * 0.83) * 0.45) * 0.0016 * gust;
       wx = Math.sin(py * 1.7 + t * 0.95) * 0.0009 * gust;
-      wy = -0.0034;                         // тяжесть: чем больше, тем глубже заломы
+      wy = -0.0030;                         // тяжесть: чем больше, тем глубже заломы
       acc[i3] += wx; acc[i3+1] += wy; acc[i3+2] += wz;
     }
     if(pullPow > 0.004){
@@ -3104,7 +3173,7 @@ import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.m
     }
     // пружины: несколько проходов, иначе ткань тянется как резина
     // на двух точках подвеса связям нужно больше проходов, иначе ткань тянется
-    for(var pass = 0; pass < 4; pass++){
+    for(var pass = 0; pass < 6; pass++){
       for(var l = 0; l < LN; l++){
         var a = links[l*3], b = links[l*3+1], rest = links[l*3+2];
         var a3 = a*3, b3 = b*3;
