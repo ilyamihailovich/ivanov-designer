@@ -10,7 +10,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap&subset=cyrillic" rel="stylesheet">
 <link rel="preload" href="fonts/ak.woff2" as="font" type="font/woff2" crossorigin>
-<script src="cases.js?v=030002"></script>
+<script src="cases.js?v=030035"></script>
 <script src="https://cdn.jsdelivr.net/npm/lenis@1.3.21/dist/lenis.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/gsap.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/ScrollTrigger.min.js"></script>
@@ -511,11 +511,17 @@
     .cc-t,.cc-b,.cc-rule,.cc-photo,.cc-copy{position:static;left:auto;top:auto;width:auto;}
     .cc-t{white-space:normal;}
     /* шапка */
-    .cc-name{font-size:27px;line-height:1.05;letter-spacing:-.045em;
-      font-weight:600;padding:26px 68px 0 20px;}
-    .cc-year{font-size:12px;font-weight:500;opacity:.42;letter-spacing:-.02em;
-      padding:7px 20px 0;}
-    .cc-rule{height:1px;margin:15px 20px 0;background:var(--hair);}
+    /* Имя и год — в одну строку слева направо и по общей базовой линии,
+       как на большом экране. Имя крупнее. */
+    .cc{display:grid;grid-template-columns:auto 1fr;align-items:baseline;}
+    .cc-name{grid-column:1;grid-row:1;font-size:34px;line-height:1;
+      letter-spacing:-.05em;font-weight:600;padding:26px 0 0 20px;}
+    .cc-year{grid-column:2;grid-row:1;font-size:13px;font-weight:500;
+      opacity:.42;letter-spacing:-.02em;padding:0 0 0 11px;}
+    .cc-rule{grid-column:1 / -1;grid-row:2;height:1px;margin:14px 20px 0;
+      background:var(--hair);}
+    .cc-copy{grid-column:1 / -1;grid-row:3;}
+    .cc-nav{grid-column:1 / -1;grid-row:4;}
     /* текст кейса: плотнее и с иерархией */
     .cc-copy{padding:0 20px;}
     .cc-h{font-size:13px;font-weight:600;letter-spacing:.02em;opacity:.42;
@@ -527,9 +533,13 @@
     .cc-photo{display:none;}
     /* лента: закрыта, пока не нажата кнопка; раскрывается снизу вверх под
        шапкой и занимает всё окно, не перекрывая имя и год */
+    /* листать можно и пальцем, не только стрелками */
     .cw-screen.ribbon:not(.solo){display:block;position:absolute;left:0;right:0;
-      bottom:0;top:auto;height:0;opacity:1!important;overflow:hidden;
+      bottom:0;top:auto;height:0;opacity:1!important;overflow-x:auto;
+      overflow-y:hidden;-webkit-overflow-scrolling:touch;
       pointer-events:none;transition:height .66s var(--eo);}
+    .cw-screen.ribbon::-webkit-scrollbar{display:none;}
+    .cw-screen.ribbon{scrollbar-width:none;}
     .cw-panel.m-open .cw-screen.ribbon:not(.solo){height:calc(80svh - 108px);
       pointer-events:auto;}
     /* текст уходит в размытие снизу вверх и в прозрачность */
@@ -553,10 +563,10 @@
     .m-page{position:absolute;top:24px;right:16px;z-index:8;display:none;
       gap:7px;}
     .cw-panel.m-open .m-page{display:flex;}
-    .m-page button{width:38px;height:38px;border-radius:50%;border:1px solid var(--hair);
+    .m-page button{width:34px;height:34px;border-radius:50%;border:1px solid var(--hair);
       background:var(--paper);padding:0;display:flex;align-items:center;
       justify-content:center;cursor:pointer;transition:opacity .3s var(--eo);}
-    .m-page img{width:15px;height:15px;display:block;}
+    .m-page img{width:22px;height:22px;display:block;}
     .m-page .m-prev img{transform:rotate(180deg);}
     .m-page .m-prev[hidden]{display:none;}
     /* фотокейс и витрина наборов */
@@ -564,9 +574,9 @@
     .cc.solo-head{padding-bottom:0;}
     .cc-nav.solo{position:absolute;left:auto;right:16px;top:24px;bottom:auto;
       transform:none;width:38px;height:38px;}
-    .cc-nav.solo button{left:0;right:auto;width:38px;height:38px;
+    .cc-nav.solo button{left:0;right:auto;width:34px;height:34px;
       border:1px solid var(--hair);border-radius:50%;background:var(--paper);}
-    .cc-nav.solo img{width:15px;height:15px;}
+    .cc-nav.solo img{width:22px;height:22px;}
     .cw-sets{display:grid!important;grid-template-columns:1fr 1fr;
       gap:3vw;padding:20px var(--gm) 26px!important;}
     .cw-set{height:auto!important;aspect-ratio:624/1789;flex:none!important;}
@@ -841,37 +851,48 @@
     /* ---------- финальный блок по его макету ----------
        Часов и строки «всего лишь» у него нет: на их месте круг с шаром,
        который вращается по прокрутке. Координаты — его, при ширине 375. */
-    .close-mid,.c-c,.m-hide{display:none;}
-    .close{padding:0 0 clamp(40px,8vh,90px);}
-    /* две части строки у него стоят на разных отступах — на телефоне они
-       идут отдельными строками, на большом экране остаются одной */
+    /* ---------- финальный блок ----------
+       Все отметки взяты из фрейма 407:3 и считаны от верха блока (страница
+       5737,9). Высота у него 1189 — поэтому ниже копирайта страница не тянется
+       и «ilyaivanov» стоит внизу, а не выскакивает к середине. */
+    .close-mid,.c-c,.m-hide,.tailroom{display:none;}
+    .close{position:relative;height:1189px;padding:0;}
+    .close > div{position:absolute;margin:0;}
     .c-a,.c-d{margin-left:0;}
     .c-a .p1,.c-a .p2,.c-d .p1,.c-d .p2{display:block;}
-    .c-a{margin-top:11.9px;}
+    .c-a{top:11.9px;left:0;right:0;}
     .c-a .p1{margin-left:21.71%;}
     .c-a .p2{margin-left:9.87%;}
-    .c-b{margin-left:18.4%;}
+    .c-b{top:95.3px;left:18.4%;right:0;}
+    .c-d{top:551.7px;left:0;right:0;}
     .c-d .p1{margin-left:11.07%;}
     .c-d .p2{margin-left:55.6%;}
-    .m-orb{display:block;width:78.69%;aspect-ratio:1;margin:56px auto 72px;
+    .m-orb{display:block;top:195.4px;left:10.67%;width:78.69%;aspect-ratio:1;
       border-radius:50%;overflow:hidden;}
     .m-orb canvas{width:100%;height:100%;display:block;}
     /* у него в макете три кружка с иконками, а не буквы */
-    .socials{margin:0;justify-content:center;gap:12px;}
+    .socials{top:703.8px;left:20.4%;right:auto;margin:0;gap:12px;}
     .socials .lbl{display:none;}
     .socials .ico{display:block;}
     .socials .s-mail{display:flex;}
     .socials a{background:none;color:var(--ink);border-color:var(--hair);}
     /* координаты из фрейма 407:3, не по центру */
-    .m-bye{display:block;margin-top:69px;}
+    .m-bye{display:block;top:838.7px;left:0;right:0;}
     .b-a{margin-left:6.53%;}
-    .b-b{margin-left:17.25%;}
-    .close-aside{margin-top:14px;align-items:flex-start;text-align:left;
-      gap:10px;padding-left:7.73%;}
-    .close-aside .sm{font-size:12px;}
-    .m-mark{display:block;margin-top:46px;padding:0;text-align:center;}
+    .b-b{margin-left:17.25%;margin-top:5.6px;}
+    /* «Открыт для новых проектов.» у него справа на 151, «Написать напрямую:»
+       слева на 29, адрес — плашкой под ним */
+    .close-aside{top:932px;left:0;right:0;display:block;padding:0;}
+    .close-aside > div{position:absolute;}
+    .close-aside > div:nth-of-type(1){left:40.27%;top:0;}
+    .close-aside > div:nth-of-type(2){left:7.73%;top:43px;}
+    .close-aside .sm{font-size:12px;text-align:left;}
+    .close-aside > div:nth-of-type(2) .sm:last-child{font-size:10px;
+      border:1px solid var(--hair);border-radius:11px;padding:3px 12px;
+      display:inline-block;margin-top:5px;}
+    .m-mark{display:block;top:1104.3px;left:0;right:0;text-align:center;}
     .m-mark .lg{font-size:19.47vw;opacity:.4;line-height:1;display:block;}
-    .m-copy{display:block;margin-top:15px;padding:0;text-align:center;}
+    .m-copy{display:block;top:1158.7px;left:0;right:0;text-align:center;}
     .m-copy .sm{font-size:7px;opacity:.6;}
     /* закреплённые словомарка и копирайт на телефоне не нужны: его вариант
        появляется внизу страницы и проявляется, а не висит весь скролл */
@@ -917,7 +938,7 @@
   <!-- ============ OPENING CHAPTER ============ -->
   <section class="chapter" id="chapter">
     <div id="spine"></div>
-    <div id="spineCap">’26</div>
+    <div id="spineCap">©’26</div>
 
     <div class="op-note"><span class="sm dim" data-goo data-fade>Россия<br>SMM · Дизайн · Графика</span></div>
 
@@ -1039,7 +1060,7 @@
     <div class="m-copy"><span class="sm" data-goo data-fade>’26 © All Right Reserved</span></div>
 
     <div class="tailroom"></div>
-    <span id="buildStamp" style="display:none">BUILD 03.10 00:02</span>
+    <span id="buildStamp" style="display:none">BUILD 03.10 00:35</span>
   </section>
 
 </main>
@@ -2066,6 +2087,10 @@
   window.__openCase = openCaseAll;
   function openCase(i){ return openWindowFor(CASES[i]); }
   function openWindowFor(c){
+    // состояние раскрытия принадлежит одному кейсу и не должно переезжать
+    // в следующий — иначе текст открывается уже погашенным
+    var pnl0 = cwEl.querySelector('.cw-panel');
+    if(pnl0) pnl0.classList.remove('m-open');
     if(!c || !cwEl || cwOpen) return;
     cwOpen = true;
     cwLastFocus = document.activeElement;
@@ -2288,6 +2313,8 @@
   function closeCase(){
     if(!cwOpen) return;
     cwOpen = false;
+    var pnlC = cwEl.querySelector('.cw-panel');
+    if(pnlC) pnlC.classList.remove('m-open');
     var veil = cwEl.querySelector('.cw-veil'), panel = cwEl.querySelector('.cw-panel');
     gsap.timeline({onComplete: function(){
         cwEl.classList.remove('on');
@@ -3295,8 +3322,7 @@ import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.m
   /* Пропорция берётся с коробки, а не задаётся числом: так разметка и сцена
      не могут разойтись. Ширина делится на сбор — ткань садится по ширине на
      те же 10 %, и в коробку она приходит ровно его кадром. */
-  var bx = holder.getBoundingClientRect();
-  var AR = (bx.width && bx.height) ? bx.width / bx.height : 1;
+  var AR = 166.2 / 239.1;            // пропорция коробки полотна из его макета
   var H = 1.0, W = AR;
 
   var renderer = new THREE.WebGLRenderer({canvas: canvas, antialias: !SMALL, alpha: true});
@@ -3385,6 +3411,9 @@ import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.m
     if(y < NY - 2) link(id, id + NX * 2);
   }
   var LN = links.length / 3;
+  // тяжесть на узел падает как квадрат плотности сетки — так провис не зависит
+  // от числа рядов, и полотно не вытягивается, когда сетку делают мельче
+  var GRAV = -0.0030 * Math.pow(24 / ROWS, 2);
 
   /* Подвес по всему верхнему ряду — так у ткани прямой верхний край. Раньше
      она висела на трёх точках, и верх уходил двумя провисами: квадрат сверху
@@ -3517,7 +3546,7 @@ import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.m
       // две волны разной частоты — движение не читается как повтор
       wz = (Math.sin(px * 3.1 + t * 1.25) * 0.55 + Math.sin(py * 2.2 - t * 0.83) * 0.45) * 0.0008 * gust;
       wx = Math.sin(py * 1.7 + t * 0.95) * 0.00045 * gust;
-      wy = -0.0030;                         // тяжесть: чем больше, тем глубже заломы
+      wy = GRAV;                             // тяжесть: см. GRAV выше
       acc[i3] += wx; acc[i3+1] += wy; acc[i3+2] += wz;
     }
     if(pullPow > 0.004){
@@ -3562,8 +3591,11 @@ import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.m
   }
 
   /* ---------- кадр ---------- */
+  /* Холст больше коробки в OVER раз, и считать его надо по собственному
+     размеру. Раньше сюда шёл размер коробки: буфер выходил 332 x 478 на
+     холст 366 x 526, картинка растягивалась — это и была пикселизация. */
   function resize(){
-    var w = holder.clientWidth, h = holder.clientHeight;
+    var w = holder.clientWidth * OVER, h = holder.clientHeight * OVER;
     if(!w || !h) return;
     renderer.setSize(w, h, false);
     camera.aspect = w / h; camera.updateProjectionMatrix();
@@ -3632,10 +3664,10 @@ import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.m
   for(var rp = 1; rp < REPEAT; rp++) ORBIT = ORBIT.concat(ONCE);
   var n = Math.max(ORBIT.length, 2);
   var golden = Math.PI * (3 - Math.sqrt(5));
-  /* Просвет между плитками задаётся их числом и размером: при 33 плитках шаг
-     по сфере ~0,617, и плитка 0,55 оставляет зазор 0,067 — втрое меньше, чем
-     было. Каждая обложка встаёт на шар трижды, поэтому кадров заметно больше. */
-  var RADIUS = 1.0, TILE = 0.55, REPEAT = 3;
+  /* Плотный шар: кадров много, они небольшие и стоят почти вплотную. При 44
+     плитках шаг по сфере ~0,534, плитка 0,5 оставляет зазор 0,034 — вдвое
+     меньше прежнего. Каждая обложка встаёт на шар четырежды. */
+  var RADIUS = 1.0, TILE = 0.5, REPEAT = 4;
   var loader = new THREE.TextureLoader();
   ORBIT.forEach(function(item, i){
     var y = 1 - (i / (n - 1)) * 2;
