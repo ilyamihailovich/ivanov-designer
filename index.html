@@ -10,7 +10,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap&subset=cyrillic" rel="stylesheet">
 <link rel="preload" href="fonts/ak.woff2" as="font" type="font/woff2" crossorigin>
-<script src="cases.js?v=022003"></script>
+<script src="cases.js?v=022014"></script>
 <script src="https://cdn.jsdelivr.net/npm/lenis@1.3.21/dist/lenis.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/gsap.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/ScrollTrigger.min.js"></script>
@@ -663,7 +663,7 @@
   @media (max-width:900px){
     :root{
       --gm:4.07%; --gg:3.053%; --colw:12.76%;
-      --rule:32.65%;                 /* 4.07 + 2*12.76 + 3.053 */
+      --rule:39.28%;                 /* 147,3 при 375 — по его макету */
       --c2:19.88%; --c3:35.70%;      /* 4.07 + (N-1)*15.813 */
       /* правая колонка начиналась на 51,5% — «продукты» упиралось в край,
          а «и людей.» ломалось на две строки. 40% оставляет им место. */
@@ -734,7 +734,7 @@
     /* ряда плиток и подписи под ним в его мобильном макете нет */
     #tiles,.tiles-note{display:none;}
     .op-note{position:absolute;left:46.32%;top:94.7px;margin:0;padding:0;
-      width:32%;z-index:3;}
+      width:53%;z-index:3;}
     .op-note .sm{text-align:left;}
     .op-1{position:absolute;left:45.33%;top:135.6px;margin:0;width:56%;z-index:2;}
     .op-role{position:absolute;left:0;top:240.4px;margin:0;width:33.6%;z-index:3;}
@@ -912,7 +912,7 @@
     </div>
 
     <div class="tailroom"></div>
-    <span id="buildStamp" style="display:none">BUILD 02.10 20:03</span>
+    <span id="buildStamp" style="display:none">BUILD 02.10 20:14</span>
   </section>
 
 </main>
@@ -3414,52 +3414,65 @@ import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.m
   var camera = new THREE.OrthographicCamera(0, 1, 0, 1, -10, 10);  // чисто плоско
 
   /* ---------- лента ----------
-     Числа — доли ширины окна, снятые с его вектора. BOX_W/BOX_H — коробка
-     ленты, CX/CY — центр спирали внутри неё, остальное описывает, как
-     меняются внутренний радиус и толщина по ходу. */
+     Форма снята с его разметки стрелками: вход широкий сверху-слева за кадром
+     (синяя стрелка), резкое сужение — талия, снова расширение, обход справа
+     вниз, и выход за кадр внизу слева (красная стрелка). Это не круг: слева и
+     справа изгиб сильный, посередине лента пережата.
+
+     Спина задана опорными точками, ширина — своим профилем в тех же точках.
+     Между точками и то и другое идёт по Катмуллу-Рому, поэтому лента гладкая,
+     а править форму можно, двигая точки. Координаты — пиксели при ширине окна
+     375, коробка ленты 520 x 780. */
+  var VW = 375;
   var P = {
-    BOX_W: 1.350, BOX_H: 1.981,          // 506 x 743 при окне 375
-    CX: 0.484, CY: 0.528,                // центр спирали в долях коробки
-    /* Полный оборот: кадр заходит слева за краем кадра, обходит экран и
-       уходит обратно влево. */
-    TH0: 170, TH1: -190,                 // начало и конец ленты, градусы
-    R0: 0.720, R1: 0.640,                // внутренний радиус, доли ширины окна
-    /* Толщина не растёт ровно, а гнётся: у краёв ленты кадр широкий — он
-       близко, к середине сужается — он ушёл вдаль. Ровно так он это описал. */
-    HE: 0.560, HM: 0.165, HP: 1.35,
-    FILL: 0.92,                          // просвет между кадрами втрое меньше
-    SEG: 26                              // полос в сетке — ими кадр и гнётся
+    BOX_W: 520, BOX_H: 780,
+    OX: -100, OY: 540,                   // где коробка стоит относительно блока
+    SP: [[-70,150],[160,250],[330,330],[470,470],[430,640],[240,740],[40,760],[-90,720]],
+    WD: [170, 60, 90, 150, 175, 195, 200, 190],
+    LEN: 0.165,                          // длина кадра вдоль ленты, доля пути
+    GAP: 0.035,                          // просвет между кадрами
+    SEG: 28                              // полос в сетке — ими кадр и гнётся
   };
-  var VW = 375;                          // база, в долях которой сняты числа
 
-  function thAt(t){ return (P.TH0 + (P.TH1 - P.TH0) * t) * Math.PI / 180; }
-  function rAt(t){ return (P.R0 + (P.R1 - P.R0) * t) * VW; }
-  function hAt(t){
-    var k = Math.pow(Math.sin(Math.PI * t), P.HP);
-    return (P.HE - (P.HE - P.HM) * k) * VW;
+  function cr(a, b, c, d, t){            // Катмулл-Ром по одной координате
+    var t2 = t * t, t3 = t2 * t;
+    return 0.5 * ((2*b) + (-a + c)*t + (2*a - 5*b + 4*c - d)*t2 + (-a + 3*b - 3*c + d)*t3);
+  }
+  function at(arr, i){ return arr[Math.max(0, Math.min(arr.length - 1, i))]; }
+
+  // точка спины и её ширина в параметре u (0..1 по всей ленте)
+  function spine(u){
+    var n = P.SP.length - 1;
+    var f = Math.max(0, Math.min(0.9999, u)) * n;
+    var i = Math.floor(f), t = f - i;
+    var p0 = at(P.SP, i-1), p1 = at(P.SP, i), p2 = at(P.SP, i+1), p3 = at(P.SP, i+2);
+    var x = cr(p0[0], p1[0], p2[0], p3[0], t);
+    var y = cr(p0[1], p1[1], p2[1], p3[1], t);
+    var w = cr(at(P.WD, i-1), at(P.WD, i), at(P.WD, i+1), at(P.WD, i+2), t);
+    return [x, y, w];
+  }
+  // нормаль к спине — по ней откладывается ширина, отсюда и изгиб кадра
+  function edge(u){
+    var e = 0.004;
+    var a = spine(Math.max(0, u - e)), b = spine(Math.min(1, u + e));
+    var dx = b[0] - a[0], dy = b[1] - a[1];
+    var L = Math.hypot(dx, dy) || 1;
+    var nx = -dy / L, ny = dx / L;
+    var c = spine(u), h = c[2] / 2;
+    return [c[0] - nx*h, c[1] - ny*h, c[0] + nx*h, c[1] + ny*h];
   }
 
-  // точка внутреннего и внешнего края ленты в её собственных пикселях
-  function edge(t){
-    var th = thAt(t), r = rAt(t), h = hAt(t);
-    var cs = Math.cos(th), sn = Math.sin(th);
-    var cx = P.CX * P.BOX_W * VW, cy = P.CY * P.BOX_H * VW;
-    return [cx + r * cs, cy + r * sn, cx + (r + h) * cs, cy + (r + h) * sn];
-  }
-
+  /* ---------- кадры ---------- */
   var loader = new THREE.TextureLoader();
   var cards = [];
   for(var i = 0; i < N; i++){
     var g = new THREE.BufferGeometry();
     var pos = new Float32Array((P.SEG + 1) * 2 * 3);
-    var uv  = [], idx = [];
-    for(var s = 0; s <= P.SEG; s++){
-      var u = s / P.SEG;
-      uv.push(u, 1, u, 0);
-    }
-    for(var s2 = 0; s2 < P.SEG; s2++){
-      var b = s2 * 2;
-      idx.push(b, b + 1, b + 2, b + 1, b + 3, b + 2);
+    var uv = [], idx = [];
+    for(var s0 = 0; s0 <= P.SEG; s0++){ var u0 = s0 / P.SEG; uv.push(u0, 1, u0, 0); }
+    for(var s1 = 0; s1 < P.SEG; s1++){
+      var b1 = s1 * 2;
+      idx.push(b1, b1 + 1, b1 + 2, b1 + 1, b1 + 3, b1 + 2);
     }
     g.setAttribute('position', new THREE.BufferAttribute(pos, 3));
     g.setAttribute('uv', new THREE.Float32BufferAttribute(uv, 2));
@@ -3469,25 +3482,23 @@ import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.m
     (function(mat, src){
       loader.load(src, function(tex){
         tex.colorSpace = THREE.SRGBColorSpace;
-        tex.anisotropy = Math.min(4, renderer.capabilities.getMaxAnisotropy());
-        mat.map = tex; mat.needsUpdate = true;
-        gsap.to(mat, {opacity: 1, duration: .5, ease: 'none'});
+        tex.anisotropy = Math.min(8, renderer.capabilities.getMaxAnisotropy());
+        mat.map = tex; mat.needsUpdate = true; mat.opacity = 1;
       });
     })(m, covers[i]);
     var mesh = new THREE.Mesh(g, m);
+    mesh.visible = false;
     scene.add(mesh);
     cards.push({mesh: mesh, geo: g, pos: pos});
   }
 
-  /* Кадр натягивается на кусок ленты [t0, t1]: для каждой полосы берутся
-     обе кромки, и картинка размазывается между ними. Это и есть warp. */
-  var STEP = 1 / N;
+  /* Кадр натянут на кусок ленты [t0, t0+LEN]: для каждой полосы берутся обе
+     кромки, и картинка размазывается между ними. Это и есть warp — у талии
+     кадр сжат, на широких местах растянут и развёрнут по касательной. */
   function warp(card, t0){
-    var t1 = t0 + STEP * P.FILL;
-    var p = card.pos, k = 0;
+    var t1 = t0 + P.LEN, p = card.pos, k = 0;
     for(var s = 0; s <= P.SEG; s++){
-      var t = t0 + (t1 - t0) * (s / P.SEG);
-      var e = edge(t);
+      var e = edge(t0 + (t1 - t0) * (s / P.SEG));
       p[k++] = e[0]; p[k++] = e[1]; p[k++] = 0;
       p[k++] = e[2]; p[k++] = e[3]; p[k++] = 0;
     }
@@ -3498,17 +3509,15 @@ import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.m
   function place(){
     var vw = block.offsetWidth;
     if(!vw) return;
-    var w = Math.round(P.BOX_W * vw), h = Math.round(P.BOX_H * vw);
+    var k = vw / VW;                       // всё снято при ширине окна 375
+    var w = Math.round(P.BOX_W * k), h = Math.round(P.BOX_H * k);
     wrap.style.width  = w + 'px';
     wrap.style.height = h + 'px';
-    wrap.style.left   = Math.round(block.offsetLeft + (vw - w) / 2) + 'px';
+    wrap.style.left   = Math.round(block.offsetLeft + P.OX * k) + 'px';
     wrap.style.top    = Math.round(block.offsetTop + block.offsetHeight / 2 - h / 2) + 'px';
     renderer.setSize(w, h, false);
-    // ортографическая камера ровно по коробке ленты, ось Y вниз
-    var sx = P.BOX_W * VW, sy = P.BOX_H * VW;
-    camera.left = 0; camera.right = sx; camera.top = 0; camera.bottom = sy;
+    camera.left = 0; camera.right = P.BOX_W; camera.top = 0; camera.bottom = P.BOX_H;
     camera.updateProjectionMatrix();
-    scene.scale.set(1, 1, 1);
   }
   place();
   window.addEventListener('resize', place);
@@ -3527,13 +3536,18 @@ import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.m
     new IntersectionObserver(function(e){ live = e[0].isIntersecting; },
       {rootMargin: '250px'}).observe(wrap);
   }
+  /* Лента не зациклена. Когда блок только появился, на ней пусто — кадры
+     стоят ещё до начала. Дальше по прокрутке они один за другим заходят
+     сверху слева, проходят ленту и уходят за кадр снизу слева; к концу блока
+     пролетели все. */
+  var PITCH = P.LEN + P.GAP;
+  var TRAVEL = 1 + PITCH * N + P.LEN;
   (function frame(){
     requestAnimationFrame(frame);
     if(!live) return;
     for(var i = 0; i < N; i++){
-      var t0 = (i * STEP + run.v) % 1;
-      if(t0 < 0) t0 += 1;
-      var vis = t0 + STEP * P.FILL <= 1;   // ушёл за конец ленты — не рисуем
+      var t0 = run.v * TRAVEL - PITCH * (N - i);
+      var vis = (t0 + P.LEN > 0) && (t0 < 1);
       cards[i].mesh.visible = vis;
       if(vis) warp(cards[i], t0);
     }
