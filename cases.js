@@ -241,7 +241,7 @@ window.CASES_DATA = [
   "c": "Айдентика, пространство и мерч премиального теннисного клуба",
   "year": "Концепт-проект",
   "role": "Легенда бренда, логотип, пространство, корт, мерч, реклама",
-  "img": "cases/quoters/04.jpg",
+  "img": "cases/idx/quoters.jpg",
   "gallery": [
    "cases/quoters/04.jpg",
    "cases/quoters/01.jpg",
@@ -388,7 +388,7 @@ window.CASES_DATA = [
   "c": "Айдентика и визуальная система эко-маркета фастфуда",
   "year": "Концепт-проект",
   "role": "Платформа бренда, айдентика, упаковка, носители, tone of voice",
-  "img": "cases/sanek/01.jpg",
+  "img": "cases/idx/sanek.jpg",
   "gallery": [
    "cases/sanek/01.jpg",
    "cases/sanek/02.jpg",
@@ -620,7 +620,7 @@ window.CASES_DATA = [
   "c": "SMM-стратегия и визуальная концепция бренда натуральной парфюмерии",
   "year": "Концепт-проект",
   "role": "Исследование, визуальная концепция, tone of voice, рубрикатор, контент-план",
-  "img": "cases/alteya-ribbon/thumb.jpg",
+  "img": "cases/idx/alteya.jpg",
   "gallery": [],
   "about": [
    {
@@ -773,7 +773,7 @@ window.CASES_DATA = [
   "c": "Брендинг гастробара, визуал соцсетей и мобильное приложение",
   "year": "Концепт-проект",
   "role": "Айдентика, логотип, визуал соцсетей, носители, приложение",
-  "img": "cases/blaze/09.jpg",
+  "img": "cases/idx/blaze.jpg",
   "gallery": [
    "cases/blaze/09.jpg",
    "cases/blaze/01.jpg",
@@ -1264,7 +1264,7 @@ window.CASES_DATA = [
   "t": "Невинность",
   "c": "Лайфстайл-фотосессия",
   "role": "Съёмка, свет, ретушь",
-  "img": "cases/innocence/01.jpg",
+  "img": "cases/idx/innocence.jpg",
   "gallery": [
    "cases/innocence/01.jpg",
    "cases/innocence/02.jpg",
@@ -1316,7 +1316,7 @@ window.CASES_DATA = [
   "t": "Сеул, 23:40",
   "c": "Городская и фэшн-съёмка",
   "role": "Съёмка, свет, ретушь",
-  "img": "cases/seoul/01.jpg",
+  "img": "cases/idx/seoul.jpg",
   "gallery": [
    "cases/seoul/01.jpg",
    "cases/seoul/02.jpg",
