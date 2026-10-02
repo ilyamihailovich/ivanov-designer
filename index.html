@@ -10,7 +10,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap&subset=cyrillic" rel="stylesheet">
 <link rel="preload" href="fonts/ak.woff2" as="font" type="font/woff2" crossorigin>
-<script src="cases.js?v=022033"></script>
+<script src="cases.js?v=022048"></script>
 <script src="https://cdn.jsdelivr.net/npm/lenis@1.3.21/dist/lenis.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/gsap.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/ScrollTrigger.min.js"></script>
@@ -158,8 +158,8 @@
      же раз, так что полотно на экране прежней величины. Событий холст не
      ловит — иначе его поля перекрыли бы соседний текст; мышь слушает сама
      коробка, которая осталась на месте. */
-  #cloth canvas{position:absolute;left:-70%;top:-70%;width:240%;height:240%;
-    display:block;pointer-events:none;}
+  /* поля холста ставит сам модуль — чтобы они не разошлись с камерой */
+  #cloth canvas{position:absolute;display:block;pointer-events:none;}
   @media (max-width:900px){
     #cloth{position:relative;right:auto;top:auto;width:auto;aspect-ratio:580/675;
       margin:clamp(30px,6vh,60px) var(--gm) clamp(10px,2vh,20px);}
@@ -297,6 +297,7 @@
   .cc-b{position:absolute;left:96.12px;width:703.539px;}
   .cc-b .lead{font-weight:500;font-size:20px;line-height:.98;letter-spacing:-.01em;
     color:#000;margin:0;}
+  .nav-lbl{display:none;}
   .cc-b .body{font-weight:400;font-size:18px;line-height:1.08;letter-spacing:-.01em;
     color:#6f6f6f;margin:12px 0 0;}
   /* The photograph carries a progressive blur, not a flat one: at the right
@@ -519,14 +520,29 @@
     .cw-screen.ribbon{display:block;opacity:1!important;margin-top:28px;
       height:34svh;pointer-events:auto!important;}
     /* стрелка крупная и лежит на самой полураскрытой ленте */
-    /* стрелка стоит между текстом и лентой, а не поверх текста */
+    /* Внизу карточки — кнопка «Перейти к просмотру» во всю ширину; по ней
+       открывается сама лента. Круглая стрелка на карточке не нужна. */
     .cc-nav{position:relative;left:auto;top:auto;bottom:auto;transform:none;
-      width:72px;height:72px;margin:28px auto 0;z-index:6;}
-    .cc-nav button{width:72px;height:72px;left:0;top:0;
-      background:var(--paper);border-radius:50%;}
+      width:auto;height:auto;margin:26px 0 0;z-index:6;}
+    .cc-nav .cc-next{position:relative;left:auto;top:auto;width:100%;height:52px;
+      border-radius:26px;border:1px solid var(--hair);background:none;
+      display:flex;align-items:center;justify-content:center;gap:10px;}
+    .cc-nav .cc-next img{width:19px;height:19px;}
+    .nav-lbl{display:inline;font:600 14px/1 'AK','Helvetica Neue',Arial,sans-serif;
+      letter-spacing:-.03em;color:var(--ink);}
+    /* стрелки листания ленты — справа и некрупные */
+    .cc-nav.solo{position:absolute;left:auto;right:14px;top:auto;bottom:14px;
+      transform:none;width:46px;height:46px;}
+    .cc-nav.solo button{left:0;right:auto;width:46px;height:46px;}
+    /* текст задачи и решения мельче — иначе не помещается */
+    .cc-b .lead{font-size:14px;line-height:1.2;}
+    .cc-b .body{font-size:12px;line-height:1.32;}
+    .cc-h{font-size:16px;margin-top:20px;}
+    /* крест — за границей плашки сверху и белый, как на большом экране */
+    .cw-x{top:-44px;right:12px;width:30px;height:30px;}
+    .cw-x img{filter:none;}
     .cc-prev{display:none;}          /* верхняя навигация стрелками не нужна */
-    /* крест — внутрь окна: снаружи он уезжал за край экрана */
-    .cw-x{top:12px;right:12px;width:30px;height:30px;}
+    /* крест вынесен выше плашки — см. правило ниже */
     /* фотокейс и витрина наборов: шапка обычной колонкой, лента под ней */
     .cw-screen.ribbon.solo{position:static;top:auto;height:62svh;}
     .cc.solo-head{padding-bottom:0;}
@@ -780,11 +796,12 @@
     .idx-wrap > .lg{font-size:11.45vw;}
     /* ---------- кружок «’26» ----------
        у него это просто подпись под строками, без кружка и рамки */
-    /* кружок с годом остаётся кружком, но стоит ниже строк и не режет их */
-    #spineCap{left:var(--rule);bottom:auto;top:1086px;transform:translateX(-50%);
-      width:34px;height:34px;font-size:9.5px;}
+    /* у него в кадре это не кружок, а подпись «©’26» на 135,8 × 1080,2 */
+    #spineCap{left:36.21%;bottom:auto;top:1080.2px;transform:none;
+      width:auto;height:auto;border:0;background:none;border-radius:0;
+      font-size:10px;font-weight:500;opacity:.5;display:block;}
     /* крест в окне кейса белый — на белом листе телефона его не видно */
-    .cw-x img{filter:invert(1);}
+
     /* витрина наборов инфографики: в потоке, сеткой, иначе высота 100 %
        схлопывалась в ноль и окно открывалось пустым */
     .cw-sets{display:grid!important;grid-template-columns:1fr 1fr;
@@ -814,14 +831,16 @@
     .socials .ico{display:block;}
     .socials .s-mail{display:flex;}
     .socials a{background:none;color:var(--ink);border-color:var(--hair);}
-    .m-bye{display:block;margin-top:88px;text-align:center;}
-    .b-a,.b-b{margin-left:0;text-align:center;}
+    /* координаты из фрейма 407:3, не по центру */
+    .m-bye{display:block;margin-top:69px;}
+    .b-a{margin-left:6.53%;}
+    .b-b{margin-left:17.25%;}
     .close-aside{margin-top:14px;align-items:flex-start;text-align:left;
       gap:10px;padding-left:7.73%;}
     .close-aside .sm{font-size:12px;}
-    .m-mark{display:block;margin-top:66px;padding:0;text-align:center;}
+    .m-mark{display:block;margin-top:46px;padding-left:6.53%;}
     .m-mark .lg{font-size:19.47vw;opacity:.4;line-height:1;display:block;}
-    .m-copy{display:block;margin-top:16px;padding:0;text-align:center;}
+    .m-copy{display:block;margin-top:15px;padding-left:40.27%;}
     .m-copy .sm{font-size:7px;opacity:.6;}
     /* закреплённые словомарка и копирайт на телефоне не нужны: его вариант
        появляется внизу страницы и проявляется, а не висит весь скролл */
@@ -985,7 +1004,7 @@
     <div class="m-copy"><span class="sm" data-goo data-fade>’26 © All Right Reserved</span></div>
 
     <div class="tailroom"></div>
-    <span id="buildStamp" style="display:none">BUILD 02.10 20:33</span>
+    <span id="buildStamp" style="display:none">BUILD 02.10 20:48</span>
   </section>
 
 </main>
@@ -1487,7 +1506,8 @@
       (d.photo ? photoStack(d.photo) : '') +
       (c.page ? '<div class="cc-nav">' +
         '<button class="cc-prev" type="button" data-prev aria-label="Назад"><img src="cases/sanek-tpl/arrow.svg" alt=""></button>' +
-        '<button class="cc-next" type="button" data-next aria-label="Дальше"><img src="cases/sanek-tpl/arrow.svg" alt=""></button>' +
+        '<button class="cc-next" type="button" data-next aria-label="Дальше"><img src="cases/sanek-tpl/arrow.svg" alt="">' +
+          '<span class="nav-lbl">Перейти к просмотру</span></button>' +
       '</div>' : '') +
     '</div>';
   }
@@ -3157,7 +3177,7 @@ import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.m
   if(window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
 
   var SMALL = window.matchMedia('(max-width:900px)').matches;
-  var COLS = SMALL ? 30 : 40, ROWS = COLS;   // мельче сетка — ровнее кромка
+  var COLS = 48, ROWS = COLS;      // мельче сетка — ровнее кромка, без ступеней
   var GATHER = 0.90;                 // во столько раз подвес уже самой ткани
   /* Пропорция берётся с коробки, а не задаётся числом: так разметка и сцена
      не могут разойтись. Ширина делится на сбор — ткань садится по ширине на
@@ -3167,7 +3187,7 @@ import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.m
   var H = 1.0, W = AR;
 
   var renderer = new THREE.WebGLRenderer({canvas: canvas, antialias: !SMALL, alpha: true});
-  renderer.setPixelRatio(Math.min(window.devicePixelRatio, SMALL ? 1.5 : 2));
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
   var scene = new THREE.Scene();
   var camera = new THREE.PerspectiveCamera(32, 1, 0.1, 50);
   // Кадр заметно шире полотна: когда ткань раскачивается, её края выходят за
@@ -3176,7 +3196,17 @@ import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.m
   /* Холст шире коробки, камера видит ровно эту ширину — значит полотно
      занимает свою коробку целиком, а поля вокруг остаются ткани на размах и
      на рывок рукой. */
-  var OVER = 2.4;
+  /* Запас кадра. На телефоне он скромный: при большом холст залезал на
+     строку «Снимаю,», а в его макете полотно её не трогает. Поля задаются
+     отсюда же, чтобы разметка и камера не разошлись. */
+  var OVER = SMALL ? 1.22 : 2.4;
+  (function(){
+    var m = ((OVER - 1) / 2 * 100).toFixed(2);
+    canvas.style.left = '-' + m + '%';
+    canvas.style.top  = '-' + m + '%';
+    canvas.style.width  = (OVER * 100).toFixed(2) + '%';
+    canvas.style.height = (OVER * 100).toFixed(2) + '%';
+  })();
   var FOV = 32;
   camera.fov = FOV;
   camera.position.set(0, 0, OVER / (2 * Math.tan(FOV * Math.PI / 360)));
@@ -3483,9 +3513,11 @@ import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.m
   var group = new THREE.Group();
   scene.add(group);
   var ORBIT = (window.CASES_DATA || []).filter(function(c){ return !!c.globe; });
+  if(DOUBLE) ORBIT = ORBIT.concat(ORBIT);
   var n = Math.max(ORBIT.length, 2);
   var golden = Math.PI * (3 - Math.sqrt(5));
-  var RADIUS = 1.0, TILE = 0.8;
+  var RADIUS = 1.0, TILE = 0.4;   // вдвое мельче — и вдвое больше их на шаре
+  var DOUBLE = true;                // каждая обложка встаёт на шар дважды
   var loader = new THREE.TextureLoader();
   ORBIT.forEach(function(item, i){
     var y = 1 - (i / (n - 1)) * 2;
