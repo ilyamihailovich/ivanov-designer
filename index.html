@@ -10,7 +10,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap&subset=cyrillic" rel="stylesheet">
 <link rel="preload" href="fonts/ak.woff2" as="font" type="font/woff2" crossorigin>
-<script src="cases.js?v=021911"></script>
+<script src="cases.js?v=021939"></script>
 <script src="https://cdn.jsdelivr.net/npm/lenis@1.3.21/dist/lenis.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/gsap.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/ScrollTrigger.min.js"></script>
@@ -152,7 +152,7 @@
      же раз, так что полотно на экране прежней величины. Событий холст не
      ловит — иначе его поля перекрыли бы соседний текст; мышь слушает сама
      коробка, которая осталась на месте. */
-  #cloth canvas{position:absolute;left:-37.5%;top:-37.5%;width:175%;height:175%;
+  #cloth canvas{position:absolute;left:-70%;top:-70%;width:240%;height:240%;
     display:block;pointer-events:none;}
   @media (max-width:900px){
     #cloth{position:relative;right:auto;top:auto;width:auto;aspect-ratio:580/675;
@@ -485,8 +485,48 @@
   .cw-shots img{width:100%;display:block;background:var(--ghost);}
   .cw-shots img.wide{grid-column:1 / -1;}
   @media (max-width:900px){
-    .cw-panel{width:100%;height:100%;}
     .cw-shots{grid-template-columns:1fr;}
+    /* ---------- окно кейса на телефоне ----------
+       Это была та же карточка, что на большом экране, ужатая в 375 px: кегль
+       80 превращался в 18, строки не читались и половина содержимого уезжала
+       за край. Теперь карточка не масштабируется, а раскладывается обычной
+       колонкой в читаемом кегле, а само окно — лист снизу, не весь экран. */
+    .cw{align-items:flex-end;}
+    .cw-panel{width:100%;height:76svh;border-radius:14px 14px 0 0;overflow:hidden;}
+    .cw-scroll.card{padding:0;}
+    .cw-stage{position:static;overflow:visible;}
+    .cw-screen{position:static;}
+    .cc{position:static;width:auto;height:auto;transform:none!important;
+      font-family:inherit;padding:26px var(--gm) 0;}
+    .cc-t,.cc-b,.cc-rule,.cc-photo,.cc-copy{position:static;left:auto;top:auto;width:auto;}
+    .cc-t{white-space:normal;}
+    .cc-name{font-size:max(30px,8vw);line-height:1;letter-spacing:-.04em;}
+    .cc-year{font-size:max(14px,3.8vw);font-weight:500;margin-top:8px;}
+    .cc-rule{height:1px;margin:16px 0 4px;}
+    .cc-h{font-size:max(18px,4.9vw);margin-top:26px;}
+    .cc-b{margin-top:10px;}
+    .cc-b .lead{font-size:max(15px,4.1vw);line-height:1.18;}
+    .cc-b .body{font-size:max(13.5px,3.6vw);line-height:1.3;margin-top:8px;}
+    /* полураскрытая лента: во всю ширину, размытая, с крупной стрелкой */
+    .cc-photo{margin:30px calc(-1 * var(--gm)) 0;height:30svh;width:auto;}
+    /* стрелка крупная и лежит на самой полураскрытой ленте */
+    .cc-nav{position:relative;left:auto;top:auto;bottom:auto;transform:none;
+      width:72px;height:72px;margin:-58px auto 26px;z-index:6;}
+    .cc-nav button{width:72px;height:72px;left:0;top:0;
+      background:var(--paper);border-radius:50%;}
+    .cc-prev{display:none;}          /* верхняя навигация стрелками не нужна */
+    /* крест — внутрь окна: снаружи он уезжал за край экрана */
+    .cw-x{top:12px;right:12px;width:30px;height:30px;}
+    /* фотокейс и витрина наборов: шапка обычной колонкой, лента под ней */
+    .cw-screen.ribbon.solo{position:static;top:auto;height:62svh;}
+    .cc.solo-head{padding-bottom:0;}
+    .cc-nav.solo{position:absolute;left:50%;right:auto;top:auto;bottom:4svh;
+      transform:translateX(-50%);width:72px;height:72px;}
+    .cc-nav.solo button{left:0;right:auto;width:72px;height:72px;}
+    .cw-sets{position:static;padding:18px var(--gm) 24px;gap:3vw;}
+    /* окно — лист снизу, значит кнопка ко всем кейсам встаёт НАД ним */
+    .cw-all{top:auto;bottom:calc(100% + 2.4svh);font-size:max(14px,3.8vw);}
+    .cw-panel.lifted{top:auto;}
   }
   .tiles-row{display:contents;}
   .tile{aspect-ratio:1;overflow:hidden;background:var(--ghost);}
@@ -836,7 +876,7 @@
     </div>
 
     <div class="tailroom"></div>
-    <span id="buildStamp" style="display:none">BUILD 02.10 19:11</span>
+    <span id="buildStamp" style="display:none">BUILD 02.10 19:39</span>
   </section>
 
 </main>
@@ -1568,6 +1608,14 @@
       if(at === to) return;
       at = to;
       var fwd = to === 'ribbon';
+      if(MOBILE){
+        ribS.classList.add('live');
+        gsap.set(ribS, {clearProps: 'all', opacity: fwd ? 1 : 0,
+                        pointerEvents: fwd ? 'auto' : 'none'});
+        if(fwd) fitRibbon();
+        cwScroll.scrollTo({top: fwd ? ribS.offsetTop - 8 : 0, behavior: 'smooth'});
+        return;
+      }
       var b = boxes();
       var cc = cardS.querySelector('.cc');
       var name = cc.querySelector('.cc-name'),
@@ -2494,9 +2542,13 @@
     list.forEach(function(c){
       var b = document.createElement('button');
       b.type = 'button';
-      b.innerHTML = '<img loading="lazy" src="' + esc(c.globe) + '" alt="">' +
-                    '<b>' + esc(c.t) + '</b>';
-      b.addEventListener('click', function(){ openWindowFor(c); });
+      b.innerHTML = '<img loading="lazy" src="' + esc(c.globe) + '" alt="">';
+      // ---- 9. кейс с ленты открывается так же, как с шара: окно приподнято,
+      //         под ним кнопка ко всем кейсам
+      b.addEventListener('click', function(){
+        window.__fromGlobe = true;
+        openWindowFor(c);
+      });
       track.appendChild(b);
     });
     rail.appendChild(track);
@@ -2516,6 +2568,16 @@
     gsap.set(B, {y: function(){ return  off(); }});
     gsap.set(link, {opacity: 0});
     gsap.set(rule, {width: 0});
+
+    // тёмная тема держится, пока блок закреплён, — ровно как у шара
+    var rootEl = document.documentElement;
+    ScrollTrigger.create({trigger: sec, start: 'top top', end: 'bottom bottom',
+      scrub: true, invalidateOnRefresh: true,
+      onUpdate: function(self){
+        rootEl.classList.toggle('is-dark', self.progress > 0.04 && self.progress < 0.93);
+      },
+      onLeave: function(){ rootEl.classList.remove('is-dark'); },
+      onLeaveBack: function(){ rootEl.classList.remove('is-dark'); }});
 
     gsap.timeline({scrollTrigger: {trigger: sec, start: 'top top',
         end: 'bottom bottom', scrub: .35, invalidateOnRefresh: true,
@@ -2997,7 +3059,7 @@ import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.m
   /* Холст шире коробки, камера видит ровно эту ширину — значит полотно
      занимает свою коробку целиком, а поля вокруг остаются ткани на размах и
      на рывок рукой. */
-  var OVER = 1.75;
+  var OVER = 2.4;
   var FOV = 32;
   camera.fov = FOV;
   camera.position.set(0, 0, OVER / (2 * Math.tan(FOV * Math.PI / 360)));
@@ -3075,7 +3137,12 @@ import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.m
     var u = NX > 1 ? px0 / (NX - 1) : 0;
     pinned[px0] = 1;
     pos[px0*3]   = prev[px0*3]   = src[px0*3] * GATHER;
-    pos[px0*3+2] = prev[px0*3+2] = Math.sin(u * Math.PI * 4) * 0.05;
+    pos[px0*3+2] = prev[px0*3+2] = 0;        // верхний край строго прямой
+    /* Гофра задаёт шаг складок, но сидела на самом верхнем ряду, и его кромка
+       шла зубцами — это и было видно как «пиксели сверху». Сдвинута на ряд
+       ниже: складки те же, а верх ровный. */
+    var p1 = px0 + NX;
+    pos[p1*3+2] = prev[p1*3+2] = Math.sin(u * Math.PI * 4) * 0.05;
   }
 
   /* ---------- ввод ---------- */
@@ -3179,7 +3246,7 @@ import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.m
     hover += (hoverWant - hover) * 0.07;
     // Под курсором ветер крепчал втрое — вдвое спокойнее; рывок рукой
     // живёт отдельно и не трогается.
-    var gust = 0.55 + hover * 0.75;
+    var gust = 0.28 + hover * 0.38;
     var i3, wx, wy, wz;
     for(var i = 0; i < N; i++){
       if(pinned[i]) continue;
@@ -3290,6 +3357,8 @@ import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.m
   if(!wrap || !canvas || !block) return;
   if(window.matchMedia('(prefers-reduced-motion: reduce)').matches){ wrap.remove(); return; }
   if(!window.gsap || !window.ScrollTrigger){ wrap.remove(); return; }
+  // колесо — часть мобильной версии; на большом экране его нет
+  if(!window.matchMedia('(max-width:900px)').matches){ wrap.remove(); return; }
 
   var covers = (window.CASES_DATA || []).filter(function(c){ return c.globe; })
                                         .map(function(c){ return c.globe; });
