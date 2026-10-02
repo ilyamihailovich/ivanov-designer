@@ -10,7 +10,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap&subset=cyrillic" rel="stylesheet">
 <link rel="preload" href="fonts/ak.woff2" as="font" type="font/woff2" crossorigin>
-<script src="cases.js?v=030128"></script>
+<script src="cases.js?v=030133"></script>
 <script src="https://cdn.jsdelivr.net/npm/lenis@1.3.21/dist/lenis.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/gsap.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/ScrollTrigger.min.js"></script>
@@ -179,7 +179,7 @@
      в 99 px от края вёрстки, верх в 189 px от верха окна. Пропорция держится
      на aspect-ratio, так что на любой ширине кадр тот же. */
   #cloth{position:absolute;right:5.02%;top:clamp(120px,16.5vh,230px);
-    width:29.44%;aspect-ratio:580/675;z-index:4;touch-action:none;
+    width:29.44%;aspect-ratio:166.2/195.5;z-index:4;touch-action:none;
     cursor:grab;-webkit-user-select:none;user-select:none;}
   #cloth.dragging{cursor:grabbing;}
   /* Холст в полтора раза больше своей коробки и смещён на четверть в каждую
@@ -833,7 +833,7 @@
     .op-role{position:absolute;left:14.93%;top:240.4px;margin:0;width:18.67%;z-index:3;}
     .op-role .sm{text-align:right;display:block;}
     #cloth{position:absolute;left:45.33%;right:auto;top:240.4px;
-      width:44.32%;aspect-ratio:166.2/239.1;margin:0;}
+      width:44.32%;aspect-ratio:166.2/195.5;margin:0;}
     /* Строки заявления стоят абсолютно на его отметках. В потоке последние
        три уезжали вниз на 3,6–4,3: у строки со сменяющимся словом своя
        высота строки, и она накапливалась. */
@@ -1116,7 +1116,7 @@
     <div class="m-copy"><span class="sm" data-goo data-fade>’26 © All Right Reserved</span></div>
 
     <div class="tailroom"></div>
-    <span id="buildStamp" style="display:none">BUILD 03.10 01:28</span>
+    <span id="buildStamp" style="display:none">BUILD 03.10 01:33</span>
   </section>
 
 </main>
@@ -3445,7 +3445,7 @@ import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.m
   /* Пропорция берётся с коробки, а не задаётся числом: так разметка и сцена
      не могут разойтись. Ширина делится на сбор — ткань садится по ширине на
      те же 10 %, и в коробку она приходит ровно его кадром. */
-  var AR = 166.2 / 239.1;            // пропорция коробки полотна из его макета
+  var AR = 166.2 / 195.5;            // полотно короче, ближе к квадрату
   var H = 1.0, W = AR;
 
   var renderer = new THREE.WebGLRenderer({canvas: canvas, antialias: !SMALL, alpha: true});
@@ -3716,10 +3716,14 @@ import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.m
     /* Жёсткий предел по высоте. Сколько ни подбирай тяжесть и плотность сетки,
        ткань всё равно вытягивалась — теперь ни один узел не может опуститься
        ниже своей коробки, и полотно не бывает длиннее её никогда. */
-    var LOW = -H / 2;
-    for(var q = 0; q < N; q++){
-      var q3 = q * 3 + 1;
-      if(pos[q3] < LOW){ pos[q3] = LOW; prev[q3] = LOW; }
+    /* Предел держит полотно в коробке, пока его не трогают. Под рукой он
+       снимается — тянуть вниз и закрывать слова можно, он просил именно так. */
+    if(grab < 0 && pullPow < 0.02){
+      var LOW = -H / 2;
+      for(var q = 0; q < N; q++){
+        var q3 = q * 3 + 1;
+        if(pos[q3] < LOW){ pos[q3] = LOW; prev[q3] = LOW; }
+      }
     }
   }
 
