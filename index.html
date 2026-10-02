@@ -10,7 +10,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap&subset=cyrillic" rel="stylesheet">
 <link rel="preload" href="fonts/ak.woff2" as="font" type="font/woff2" crossorigin>
-<script src="cases.js?v=021339"></script>
+<script src="cases.js?v=021358"></script>
 <script src="https://cdn.jsdelivr.net/npm/lenis@1.3.21/dist/lenis.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/gsap.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/ScrollTrigger.min.js"></script>
@@ -139,11 +139,11 @@
      Висит в свободном поле справа от имени, над рядом плиток. На десктопе
      вынесено из потока, чтобы не сдвинуть ни одной строки; на телефоне
      встаёт между фразой и плитками, где место есть. */
-  #cloth{position:absolute;right:var(--gm);top:clamp(96px,12vh,170px);
-    width:21.5%;aspect-ratio:.63;z-index:1;touch-action:none;}
+  #cloth{position:absolute;right:7.4%;top:clamp(96px,12vh,170px);
+    width:24%;aspect-ratio:1;z-index:1;touch-action:none;}
   #cloth canvas{width:100%;height:100%;display:block;}
   @media (max-width:900px){
-    #cloth{position:relative;right:auto;top:auto;width:auto;aspect-ratio:.78;
+    #cloth{position:relative;right:auto;top:auto;width:auto;aspect-ratio:1;
       margin:clamp(30px,6vh,60px) var(--gm) clamp(10px,2vh,20px);}
   }
 
@@ -814,7 +814,7 @@
     </div>
 
     <div class="tailroom"></div>
-    <span id="buildStamp" style="display:none">BUILD 02.10 13:39</span>
+    <span id="buildStamp" style="display:none">BUILD 02.10 13:58</span>
   </section>
 
 </main>
@@ -1771,6 +1771,10 @@
   }
 
   function openCaseAll(i){ return openWindowFor((window.__ALL_CASES || [])[i]); }
+  /* Шар живёт в отдельном module-скрипте со своей областью видимости и до
+     функций этого замыкания не дотягивается — клик по плитке падал с
+     ReferenceError и кейс не открывался. Выношу наружу явно. */
+  window.__openCase = openCaseAll;
   function openCase(i){ return openWindowFor(CASES[i]); }
   function openWindowFor(c){
     if(!c || !cwEl || cwOpen) return;
@@ -2815,16 +2819,23 @@
     canvas.addEventListener('pointerleave', function(){
       hot = null; tiles.forEach(function(t){ t.want = 1; });
     });
-    canvas.addEventListener('pointerdown', function(e){ downAt = {x:e.clientX, y:e.clientY}; });
+    /* Плитка запоминается в момент нажатия, а не отпускания: шар всё время
+       медленно крутится, и за время клика цель успевает уехать из-под курсора —
+       повторный поиск на pointerup попадал в пустоту, и кейс не открывался. */
+    var downHit = null;
+    canvas.addEventListener('pointerdown', function(e){
+      downAt = {x:e.clientX, y:e.clientY};
+      downHit = pick(e);
+    });
     canvas.addEventListener('pointerup', function(e){
       if(!downAt) return;
       var moved = Math.abs(e.clientX - downAt.x) + Math.abs(e.clientY - downAt.y);
       downAt = null;
-      if(moved > 6) return;                 // that was a drag of the globe
-      var m = pick(e);
-      if(m && typeof m.userData.caseIndex === 'number'){
+      var m = downHit; downHit = null;
+      if(moved > 6) return;                 // это было вращение шара
+      if(m && typeof m.userData.caseIndex === 'number' && window.__openCase){
         window.__fromGlobe = true;
-        openCaseAll(m.userData.caseIndex);
+        window.__openCase(m.userData.caseIndex);
       }
     });
 
@@ -2907,20 +2918,27 @@ import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.m
   if(window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
 
   var SMALL = window.matchMedia('(max-width:900px)').matches;
-  var COLS = SMALL ? 14 : 22, ROWS = SMALL ? 18 : 28;
-  var W = 1.0, H = W / 0.63;                 // пропорции совпадают с коробкой
-  var REST_X = W / COLS, REST_Y = H / ROWS;
+  var COLS = SMALL ? 16 : 24, ROWS = COLS;   // полотно квадратное
+  var W = 1.0, H = 1.0;
 
   var renderer = new THREE.WebGLRenderer({canvas: canvas, antialias: !SMALL, alpha: true});
   renderer.setPixelRatio(Math.min(window.devicePixelRatio, SMALL ? 1.5 : 2));
   var scene = new THREE.Scene();
-  var camera = new THREE.PerspectiveCamera(32, 0.63, 0.1, 50);
-  camera.position.set(0, 0, 3.05);
+  var camera = new THREE.PerspectiveCamera(32, 1, 0.1, 50);
+  // Кадр заметно шире полотна: когда ткань раскачивается, её края выходят за
+  // собственный размер, и при впритык подобранной камере она обрезалась о
+  // границу контейнера. Запас примерно в полтора раза это снимает.
+  camera.position.set(0, 0, 2.42);
 
-  scene.add(new THREE.AmbientLight(0xffffff, 0.86));
-  var key = new THREE.DirectionalLight(0xffffff, 0.72);
-  key.position.set(-0.6, 0.9, 1.4);
+  // Свет сбоку и сверху: складки читаются только если они затенены. При ровной
+  // засветке ткань выглядела плоской фотографией.
+  scene.add(new THREE.AmbientLight(0xffffff, 0.62));
+  var key = new THREE.DirectionalLight(0xffffff, 0.95);
+  key.position.set(-1.1, 1.0, 0.85);
   scene.add(key);
+  var fill = new THREE.DirectionalLight(0xffffff, 0.32);
+  fill.position.set(1.0, -0.4, 1.2);
+  scene.add(fill);
 
   var geo = new THREE.PlaneGeometry(W, H, COLS, ROWS);
   var mat = new THREE.MeshLambertMaterial({transparent: true, side: THREE.DoubleSide});
@@ -2942,8 +2960,15 @@ import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.m
     pos[i*3+1] = prev[i*3+1] = src[i*3+1];
     pos[i*3+2] = prev[i*3+2] = src[i*3+2];
   }
-  // верхний ряд закреплён — полотно висит, как на прищепках
-  for(var x = 0; x < NX; x++) pinned[x] = 1;
+  /* Подвес в трёх точках: два верхних угла и середина. На целом верхнем ряду
+     полотно висело ровной шторой без единой складки; на двух углах провисало
+     так глубоко, что верх квадрата пустел. Третья точка, опущенная чуть ниже
+     углов, даёт две неглубокие дуги — ткань заполняет квадрат и идёт заломами
+     от каждой точки вниз. */
+  var MID = (NX - 1) >> 1;
+  [0, MID, NX - 1].forEach(function(id){ pinned[id] = 1; });
+  pos[MID*3+1] -= 0.055; prev[MID*3+1] = pos[MID*3+1];
+  mesh.position.y = 0.04;
 
   // пружины: соседние узлы, диагонали и через один — последние держат форму,
   // иначе ткань складывается сама в себя
@@ -3016,7 +3041,7 @@ import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.m
       // две волны разной частоты — движение не читается как повтор
       wz = (Math.sin(px * 3.1 + t * 1.25) * 0.55 + Math.sin(py * 2.2 - t * 0.83) * 0.45) * 0.0016 * gust;
       wx = Math.sin(py * 1.7 + t * 0.95) * 0.0009 * gust;
-      wy = -0.0022;                         // тяжесть
+      wy = -0.0034;                         // тяжесть: чем больше, тем глубже заломы
       acc[i3] += wx; acc[i3+1] += wy; acc[i3+2] += wz;
     }
     if(pullPow > 0.004){
@@ -3043,7 +3068,8 @@ import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.m
       }
     }
     // пружины: несколько проходов, иначе ткань тянется как резина
-    for(var pass = 0; pass < 3; pass++){
+    // на двух точках подвеса связям нужно больше проходов, иначе ткань тянется
+    for(var pass = 0; pass < 4; pass++){
       for(var l = 0; l < LN; l++){
         var a = links[l*3], b = links[l*3+1], rest = links[l*3+2];
         var a3 = a*3, b3 = b*3;
