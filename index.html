@@ -10,7 +10,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap&subset=cyrillic" rel="stylesheet">
 <link rel="preload" href="fonts/ak.woff2" as="font" type="font/woff2" crossorigin>
-<script src="cases.js?v=030103"></script>
+<script src="cases.js?v=030104"></script>
 <script src="https://cdn.jsdelivr.net/npm/lenis@1.3.21/dist/lenis.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/gsap.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/ScrollTrigger.min.js"></script>
@@ -1102,7 +1102,7 @@
     <div class="m-copy"><span class="sm" data-goo data-fade>’26 © All Right Reserved</span></div>
 
     <div class="tailroom"></div>
-    <span id="buildStamp" style="display:none">BUILD 03.10 01:03</span>
+    <span id="buildStamp" style="display:none">BUILD 03.10 01:04</span>
   </section>
 
 </main>
@@ -1370,6 +1370,48 @@
       if(t) tl.add(t, i * GOO.step);
     });
     return tl;
+  }
+
+  /* Повторяющееся проявление. Заголовок уходит обратно в размытие, когда
+     строка уходит вверх за край, и проявляется снова при возврате — он просил
+     именно постоянную анимацию, а не однократную. Порог тот же, что и всюду. */
+  function reGoo(el, show){
+    if(!el) return;
+    var fs = fontOf(el);
+    el.classList.add('shown');
+    gsap.killTweensOf(el);
+    if(el.__fx) el.__fx.kill();
+    if(el.hasAttribute('data-fade') || fs < GOO.minSize || reduced){
+      el.__fx = gsap.to(el, {opacity: show ? 1 : 0, duration: GOO.reveal * .7,
+                             ease: EASE.glide, overwrite: 'auto'});
+      return;
+    }
+    var g = ownFilter(el), peak = fs * GOO.blur;
+    var st = {b: show ? peak : 0};
+    el.style.filter = 'url(#' + g.id + ')';
+    g.blur.setAttribute('stdDeviation', st.b);
+    el.__fx = gsap.timeline()
+      .to(st, {b: show ? 0 : peak, duration: GOO.reveal, ease: EASE.goo,
+               onUpdate: function(){ g.blur.setAttribute('stdDeviation', st.b.toFixed(2)); },
+               onComplete: function(){ if(show) el.style.filter = 'none'; }}, 0)
+      .to(el, {opacity: show ? 1 : 0, duration: GOO.reveal * .8, ease: 'none'}, 0);
+  }
+
+  function armLoop(nodes){
+    [].slice.call(nodes).forEach(function(el, i){
+      if(el.__loop) return;
+      el.__loop = true;
+      el.__done = true;              // снимаем однократный проявитель
+      gsap.set(el, {opacity: 0});
+      el.classList.add('shown');
+      ScrollTrigger.create({
+        trigger: el, start: 'top 88%', end: 'bottom 6%',
+        onEnter:     function(){ reGoo(el, true); },
+        onEnterBack: function(){ reGoo(el, true); },
+        onLeave:     function(){ reGoo(el, false); },
+        onLeaveBack: function(){ reGoo(el, false); }
+      });
+    });
   }
 
   function armGroup(sel, childSel, start){
@@ -3153,6 +3195,10 @@
   function start(){
     spine(); intro(); armReveals(); wordmark(); menu(); socials();
     if(MOBILE) mobileRail(); else { workHead(); themeFlip(); }
+    if(MOBILE){
+      // на телефоне заголовки проявляются каждый раз, когда возвращаешься
+      armLoop(document.querySelectorAll('.idx-wrap > .lg, .close .lg, .m-mark .lg'));
+    }
     ScrollTrigger.refresh();
   }
   if(reduced){
