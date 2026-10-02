@@ -10,7 +10,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap&subset=cyrillic" rel="stylesheet">
 <link rel="preload" href="fonts/ak.woff2" as="font" type="font/woff2" crossorigin>
-<script src="cases.js?v=022356"></script>
+<script src="cases.js?v=030002"></script>
 <script src="https://cdn.jsdelivr.net/npm/lenis@1.3.21/dist/lenis.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/gsap.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/ScrollTrigger.min.js"></script>
@@ -389,6 +389,10 @@
   /* the card and the ribbon live in the same box; the ribbon starts pushed
      away and comes forward as the card recedes, which reads as moving into
      the case rather than as one panel being swapped for another */
+  /* белая пелена, под которой лента переходит с кадра на кадр */
+  .rb-veil{position:absolute;inset:0;background:var(--paper);opacity:0;
+    pointer-events:none;z-index:4;display:block;}
+  .cw-screen.ribbon .rb-inner{will-change:filter;}
   .cw-stage{position:absolute;inset:0;overflow:hidden;}
   .cw-screen{position:absolute;inset:0;}
   /* The ribbon runs from the rule that underlines the case name down to the
@@ -523,10 +527,11 @@
     .cc-photo{display:none;}
     /* лента: закрыта, пока не нажата кнопка; раскрывается снизу вверх под
        шапкой и занимает всё окно, не перекрывая имя и год */
-    .cw-screen.ribbon{display:block;position:absolute;left:0;right:0;bottom:0;
-      top:auto;height:0;opacity:1!important;overflow:hidden;
+    .cw-screen.ribbon:not(.solo){display:block;position:absolute;left:0;right:0;
+      bottom:0;top:auto;height:0;opacity:1!important;overflow:hidden;
       pointer-events:none;transition:height .66s var(--eo);}
-    .cw-panel.m-open .cw-screen.ribbon{height:calc(80svh - 108px);pointer-events:auto;}
+    .cw-panel.m-open .cw-screen.ribbon:not(.solo){height:calc(80svh - 108px);
+      pointer-events:auto;}
     /* текст уходит в размытие снизу вверх и в прозрачность */
     .cc-copy{transition:opacity .4s var(--eo), filter .5s var(--eo),
              -webkit-mask-position .55s var(--eo);
@@ -757,7 +762,9 @@
     .m-rail-track{position:absolute;left:0;top:0;height:100%;display:flex;
       gap:2.4vw;will-change:transform;}
     .m-rail-track button{position:relative;height:100%;aspect-ratio:6/5;
-      flex:0 0 auto;border:0;padding:0;background:none;overflow:hidden;cursor:pointer;}
+      flex:0 0 auto;border:0;padding:0;background:none;overflow:hidden;
+      cursor:pointer;will-change:transform;}
+    .m-rail{overflow:visible;}
     .m-rail-track img{width:100%;height:100%;object-fit:cover;display:block;}
     .m-rail-track b{position:absolute;left:0;right:0;bottom:0;padding:7% 6%;
       font-size:max(11px,2.9vw);font-weight:600;letter-spacing:-.03em;color:#fff;
@@ -1032,7 +1039,7 @@
     <div class="m-copy"><span class="sm" data-goo data-fade>’26 © All Right Reserved</span></div>
 
     <div class="tailroom"></div>
-    <span id="buildStamp" style="display:none">BUILD 02.10 23:56</span>
+    <span id="buildStamp" style="display:none">BUILD 03.10 00:02</span>
   </section>
 
 </main>
@@ -1647,11 +1654,29 @@
       }
       to = Math.min(max, Math.max(0, to));
     }
+    /* Переход между кадрами: лента уходит в размытие и в белое, под этой
+       белизной происходит сам сдвиг, и следующий кадр выходит обратно из
+       белого и размытия. Шаг при этом остаётся прежним — по промежуткам
+       между кадрами, так что ничего не режется. */
     var st = {v: ribS.scrollLeft};
+    var inner = ribS.querySelector('.rb-inner') || ribS;
+    var veil = ribS.__veil;
+    if(!veil){
+      veil = document.createElement('i');
+      veil.className = 'rb-veil';
+      ribS.appendChild(veil);
+      ribS.__veil = veil;
+    }
     gsap.killTweensOf(st);
-    gsap.to(st, {v: to, duration: .75, ease: EASE.rise,
-      onUpdate: function(){ ribS.scrollLeft = st.v; },
-      onComplete: function(){ if(then) then(); }});
+    gsap.killTweensOf([inner, veil]);
+    var FADE = .3;
+    gsap.timeline({onComplete: function(){ if(then) then(); }})
+      .to(inner, {filter: 'blur(13px)', duration: FADE, ease: 'power2.in'}, 0)
+      .to(veil,  {opacity: 1, duration: FADE, ease: 'power2.in'}, 0)
+      .to(st, {v: to, duration: .5, ease: EASE.rise,
+               onUpdate: function(){ ribS.scrollLeft = st.v; }}, FADE * .72)
+      .to(inner, {filter: 'blur(0px)', duration: .42, ease: 'power2.out'}, FADE + .18)
+      .to(veil,  {opacity: 0, duration: .42, ease: 'power2.out'}, FADE + .18);
   }
 
   /* Шапка открытого кейса — имя, год и линейка, в тех же проектных точках,
@@ -2765,6 +2790,33 @@
       },
       onLeave: function(){ rootEl.classList.remove('is-dark'); },
       onLeaveBack: function(){ rootEl.classList.remove('is-dark'); }});
+
+    /* Ворп на вылете: кадр, проходящий середину экрана, пережимается —
+       там у ленты талия, — а к левому и правому краю разворачивается и
+       растёт. Считается по положению самой плитки, поэтому форма верна в
+       любой точке пути. */
+    var liveWarp = true;
+    if(window.IntersectionObserver){
+      new IntersectionObserver(function(e){ liveWarp = e[0].isIntersecting; },
+        {rootMargin: '200px'}).observe(rail);
+    }
+    (function warpFrame(){
+      requestAnimationFrame(warpFrame);
+      if(!liveWarp) return;
+      var W = window.innerWidth, half = W / 2;
+      for(var i = 0; i < track.children.length; i++){
+        var el = track.children[i];
+        var r = el.getBoundingClientRect();
+        if(r.right < -140 || r.left > W + 140){ el.style.transform = ''; continue; }
+        var u = ((r.left + r.width / 2) - half) / half;   // -1 слева, +1 справа
+        if(u < -1.6) u = -1.6; if(u > 1.6) u = 1.6;
+        var a = Math.abs(u);
+        var sy = 0.74 + 0.26 * Math.pow(Math.min(1, a), 1.35);
+        var sx = 0.92 + 0.08 * Math.min(1, a);
+        el.style.transform = 'rotate(' + (u * 4.6).toFixed(2) + 'deg) ' +
+                             'scale(' + sx.toFixed(3) + ',' + sy.toFixed(3) + ')';
+      }
+    })();
 
     gsap.timeline({scrollTrigger: {trigger: sec, start: 'top top',
         end: 'bottom bottom', scrub: .35, invalidateOnRefresh: true,
