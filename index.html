@@ -519,8 +519,9 @@
     .cw-screen.ribbon{display:block;opacity:1!important;margin-top:28px;
       height:34svh;pointer-events:auto!important;}
     /* стрелка крупная и лежит на самой полураскрытой ленте */
+    /* стрелка стоит между текстом и лентой, а не поверх текста */
     .cc-nav{position:relative;left:auto;top:auto;bottom:auto;transform:none;
-      width:72px;height:72px;margin:-58px auto 26px;z-index:6;}
+      width:72px;height:72px;margin:28px auto 0;z-index:6;}
     .cc-nav button{width:72px;height:72px;left:0;top:0;
       background:var(--paper);border-radius:50%;}
     .cc-prev{display:none;}          /* верхняя навигация стрелками не нужна */
