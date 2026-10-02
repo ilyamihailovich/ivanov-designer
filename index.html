@@ -10,7 +10,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap&subset=cyrillic" rel="stylesheet">
 <link rel="preload" href="fonts/ak.woff2" as="font" type="font/woff2" crossorigin>
-<script src="cases.js?v=030104"></script>
+<script src="cases.js?v=030123"></script>
 <script src="https://cdn.jsdelivr.net/npm/lenis@1.3.21/dist/lenis.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/gsap.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/ScrollTrigger.min.js"></script>
@@ -106,7 +106,9 @@
     -webkit-mask-image:linear-gradient(to bottom,#000 32%,transparent 100%);
     mask-image:linear-gradient(to bottom,#000 32%,transparent 100%);
     background:linear-gradient(to bottom,var(--paper) 18%,transparent 100%);}
-  .edge-fade.bot{bottom:0;height:74px;
+  .edge-fade.bot{bottom:0;height:74px;transition:opacity .35s var(--eo);}
+  html.at-bottom .edge-fade.bot{opacity:0;}
+  .edge-fade.bot{
     -webkit-mask-image:linear-gradient(to top,#000 32%,transparent 100%);
     mask-image:linear-gradient(to top,#000 32%,transparent 100%);
     background:linear-gradient(to top,var(--paper) 18%,transparent 100%);}
@@ -130,11 +132,17 @@
   /* Подложка меню: не прямоугольник за каждой кнопкой, а один мягкий овал за
      всеми сразу — фон под ним размывается и к кнопкам уходит в белый. */
   .menu-list::before{content:'';position:absolute;z-index:-1;
-    left:-46px;right:-34px;top:-40px;bottom:-40px;border-radius:50%;
-    backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);
-    background:radial-gradient(60% 55% at 72% 50%,
-      var(--paper) 0%, rgba(255,255,255,.72) 52%, rgba(255,255,255,0) 100%);
+    left:-70px;right:-46px;top:-62px;bottom:-62px;border-radius:50%;
+    backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);
+    background:radial-gradient(58% 52% at 70% 50%,
+      var(--paper) 0%, rgba(255,255,255,.78) 44%, rgba(255,255,255,0) 82%);
+    /* край самого овала тоже растушёван — чёткой границы размытия нет */
+    -webkit-mask-image:radial-gradient(58% 52% at 70% 50%,#000 38%,transparent 86%);
+    mask-image:radial-gradient(58% 52% at 70% 50%,#000 38%,transparent 86%);
     opacity:0;transition:opacity .45s var(--eo);}
+  html.is-dark .menu-list::before{
+    background:radial-gradient(58% 52% at 70% 50%,
+      var(--paper) 0%, rgba(0,0,0,.78) 44%, rgba(0,0,0,0) 82%);}
   .menu-wrap.on .menu-list::before{opacity:1;}
   .menu-item{background:none;color:var(--ink);border:1px solid var(--ink);
     border-radius:999px;padding:10px 22px;font-size:12px;font-weight:600;line-height:1;
@@ -525,6 +533,7 @@
        справа, как на большом экране, и не мешает ни тексту, ни кадрам. */
     .cw{align-items:flex-end;}
     .cw-panel{width:100%;height:80svh;border-radius:16px 16px 0 0;overflow:hidden;}
+    .cw-stage{overflow:hidden!important;}
     .cw-scroll.card{padding:0;overflow:hidden;}
     .cw-stage{position:static;overflow:visible;}
     .cw-screen{position:static;}
@@ -547,10 +556,10 @@
     /* текст кейса: плотнее и с иерархией */
     .cc-copy{padding:0 20px;}
     .cc-h{font-size:13px;font-weight:600;letter-spacing:.02em;opacity:.42;
-      text-transform:uppercase;margin-top:36px;}
+      text-transform:uppercase;margin-top:52px;}
     .cc-b{margin-top:7px;}
-    .cc-b .lead{font-size:15px;line-height:1.14;font-weight:600;letter-spacing:-.02em;}
-    .cc-b .body{font-size:12.5px;line-height:1.42;margin-top:9px;opacity:.56;
+    .cc-b .lead{font-size:15px;line-height:1.06;font-weight:600;letter-spacing:-.025em;}
+    .cc-b .body{font-size:12.5px;line-height:1.26;margin-top:10px;opacity:.56;
       font-weight:400;}
     .cc-photo{display:none;}
     /* лента: закрыта, пока не нажата кнопка; раскрывается снизу вверх под
@@ -605,8 +614,10 @@
     .cw-all{top:auto;bottom:calc(100% + 2.4svh);font-size:max(14px,3.8vw);}
     .cw-panel.lifted{top:auto;}
     /* крест — за границей плашки сверху и белый, как на большом экране */
-    .cw-x{top:-44px;right:14px;width:30px;height:30px;}
-    .cw-x img{filter:none;}
+    /* крест держится внутри окна у верхнего края — за его границей на
+       высоком листе он уходил за верх экрана и пропадал */
+    .cw-x{top:16px;right:16px;width:28px;height:28px;z-index:9;}
+    .cw-x img{filter:invert(1);}
     .cc-prev{display:none;}
   }
   .tiles-row{display:contents;}
@@ -826,10 +837,10 @@
     /* Строки заявления стоят абсолютно на его отметках. В потоке последние
        три уезжали вниз на 3,6–4,3: у строки со сменяющимся словом своя
        высота строки, и она накапливалась. */
-    .chapter{height:1836px;}
+    .chapter{height:1120px;}
     /* линия колонки кончается там же, где у него: 1036 от верха главы */
     #spine{height:1036px!important;}
-    .featured{margin-top:114px;}
+    .featured{margin-top:96px;}
     .stmt{padding:0;height:0;position:static;}
     .stmt > div{position:absolute;margin:0;}
     .stmt .s-1{left:14.48%;top:501px;}
@@ -875,7 +886,8 @@
     /* ---------- кружок «’26» ----------
        у него это просто подпись под строками, без кружка и рамки */
     /* у него в кадре это не кружок, а подпись «©’26» на 135,8 × 1080,2 */
-    #spineCap{left:33.47%;bottom:auto;top:1034.5px;transform:none;
+    /* год стоит под концом линии и по её оси, а не сбоку от неё */
+    #spineCap{left:var(--rule);bottom:auto;top:1044px;transform:translateX(-50%);
       width:auto;height:auto;border:0;background:none;border-radius:0;
       font-size:10px;font-weight:500;opacity:.5;display:block;}
     /* крест в окне кейса белый — на белом листе телефона его не видно */
@@ -1102,7 +1114,7 @@
     <div class="m-copy"><span class="sm" data-goo data-fade>’26 © All Right Reserved</span></div>
 
     <div class="tailroom"></div>
-    <span id="buildStamp" style="display:none">BUILD 03.10 01:04</span>
+    <span id="buildStamp" style="display:none">BUILD 03.10 01:23</span>
   </section>
 
 </main>
@@ -2785,6 +2797,19 @@
      Present from the first screen and parked in the margins for the whole scroll,
      faint. It only leaves the corners at the very end of the document: the join
      happens across the last few hundred pixels and lands exactly at the bottom. */
+  /* У самого низа нижняя кромка перестаёт размывать — там стоит словомарка
+     и копирайт, и мылить их нельзя. */
+  (function(){
+    var root = document.documentElement;
+    function check(){
+      var left = document.body.scrollHeight - window.scrollY - window.innerHeight;
+      root.classList.toggle('at-bottom', left < 170);
+    }
+    window.addEventListener('scroll', check, {passive: true});
+    window.addEventListener('resize', check);
+    check();
+  })();
+
   function wordmark(){
     var wrap = document.getElementById('markWrap');
     if(!wrap) return;
@@ -3672,7 +3697,6 @@ import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.m
       }
     }
     // пружины: несколько проходов, иначе ткань тянется как резина
-    // на двух точках подвеса связям нужно больше проходов, иначе ткань тянется
     for(var pass = 0; pass < 6; pass++){
       for(var l = 0; l < LN; l++){
         var a = links[l*3], b = links[l*3+1], rest = links[l*3+2];
@@ -3686,6 +3710,14 @@ import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.m
         pos[a3] += ex*diff*sa*2*0.5; pos[a3+1] += ey*diff*sa*2*0.5; pos[a3+2] += ez*diff*sa*2*0.5;
         pos[b3] -= ex*diff*sb*2*0.5; pos[b3+1] -= ey*diff*sb*2*0.5; pos[b3+2] -= ez*diff*sb*2*0.5;
       }
+    }
+    /* Жёсткий предел по высоте. Сколько ни подбирай тяжесть и плотность сетки,
+       ткань всё равно вытягивалась — теперь ни один узел не может опуститься
+       ниже своей коробки, и полотно не бывает длиннее её никогда. */
+    var LOW = -H / 2;
+    for(var q = 0; q < N; q++){
+      var q3 = q * 3 + 1;
+      if(pos[q3] < LOW){ pos[q3] = LOW; prev[q3] = LOW; }
     }
   }
 
@@ -3766,7 +3798,9 @@ import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.m
   /* Плотный шар: кадров много, они небольшие и стоят почти вплотную. При 44
      плитках шаг по сфере ~0,534, плитка 0,5 оставляет зазор 0,034 — вдвое
      меньше прежнего. Каждая обложка встаёт на шар четырежды. */
-  var RADIUS = 1.0, TILE = 1.0, REPEAT = 4;   // кадры вдвое крупнее, шар плотный
+  /* Как на большом экране: много мелких квадратов с узкими просветами.
+     88 плиток, шаг по сфере ~0,378, плитка 0,3 — зазор 0,078. */
+  var RADIUS = 1.0, TILE = 0.3, REPEAT = 8;
   var loader = new THREE.TextureLoader();
   ORBIT.forEach(function(item, i){
     var y = 1 - (i / (n - 1)) * 2;
