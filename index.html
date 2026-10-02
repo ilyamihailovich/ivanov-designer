@@ -10,7 +10,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap&subset=cyrillic" rel="stylesheet">
 <link rel="preload" href="fonts/ak.woff2" as="font" type="font/woff2" crossorigin>
-<script src="cases.js?v=022026"></script>
+<script src="cases.js?v=022028"></script>
 <script src="https://cdn.jsdelivr.net/npm/lenis@1.3.21/dist/lenis.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/gsap.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/ScrollTrigger.min.js"></script>
@@ -513,8 +513,11 @@
     .cc-b{margin-top:10px;}
     .cc-b .lead{font-size:max(15px,4.1vw);line-height:1.18;}
     .cc-b .body{font-size:max(13.5px,3.6vw);line-height:1.3;margin-top:8px;}
-    /* полураскрытая лента: во всю ширину, размытая, с крупной стрелкой */
-    .cc-photo{margin:30px calc(-1 * var(--gm)) 0;height:30svh;width:auto;}
+    /* Глухое размытое фото с карточки на телефоне только путало: оно ничего
+       не открывало и не листалось. Его нет — под текстом сразу сама лента. */
+    .cc-photo{display:none;}
+    .cw-screen.ribbon{display:block;opacity:1!important;margin-top:28px;
+      height:34svh;pointer-events:auto!important;}
     /* стрелка крупная и лежит на самой полураскрытой ленте */
     .cc-nav{position:relative;left:auto;top:auto;bottom:auto;transform:none;
       width:72px;height:72px;margin:-58px auto 26px;z-index:6;}
@@ -541,12 +544,6 @@
   .tile.c7{grid-column:7/8;} .tile.c8{grid-column:8/9;}
 
   .stmt2{position:relative;z-index:2;padding:clamp(60px,14vh,180px) 0 clamp(20px,5vh,60px);}
-  /* Колесо работ. Стоит не внутри блока, а рядом с ним в той же главе и ниже
-     по слоям: строки заявления идут на z-index 1 и 2, колесо на 0 — значит оно
-     проходит за текстом, как на его схеме. Коробка шире и выше самого блока:
-     кадры уходят далеко за его края. */
-  #reelWrap{position:absolute;z-index:0;pointer-events:none;}
-  #reelWrap canvas{width:100%;height:100%;display:block;}
   /* a steady descent to the right, then the last line set under the middle of
      the one above it */
   /* anchored to the reference's own columns: its closing statement puts the
@@ -780,9 +777,9 @@
     .idx-wrap > .lg{font-size:11.45vw;}
     /* ---------- кружок «’26» ----------
        у него это просто подпись под строками, без кружка и рамки */
-    #spineCap{left:36.21%;bottom:auto;top:1080.2px;transform:none;
-      width:auto;height:auto;border:0;background:none;font-size:10px;
-      font-weight:500;opacity:.5;display:block;}
+    /* кружок с годом остаётся кружком, но стоит ниже строк и не режет их */
+    #spineCap{left:var(--rule);bottom:auto;top:1086px;transform:translateX(-50%);
+      width:34px;height:34px;font-size:9.5px;}
     /* крест в окне кейса белый — на белом листе телефона его не видно */
     .cw-x img{filter:invert(1);}
     /* витрина наборов инфографики: в потоке, сеткой, иначе высота 100 %
@@ -809,15 +806,14 @@
       border-radius:50%;overflow:hidden;}
     .m-orb canvas{width:100%;height:100%;display:block;}
     .socials{margin:0 0 0;justify-content:center;gap:12px;}
-    .m-bye{display:block;margin-top:88px;}
-    .b-a{margin-left:6.53%;}
-    .b-b{margin-left:17.25%;}
+    .m-bye{display:block;margin-top:88px;text-align:center;}
+    .b-a,.b-b{margin-left:0;text-align:center;}
     .close-aside{margin-top:14px;align-items:flex-start;text-align:left;
       gap:10px;padding-left:7.73%;}
     .close-aside .sm{font-size:12px;}
-    .m-mark{display:block;margin-top:66px;padding-left:6.53%;}
-    .m-mark .lg{font-size:19.47vw;opacity:.4;line-height:1;}
-    .m-copy{display:block;margin-top:16px;padding-left:40.27%;}
+    .m-mark{display:block;margin-top:66px;padding:0;text-align:center;}
+    .m-mark .lg{font-size:19.47vw;opacity:.4;line-height:1;display:block;}
+    .m-copy{display:block;margin-top:16px;padding:0;text-align:center;}
     .m-copy .sm{font-size:7px;opacity:.6;}
     /* закреплённые словомарка и копирайт на телефоне не нужны: его вариант
        появляется внизу страницы и проявляется, а не висит весь скролл */
@@ -889,7 +885,6 @@
 
     <div class="tiles" id="tiles"></div>
 
-    <div id="reelWrap"><canvas id="reelCanvas"></canvas></div>
     <div class="stmt2">
       <div class="lg t-a" data-goo>любая</div>
       <div class="lg t-b" data-goo>идея</div>
@@ -981,7 +976,7 @@
     <div class="m-copy"><span class="sm" data-goo data-fade>’26 © All Right Reserved</span></div>
 
     <div class="tailroom"></div>
-    <span id="buildStamp" style="display:none">BUILD 02.10 20:26</span>
+    <span id="buildStamp" style="display:none">BUILD 02.10 20:28</span>
   </section>
 
 </main>
@@ -3444,200 +3439,6 @@ import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.m
 </script>
 
 
-<script type="module">
-/* ============================================================
-   КОЛЕСО РАБОТ — WARP
-
-   Форма снята с его вектора в мобильном макете (узел 411:36 на странице
-   «САЙТ — ТЕЛЕФОН»). Это не кольцо в перспективе, а лента-спираль, нарисованная
-   прямо в плоскости экрана: она заходит тонким хвостом сверху, обходит строки
-   «Лучшие идеи заслуживают реализации» по дуге и выходит внизу слева уже
-   широкой. В его координатах при ширине окна 375 лента занимает x от −95 до
-   411 и y от 558 до 1301, центр спирали приходится примерно на середину
-   строк, внутренний радиус идёт от 159 до 239, толщина — от 76 у дальнего
-   конца до 190 у ближнего.
-
-   Деформация — настоящий warp, а не перспектива. Камера ортографическая, то
-   есть никакого схождения нет вовсе. Каждый кадр натянут на сетку из полос:
-   полоса s берёт точку на внутреннем крае ленты и точку на внешнем, а
-   картинка размазывается между ними. Там, где лента широкая, кадр тянется и
-   разъезжается по углам; там, где узкая, он сжимается и читается как ушедший
-   вдаль. Изгиб берётся из самой спирали, поэтому углы кадра честно
-   разворачиваются по касательной, а не скашиваются на глаз.
-
-   Прокрутка гонит кадры по ленте: дошёл до конца — ушёл и зашёл снова с
-   начала.
-   ============================================================ */
-import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js';
-
-(function(){
-  var wrap = document.getElementById('reelWrap');
-  var canvas = document.getElementById('reelCanvas');
-  var block = document.querySelector('.stmt2');
-  if(!wrap || !canvas || !block) return;
-  if(window.matchMedia('(prefers-reduced-motion: reduce)').matches){ wrap.remove(); return; }
-  if(!window.gsap || !window.ScrollTrigger){ wrap.remove(); return; }
-  // колесо — часть мобильной версии; на большом экране его нет
-  if(!window.matchMedia('(max-width:900px)').matches){ wrap.remove(); return; }
-
-  var covers = (window.CASES_DATA || []).filter(function(c){ return c.globe; })
-                                        .map(function(c){ return c.globe; });
-  if(covers.length < 3){ wrap.remove(); return; }
-  var N = covers.length;
-
-  var renderer = new THREE.WebGLRenderer({canvas: canvas, alpha: true, antialias: true});
-  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-  var scene = new THREE.Scene();
-  var camera = new THREE.OrthographicCamera(0, 1, 0, 1, -10, 10);  // чисто плоско
-
-  /* ---------- лента ----------
-     Форма снята с его разметки стрелками: вход широкий сверху-слева за кадром
-     (синяя стрелка), резкое сужение — талия, снова расширение, обход справа
-     вниз, и выход за кадр внизу слева (красная стрелка). Это не круг: слева и
-     справа изгиб сильный, посередине лента пережата.
-
-     Спина задана опорными точками, ширина — своим профилем в тех же точках.
-     Между точками и то и другое идёт по Катмуллу-Рому, поэтому лента гладкая,
-     а править форму можно, двигая точки. Координаты — пиксели при ширине окна
-     375, коробка ленты 520 x 780. */
-  var VW = 375;
-  var P = {
-    BOX_W: 520, BOX_H: 780,
-    OX: -100, OY: 540,                   // где коробка стоит относительно блока
-    SP: [[-70,150],[160,250],[330,330],[470,470],[430,640],[240,740],[40,760],[-90,720]],
-    WD: [170, 60, 90, 150, 175, 195, 200, 190],
-    LEN: 0.165,                          // длина кадра вдоль ленты, доля пути
-    GAP: 0.035,                          // просвет между кадрами
-    SEG: 28                              // полос в сетке — ими кадр и гнётся
-  };
-
-  function cr(a, b, c, d, t){            // Катмулл-Ром по одной координате
-    var t2 = t * t, t3 = t2 * t;
-    return 0.5 * ((2*b) + (-a + c)*t + (2*a - 5*b + 4*c - d)*t2 + (-a + 3*b - 3*c + d)*t3);
-  }
-  function at(arr, i){ return arr[Math.max(0, Math.min(arr.length - 1, i))]; }
-
-  // точка спины и её ширина в параметре u (0..1 по всей ленте)
-  function spine(u){
-    var n = P.SP.length - 1;
-    var f = Math.max(0, Math.min(0.9999, u)) * n;
-    var i = Math.floor(f), t = f - i;
-    var p0 = at(P.SP, i-1), p1 = at(P.SP, i), p2 = at(P.SP, i+1), p3 = at(P.SP, i+2);
-    var x = cr(p0[0], p1[0], p2[0], p3[0], t);
-    var y = cr(p0[1], p1[1], p2[1], p3[1], t);
-    var w = cr(at(P.WD, i-1), at(P.WD, i), at(P.WD, i+1), at(P.WD, i+2), t);
-    return [x, y, w];
-  }
-  // нормаль к спине — по ней откладывается ширина, отсюда и изгиб кадра
-  function edge(u){
-    var e = 0.004;
-    var a = spine(Math.max(0, u - e)), b = spine(Math.min(1, u + e));
-    var dx = b[0] - a[0], dy = b[1] - a[1];
-    var L = Math.hypot(dx, dy) || 1;
-    var nx = -dy / L, ny = dx / L;
-    var c = spine(u), h = c[2] / 2;
-    return [c[0] - nx*h, c[1] - ny*h, c[0] + nx*h, c[1] + ny*h];
-  }
-
-  /* ---------- кадры ---------- */
-  var loader = new THREE.TextureLoader();
-  var cards = [];
-  for(var i = 0; i < N; i++){
-    var g = new THREE.BufferGeometry();
-    var pos = new Float32Array((P.SEG + 1) * 2 * 3);
-    var uv = [], idx = [];
-    for(var s0 = 0; s0 <= P.SEG; s0++){ var u0 = s0 / P.SEG; uv.push(u0, 1, u0, 0); }
-    for(var s1 = 0; s1 < P.SEG; s1++){
-      var b1 = s1 * 2;
-      idx.push(b1, b1 + 1, b1 + 2, b1 + 1, b1 + 3, b1 + 2);
-    }
-    g.setAttribute('position', new THREE.BufferAttribute(pos, 3));
-    g.setAttribute('uv', new THREE.Float32BufferAttribute(uv, 2));
-    g.setIndex(idx);
-    var m = new THREE.MeshBasicMaterial({transparent: true, opacity: 0,
-                                         side: THREE.DoubleSide});
-    (function(mat, src){
-      loader.load(src, function(tex){
-        tex.colorSpace = THREE.SRGBColorSpace;
-        tex.anisotropy = Math.min(8, renderer.capabilities.getMaxAnisotropy());
-        mat.map = tex; mat.needsUpdate = true; mat.opacity = 1;
-      });
-    })(m, covers[i]);
-    var mesh = new THREE.Mesh(g, m);
-    mesh.visible = false;
-    scene.add(mesh);
-    cards.push({mesh: mesh, geo: g, pos: pos});
-  }
-
-  /* Кадр натянут на кусок ленты [t0, t0+LEN]: для каждой полосы берутся обе
-     кромки, и картинка размазывается между ними. Это и есть warp — у талии
-     кадр сжат, на широких местах растянут и развёрнут по касательной. */
-  function warp(card, t0){
-    var t1 = t0 + P.LEN, p = card.pos, k = 0;
-    for(var s = 0; s <= P.SEG; s++){
-      var e = edge(t0 + (t1 - t0) * (s / P.SEG));
-      p[k++] = e[0]; p[k++] = e[1]; p[k++] = 0;
-      p[k++] = e[2]; p[k++] = e[3]; p[k++] = 0;
-    }
-    card.geo.attributes.position.needsUpdate = true;
-  }
-
-  /* ---------- коробка ---------- */
-  function place(){
-    var vw = block.offsetWidth;
-    if(!vw) return;
-    var k = vw / VW;                       // всё снято при ширине окна 375
-    var w = Math.round(P.BOX_W * k), h = Math.round(P.BOX_H * k);
-    wrap.style.width  = w + 'px';
-    wrap.style.height = h + 'px';
-    wrap.style.left   = Math.round(block.offsetLeft + P.OX * k) + 'px';
-    wrap.style.top    = Math.round(block.offsetTop + block.offsetHeight / 2 - h / 2) + 'px';
-    renderer.setSize(w, h, false);
-    camera.left = 0; camera.right = P.BOX_W; camera.top = 0; camera.bottom = P.BOX_H;
-    camera.updateProjectionMatrix();
-  }
-  place();
-  window.addEventListener('resize', place);
-  if(window.ResizeObserver) new ResizeObserver(place).observe(block);
-
-  /* ---------- ход ---------- */
-  var run = {v: 0};
-  gsap.to(run, {
-    v: 1, ease: 'none',
-    scrollTrigger: {trigger: block, start: 'top bottom', end: 'bottom top',
-                    scrub: .4, invalidateOnRefresh: true}
-  });
-
-  var live = true;
-  if(window.IntersectionObserver){
-    new IntersectionObserver(function(e){ live = e[0].isIntersecting; },
-      {rootMargin: '250px'}).observe(wrap);
-  }
-  /* Лента не зациклена. Когда блок только появился, на ней пусто — кадры
-     стоят ещё до начала. Дальше по прокрутке они один за другим заходят
-     сверху слева, проходят ленту и уходят за кадр снизу слева; к концу блока
-     пролетели все. */
-  var PITCH = P.LEN + P.GAP;
-  var TRAVEL = 1 + PITCH * N + P.LEN;
-  (function frame(){
-    requestAnimationFrame(frame);
-    if(!live) return;
-    for(var i = 0; i < N; i++){
-      var t0 = run.v * TRAVEL - PITCH * (N - i);
-      var vis = (t0 + P.LEN > 0) && (t0 < 1);
-      cards[i].mesh.visible = vis;
-      if(vis) warp(cards[i], t0);
-    }
-    renderer.render(scene, camera);
-  })();
-
-  // ручка для подгонки формы: __reel({CX,CY,TH0,TH1,R0,R1,H0,H1,HP,FILL,BOX_W,BOX_H})
-  window.__reel = function(o){
-    if(o){ for(var k in o) if(k in P) P[k] = o[k]; place(); }
-    return JSON.parse(JSON.stringify(P));
-  };
-})();
-</script>
 
 <script type="module">
 /* ============================================================
