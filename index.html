@@ -10,7 +10,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap&subset=cyrillic" rel="stylesheet">
 <link rel="preload" href="fonts/ak.woff2" as="font" type="font/woff2" crossorigin>
-<script src="cases.js?v=022120"></script>
+<script src="cases.js?v=022356"></script>
 <script src="https://cdn.jsdelivr.net/npm/lenis@1.3.21/dist/lenis.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/gsap.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/ScrollTrigger.min.js"></script>
@@ -494,65 +494,83 @@
   @media (max-width:900px){
     .cw-shots{grid-template-columns:1fr;}
     /* ---------- окно кейса на телефоне ----------
-       Это была та же карточка, что на большом экране, ужатая в 375 px: кегль
-       80 превращался в 18, строки не читались и половина содержимого уезжала
-       за край. Теперь карточка не масштабируется, а раскладывается обычной
-       колонкой в читаемом кегле, а само окно — лист снизу, не весь экран. */
+       Лист снизу. Шапка — имя, год и линейка — стоит на месте всегда; ниже
+       либо текст кейса, либо сама лента. Стрелка листания живёт в шапке
+       справа, как на большом экране, и не мешает ни тексту, ни кадрам. */
     .cw{align-items:flex-end;}
-    .cw-panel{width:100%;height:76svh;border-radius:14px 14px 0 0;overflow:hidden;}
-    .cw-scroll.card{padding:0;}
+    .cw-panel{width:100%;height:80svh;border-radius:16px 16px 0 0;overflow:hidden;}
+    .cw-scroll.card{padding:0;overflow:hidden;}
     .cw-stage{position:static;overflow:visible;}
     .cw-screen{position:static;}
     .cc{position:static;width:auto;height:auto;transform:none!important;
-      font-family:inherit;padding:26px var(--gm) 0;}
+      font-family:inherit;padding:0;}
     .cc-t,.cc-b,.cc-rule,.cc-photo,.cc-copy{position:static;left:auto;top:auto;width:auto;}
     .cc-t{white-space:normal;}
-    .cc-name{font-size:max(30px,8vw);line-height:1;letter-spacing:-.04em;}
-    .cc-year{font-size:max(14px,3.8vw);font-weight:500;margin-top:8px;}
-    .cc-rule{height:1px;margin:16px 0 4px;}
-    .cc-h{font-size:max(18px,4.9vw);margin-top:26px;}
-    .cc-b{margin-top:10px;}
-    .cc-b .lead{font-size:max(15px,4.1vw);line-height:1.18;}
-    .cc-b .body{font-size:max(13.5px,3.6vw);line-height:1.3;margin-top:8px;}
-    /* Глухое размытое фото с карточки на телефоне только путало: оно ничего
-       не открывало и не листалось. Его нет — под текстом сразу сама лента. */
+    /* шапка */
+    .cc-name{font-size:27px;line-height:1.05;letter-spacing:-.045em;
+      font-weight:600;padding:26px 68px 0 20px;}
+    .cc-year{font-size:12px;font-weight:500;opacity:.42;letter-spacing:-.02em;
+      padding:7px 20px 0;}
+    .cc-rule{height:1px;margin:15px 20px 0;background:var(--hair);}
+    /* текст кейса: плотнее и с иерархией */
+    .cc-copy{padding:0 20px;}
+    .cc-h{font-size:13px;font-weight:600;letter-spacing:.02em;opacity:.42;
+      text-transform:uppercase;margin-top:22px;}
+    .cc-b{margin-top:7px;}
+    .cc-b .lead{font-size:15px;line-height:1.24;font-weight:600;letter-spacing:-.02em;}
+    .cc-b .body{font-size:12.5px;line-height:1.42;margin-top:9px;opacity:.56;
+      font-weight:400;}
     .cc-photo{display:none;}
-    .cw-screen.ribbon{display:block;opacity:1!important;margin-top:28px;
-      height:34svh;pointer-events:auto!important;}
-    /* стрелка крупная и лежит на самой полураскрытой ленте */
-    /* Внизу карточки — кнопка «Перейти к просмотру» во всю ширину; по ней
-       открывается сама лента. Круглая стрелка на карточке не нужна. */
-    .cc-nav{position:relative;left:auto;top:auto;bottom:auto;transform:none;
-      width:auto;height:auto;margin:26px 0 0;z-index:6;}
-    .cc-nav .cc-next{position:relative;left:auto;top:auto;width:100%;height:52px;
-      border-radius:26px;border:1px solid var(--hair);background:none;
-      display:flex;align-items:center;justify-content:center;gap:10px;}
-    .cc-nav .cc-next img{width:19px;height:19px;}
-    .nav-lbl{display:inline;font:600 14px/1 'AK','Helvetica Neue',Arial,sans-serif;
-      letter-spacing:-.03em;color:var(--ink);}
-    /* стрелки листания ленты — справа и некрупные */
-    .cc-nav.solo{position:absolute;left:auto;right:14px;top:auto;bottom:14px;
-      transform:none;width:46px;height:46px;}
-    .cc-nav.solo button{left:0;right:auto;width:46px;height:46px;}
-    /* текст задачи и решения мельче — иначе не помещается */
-    .cc-b .lead{font-size:14px;line-height:1.2;}
-    .cc-b .body{font-size:12px;line-height:1.32;}
-    .cc-h{font-size:16px;margin-top:20px;}
-    /* крест — за границей плашки сверху и белый, как на большом экране */
-    .cw-x{top:-44px;right:12px;width:30px;height:30px;}
-    .cw-x img{filter:none;}
-    .cc-prev{display:none;}          /* верхняя навигация стрелками не нужна */
-    /* крест вынесен выше плашки — см. правило ниже */
-    /* фотокейс и витрина наборов: шапка обычной колонкой, лента под ней */
+    /* лента: закрыта, пока не нажата кнопка; раскрывается снизу вверх под
+       шапкой и занимает всё окно, не перекрывая имя и год */
+    .cw-screen.ribbon{display:block;position:absolute;left:0;right:0;bottom:0;
+      top:auto;height:0;opacity:1!important;overflow:hidden;
+      pointer-events:none;transition:height .66s var(--eo);}
+    .cw-panel.m-open .cw-screen.ribbon{height:calc(80svh - 108px);pointer-events:auto;}
+    /* текст уходит в размытие снизу вверх и в прозрачность */
+    .cc-copy{transition:opacity .4s var(--eo), filter .5s var(--eo),
+             -webkit-mask-position .55s var(--eo);
+      -webkit-mask-image:linear-gradient(to top,#000 0,#000 100%);
+      mask-image:linear-gradient(to top,#000 0,#000 100%);}
+    .cw-panel.m-open .cc-copy{opacity:0;filter:blur(9px);}
+    /* кнопка «Перейти к просмотру» внизу; при раскрытии уходит */
+    .cc-nav{position:absolute;left:20px;right:20px;bottom:18px;top:auto;
+      transform:none;width:auto;height:auto;z-index:7;
+      transition:opacity .35s var(--eo);}
+    .cw-panel.m-open .cc-nav{opacity:0;pointer-events:none;}
+    .cc-nav .cc-next{position:relative;left:auto;top:auto;width:100%;height:50px;
+      border-radius:25px;border:1px solid var(--hair);background:var(--paper);
+      display:flex;align-items:center;justify-content:center;gap:9px;}
+    .cc-nav .cc-next img{width:17px;height:17px;}
+    .nav-lbl{display:inline;font:600 13.5px/1 'AK','Helvetica Neue',Arial,sans-serif;
+      letter-spacing:-.025em;color:var(--ink);}
+    /* стрелки листания — в шапке справа, как на большом экране */
+    .m-page{position:absolute;top:24px;right:16px;z-index:8;display:none;
+      gap:7px;}
+    .cw-panel.m-open .m-page{display:flex;}
+    .m-page button{width:38px;height:38px;border-radius:50%;border:1px solid var(--hair);
+      background:var(--paper);padding:0;display:flex;align-items:center;
+      justify-content:center;cursor:pointer;transition:opacity .3s var(--eo);}
+    .m-page img{width:15px;height:15px;display:block;}
+    .m-page .m-prev img{transform:rotate(180deg);}
+    .m-page .m-prev[hidden]{display:none;}
+    /* фотокейс и витрина наборов */
     .cw-screen.ribbon.solo{position:static;top:auto;height:62svh;}
     .cc.solo-head{padding-bottom:0;}
-    .cc-nav.solo{position:absolute;left:50%;right:auto;top:auto;bottom:4svh;
-      transform:translateX(-50%);width:72px;height:72px;}
-    .cc-nav.solo button{left:0;right:auto;width:72px;height:72px;}
-    .cw-sets{position:static;padding:18px var(--gm) 24px;gap:3vw;}
-    /* окно — лист снизу, значит кнопка ко всем кейсам встаёт НАД ним */
+    .cc-nav.solo{position:absolute;left:auto;right:16px;top:24px;bottom:auto;
+      transform:none;width:38px;height:38px;}
+    .cc-nav.solo button{left:0;right:auto;width:38px;height:38px;
+      border:1px solid var(--hair);border-radius:50%;background:var(--paper);}
+    .cc-nav.solo img{width:15px;height:15px;}
+    .cw-sets{display:grid!important;grid-template-columns:1fr 1fr;
+      gap:3vw;padding:20px var(--gm) 26px!important;}
+    .cw-set{height:auto!important;aspect-ratio:624/1789;flex:none!important;}
     .cw-all{top:auto;bottom:calc(100% + 2.4svh);font-size:max(14px,3.8vw);}
     .cw-panel.lifted{top:auto;}
+    /* крест — за границей плашки сверху и белый, как на большом экране */
+    .cw-x{top:-44px;right:14px;width:30px;height:30px;}
+    .cw-x img{filter:none;}
+    .cc-prev{display:none;}
   }
   .tiles-row{display:contents;}
   .tile{aspect-ratio:1;overflow:hidden;background:var(--ghost);}
@@ -844,9 +862,9 @@
     .close-aside{margin-top:14px;align-items:flex-start;text-align:left;
       gap:10px;padding-left:7.73%;}
     .close-aside .sm{font-size:12px;}
-    .m-mark{display:block;margin-top:46px;padding-left:6.53%;}
+    .m-mark{display:block;margin-top:46px;padding:0;text-align:center;}
     .m-mark .lg{font-size:19.47vw;opacity:.4;line-height:1;display:block;}
-    .m-copy{display:block;margin-top:15px;padding-left:40.27%;}
+    .m-copy{display:block;margin-top:15px;padding:0;text-align:center;}
     .m-copy .sm{font-size:7px;opacity:.6;}
     /* закреплённые словомарка и копирайт на телефоне не нужны: его вариант
        появляется внизу страницы и проявляется, а не висит весь скролл */
@@ -1014,7 +1032,7 @@
     <div class="m-copy"><span class="sm" data-goo data-fade>’26 © All Right Reserved</span></div>
 
     <div class="tailroom"></div>
-    <span id="buildStamp" style="display:none">BUILD 02.10 21:20</span>
+    <span id="buildStamp" style="display:none">BUILD 02.10 23:56</span>
   </section>
 
 </main>
@@ -1683,6 +1701,27 @@
     syncNav();
   }
 
+  /* Стрелки листания в шапке окна на телефоне. Делаются один раз на кейс и
+     живут, пока окно открыто. */
+  function mPage(ribS){
+    var head = cwScroll.querySelector('.cc');
+    if(!head || head.querySelector('.m-page')) return;
+    var box = document.createElement('div');
+    box.className = 'm-page';
+    box.innerHTML =
+      '<button class="m-prev" type="button" aria-label="Назад" hidden>' +
+        '<img src="cases/sanek-tpl/arrow.svg" alt=""></button>' +
+      '<button class="m-next" type="button" aria-label="Дальше">' +
+        '<img src="cases/sanek-tpl/arrow.svg" alt=""></button>';
+    head.appendChild(box);
+    var prev = box.querySelector('.m-prev'), next = box.querySelector('.m-next');
+    function sync(){ prev.hidden = ribS.scrollLeft <= 2; }
+    next.addEventListener('click', function(){ pageRibbon(ribS, 1, sync); sync(); });
+    prev.addEventListener('click', function(){ pageRibbon(ribS, -1, sync); });
+    ribS.addEventListener('scroll', sync);
+    sync();
+  }
+
   function wireCase(){
     var stage = cwScroll.querySelector('.cw-stage');
     if(!stage) return;
@@ -1748,11 +1787,20 @@
       at = to;
       var fwd = to === 'ribbon';
       if(MOBILE){
+        /* Телефон. Нажали «Перейти к просмотру»: текст задачи и решения
+           уходит в размытие и прозрачность, лента поднимается снизу и
+           занимает окно под шапкой — имя и год остаются на месте. Стрелки
+           листания встают в шапку справа; «назад» появляется только после
+           первого шага, как на большом экране. */
+        var pnl = cwEl.querySelector('.cw-panel');
         ribS.classList.add('live');
-        gsap.set(ribS, {clearProps: 'all', opacity: fwd ? 1 : 0,
-                        pointerEvents: fwd ? 'auto' : 'none'});
-        if(fwd) fitRibbon();
-        cwScroll.scrollTo({top: fwd ? ribS.offsetTop - 8 : 0, behavior: 'smooth'});
+        gsap.set(ribS, {clearProps: 'all'});
+        pnl.classList.toggle('m-open', fwd);
+        if(fwd){
+          mPage(ribS);
+          setTimeout(function(){ fitRibbon(); }, 80);
+          setTimeout(function(){ fitRibbon(); }, 700);
+        }
         return;
       }
       var b = boxes();
@@ -2729,9 +2777,12 @@
                       ease: 'none', duration: .72}, 0)
       .to(A, {y: function(){ return -near(); }, ease: 'none', duration: .9}, 0)
       .to(B, {y: function(){ return  near(); }, ease: 'none', duration: .9}, 0)
-      .to([A, B], {opacity: 0, duration: .06}, .9)
-      .to(link, {opacity: 1, duration: .08}, .91)
-      .to(rule, {width: '62%', ease: 'none', duration: .1}, .9);
+      /* Строки не просто гаснут: они уходят в размытие, и из размытия
+         проявляется «Перейти ко всем кейсам» — как он и просил. */
+      .to([A, B], {opacity: 0, filter: 'blur(14px)', duration: .07, ease: 'none'}, .89)
+      .fromTo(link, {opacity: 0, filter: 'blur(14px)'},
+                    {opacity: 1, filter: 'blur(0px)', duration: .09, ease: 'none'}, .91)
+      .to(rule, {width: '62%', ease: 'none', duration: .1}, .92);
   }
 
   function workHead(){
@@ -3209,7 +3260,9 @@ import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.m
   /* Запас кадра. На телефоне он скромный: при большом холст залезал на
      строку «Снимаю,», а в его макете полотно её не трогает. Поля задаются
      отсюда же, чтобы разметка и камера не разошлись. */
-  var OVER = SMALL ? 1.22 : 2.4;
+  /* Запас кадра. В покое полотно стоит в своей коробке и строки не трогает,
+     а рукой его можно утянуть далеко — поэтому поля щедрые. */
+  var OVER = SMALL ? 2.2 : 2.4;
   (function(){
     var m = ((OVER - 1) / 2 * 100).toFixed(2);
     canvas.style.left = '-' + m + '%';
@@ -3523,11 +3576,14 @@ import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.m
   var group = new THREE.Group();
   scene.add(group);
   var ORBIT = (window.CASES_DATA || []).filter(function(c){ return !!c.globe; });
-  if(DOUBLE) ORBIT = ORBIT.concat(ORBIT);
+  var ONCE = ORBIT.slice();
+  for(var rp = 1; rp < REPEAT; rp++) ORBIT = ORBIT.concat(ONCE);
   var n = Math.max(ORBIT.length, 2);
   var golden = Math.PI * (3 - Math.sqrt(5));
-  var RADIUS = 1.0, TILE = 0.4;   // вдвое мельче — и вдвое больше их на шаре
-  var DOUBLE = true;                // каждая обложка встаёт на шар дважды
+  /* Просвет между плитками задаётся их числом и размером: при 33 плитках шаг
+     по сфере ~0,617, и плитка 0,55 оставляет зазор 0,067 — втрое меньше, чем
+     было. Каждая обложка встаёт на шар трижды, поэтому кадров заметно больше. */
+  var RADIUS = 1.0, TILE = 0.55, REPEAT = 3;
   var loader = new THREE.TextureLoader();
   ORBIT.forEach(function(item, i){
     var y = 1 - (i / (n - 1)) * 2;
