@@ -10,7 +10,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap&subset=cyrillic" rel="stylesheet">
 <link rel="preload" href="fonts/ak.woff2" as="font" type="font/woff2" crossorigin>
-<script src="cases.js?v=030036"></script>
+<script src="cases.js?v=030045"></script>
 <script src="https://cdn.jsdelivr.net/npm/lenis@1.3.21/dist/lenis.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/gsap.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/ScrollTrigger.min.js"></script>
@@ -795,17 +795,23 @@
       width:53%;z-index:3;}
     .op-note .sm{text-align:left;}
     .op-1{position:absolute;left:45.33%;top:135.6px;margin:0;width:56%;z-index:2;}
-    .op-role{position:absolute;left:0;top:240.4px;margin:0;width:33.6%;z-index:3;}
+    .op-role{position:absolute;left:14.93%;top:240.4px;margin:0;width:18.67%;z-index:3;}
     .op-role .sm{text-align:right;display:block;}
     #cloth{position:absolute;left:45.33%;right:auto;top:240.4px;
       width:44.32%;aspect-ratio:166.2/239.1;margin:0;}
-    .stmt{padding-top:501px;}
-    .stmt .s-1{margin-left:14.48%;}
-    .stmt .s-2{margin-left:9.55%;}
-    .stmt .s-3{margin-left:17.57%;}
-    .stmt .col-r{margin-left:44.51%;}
-    .stmt .col-r.ind{margin-left:52.96%;}
-    .stmt .lg.blk{margin-left:29.6%;}
+    /* Строки заявления стоят абсолютно на его отметках. В потоке последние
+       три уезжали вниз на 3,6–4,3: у строки со сменяющимся словом своя
+       высота строки, и она накапливалась. */
+    .chapter{height:1836px;}
+    .featured{margin-top:114px;}
+    .stmt{padding:0;height:0;position:static;}
+    .stmt > div{position:absolute;margin:0;}
+    .stmt .s-1{left:14.48%;top:501px;}
+    .stmt .s-2{left:9.55%;top:540px;}
+    .stmt .s-3{left:17.57%;top:578.3px;}
+    .stmt .lg.blk{left:29.6%;top:617.3px;}
+    .stmt .col-r:not(.blk){left:44.51%;top:656px;}
+    .stmt .col-r.ind{left:52.96%;top:694.6px;}
     /* «любая идея заслуживает реализации».
        Строки стоят абсолютно на его отметках, а не в потоке: у него шаг между
        ними 32 и 34,7, а не высота строки, и в потоке они расползались.
@@ -820,8 +826,8 @@
     .st-tiles{display:block;position:static;}
     .st-t{position:absolute;top:865px;width:15.68%;aspect-ratio:1;display:block;
       background-size:cover;background-position:50% 50%;}
-    .st-t.a{left:42.83%;background-image:url('cases/globe/sanek.jpg');}
-    .st-t.b{left:61.92%;background-image:url('cases/globe/blaze.jpg');}
+    .st-t.a{left:42.83%;background-image:url('cases/stmt/a.jpg');}
+    .st-t.b{left:61.92%;background-image:url('cases/stmt/b.jpg');}
     /* ---------- список кейсов по его макету ----------
        номер на 15,8, название на 45,3, подпись 9 кегля в половину тона */
     .idx-row{grid-template-columns:29.5px 1fr;gap:0;align-items:baseline;
@@ -830,15 +836,20 @@
     .idx-row .t{grid-column:2;font-size:16.1px;}
     .idx-row .c{grid-column:2;text-align:left;margin-top:3px;justify-self:start;
       font-size:9px;line-height:1.3;white-space:normal;opacity:.4;}
-    /* заголовок раздела у него сдвинут влево */
-    .idx-wrap > .lg:nth-of-type(1){margin-left:14.17%!important;}
-    .idx-wrap > .lg:nth-of-type(2){margin-left:26.4%!important;}
-    .idx-wrap > .lg:nth-of-type(3){margin-left:9.54%!important;}
-    .idx-wrap > .lg{font-size:11.45vw;}
+    /* заголовок раздела — по его отметкам из фрейма, абсолютно, чтобы
+       строки не расползались от высоты строки */
+    /* Заголовок раздела отсчитывается от верха самого раздела, а первая
+       строка списка встаёт на его 397,6. */
+    #cases{position:relative;}
+    .idx-wrap{position:static;padding-top:116.9px;}
+    .ix-a,.ix-b,.ix-c{position:absolute;margin:0!important;font-size:11.45vw;}
+    .ix-a{left:14.16%;top:146.2px;}
+    .ix-b{left:26.4%;top:184.8px;}
+    .ix-c{left:9.55%;top:223.4px;}
     /* ---------- кружок «’26» ----------
        у него это просто подпись под строками, без кружка и рамки */
     /* у него в кадре это не кружок, а подпись «©’26» на 135,8 × 1080,2 */
-    #spineCap{left:36.21%;bottom:auto;top:1034.5px;transform:none;
+    #spineCap{left:33.47%;bottom:auto;top:1034.5px;transform:none;
       width:auto;height:auto;border:0;background:none;border-radius:0;
       font-size:10px;font-weight:500;opacity:.5;display:block;}
     /* крест в окне кейса белый — на белом листе телефона его не видно */
@@ -1001,9 +1012,9 @@
   <!-- ============ CASE INDEX ============ -->
   <section class="band pad" id="cases">
     <div class="idx-wrap">
-      <h2 class="lg" data-goo style="margin-left:var(--c3);">Кейсы</h2>
-      <div class="lg" data-goo style="margin-left:calc(var(--c3) + var(--colw));">и&nbsp;последние</div>
-      <div class="lg" data-goo style="margin-left:30.8691%;">работы</div>
+      <h2 class="lg ix-a" data-goo style="margin-left:var(--c3);">Кейсы</h2>
+      <div class="lg ix-b" data-goo style="margin-left:calc(var(--c3) + var(--colw));">и&nbsp;последние</div>
+      <div class="lg ix-c" data-goo style="margin-left:30.8691%;">работы</div>
       <div class="idx-holder">
         <div class="idx" id="caseIndex"></div>
         <div id="thumb"><img alt=""></div>
@@ -1060,7 +1071,7 @@
     <div class="m-copy"><span class="sm" data-goo data-fade>’26 © All Right Reserved</span></div>
 
     <div class="tailroom"></div>
-    <span id="buildStamp" style="display:none">BUILD 03.10 00:36</span>
+    <span id="buildStamp" style="display:none">BUILD 03.10 00:45</span>
   </section>
 
 </main>
@@ -3340,7 +3351,7 @@ import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.m
      отсюда же, чтобы разметка и камера не разошлись. */
   /* Запас кадра. В покое полотно стоит в своей коробке и строки не трогает,
      а рукой его можно утянуть далеко — поэтому поля щедрые. */
-  var OVER = SMALL ? 2.2 : 2.4;
+  var OVER = SMALL ? 3.0 : 3.0;
   (function(){
     var m = ((OVER - 1) / 2 * 100).toFixed(2);
     canvas.style.left = '-' + m + '%';
@@ -3487,8 +3498,10 @@ import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.m
     if(!ray.ray.intersectPlane(grabPlane, grabPt)) return;
     var g3 = grab * 3;
     // за кадр уходить нельзя, иначе ткань утаскивается из поля зрения
-    var nx = Math.max(-VIS_W * .96, Math.min(VIS_W * .96, grabPt.x));
-    var ny = Math.max(-VIS_H * .96, Math.min(VIS_H * .96, grabPt.y - mesh.position.y));
+    // держим узел внутри видимого поля холста, а не коробки — иначе рывок
+    // вбок упирался в невидимую стенку и ткань срезало
+    var nx = Math.max(-VIS_W * .92, Math.min(VIS_W * .92, grabPt.x));
+    var ny = Math.max(-VIS_H * .92, Math.min(VIS_H * .92, grabPt.y - mesh.position.y));
     prev[g3] = pos[g3]; prev[g3+1] = pos[g3+1];
     pos[g3] = nx; pos[g3+1] = ny;
   }
