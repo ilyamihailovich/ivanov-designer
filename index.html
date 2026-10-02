@@ -10,7 +10,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap&subset=cyrillic" rel="stylesheet">
 <link rel="preload" href="fonts/ak.woff2" as="font" type="font/woff2" crossorigin>
-<script src="cases.js?v=021939"></script>
+<script src="cases.js?v=021946"></script>
 <script src="https://cdn.jsdelivr.net/npm/lenis@1.3.21/dist/lenis.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/gsap.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/ScrollTrigger.min.js"></script>
@@ -876,7 +876,7 @@
     </div>
 
     <div class="tailroom"></div>
-    <span id="buildStamp" style="display:none">BUILD 02.10 19:39</span>
+    <span id="buildStamp" style="display:none">BUILD 02.10 19:46</span>
   </section>
 
 </main>
@@ -3330,23 +3330,30 @@ import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.m
 })();
 </script>
 
+
 <script type="module">
 /* ============================================================
-   КОЛЕСО РАБОТ
+   КОЛЕСО РАБОТ — WARP
 
-   За строками «Лучшие идеи заслуживают реализации» по кольцу идут обложки
-   кейсов. Кольцо охватывает камеру: его дальняя точка приходится на середину
-   экрана, ближние — на левый и правый края. Поэтому кадр выходит слева
-   крупным, к середине уходит вглубь и мельчает, к правому краю снова
-   разрастается и уходит за камеру, чтобы вернуться слева.
+   Форма снята с его вектора в мобильном макете (узел 411:36 на странице
+   «САЙТ — ТЕЛЕФОН»). Это не кольцо в перспективе, а лента-спираль, нарисованная
+   прямо в плоскости экрана: она заходит тонким хвостом сверху, обходит строки
+   «Лучшие идеи заслуживают реализации» по дуге и выходит внизу слева уже
+   широкой. В его координатах при ширине окна 375 лента занимает x от −95 до
+   411 и y от 558 до 1301, центр спирали приходится примерно на середину
+   строк, внутренний радиус идёт от 159 до 239, толщина — от 76 у дальнего
+   конца до 190 у ближнего.
 
-   Деформация не считается отдельно: карточка — это кусок самого кольца,
-   разбитый на полосы и выгнутый по его дуге. Перспектива тогда сама даёт и
-   сужение к дальней точке, и скос краёв по касательной, причём верно в любом
-   положении.
+   Деформация — настоящий warp, а не перспектива. Камера ортографическая, то
+   есть никакого схождения нет вовсе. Каждый кадр натянут на сетку из полос:
+   полоса s берёт точку на внутреннем крае ленты и точку на внешнем, а
+   картинка размазывается между ними. Там, где лента широкая, кадр тянется и
+   разъезжается по углам; там, где узкая, он сжимается и читается как ушедший
+   вдаль. Изгиб берётся из самой спирали, поэтому углы кадра честно
+   разворачиваются по касательной, а не скашиваются на глаз.
 
-   Крутит прокрутка: один проход по блоку — один полный оборот, и все работы
-   успевают пролететь ровно по разу.
+   Прокрутка гонит кадры по ленте: дошёл до конца — ушёл и зашёл снова с
+   начала.
    ============================================================ */
 import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js';
 
@@ -3365,53 +3372,57 @@ import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.m
   if(covers.length < 3){ wrap.remove(); return; }
   var N = covers.length;
 
-  var SMALL = window.matchMedia('(max-width:900px)').matches;
-  var renderer = new THREE.WebGLRenderer({canvas: canvas, alpha: true, antialias: !SMALL});
-  renderer.setPixelRatio(Math.min(window.devicePixelRatio, SMALL ? 1.5 : 2));
+  var renderer = new THREE.WebGLRenderer({canvas: canvas, alpha: true, antialias: true});
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
   var scene = new THREE.Scene();
-  var camera = new THREE.PerspectiveCamera(52, 1, 0.1, 200);
+  var camera = new THREE.OrthographicCamera(0, 1, 0, 1, -10, 10);  // чисто плоско
 
-  /* Радиус кольца и вынос его центра вперёд. Чем меньше вынос при том же
-     радиусе, тем ближе кадр проходит мимо камеры у края кадра и тем сильнее
-     разница между краем и серединой. */
-  var R = 10, ZC = 7.6;
-  /* Наклон: на схеме кольцо не стоит поперёк взгляда, а завалено от зрителя —
-     дальняя дуга уходит вверх и проходит НАД строками, а не сквозь них, текст
-     остаётся в его отверстии. Наклон живёт на внешней группе, оборот — на
-     внутренней, иначе они перемешиваются и ось оборота уезжает вместе с
-     наклоном. */
-  var TILT = -0.34, LIFT = -1.9;
-  var tilt = new THREE.Group();
-  tilt.position.set(0, LIFT, -ZC);
-  tilt.rotation.x = TILT;
-  scene.add(tilt);
-  var ring = new THREE.Group();
-  tilt.add(ring);
+  /* ---------- лента ----------
+     Числа — доли ширины окна, снятые с его вектора. BOX_W/BOX_H — коробка
+     ленты, CX/CY — центр спирали внутри неё, остальное описывает, как
+     меняются внутренний радиус и толщина по ходу. */
+  var P = {
+    BOX_W: 1.350, BOX_H: 1.981,          // 506 x 743 при окне 375
+    CX: 0.484, CY: 0.528,                // центр спирали в долях коробки
+    TH0: -130, TH1: 175,                 // начало и конец ленты, градусы
+    R0: 0.424, R1: 0.637,                // внутренний радиус, доли ширины окна
+    H0: 0.135, H1: 0.550, HP: 1.9,       // толщина: от H0 к H1 с нарастанием
+    FILL: 0.70,                          // доля шага под кадр, остальное просвет
+    SEG: 26                              // полос в сетке — ими кадр и гнётся
+  };
+  var VW = 375;                          // база, в долях которой сняты числа
 
-  var PITCH = Math.PI * 2 / N;         // угол на одну работу
-  var FILL  = 0.66;                    // доля угла под кадр, остальное просвет
-  var HALF  = PITCH * FILL / 2;
-  var SEG   = 18;                      // полос поперёк кадра — ими он и гнётся
-  var HH    = R * PITCH * FILL * 0.31;  // полувысота: лента, а не стена
+  function thAt(t){ return (P.TH0 + (P.TH1 - P.TH0) * t) * Math.PI / 180; }
+  function rAt(t){ return (P.R0 + (P.R1 - P.R0) * t) * VW; }
+  function hAt(t){ return (P.H0 + (P.H1 - P.H0) * Math.pow(t, P.HP)) * VW; }
+
+  // точка внутреннего и внешнего края ленты в её собственных пикселях
+  function edge(t){
+    var th = thAt(t), r = rAt(t), h = hAt(t);
+    var cs = Math.cos(th), sn = Math.sin(th);
+    var cx = P.CX * P.BOX_W * VW, cy = P.CY * P.BOX_H * VW;
+    return [cx + r * cs, cy + r * sn, cx + (r + h) * cs, cy + (r + h) * sn];
+  }
 
   var loader = new THREE.TextureLoader();
+  var cards = [];
   for(var i = 0; i < N; i++){
-    var pos = [], uv = [], idx = [];
-    for(var s = 0; s <= SEG; s++){
-      var t = s / SEG, a = -HALF + 2 * HALF * t;
-      var x = R * Math.sin(a), z = -R * Math.cos(a);
-      pos.push(x, HH, z, x, -HH, z);
-      uv.push(t, 1, t, 0);
+    var g = new THREE.BufferGeometry();
+    var pos = new Float32Array((P.SEG + 1) * 2 * 3);
+    var uv  = [], idx = [];
+    for(var s = 0; s <= P.SEG; s++){
+      var u = s / P.SEG;
+      uv.push(u, 1, u, 0);
     }
-    for(var s2 = 0; s2 < SEG; s2++){
+    for(var s2 = 0; s2 < P.SEG; s2++){
       var b = s2 * 2;
       idx.push(b, b + 1, b + 2, b + 1, b + 3, b + 2);
     }
-    var g = new THREE.BufferGeometry();
-    g.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3));
+    g.setAttribute('position', new THREE.BufferAttribute(pos, 3));
     g.setAttribute('uv', new THREE.Float32BufferAttribute(uv, 2));
     g.setIndex(idx);
-    var m = new THREE.MeshBasicMaterial({side: THREE.DoubleSide, transparent: true, opacity: 0});
+    var m = new THREE.MeshBasicMaterial({transparent: true, opacity: 0,
+                                         side: THREE.DoubleSide});
     (function(mat, src){
       loader.load(src, function(tex){
         tex.colorSpace = THREE.SRGBColorSpace;
@@ -3421,33 +3432,49 @@ import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.m
       });
     })(m, covers[i]);
     var mesh = new THREE.Mesh(g, m);
-    mesh.rotation.y = i * PITCH;       // карточка встаёт на своё место кольца
-    ring.add(mesh);
+    scene.add(mesh);
+    cards.push({mesh: mesh, geo: g, pos: pos});
   }
 
-  /* ---------- коробка ----------
-     Колесо шире и выше блока: на схеме кадры уходят далеко за его края. */
-  var OVER_W = 2.0, OVER_H = 2.2;
+  /* Кадр натягивается на кусок ленты [t0, t1]: для каждой полосы берутся
+     обе кромки, и картинка размазывается между ними. Это и есть warp. */
+  var STEP = 1 / N;
+  function warp(card, t0){
+    var t1 = t0 + STEP * P.FILL;
+    var p = card.pos, k = 0;
+    for(var s = 0; s <= P.SEG; s++){
+      var t = t0 + (t1 - t0) * (s / P.SEG);
+      var e = edge(t);
+      p[k++] = e[0]; p[k++] = e[1]; p[k++] = 0;
+      p[k++] = e[2]; p[k++] = e[3]; p[k++] = 0;
+    }
+    card.geo.attributes.position.needsUpdate = true;
+  }
+
+  /* ---------- коробка ---------- */
   function place(){
-    var bw = block.offsetWidth, bh = block.offsetHeight;
-    if(!bw || !bh) return;
-    var w = Math.round(bw * OVER_W), h = Math.round(bh * OVER_H);
+    var vw = block.offsetWidth;
+    if(!vw) return;
+    var w = Math.round(P.BOX_W * vw), h = Math.round(P.BOX_H * vw);
     wrap.style.width  = w + 'px';
     wrap.style.height = h + 'px';
-    wrap.style.left   = (block.offsetLeft - (w - bw) / 2) + 'px';
-    wrap.style.top    = (block.offsetTop  - (h - bh) / 2) + 'px';
+    wrap.style.left   = Math.round(block.offsetLeft + (vw - w) / 2) + 'px';
+    wrap.style.top    = Math.round(block.offsetTop + block.offsetHeight / 2 - h / 2) + 'px';
     renderer.setSize(w, h, false);
-    camera.aspect = w / h;
+    // ортографическая камера ровно по коробке ленты, ось Y вниз
+    var sx = P.BOX_W * VW, sy = P.BOX_H * VW;
+    camera.left = 0; camera.right = sx; camera.top = 0; camera.bottom = sy;
     camera.updateProjectionMatrix();
+    scene.scale.set(1, 1, 1);
   }
   place();
   window.addEventListener('resize', place);
   if(window.ResizeObserver) new ResizeObserver(place).observe(block);
 
   /* ---------- ход ---------- */
-  var spin = {v: 0};
-  gsap.to(spin, {
-    v: Math.PI * 2, ease: 'none',
+  var run = {v: 0};
+  gsap.to(run, {
+    v: 1, ease: 'none',
     scrollTrigger: {trigger: block, start: 'top bottom', end: 'bottom top',
                     scrub: .4, invalidateOnRefresh: true}
   });
@@ -3460,22 +3487,20 @@ import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.m
   (function frame(){
     requestAnimationFrame(frame);
     if(!live) return;
-    ring.rotation.y = spin.v;
+    for(var i = 0; i < N; i++){
+      var t0 = (i * STEP + run.v) % 1;
+      if(t0 < 0) t0 += 1;
+      var vis = t0 + STEP * P.FILL <= 1;   // ушёл за конец ленты — не рисуем
+      cards[i].mesh.visible = vis;
+      if(vis) warp(cards[i], t0);
+    }
     renderer.render(scene, camera);
   })();
 
-  // ручка для подгонки: __reel({R, ZC, fov, over})
+  // ручка для подгонки формы: __reel({CX,CY,TH0,TH1,R0,R1,H0,H1,HP,FILL,BOX_W,BOX_H})
   window.__reel = function(o){
-    if(o){
-      if(o.ZC != null){ ZC = o.ZC; tilt.position.z = -ZC; }
-      if(o.tilt != null){ TILT = o.tilt; tilt.rotation.x = TILT; }
-      if(o.lift != null){ LIFT = o.lift; tilt.position.y = LIFT; }
-      if(o.fov != null){ camera.fov = o.fov; camera.updateProjectionMatrix(); }
-      if(o.overW != null){ OVER_W = o.overW; place(); }
-      if(o.overH != null){ OVER_H = o.overH; place(); }
-      if(o.spin != null) spin.v = o.spin;
-    }
-    return {R: R, ZC: ZC, tilt: TILT, lift: LIFT, fov: camera.fov, N: N, overW: OVER_W, overH: OVER_H};
+    if(o){ for(var k in o) if(k in P) P[k] = o[k]; place(); }
+    return JSON.parse(JSON.stringify(P));
   };
 })();
 </script>
