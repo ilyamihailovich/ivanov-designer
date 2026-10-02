@@ -909,7 +909,7 @@ window.CASES_DATA = [
   "c": "Айдентика и визуальная система эко-маркета",
   "year": "Концепт-проект",
   "role": "Айдентика, упаковка, наружная реклама, POS, фотостилистика",
-  "img": "cases/gloff/06.jpg",
+  "img": "cases/idx/gloff.jpg",
   "gallery": [
    "cases/gloff/06.jpg",
    "cases/gloff/01.jpg",
