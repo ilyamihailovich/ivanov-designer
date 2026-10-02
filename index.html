@@ -10,7 +10,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap&subset=cyrillic" rel="stylesheet">
 <link rel="preload" href="fonts/ak.woff2" as="font" type="font/woff2" crossorigin>
-<script src="cases.js?v=022014"></script>
+<script src="cases.js?v=022020"></script>
 <script src="https://cdn.jsdelivr.net/npm/lenis@1.3.21/dist/lenis.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/gsap.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/ScrollTrigger.min.js"></script>
@@ -551,6 +551,7 @@
   .t-b{margin-left:25.8316%;}
   .t-c{margin-left:33.0596%;}
   .hy,.brk{display:none;}
+  .m-orb,.m-bye,.m-mark,.m-copy{display:none;}
   .t-c i,.t-c b{font-style:normal;font-weight:inherit;}
   .t-d{margin-left:21.7404%;}
 
@@ -758,15 +759,64 @@
        отодвинута отступом первой строки, вторая стоит по левому краю блока */
     .t-c{margin-left:13.49%;text-indent:4.91%;}
     .t-d{margin-left:19.65%;}
-    /* подпись кейса уезжала за край: на телефоне она встаёт под название */
-    .idx-row{grid-template-columns:auto 1fr;gap:0 3vw;align-items:baseline;
-      padding:clamp(9px,1.6vh,14px) 0;}
-    .idx-row .n{grid-column:1;}
-    .idx-row .t{grid-column:2;font-size:max(15px,4.3vw);}
-    .idx-row .c{grid-column:2;text-align:left;margin-top:4px;justify-self:start;
-      font-size:max(10px,2.9vw);line-height:1.2;white-space:normal;}
-    .mark-half{font-size:clamp(2.2rem,13vw,4rem);}
-    .close-mid{flex-direction:column;}
+    /* ---------- список кейсов по его макету ----------
+       номер на 15,8, название на 45,3, подпись 9 кегля в половину тона */
+    .idx-row{grid-template-columns:29.5px 1fr;gap:0;align-items:baseline;
+      padding:clamp(9px,1.6vh,14px) 0;margin-left:4.21%;}
+    .idx-row .n{grid-column:1;font-size:12px;}
+    .idx-row .t{grid-column:2;font-size:16.1px;}
+    .idx-row .c{grid-column:2;text-align:left;margin-top:3px;justify-self:start;
+      font-size:9px;line-height:1.3;white-space:normal;opacity:.4;}
+    /* заголовок раздела у него сдвинут влево */
+    .idx-wrap > .lg:nth-of-type(1){margin-left:14.17%!important;}
+    .idx-wrap > .lg:nth-of-type(2){margin-left:26.4%!important;}
+    .idx-wrap > .lg:nth-of-type(3){margin-left:9.54%!important;}
+    .idx-wrap > .lg{font-size:11.45vw;}
+    /* ---------- кружок «’26» ----------
+       у него это просто подпись под строками, без кружка и рамки */
+    #spineCap{left:36.21%;bottom:auto;top:1080.2px;transform:none;
+      width:auto;height:auto;border:0;background:none;font-size:10px;
+      font-weight:500;opacity:.5;display:block;}
+    /* крест в окне кейса белый — на белом листе телефона его не видно */
+    .cw-x img{filter:invert(1);}
+    /* витрина наборов инфографики: в потоке, сеткой, иначе высота 100 %
+       схлопывалась в ноль и окно открывалось пустым */
+    .cw-sets{display:grid!important;grid-template-columns:1fr 1fr;
+      gap:3vw;padding:20px var(--gm) 26px!important;}
+    .cw-set{height:auto!important;aspect-ratio:624/1789;flex:none!important;}
+    /* ---------- финальный блок по его макету ----------
+       Часов и строки «всего лишь» у него нет: на их месте круг с шаром,
+       который вращается по прокрутке. Координаты — его, при ширине 375. */
+    .close-mid,.c-c,.m-hide{display:none;}
+    .close{padding:0 0 clamp(40px,8vh,90px);}
+    /* две части строки у него стоят на разных отступах — на телефоне они
+       идут отдельными строками, на большом экране остаются одной */
+    .c-a,.c-d{margin-left:0;}
+    .c-a .p1,.c-a .p2,.c-d .p1,.c-d .p2{display:block;}
+    .c-a{margin-top:11.9px;}
+    .c-a .p1{margin-left:21.71%;}
+    .c-a .p2{margin-left:9.87%;}
+    .c-b{margin-left:18.4%;}
+    .c-d .p1{margin-left:11.07%;}
+    .c-d .p2{margin-left:55.6%;}
+    .m-orb{display:block;width:78.69%;aspect-ratio:1;margin:56px auto 72px;
+      border-radius:50%;overflow:hidden;}
+    .m-orb canvas{width:100%;height:100%;display:block;}
+    .socials{margin:0 0 0;justify-content:center;gap:12px;}
+    .m-bye{display:block;margin-top:88px;}
+    .b-a{margin-left:6.53%;}
+    .b-b{margin-left:17.25%;}
+    .close-aside{margin-top:14px;align-items:flex-start;text-align:left;
+      gap:10px;padding-left:7.73%;}
+    .close-aside .sm{font-size:12px;}
+    .m-mark{display:block;margin-top:66px;padding-left:6.53%;}
+    .m-mark .lg{font-size:19.47vw;opacity:.4;line-height:1;}
+    .m-copy{display:block;margin-top:16px;padding-left:40.27%;}
+    .m-copy .sm{font-size:7px;opacity:.6;}
+    /* закреплённые словомарка и копирайт на телефоне не нужны: его вариант
+       появляется внизу страницы и проявляется, а не висит весь скролл */
+    #markWrap,.foot-note{display:none!important;}
+    .tailroom{height:clamp(60px,10vh,120px);}
     #thumb{display:none;}
   }
   @media (prefers-reduced-motion: reduce){
@@ -879,7 +929,7 @@
 
   <!-- ============ CLOSING ============ -->
   <section class="close pad" id="contact">
-    <div class="lg c-a" data-goo>Всё прекрасное,</div>
+    <div class="lg c-a" data-goo><span class="p1">Всё</span> <span class="p2">прекрасное,</span></div>
     <div class="lg c-b" data-goo>сначала было</div>
 
     <div class="close-mid">
@@ -889,30 +939,43 @@
     </div>
 
     <div class="lg c-c" data-goo>всего лишь</div>
-    <div class="lg c-d" data-goo>прекрасной идеей.</div>
+    <div class="lg c-d" data-goo><span class="p1">прекрасной</span> <span class="p2">идеей.</span></div>
+    <!-- шар в круге: на телефоне он встаёт на место часов -->
+    <div class="m-orb" id="mOrb"><canvas id="mOrbCanvas"></canvas></div>
 
     <div class="socials">
       <a href="https://t.me/llyaMihailovich" target="_blank" rel="noopener" data-goo data-fade>TG</a>
       <a href="https://www.instagram.com/llyamihailovich" target="_blank" rel="noopener" data-goo data-fade>IG</a>
     </div>
 
+    <!-- «Ещё увидимся.» — его строки, видны только на телефоне -->
+    <div class="m-bye">
+      <div class="lg b-a" data-goo>Ещё</div>
+      <div class="lg b-b" data-goo>увидимся.</div>
+    </div>
+
     <div class="close-aside">
       <div>
-        <p class="sm" data-goo data-fade style="margin:0 0 6px;">Беру избранные проекты</p>
-        <p class="sm dim" data-goo data-fade style="margin:0;">Свободен с ноября</p>
+        <p class="sm" data-goo data-fade style="margin:0 0 6px;">Открыт для новых проектов.</p>
+        <p class="sm dim m-hide" data-goo data-fade style="margin:0;">Свободен с ноября</p>
       </div>
       <div>
         <p class="sm dim" data-goo data-fade style="margin:0 0 6px;">Написать напрямую:</p>
         <p class="sm" data-goo data-fade style="margin:0;"><a href="https://t.me/llyaMihailovich" target="_blank" rel="noopener">@llyaMihailovich</a></p>
       </div>
-      <div>
+      <div class="m-hide">
         <p class="sm dim" data-goo data-fade style="margin:0 0 6px;">Ещё:</p>
         <p class="sm" data-goo data-fade style="margin:0;"><a href="https://www.instagram.com/llyamihailovich" target="_blank" rel="noopener">Instagram</a></p>
       </div>
     </div>
 
+    <!-- словомарка и копирайт внизу: на телефоне они стоят здесь, в потоке,
+         и проявляются порогом, а не висят закреплёнными весь скролл -->
+    <div class="m-mark"><span class="lg" data-goo>ilyaivanov</span></div>
+    <div class="m-copy"><span class="sm" data-goo data-fade>’26 © All Right Reserved</span></div>
+
     <div class="tailroom"></div>
-    <span id="buildStamp" style="display:none">BUILD 02.10 20:14</span>
+    <span id="buildStamp" style="display:none">BUILD 02.10 20:20</span>
   </section>
 
 </main>
@@ -3076,7 +3139,7 @@ import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.m
   if(window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
 
   var SMALL = window.matchMedia('(max-width:900px)').matches;
-  var COLS = SMALL ? 16 : 24, ROWS = COLS;
+  var COLS = SMALL ? 30 : 40, ROWS = COLS;   // мельче сетка — ровнее кромка
   var GATHER = 0.90;                 // во столько раз подвес уже самой ткани
   /* Пропорция берётся с коробки, а не задаётся числом: так разметка и сцена
      не могут разойтись. Ширина делится на сбор — ткань садится по ширине на
@@ -3559,5 +3622,76 @@ import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.m
     if(o){ for(var k in o) if(k in P) P[k] = o[k]; place(); }
     return JSON.parse(JSON.stringify(P));
   };
+})();
+</script>
+
+<script type="module">
+/* ============================================================
+   ШАР В КРУГЕ (финальный блок, телефон)
+
+   На его макете вместо часов стоит круг 295 x 295. Внутри — шар из обложек
+   кейсов: они свёрнуты в одну развёртку и натянуты на сферу, а сама сфера
+   поворачивается по мере прокрутки. Круг режет холст, поэтому за его краями
+   ничего не торчит.
+   ============================================================ */
+import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js';
+
+(function(){
+  var host = document.getElementById('mOrb');
+  var canvas = document.getElementById('mOrbCanvas');
+  if(!host || !canvas) return;
+  if(!window.matchMedia('(max-width:900px)').matches) return;
+  if(!window.gsap || !window.ScrollTrigger) return;
+
+  var renderer = new THREE.WebGLRenderer({canvas: canvas, alpha: true, antialias: true});
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+  var scene = new THREE.Scene();
+  var camera = new THREE.PerspectiveCamera(34, 1, 0.1, 50);
+  camera.position.set(0, 0, 3.4);
+
+  scene.add(new THREE.AmbientLight(0xffffff, 0.85));
+  var key = new THREE.DirectionalLight(0xffffff, 0.55);
+  key.position.set(-1, 0.8, 1.2);
+  scene.add(key);
+
+  var geo = new THREE.SphereGeometry(1, 64, 48);
+  var mat = new THREE.MeshLambertMaterial({color: 0xe9e9e9});
+  var ball = new THREE.Mesh(geo, mat);
+  scene.add(ball);
+  new THREE.TextureLoader().load('cases/globe/strip.jpg', function(tex){
+    tex.colorSpace = THREE.SRGBColorSpace;
+    tex.anisotropy = Math.min(8, renderer.capabilities.getMaxAnisotropy());
+    mat.map = tex; mat.color.set(0xffffff); mat.needsUpdate = true;
+  });
+
+  function size(){
+    var w = host.clientWidth, h = host.clientHeight;
+    if(!w || !h) return;
+    renderer.setSize(w, h, false);
+    camera.aspect = w / h;
+    camera.updateProjectionMatrix();
+  }
+  size();
+  window.addEventListener('resize', size);
+  if(window.ResizeObserver) new ResizeObserver(size).observe(host);
+
+  // поворот ведёт прокрутка — ровно то, что он просил
+  var spin = {v: 0};
+  gsap.to(spin, {v: Math.PI * 2.2, ease: 'none',
+    scrollTrigger: {trigger: host, start: 'top bottom', end: 'bottom top',
+                    scrub: .5, invalidateOnRefresh: true}});
+
+  var live = true;
+  if(window.IntersectionObserver){
+    new IntersectionObserver(function(e){ live = e[0].isIntersecting; },
+      {rootMargin: '200px'}).observe(host);
+  }
+  (function frame(){
+    requestAnimationFrame(frame);
+    if(!live) return;
+    ball.rotation.y = spin.v;
+    ball.rotation.x = -0.18;
+    renderer.render(scene, camera);
+  })();
 })();
 </script>
