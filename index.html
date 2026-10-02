@@ -10,7 +10,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap&subset=cyrillic" rel="stylesheet">
 <link rel="preload" href="fonts/ak.woff2" as="font" type="font/woff2" crossorigin>
-<script src="cases.js?v=021429"></script>
+<script src="cases.js?v=021442"></script>
 <script src="https://cdn.jsdelivr.net/npm/lenis@1.3.21/dist/lenis.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/gsap.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/ScrollTrigger.min.js"></script>
@@ -361,8 +361,11 @@
   .cw-all:hover{opacity:1;}
   /* ---------- наборы инфографики ---------- */
   .cw-sets{position:absolute;left:0;right:0;top:var(--ruleY,218px);bottom:0;
-    display:flex;gap:1.4%;padding:3.2% 3.6% 4%;}
-  .cw-set{position:relative;flex:1 1 0;min-width:0;cursor:pointer;background:none;
+    display:flex;gap:1.4%;padding:3.2% 3.6% 4%;justify-content:center;}
+  /* Пропорция карточки — пропорция самой обложки, иначе кадр режется по бокам
+     и от снятой композиции остаётся середина. */
+  .cw-set{position:relative;flex:0 1 auto;height:100%;aspect-ratio:624/1789;
+    min-width:0;cursor:pointer;background:none;
     border:0;padding:0;text-align:left;overflow:hidden;}
   .cw-set img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;
     transition:transform .6s var(--eo);}
@@ -375,8 +378,8 @@
   .cw-set b{position:absolute;left:0;right:0;bottom:0;padding:0 7% 7%;
     font-weight:600;font-size:max(13px,1.12vw);line-height:1.1;letter-spacing:-.03em;
     color:#fff;text-shadow:0 1px 14px rgba(0,0,0,.35);}
-  .cw-set s{position:absolute;left:0;right:0;bottom:0;height:34%;display:block;
-    background:linear-gradient(to bottom,transparent,rgba(0,0,0,.52));}
+  .cw-set s{position:absolute;left:0;right:0;bottom:0;height:42%;display:block;
+    background:linear-gradient(to bottom,transparent,rgba(0,0,0,.74));}
   .cc-nav.solo{position:absolute;left:1202.94px;top:80.16px;right:auto;bottom:auto;
     width:57.051px;height:57.051px;z-index:6;pointer-events:auto;}
   .cc-nav.solo button{left:0;right:auto;}
@@ -821,7 +824,7 @@
     </div>
 
     <div class="tailroom"></div>
-    <span id="buildStamp" style="display:none">BUILD 02.10 14:29</span>
+    <span id="buildStamp" style="display:none">BUILD 02.10 14:42</span>
   </section>
 
 </main>

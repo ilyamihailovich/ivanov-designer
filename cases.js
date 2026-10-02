@@ -1369,31 +1369,31 @@ window.CASES_DATA = [
    {
     "t": "Сыворотка The Ordinary",
     "page": "inf-serum-case.html",
-    "cover": "cases/inf-serum-ribbon/01.jpg",
+    "cover": "cases/inf-covers/serum.jpg",
     "n": 4
    },
    {
     "t": "SPF The Act",
     "page": "inf-spf-case.html",
-    "cover": "cases/inf-spf-ribbon/01.jpg",
+    "cover": "cases/inf-covers/spf.jpg",
     "n": 5
    },
    {
     "t": "Экшен-камера DJI",
     "page": "inf-dji-case.html",
-    "cover": "cases/inf-dji-ribbon/01.jpg",
+    "cover": "cases/inf-covers/dji.jpg",
     "n": 4
    },
    {
     "t": "Тренажёр-степпер",
     "page": "inf-stepper-case.html",
-    "cover": "cases/inf-stepper-ribbon/01.jpg",
+    "cover": "cases/inf-covers/stepper.jpg",
     "n": 6
    },
    {
     "t": "Скраб для тела The Act",
     "page": "inf-scrub-case.html",
-    "cover": "cases/inf-scrub-ribbon/01.jpg",
+    "cover": "cases/inf-covers/scrub.jpg",
     "n": 4
    }
   ]
