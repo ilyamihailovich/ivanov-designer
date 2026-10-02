@@ -108,10 +108,12 @@ def board(args):
         im.crop((round(x0 * s), 0, round(min(bw, x1 + 1) * s), im.height)).save(
             os.path.join(outdir, fn), quality=86, optimize=True, progressive=True)
         items.append(('%s/%s' % (outdir, fn), x0, x1 - x0))
-    allp = sorted(set(gutters(src, bw, 8, 90, 12)) | set(gutters(src, bw, 30, 60, 5)))
+    allp = sorted(set(gutters(src, bw, 8, 90, 12)) |
+                  set(gutters(src, bw, 30, 60, 5)) |
+                  set(gutters(src, bw, 45, 34, 3)))
     stops = [allp[0]]
     for p in allp[1:]:
-        if p - stops[-1] >= 60:
+        if p - stops[-1] >= 34:
             stops.append(p)
     if stops[-1] != bw:
         stops.append(bw)
