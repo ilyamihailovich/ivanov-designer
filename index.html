@@ -10,7 +10,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap&subset=cyrillic" rel="stylesheet">
 <link rel="preload" href="fonts/ak.woff2" as="font" type="font/woff2" crossorigin>
-<script src="cases.js?v=031535"></script>
+<script src="cases.js?v=031553"></script>
 <script src="https://cdn.jsdelivr.net/npm/lenis@1.3.21/dist/lenis.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/gsap.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/ScrollTrigger.min.js"></script>
@@ -533,7 +533,7 @@
        Лист снизу. Шапка — имя, год и линейка — стоит на месте всегда; ниже
        либо текст кейса, либо сама лента. Стрелка листания живёт в шапке
        справа, как на большом экране, и не мешает ни тексту, ни кадрам. */
-    #caseWin.on{align-items:flex-end;}
+
     .cw-panel{width:100%;height:80svh;border-radius:16px 16px 0 0;overflow:hidden;}
     .cw-stage{overflow:hidden!important;}
     .cw-scroll.card{padding:0;overflow:hidden;}
@@ -547,11 +547,12 @@
     /* шапка */
     /* Имя и год — в одну строку слева направо и по общей базовой линии,
        как на большом экране. Имя крупнее. */
-    .cc{display:grid;grid-template-columns:auto 1fr;align-items:baseline;}
+    .cc{display:grid;grid-template-columns:auto 1fr;align-items:baseline;
+      grid-template-rows:auto auto minmax(0,1fr);}
     /* Высота на всю плашку — только у кейса с описанием. Шапка фотокейса
        пользуется тем же классом, и из-за общей высоты она занимала всю
        плашку, а лента со съёмкой уходила за её низ — кейс открывался пустым. */
-    .cc:not(.solo-head){grid-template-rows:auto auto minmax(0,1fr);height:100%;}
+    .cc:not(.solo-head){height:100%;}
     .cc-name{grid-column:1;grid-row:1;font-size:34px;line-height:1;
       letter-spacing:-.05em;font-weight:600;padding:26px 0 0 20px;}
     .cc-year{grid-column:2;grid-row:1;font-size:13px;font-weight:500;
@@ -601,23 +602,31 @@
     .nav-lbl{display:inline;font:600 13.5px/1 'AK','Helvetica Neue',Arial,sans-serif;
       letter-spacing:-.025em;color:var(--ink);}
     /* стрелки листания — в шапке справа, как на большом экране */
-    .m-page{position:absolute;top:24px;right:16px;z-index:8;display:none;
-      gap:7px;}
+    .m-page{position:absolute;top:24px;right:24px;z-index:8;display:none;
+      gap:11px;}
     .cw-panel.m-open .m-page{display:flex;}
-    .m-page button{width:34px;height:34px;border-radius:50%;border:0;
+    .m-page button{width:51px;height:51px;border-radius:50%;border:0;
       background:none;padding:0;display:flex;align-items:center;
       justify-content:center;cursor:pointer;transition:opacity .3s var(--eo);}
-    .m-page img{width:22px;height:22px;display:block;}
+    .m-page img{width:33px;height:33px;display:block;}
     .m-page .m-prev img{transform:rotate(180deg);}
     .m-page .m-prev[hidden]{display:none;}
     /* фотокейс и витрина наборов */
     .cw-screen.ribbon.solo{position:static;top:auto;height:62svh;}
     .cc.solo-head{padding-bottom:0;}
-    .cc-nav.solo{position:absolute;left:auto;right:16px;top:24px;bottom:auto;
-      transform:none;width:38px;height:38px;}
-    .cc-nav.solo button{left:0;right:auto;width:34px;height:34px;
+    .cc-nav.solo{position:absolute;left:auto;right:24px;top:24px;bottom:auto;
+      transform:none;width:57px;height:57px;}
+    .cc-nav.solo button{left:0;right:auto;width:51px;height:51px;
       border:0;border-radius:50%;background:none;}
-    .cc-nav.solo img{width:22px;height:22px;}
+    .cc-nav.solo img{width:33px;height:33px;}
+    /* В фотокейсе стрелка «назад» была скрыта общим мобильным правилом,
+       и листать можно было только вперёд. */
+    .cc-nav.solo .cc-prev{display:flex;align-items:center;justify-content:center;}
+    /* Стрелки стали в полтора раза крупнее и заняли место, где стоял год.
+       В фотокейсе год уходит под имя — рядом с ним он теперь не помещается. */
+    .cc.solo-head{grid-template-rows:auto auto auto;}
+    .cc.solo-head .cc-year{grid-column:1;grid-row:2;padding:4px 0 0 20px;}
+    .cc.solo-head .cc-rule{grid-row:3;}
     .cw-sets{display:grid!important;grid-template-columns:1fr 1fr;
       gap:3vw;padding:20px var(--gm) 26px!important;}
     .cw-set{height:auto!important;aspect-ratio:624/1789;flex:none!important;}
@@ -626,7 +635,7 @@
     /* крест — за границей плашки сверху и белый, как на большом экране */
     /* Крест перекрывал стрелки листания. Вместо него — кнопка «Назад» над
        самой плашкой, по центру: она ничего не загораживает и читается. */
-    .cw-x{top:auto;bottom:calc(80svh + 13px);left:50%;right:auto;
+    .cw-x{top:calc(10svh - 55px);bottom:auto;left:50%;right:auto;
       transform:translateX(-50%);
       width:auto;height:auto;padding:8px 20px;border-radius:999px;
       background:var(--paper);z-index:9;
@@ -882,12 +891,12 @@
     .t-d{left:34.21%;top:961.1px;}
     /* два кадра, которые он поставил рядом со строкой «любая» */
     .st-tiles{display:block;position:static;}
-    /* Выше в полтора раза, но растут вверх: низ остаётся на месте, иначе
-       кадры наезжали бы на строку «заслуживает». */
-    .st-t{position:absolute;top:835.6px;width:23.52%;aspect-ratio:1;display:block;
+    /* Размер — как во фрейме; подняты вверх, чтобы до строки «заслуживает»
+       был просвет, а не два пиксела. */
+    .st-t{position:absolute;top:823px;width:15.68%;aspect-ratio:1;display:block;
       background-size:cover;background-position:50% 50%;}
     .st-t.a{left:42.83%;background-image:url('cases/stmt/a.jpg');}
-    .st-t.b{left:69.89%;background-image:url('cases/stmt/b.jpg');}
+    .st-t.b{left:62.05%;background-image:url('cases/stmt/b.jpg');}
     /* ---------- список кейсов по его макету ----------
        номер на 15,8, название на 45,3, подпись 9 кегля в половину тона */
     .idx-row{grid-template-columns:29.5px 1fr;gap:0;align-items:baseline;
@@ -928,22 +937,22 @@
        5737,9). Высота у него 1189 — поэтому ниже копирайта страница не тянется
        и «ilyaivanov» стоит внизу, а не выскакивает к середине. */
     .close-mid,.c-c,.m-hide,.tailroom{display:none;}
-    .close{position:relative;height:1189px;padding:0;}
+    .close{position:relative;height:1300.6px;padding:0;}
     .close > div{position:absolute;margin:0;}
     .c-a,.c-d{margin-left:0;}
     .c-a .p1,.c-a .p2,.c-d .p1,.c-d .p2{display:block;}
     .c-a{top:11.9px;left:0;right:0;}
     .c-a .p1{margin-left:21.71%;}
-    .c-a .p2{margin-left:9.87%;margin-top:-3.8px;}
-    .c-b{top:95.3px;left:18.4%;right:0;}
-    .c-d{top:551.7px;left:0;right:0;}
+    .c-a .p2{margin-left:9.87%;margin-top:-9.17px;}
+    .c-b{top:84.56px;left:18.4%;right:0;}
+    .c-d{top:663.3px;left:0;right:0;}
     .c-d .p1{margin-left:11.07%;}
-    .c-d .p2{margin-left:55.6%;margin-top:2.6px;}
-    .m-orb{display:block;top:195.4px;left:10.67%;width:78.69%;aspect-ratio:1;
+    .c-d .p2{margin-left:55.6%;margin-top:-0.84px;}
+    .m-orb{display:block;top:245.8px;left:10.67%;width:78.69%;aspect-ratio:1;
       border-radius:50%;overflow:hidden;}
     .m-orb canvas{width:100%;height:100%;display:block;}
     /* у него в макете три кружка с иконками, а не буквы */
-    .socials{top:703.8px;left:20.4%;right:auto;margin:0;gap:12px;}
+    .socials{top:815.4px;left:20.4%;right:auto;margin:0;gap:12px;}
     .socials .lbl{display:none;}
     .socials .ico{display:block;}
     .socials .s-mail{display:flex;}
@@ -954,12 +963,12 @@
     .socials a:hover,.socials a:active{background:var(--ink);border-color:var(--ink);}
     .socials a:hover .ico,.socials a:active .ico{filter:invert(1);}
     /* координаты из фрейма 407:3, не по центру */
-    .m-bye{display:block;top:838.7px;left:0;right:0;}
+    .m-bye{display:block;top:950.3px;left:0;right:0;}
     .b-a{margin-left:6.53%;}
     .b-b{margin-left:17.25%;margin-top:-5px;}
     /* «Открыт для новых проектов.» у него справа на 151, «Написать напрямую:»
        слева на 29, адрес — плашкой под ним */
-    .close-aside{top:932px;left:0;right:0;display:block;padding:0;}
+    .close-aside{top:1043.6px;left:0;right:0;display:block;padding:0;}
     .close-aside > div{position:absolute;}
     .close-aside > div:nth-of-type(1){left:40.27%;top:0;}
     .close-aside > div:nth-of-type(2){left:7.73%;right:auto;top:43px;
@@ -970,10 +979,10 @@
     .close-aside > div:nth-of-type(2) .sm:last-child{font-size:10px;
       border:0;background:rgba(0,0,0,.055);border-radius:12px;padding:5px 14px;
       display:inline-block;margin-top:7px;}
-    .m-mark{display:block;top:1092px;left:0;right:0;text-align:center;}
+    .m-mark{display:block;top:1203.6px;left:0;right:0;text-align:center;}
     .m-mark .lg{font-size:19.47vw;line-height:1;display:block;
       color:rgba(0,0,0,.38);}
-    .m-copy{display:block;top:1176px;left:0;right:0;text-align:center;}
+    .m-copy{display:block;top:1287.6px;left:0;right:0;text-align:center;}
     .m-copy .sm{font-size:7px;opacity:.6;}
     /* закреплённые словомарка и копирайт на телефоне не нужны: его вариант
        появляется внизу страницы и проявляется, а не висит весь скролл */
@@ -1144,7 +1153,7 @@
     <div class="m-copy"><span class="sm" data-goo data-fade>’26 © All Right Reserved</span></div>
 
     <div class="tailroom"></div>
-    <span id="buildStamp" style="display:none">BUILD 03.10 15:35</span>
+    <span id="buildStamp" style="display:none">BUILD 03.10 15:53</span>
   </section>
 
 </main>
@@ -1479,8 +1488,14 @@
         pend.push(gsap.delayedCall(i * .5, function(){ reGoo(el, true); }));
       });
     }
+    /* Привязка к самому концу прокрутки, а не к коробке: подвал лежит в
+       последних ста точках документа, и любой порог, считанный от высоты
+       экрана, попадает то до низа, то за него — на разных телефонах
+       по-разному. Здесь порог всегда за 340 точек до конца. */
     ScrollTrigger.create({
-      trigger: host, start: 'bottom bottom+=300', invalidateOnRefresh: true,
+      trigger: host, invalidateOnRefresh: true,
+      start: function(){ return Math.max(0, ScrollTrigger.maxScroll(window) - 340); },
+      end: function(){ return ScrollTrigger.maxScroll(window); },
       onEnter: show, onEnterBack: show,
       onLeaveBack: function(){
         pend.forEach(function(t){ t.kill(); }); pend.length = 0;
@@ -1900,7 +1915,7 @@
     var prev = nav.querySelector('.cc-prev'), next = nav.querySelector('.cc-next');
     fr.addEventListener('load', function(){ fitRibbonIn(ribS); });
     if(window.ResizeObserver) new ResizeObserver(function(){ fitRibbonIn(ribS); }).observe(ribS);
-    gsap.set(prev, {x: -76, opacity: 0});
+    gsap.set(prev, {x: -114, opacity: 0});
     function syncNav(){
       var atStart = ribS.scrollLeft <= 2;
       prev.style.pointerEvents = atStart ? 'none' : 'auto';
@@ -1942,6 +1957,28 @@
     });
     ribS.addEventListener('scroll', sync);
     sync();
+  }
+
+  /* Открытие окна. На телефоне плашка выезжает снизу вверх, и кнопка
+     «Назад» проявляется только после того, как плашка встала — он просил
+     именно такой порядок. На большом экране движение прежнее. */
+  function openAnim(){
+    var veil = cwEl.querySelector('.cw-veil'), panel = cwEl.querySelector('.cw-panel');
+    var back = cwEl.querySelector('.cw-x');
+    var narrow = window.matchMedia('(max-width:900px)').matches;
+    var tl = gsap.timeline();
+    tl.fromTo(veil, {opacity: 0}, {opacity: 1, duration: .32, ease: 'none'}, 0);
+    if(narrow){
+      if(back) gsap.set(back, {opacity: 0, y: 10, pointerEvents: 'none'});
+      tl.fromTo(panel, {yPercent: 100, opacity: 1},
+                       {yPercent: 0, duration: .62, ease: EASE.rise}, 0);
+      if(back) tl.to(back, {opacity: 1, y: 0, pointerEvents: 'auto',
+                            duration: .34, ease: EASE.glide}, .62);
+    } else {
+      tl.fromTo(panel, {opacity: 0, yPercent: 3, scale: .985},
+                       {opacity: 1, yPercent: 0, scale: 1, duration: .5, ease: EASE.rise}, .04);
+    }
+    return tl;
   }
 
   function wireCase(){
@@ -2321,11 +2358,7 @@
       liftForGlobe();
       if(window.lenis && lenis.stop) lenis.stop();
       document.documentElement.classList.add('cw-locked');
-      var veilC = cwEl.querySelector('.cw-veil'), panelC = cwEl.querySelector('.cw-panel');
-      gsap.timeline()
-        .fromTo(veilC, {opacity: 0}, {opacity: 1, duration: .3, ease: 'none'}, 0)
-        .fromTo(panelC, {opacity: 0, yPercent: 3, scale: .985},
-                        {opacity: 1, yPercent: 0, scale: 1, duration: .5, ease: EASE.rise}, .04);
+      openAnim();
       var xC = cwEl.querySelector('.cw-x'); if(xC) xC.focus();
       return;
     }
@@ -2378,11 +2411,7 @@
       placeSoloYear();
       if(window.lenis && lenis.stop) lenis.stop();
       document.documentElement.classList.add('cw-locked');
-      var veilS = cwEl.querySelector('.cw-veil'), panelS = cwEl.querySelector('.cw-panel');
-      gsap.timeline()
-        .fromTo(veilS, {opacity: 0}, {opacity: 1, duration: .3, ease: 'none'}, 0)
-        .fromTo(panelS, {opacity: 0, yPercent: 3, scale: .985},
-                        {opacity: 1, yPercent: 0, scale: 1, duration: .5, ease: EASE.rise}, .04);
+      openAnim();
       var xS = cwEl.querySelector('.cw-x'); if(xS) xS.focus();
       return;
     }
@@ -2407,11 +2436,7 @@
       placeSoloYear();
       if(window.lenis && lenis.stop) lenis.stop();
       document.documentElement.classList.add('cw-locked');
-      var veilR = cwEl.querySelector('.cw-veil'), panelR = cwEl.querySelector('.cw-panel');
-      gsap.timeline()
-        .fromTo(veilR, {opacity: 0}, {opacity: 1, duration: .3, ease: 'none'}, 0)
-        .fromTo(panelR, {opacity: 0, yPercent: 3, scale: .985},
-                        {opacity: 1, yPercent: 0, scale: 1, duration: .5, ease: EASE.rise}, .04);
+      openAnim();
       var xR = cwEl.querySelector('.cw-x'); if(xR) xR.focus();
       return;
     }
@@ -2425,11 +2450,7 @@
       liftForGlobe();
       if(window.lenis && lenis.stop) lenis.stop();
       document.documentElement.classList.add('cw-locked');
-      var veilF = cwEl.querySelector('.cw-veil'), panelF = cwEl.querySelector('.cw-panel');
-      gsap.timeline()
-        .fromTo(veilF, {opacity: 0}, {opacity: 1, duration: .3, ease: 'none'}, 0)
-        .fromTo(panelF, {opacity: 0, yPercent: 3, scale: .985},
-                        {opacity: 1, yPercent: 0, scale: 1, duration: .5, ease: EASE.rise}, .04);
+      openAnim();
       var xF = cwEl.querySelector('.cw-x'); if(xF) xF.focus();
       return;
     }
@@ -2453,11 +2474,7 @@
     if(window.lenis && lenis.stop) lenis.stop();
       document.documentElement.classList.add('cw-locked');
 
-    var veil = cwEl.querySelector('.cw-veil'), panel = cwEl.querySelector('.cw-panel');
-    gsap.timeline()
-      .fromTo(veil, {opacity: 0}, {opacity: 1, duration: .3, ease: 'none'}, 0)
-      .fromTo(panel, {opacity: 0, yPercent: 3, scale: .985},
-                     {opacity: 1, yPercent: 0, scale: 1, duration: .5, ease: EASE.rise}, .04);
+    openAnim();
     var x = cwEl.querySelector('.cw-x'); if(x) x.focus();
   }
 
@@ -3079,8 +3096,8 @@
         // контейнером прокрутки, липкий элемент привязывается к нему и не
         // держится. ScrollTrigger закрепляет через fixed и этим не связан.
         pin: stage, pinSpacing: false, anticipatePin: 1}})
-      .fromTo(track, {x: function(){ return window.innerWidth; }},
-                     {x: function(){ return -track.scrollWidth; },
+      .fromTo(track, {x: function(){ return window.innerWidth + 190; }},
+                     {x: function(){ return -track.scrollWidth - 190; },
                       ease: 'none', duration: .72}, 0)
       .to(A, {y: function(){ return -near(); }, ease: 'none', duration: .88}, 0)
       .to(B, {y: function(){ return  near(); }, ease: 'none', duration: .88}, 0)
