@@ -10,7 +10,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap&subset=cyrillic" rel="stylesheet">
 <link rel="preload" href="fonts/ak.woff2" as="font" type="font/woff2" crossorigin>
-<script src="cases.js?v=032332"></script>
+<script src="cases.js?v=032334"></script>
 <!-- Библиотеки лежат рядом с сайтом, а не на CDN: при недоступном CDN
      страница превращалась в белый экран со счётчиком 0 % — весь скрипт
      падает на первой же строке с gsap. -->
@@ -1232,7 +1232,7 @@
     <div class="m-copy"><span class="sm" data-goo data-fade>’26 © All Right Reserved</span></div>
 
     <div class="tailroom"></div>
-    <span id="buildStamp" style="display:none">BUILD 03.10 23:32</span>
+    <span id="buildStamp" style="display:none">BUILD 03.10 23:34</span>
   </section>
 
 </main>
@@ -4377,9 +4377,12 @@ import * as THREE from './vendor/three.module.js';
 
   /* Шар набирает масштаб по мере захода в экран: входит небольшим и
      раскрывается к тому моменту, когда встаёт по центру. */
-  var grow = {v: 0.42};
+  /* Рост растянут на весь проход шара через экран: при коротком участке
+     он добирал полный размер ещё до того, как попадал в кадр, и роста не
+     было видно вовсе. */
+  var grow = {v: 0.3};
   gsap.to(grow, {v: 1, ease: 'none',
-    scrollTrigger: {trigger: host, start: 'top bottom', end: 'top 22%',
+    scrollTrigger: {trigger: host, start: 'top bottom', end: 'center 28%',
                     scrub: .5, invalidateOnRefresh: true}});
 
   var live = true;
