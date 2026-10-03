@@ -10,7 +10,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap&subset=cyrillic" rel="stylesheet">
 <link rel="preload" href="fonts/ak.woff2" as="font" type="font/woff2" crossorigin>
-<script src="cases.js?v=032313"></script>
+<script src="cases.js?v=032332"></script>
 <!-- Библиотеки лежат рядом с сайтом, а не на CDN: при недоступном CDN
      страница превращалась в белый экран со счётчиком 0 % — весь скрипт
      падает на первой же строке с gsap. -->
@@ -658,9 +658,11 @@
        тот же, что у одиночной кнопки при открытии из списка. */
     .cw-pair{position:absolute;left:16px;right:16px;top:calc(10svh - 34px);
       display:flex;justify-content:space-between;z-index:9;}
-    .cw-pair button{border:0;background:var(--paper);color:var(--ink);
+    /* Овалы всегда светлые: кейс из блока работ открывается на тёмной теме,
+       и фон «бумаги» там чёрный — капсул было не видно. */
+    .cw-pair button{border:0;background:#fff;color:#000;
       font:600 13px/1 'AK','Helvetica Neue',Arial,sans-serif;letter-spacing:-.02em;
-      padding:8px 18px;border-radius:999px;cursor:pointer;}
+      padding:9px 18px;border-radius:999px;cursor:pointer;}
     #caseWin.pair-on .cw-x{display:none;}
     .sh-bar{position:absolute;left:29px;right:29px;top:calc(90svh + 58px);
       height:20px;border-radius:999px;background:var(--paper);z-index:9;
@@ -900,7 +902,7 @@
       text-align:left;text-shadow:0 1px 12px rgba(0,0,0,.45);
       background:linear-gradient(to top,rgba(0,0,0,.55),transparent);}
     .work-link{position:absolute;left:0;right:0;top:50%;transform:translateY(-50%);
-      opacity:0;pointer-events:auto;padding:0;z-index:4;text-align:center;}
+      opacity:0;pointer-events:none;padding:0;z-index:4;text-align:center;}
     /* линия чуть у́же самой надписи */
     .work-link i{width:0;max-width:52%;}
     /* ---------- первый экран и заявление по его макету ----------
@@ -1230,7 +1232,7 @@
     <div class="m-copy"><span class="sm" data-goo data-fade>’26 © All Right Reserved</span></div>
 
     <div class="tailroom"></div>
-    <span id="buildStamp" style="display:none">BUILD 03.10 23:13</span>
+    <span id="buildStamp" style="display:none">BUILD 03.10 23:32</span>
   </section>
 
 </main>
@@ -3471,8 +3473,10 @@
       /* Строки не просто гаснут: они уходят в размытие, и из размытия
          проявляется «Перейти ко всем кейсам» — как он и просил. */
       .to([A, B], {opacity: 0, filter: 'blur(16px)', duration: .05, ease: 'none'}, .90)
+      .set(link, {pointerEvents: 'none'}, 0)
       .fromTo(link, {opacity: 0, filter: 'blur(16px)'},
                     {opacity: 1, filter: 'blur(0px)', duration: .06, ease: 'none'}, .92)
+      .set(link, {pointerEvents: 'auto'}, .96)
       .to(rule, {width: '36%', ease: 'none', duration: .06, immediateRender: false}, .94);
   }
 
