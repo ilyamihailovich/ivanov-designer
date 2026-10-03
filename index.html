@@ -10,7 +10,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap&subset=cyrillic" rel="stylesheet">
 <link rel="preload" href="fonts/ak.woff2" as="font" type="font/woff2" crossorigin>
-<script src="cases.js?v=032005"></script>
+<script src="cases.js?v=032007"></script>
 <!-- Библиотеки лежат рядом с сайтом, а не на CDN: при недоступном CDN
      страница превращалась в белый экран со счётчиком 0 % — весь скрипт
      падает на первой же строке с gsap. -->
@@ -1194,7 +1194,7 @@
     <div class="m-copy"><span class="sm" data-goo data-fade>’26 © All Right Reserved</span></div>
 
     <div class="tailroom"></div>
-    <span id="buildStamp" style="display:none">BUILD 03.10 20:05</span>
+    <span id="buildStamp" style="display:none">BUILD 03.10 20:07</span>
   </section>
 
 </main>
@@ -2008,9 +2008,8 @@
     var at = 0, busy = false;
     var BLUR = 16, T = .26;            // быстро: он просил короче прежнего
     /* Кнопки стоят одна на другой (обе left:0 внутри своей коробки), поэтому
-       «назад» отводится влево. 81 при кнопке 51 даёт просвет 30 — вдвое
-       меньше прежнего. */
-    gsap.set(prev, {x: -81});
+       «назад» отводится влево. 65 при кнопке 51 даёт просвет 14. */
+    gsap.set(prev, {x: -65});
     gsap.set(frames, {autoAlpha: 0, filter: 'blur(' + BLUR + 'px)'});
     gsap.set(frames[0], {autoAlpha: 1, filter: 'blur(0px)'});
     function sync(){
@@ -2033,6 +2032,28 @@
     }
     next.addEventListener('click', function(){ go(1); });
     prev.addEventListener('click', function(){ go(-1); });
+    /* Пальцем влево-вправо — как по прежней ленте. Стопка кадров сама по себе
+       не прокручивается, поэтому жест разбирается вручную. */
+    (function(){
+      var x0 = 0, y0 = 0, live = false;
+      deck.addEventListener('touchstart', function(e){
+        if(e.touches.length !== 1){ live = false; return; }
+        x0 = e.touches[0].clientX; y0 = e.touches[0].clientY; live = true;
+      }, {passive: true});
+      deck.addEventListener('touchmove', function(e){
+        if(!live) return;
+        var dx = e.touches[0].clientX - x0, dy = e.touches[0].clientY - y0;
+        // вертикальный жест отдаём странице, горизонтальный забираем себе
+        if(Math.abs(dx) > 12 && Math.abs(dx) > Math.abs(dy) * 1.2 && e.cancelable) e.preventDefault();
+      }, {passive: false});
+      deck.addEventListener('touchend', function(e){
+        if(!live) return; live = false;
+        var t = e.changedTouches[0];
+        var dx = t.clientX - x0, dy = t.clientY - y0;
+        if(Math.abs(dx) < 42 || Math.abs(dx) < Math.abs(dy)) return;
+        go(dx < 0 ? 1 : -1);
+      });
+    })();
     deck.addEventListener('keydown', function(e){
       if(e.key === 'ArrowRight') go(1);
       if(e.key === 'ArrowLeft') go(-1);
@@ -2053,7 +2074,7 @@
     var prev = nav.querySelector('.cc-prev'), next = nav.querySelector('.cc-next');
     fr.addEventListener('load', function(){ fitRibbonIn(ribS); });
     if(window.ResizeObserver) new ResizeObserver(function(){ fitRibbonIn(ribS); }).observe(ribS);
-    gsap.set(prev, {x: -81, opacity: 0});
+    gsap.set(prev, {x: -65, opacity: 0});
     function syncNav(){
       var atStart = ribS.scrollLeft <= 2;
       prev.style.pointerEvents = atStart ? 'none' : 'auto';
