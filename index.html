@@ -10,7 +10,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap&subset=cyrillic" rel="stylesheet">
 <link rel="preload" href="fonts/ak.woff2" as="font" type="font/woff2" crossorigin>
-<script src="cases.js?v=031345"></script>
+<script src="cases.js?v=031535"></script>
 <script src="https://cdn.jsdelivr.net/npm/lenis@1.3.21/dist/lenis.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/gsap.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/ScrollTrigger.min.js"></script>
@@ -537,9 +537,8 @@
     .cw-panel{width:100%;height:80svh;border-radius:16px 16px 0 0;overflow:hidden;}
     .cw-stage{overflow:hidden!important;}
     .cw-scroll.card{padding:0;overflow:hidden;}
-    /* Высота должна быть определённой, иначе строка с текстом в сетке
-       разрастается по содержимому и её хвост уходит под обрез плашки. */
-    .cw-stage{position:static;overflow:visible;height:100%;}
+    .cw-stage{position:static;overflow:visible;}
+
     .cw-screen{position:static;}
     .cc{position:static;width:auto;height:auto;transform:none!important;
       font-family:inherit;padding:0;}
@@ -548,8 +547,11 @@
     /* шапка */
     /* Имя и год — в одну строку слева направо и по общей базовой линии,
        как на большом экране. Имя крупнее. */
-    .cc{display:grid;grid-template-columns:auto 1fr;align-items:baseline;
-      grid-template-rows:auto auto minmax(0,1fr);height:100%;}
+    .cc{display:grid;grid-template-columns:auto 1fr;align-items:baseline;}
+    /* Высота на всю плашку — только у кейса с описанием. Шапка фотокейса
+       пользуется тем же классом, и из-за общей высоты она занимала всю
+       плашку, а лента со съёмкой уходила за её низ — кейс открывался пустым. */
+    .cc:not(.solo-head){grid-template-rows:auto auto minmax(0,1fr);height:100%;}
     .cc-name{grid-column:1;grid-row:1;font-size:34px;line-height:1;
       letter-spacing:-.05em;font-weight:600;padding:26px 0 0 20px;}
     .cc-year{grid-column:2;grid-row:1;font-size:13px;font-weight:500;
@@ -754,6 +756,8 @@
     transition:background .3s var(--eo), color .3s var(--eo), border-color .3s var(--eo);}
   .socials a:hover{background:var(--ink);color:var(--paper);border-color:var(--ink);}
   .socials .ico{display:none;width:100%;height:100%;}
+  .socials a:hover .ico,.socials a:active .ico,.socials a:focus-visible .ico{filter:invert(1);}
+  html.is-dark .socials a:hover .ico,html.is-dark .socials a:active .ico{filter:none;}
   .socials .s-mail{display:none;}
   /* they arrive filled and empty out once the block is properly in view */
   .socials a{background:var(--ink);color:var(--paper);border-color:var(--ink);
@@ -808,7 +812,10 @@
        лента по центру высотой 25,9 % экрана, строки стартуют в 33,1 % от
        середины вверх и вниз. */
     #globeCanvas{display:none;}
-    .featured{height:300svh;position:relative;min-height:0;}
+    /* Блок длиннее: лента шла почти вдвое быстрее пальца и кейсы
+       пролетали. На 450svh обложки идут примерно вровень с прокруткой,
+       и строки заголовка сближаются так же спокойнее. */
+    .featured{height:450svh;position:relative;min-height:0;}
     .globe-stage{position:relative;height:100svh;overflow:hidden;}
     .work-head{position:absolute;inset:0;transform:none;display:block;
       z-index:3;pointer-events:none;}
@@ -877,10 +884,10 @@
     .st-tiles{display:block;position:static;}
     /* Выше в полтора раза, но растут вверх: низ остаётся на месте, иначе
        кадры наезжали бы на строку «заслуживает». */
-    .st-t{position:absolute;top:835.6px;width:15.68%;height:88.2px;display:block;
+    .st-t{position:absolute;top:835.6px;width:23.52%;aspect-ratio:1;display:block;
       background-size:cover;background-position:50% 50%;}
     .st-t.a{left:42.83%;background-image:url('cases/stmt/a.jpg');}
-    .st-t.b{left:62.05%;background-image:url('cases/stmt/b.jpg');}
+    .st-t.b{left:69.89%;background-image:url('cases/stmt/b.jpg');}
     /* ---------- список кейсов по его макету ----------
        номер на 15,8, название на 45,3, подпись 9 кегля в половину тона */
     .idx-row{grid-template-columns:29.5px 1fr;gap:0;align-items:baseline;
@@ -941,6 +948,11 @@
     .socials .ico{display:block;}
     .socials .s-mail{display:flex;}
     .socials a{background:none;color:var(--ink);border-color:var(--hair);}
+    /* При зажатии круг заливается чернилами. Иконка внутри — картинка,
+       цвет текста ей не передаётся, и она оставалась чёрной на чёрном;
+       выворачиваем её тем же правилом, чтобы фон и знак шли вместе. */
+    .socials a:hover,.socials a:active{background:var(--ink);border-color:var(--ink);}
+    .socials a:hover .ico,.socials a:active .ico{filter:invert(1);}
     /* координаты из фрейма 407:3, не по центру */
     .m-bye{display:block;top:838.7px;left:0;right:0;}
     .b-a{margin-left:6.53%;}
@@ -1132,7 +1144,7 @@
     <div class="m-copy"><span class="sm" data-goo data-fade>’26 © All Right Reserved</span></div>
 
     <div class="tailroom"></div>
-    <span id="buildStamp" style="display:none">BUILD 03.10 13:45</span>
+    <span id="buildStamp" style="display:none">BUILD 03.10 15:35</span>
   </section>
 
 </main>
@@ -1457,11 +1469,23 @@
       gsap.set(el, {opacity: 0});
       el.classList.add('shown');
     });
+    /* Порог взят с большим запасом до низа: в последних 90 px прокрутки
+       анимацию просто не успеваешь увидеть — доезжаешь по инерции уже на
+       готовое. Копирайт выходит на полсекунды позже словомарки. */
+    var pend = [];
+    function show(){
+      pend.forEach(function(t){ t.kill(); }); pend.length = 0;
+      list.forEach(function(el, i){
+        pend.push(gsap.delayedCall(i * .5, function(){ reGoo(el, true); }));
+      });
+    }
     ScrollTrigger.create({
-      trigger: host, start: 'bottom bottom+=90', invalidateOnRefresh: true,
-      onEnter:      function(){ list.forEach(function(el, i){ gsap.delayedCall(i * .12, function(){ reGoo(el, true);  }); }); },
-      onEnterBack:  function(){ list.forEach(function(el, i){ gsap.delayedCall(i * .12, function(){ reGoo(el, true);  }); }); },
-      onLeaveBack:  function(){ list.forEach(function(el){ reGoo(el, false); }); }
+      trigger: host, start: 'bottom bottom+=300', invalidateOnRefresh: true,
+      onEnter: show, onEnterBack: show,
+      onLeaveBack: function(){
+        pend.forEach(function(t){ t.kill(); }); pend.length = 0;
+        list.forEach(function(el){ reGoo(el, false); });
+      }
     });
   }
 
@@ -2718,7 +2742,7 @@
        почти секунду. Теперь он — тварь этого же таймлайна и ходит с ними
        в такт в обе стороны. */
     tl.to(list, {'--ovl': 1, duration: 0.13 * (items.length - 1) + 0.55,
-                 ease: 'none'}, 0);
+                 ease: 'power2.out'}, 0);
 
     function run(to){
       if(open === to) return;
@@ -3003,14 +3027,14 @@
     gsap.set(B, {y: function(){ return  off(); }});
     gsap.set(link, {opacity: 0});
     gsap.set(rule, {width: 0});
-    gsap.set([A, B], {opacity: 0});   // проявятся из кляксы на входе
 
     /* Заголовок блока проявляется из кляксы при каждом заходе — так же,
        как строки списка. Обратного хода здесь нет: уход в размытие уже
        делает сам закреплённый таймлайн на 0,88. */
+    gsap.set(head, {opacity: 0});
     ScrollTrigger.create({trigger: sec, start: 'top 92%',
-      onEnter:     function(){ reGoo(A, true); reGoo(B, true); },
-      onEnterBack: function(){ reGoo(A, true); reGoo(B, true); }});
+      onEnter:     function(){ reGoo(head, true); },
+      onEnterBack: function(){ reGoo(head, true); }});
 
     // тёмная тема держится, пока блок закреплён, — ровно как у шара
     var rootEl = document.documentElement;
@@ -3046,11 +3070,6 @@
         var sx = 0.92 + 0.08 * Math.min(1, a);
         el.style.transform = 'rotate(' + (u * 4.6).toFixed(2) + 'deg) ' +
                              'scale(' + sx.toFixed(3) + ',' + sy.toFixed(3) + ')';
-        /* Кадр не выезжает из-за края и не торчит обрезанным куском: пока он
-           хотя бы касается границы окна, он прозрачен, и проявляется только
-           целиком войдя внутрь. Он просил именно «из ниоткуда». */
-        var m = Math.min(r.left, W - r.right);
-        el.style.opacity = m <= 0 ? '0' : (m >= 44 ? '1' : (m / 44).toFixed(3));
       }
     })();
 
