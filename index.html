@@ -10,7 +10,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap&subset=cyrillic" rel="stylesheet">
 <link rel="preload" href="fonts/ak.woff2" as="font" type="font/woff2" crossorigin>
-<script src="cases.js?v=032339"></script>
+<script src="cases.js?v=040033"></script>
 <!-- Библиотеки лежат рядом с сайтом, а не на CDN: при недоступном CDN
      страница превращалась в белый экран со счётчиком 0 % — весь скрипт
      падает на первой же строке с gsap. -->
@@ -1233,7 +1233,7 @@
     <div class="m-copy"><span class="sm" data-goo data-fade>’26 © All Right Reserved</span></div>
 
     <div class="tailroom"></div>
-    <span id="buildStamp" style="display:none">BUILD 03.10 23:39</span>
+    <span id="buildStamp" style="display:none">BUILD 04.10 00:33</span>
   </section>
 
 </main>
@@ -3278,13 +3278,19 @@
      и копирайт, и мылить их нельзя. */
   (function(){
     var root = document.documentElement;
+    /* Кромки не размывают первый экран. Порог считается по самой прокрутке:
+       привязка к координате блока не годится — на высоком экране его низ
+       оказывается ниже отметки уже при нулевой прокрутке, и размытие
+       включалось сразу. */
+    var EDGE_AT = 240;
     function check(){
       var left = document.body.scrollHeight - window.scrollY - window.innerHeight;
       root.classList.toggle('at-bottom', left < 170);
+      root.classList.toggle('no-botfade', (window.scrollY || 0) < EDGE_AT);
     }
     window.addEventListener('scroll', check, {passive: true});
     window.addEventListener('resize', check);
-    check();
+    (function tick(){ requestAnimationFrame(tick); check(); })();
   })();
 
   function wordmark(){
