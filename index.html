@@ -10,7 +10,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap&subset=cyrillic" rel="stylesheet">
 <link rel="preload" href="fonts/ak.woff2" as="font" type="font/woff2" crossorigin>
-<script src="cases.js?v=032057"></script>
+<script src="cases.js?v=032313"></script>
 <!-- Библиотеки лежат рядом с сайтом, а не на CDN: при недоступном CDN
      страница превращалась в белый экран со счётчиком 0 % — весь скрипт
      падает на первой же строке с gsap. -->
@@ -591,7 +591,9 @@
       pointer-events:none;transition:height .66s var(--eo);}
     .cw-screen.ribbon::-webkit-scrollbar{display:none;}
     .cw-screen.ribbon{scrollbar-width:none;}
-    .cw-panel.m-open .cw-screen.ribbon:not(.solo){height:calc(80svh - 108px);
+    /* Лента начинается сразу под линейкой: вычиталось 108 при том, что
+       линейка кончается на 77 — оставалась пустая белая полоса. */
+    .cw-panel.m-open .cw-screen.ribbon:not(.solo){height:calc(80svh - 78px);
       pointer-events:auto;}
     /* текст уходит в размытие снизу вверх и в прозрачность */
     .cc-copy{transition:opacity .4s var(--eo), filter .5s var(--eo),
@@ -651,6 +653,15 @@
     .cc-nav.solo img{width:22px;height:22px;}
     /* Ползунок панорамы: выезжает из-под плашки, когда кадр горизонтальный,
        и уходит обратно, когда с него сходишь. */
+    /* Пара кнопок над плашкой — для кейса, открытого из блока работ.
+       «Назад» по левому краю кадра, «Все кейсы» по правому. Отступ сверху
+       тот же, что у одиночной кнопки при открытии из списка. */
+    .cw-pair{position:absolute;left:16px;right:16px;top:calc(10svh - 34px);
+      display:flex;justify-content:space-between;z-index:9;}
+    .cw-pair button{border:0;background:var(--paper);color:var(--ink);
+      font:600 13px/1 'AK','Helvetica Neue',Arial,sans-serif;letter-spacing:-.02em;
+      padding:8px 18px;border-radius:999px;cursor:pointer;}
+    #caseWin.pair-on .cw-x{display:none;}
     .sh-bar{position:absolute;left:29px;right:29px;top:calc(90svh + 58px);
       height:20px;border-radius:999px;background:var(--paper);z-index:9;
       box-shadow:0 2px 10px rgba(0,0,0,.10);touch-action:none;}
@@ -901,14 +912,16 @@
     .op-1 h1,.op-1 > div{font-size:11.45vw;line-height:10.4vw;margin-left:0;}
     /* ряда плиток и подписи под ним в его мобильном макете нет */
     #tiles,.tiles-note{display:none;}
-    .op-note{position:absolute;left:46.32%;top:94.7px;margin:0;padding:0;
+    /* Весь блок поднят на 52 от фреймовых отметок — он показал линию,
+       по которой должен начинаться текст. */
+    .op-note{position:absolute;left:46.32%;top:42.7px;margin:0;padding:0;
       width:53%;z-index:3;}
     .op-note .sm{text-align:left;}
-    .op-1{position:absolute;left:45.33%;top:135.6px;margin:0;width:56%;z-index:2;}
-    .op-role{position:absolute;left:14.93%;top:240.4px;margin:0;width:18.67%;z-index:3;}
+    .op-1{position:absolute;left:45.33%;top:83.6px;margin:0;width:56%;z-index:2;}
+    .op-role{position:absolute;left:14.93%;top:188.4px;margin:0;width:18.67%;z-index:3;}
     .op-role .sm{text-align:right;display:block;}
-    #cloth{position:absolute;left:45.33%;right:auto;top:240.4px;
-      width:44.32%;aspect-ratio:166.2/195.5;margin:0;}
+    #cloth{position:absolute;left:45.33%;right:auto;top:188.4px;
+      width:48%;aspect-ratio:1086/1448;margin:0;}
     /* Строки заявления стоят абсолютно на его отметках. В потоке последние
        три уезжали вниз на 3,6–4,3: у строки со сменяющимся словом своя
        высота строки, и она накапливалась. */
@@ -918,6 +931,9 @@
     .featured{margin-top:24px;}
     /* кнопка меню и пункты мельче */
     .menu-pill,.menu-item{padding:7px 16px;font-size:10.5px;}
+    /* подпись в углу встаёт по центру кнопки меню, а не выше неё */
+    .corner.tr{top:17.5px;}
+    .corner.tl{top:24px;}
     .stmt{padding:0;height:0;position:static;}
     .stmt > div{position:absolute;margin:0;}
     .stmt .s-1{left:14.48%;top:501px;}
@@ -961,9 +977,15 @@
     #cases{position:relative;}
     .idx-wrap{position:static;padding-top:18px;}
     .ix-a,.ix-b,.ix-c{position:absolute;margin:0!important;font-size:11.45vw;}
-    .ix-a{left:14.16%;top:146.2px;}
-    .ix-b{left:26.4%;top:184.8px;}
-    .ix-c{left:9.55%;top:223.4px;}
+    /* Строки заголовка стоят абсолютом, а список — в потоке. Когда отступ
+       обёртки уменьшили, список поднялся, а заголовок остался и «работы»
+       наехали на первую строку списка. Поднимаем заголовок на столько же. */
+    .ix-a{left:14.16%;top:40px;}
+    .ix-b{left:26.4%;top:78.6px;}
+    .ix-c{left:9.55%;top:117.2px;}
+    /* список в потоке — его отступ держит дистанцию до заголовка.
+       Замер: при 170 зазор выходил 178, нужно 40. */
+    .idx{margin-top:32px;}
     /* ---------- кружок «’26» ----------
        у него это просто подпись под строками, без кружка и рамки */
     /* у него в кадре это не кружок, а подпись «©’26» на 135,8 × 1080,2 */
@@ -1208,7 +1230,7 @@
     <div class="m-copy"><span class="sm" data-goo data-fade>’26 © All Right Reserved</span></div>
 
     <div class="tailroom"></div>
-    <span id="buildStamp" style="display:none">BUILD 03.10 20:57</span>
+    <span id="buildStamp" style="display:none">BUILD 03.10 23:13</span>
   </section>
 
 </main>
@@ -2068,8 +2090,20 @@
       paint();
     }
 
+    /* Ползунок встаёт под фактический низ плашки: когда кейс открыт из
+       блока работ, плашка приподнята, и жёсткий отсчёт от 90svh промахивался. */
+    function placeBar(){
+      if(!bar) return;
+      var pn = cwScroll.closest('.cw-panel');
+      if(!pn) return;
+      var r = pn.getBoundingClientRect();
+      bar.style.top = Math.round(r.bottom + 58) + 'px';
+      bar.style.left = Math.round(r.left + 13) + 'px';
+      bar.style.right = Math.round(window.innerWidth - r.right + 13) + 'px';
+    }
     function showBar(run){
       if(!bar) return;
+      placeBar();
       if(barIn) barIn.kill();
       barIn = gsap.timeline()
         .to(bar, {yPercent: 0, opacity: 1, duration: .42, ease: EASE.rise}, .3);
@@ -2158,7 +2192,7 @@
       if(e.key === 'ArrowRight') go(1);
       if(e.key === 'ArrowLeft') go(-1);
     });
-    window.addEventListener('resize', paint);
+    window.addEventListener('resize', function(){ placeBar(); paint(); });
     frames.forEach(function(im){
       if(im.complete) return;
       im.addEventListener('load', function(){ if(frames[at] === im) armPan(); });
@@ -2600,6 +2634,8 @@
 
     var panel0 = cwEl.querySelector('.cw-panel');
     var oldBar = cwEl.querySelector('.sh-bar'); if(oldBar) oldBar.remove();
+    var oldPair = cwEl.querySelector('.cw-pair'); if(oldPair) oldPair.remove();
+    cwEl.classList.remove('pair-on');
     // у фотокейса card хранит только год — экран с описанием ему не нужен
     if(c.card && !c.ribbonOnly && !(c.sets && c.sets.length)){
       cwScroll.className = 'cw-scroll card';
@@ -2752,6 +2788,29 @@
     if(!window.__fromGlobe) return;
     window.__fromGlobe = false;
     panel.classList.add('lifted');
+    if(NARROW){
+      /* На телефоне над плашкой встают две кнопки: «Назад» по левому краю
+         кадра и «Все кейсы» по правому. Центральная кнопка здесь не нужна. */
+      var bar = document.createElement('div');
+      bar.className = 'cw-pair';
+      var back = document.createElement('button');
+      back.type = 'button'; back.textContent = 'Назад';
+      back.addEventListener('click', function(){ closeCase(); });
+      var all = document.createElement('button');
+      all.type = 'button'; all.textContent = 'Все кейсы';
+      all.addEventListener('click', function(){
+        closeCase();
+        var cs0 = document.getElementById('cases');
+        if(cs0) setTimeout(function(){
+          if(window.lenis && lenis.scrollTo) lenis.scrollTo(cs0, {offset: 0});
+          else cs0.scrollIntoView({behavior: 'smooth'});
+        }, 420);
+      });
+      bar.appendChild(back); bar.appendChild(all);
+      cwEl.appendChild(bar);
+      cwEl.classList.add('pair-on');
+      return;
+    }
     var b = document.createElement('button');
     b.type = 'button'; b.className = 'cw-all';
     b.textContent = 'Перейти ко всем кейсам';
@@ -2787,6 +2846,8 @@
       if(pn){ pn.classList.remove('lifted'); gsap.set(pn, {clearProps: 'transform,opacity'}); }
       var ab = cwEl.querySelector('.cw-all'); if(ab) ab.remove();
       var sb = cwEl.querySelector('.sh-bar'); if(sb) sb.remove();
+      var pr = cwEl.querySelector('.cw-pair'); if(pr) pr.remove();
+      cwEl.classList.remove('pair-on');
       document.documentElement.classList.remove('cw-locked');
       if(window.lenis && lenis.start) lenis.start();
       if(cwLastFocus && cwLastFocus.focus) cwLastFocus.focus();
@@ -3365,21 +3426,34 @@
       new IntersectionObserver(function(e){ liveWarp = e[0].isIntersecting; },
         {rootMargin: '200px'}).observe(rail);
     }
+    /* Талия ленты — не масштаб каждой плитки по отдельности, а одна общая
+       кривая: верх и низ полосы считаются от положения точки на экране, и
+       соседние кадры сходятся краями, потому что функция у них одна. Форма
+       режется clip-path, поэтому кадры не растягиваются и не рвутся. */
+    var STEPS = 10;
     (function warpFrame(){
       requestAnimationFrame(warpFrame);
       if(!liveWarp) return;
       var W = window.innerWidth, half = W / 2;
+      function kAt(x){
+        var u = (x - half) / half;
+        if(u < -1.6) u = -1.6; if(u > 1.6) u = 1.6;
+        var a = Math.min(1, Math.abs(u));
+        return 0.74 + 0.26 * Math.pow(a, 1.35);
+      }
       for(var i = 0; i < track.children.length; i++){
         var el = track.children[i];
         var r = el.getBoundingClientRect();
-        if(r.right < -140 || r.left > W + 140){ el.style.transform = ''; continue; }
-        var u = ((r.left + r.width / 2) - half) / half;   // -1 слева, +1 справа
-        if(u < -1.6) u = -1.6; if(u > 1.6) u = 1.6;
-        var a = Math.abs(u);
-        var sy = 0.74 + 0.26 * Math.pow(Math.min(1, a), 1.35);
-        var sx = 0.92 + 0.08 * Math.min(1, a);
-        el.style.transform = 'rotate(' + (u * 4.6).toFixed(2) + 'deg) ' +
-                             'scale(' + sx.toFixed(3) + ',' + sy.toFixed(3) + ')';
+        if(r.right < -140 || r.left > W + 140){ el.style.clipPath = ''; continue; }
+        var top = [], bot = [];
+        for(var q = 0; q <= STEPS; q++){
+          var f = q / STEPS;
+          var k = kAt(r.left + r.width * f);
+          var fx = (f * 100).toFixed(1);
+          top.push(fx + '% ' + ((1 - k) / 2 * 100).toFixed(2) + '%');
+          bot.unshift(fx + '% ' + ((1 + k) / 2 * 100).toFixed(2) + '%');
+        }
+        el.style.clipPath = 'polygon(' + top.concat(bot).join(',') + ')';
       }
     })();
 
@@ -3399,7 +3473,7 @@
       .to([A, B], {opacity: 0, filter: 'blur(16px)', duration: .05, ease: 'none'}, .90)
       .fromTo(link, {opacity: 0, filter: 'blur(16px)'},
                     {opacity: 1, filter: 'blur(0px)', duration: .06, ease: 'none'}, .92)
-      .to(rule, {width: '52%', ease: 'none', duration: .06, immediateRender: false}, .94);
+      .to(rule, {width: '36%', ease: 'none', duration: .06, immediateRender: false}, .94);
   }
 
   function workHead(){
@@ -3876,7 +3950,7 @@ import * as THREE from './vendor/three.module.js';
   /* Пропорция берётся с коробки, а не задаётся числом: так разметка и сцена
      не могут разойтись. Ширина делится на сбор — ткань садится по ширине на
      те же 10 %, и в коробку она приходит ровно его кадром. */
-  var AR = 166.2 / 195.5;            // полотно короче, ближе к квадрату
+  var AR = 1086 / 1448;   // пропорция самого изображения, без кадрирования            // полотно короче, ближе к квадрату
   var H = 1.0, W = AR;
 
   var renderer = new THREE.WebGLRenderer({canvas: canvas, antialias: !SMALL, alpha: true});
@@ -3927,7 +4001,7 @@ import * as THREE from './vendor/three.module.js';
   // составляющая, у матового материала её нет и ткань читается как бумага.
   var mat = new THREE.MeshPhongMaterial({transparent: true, side: THREE.DoubleSide,
     shininess: 24, specular: new THREE.Color(0x3a3a3a)});
-  new THREE.TextureLoader().load('cloth-photo-2.jpg', function(tex){
+  new THREE.TextureLoader().load('cloth-photo-3.jpg', function(tex){
     tex.colorSpace = THREE.SRGBColorSpace;
     tex.anisotropy = Math.min(4, renderer.capabilities.getMaxAnisotropy());
     mat.map = tex; mat.needsUpdate = true;
@@ -4299,9 +4373,9 @@ import * as THREE from './vendor/three.module.js';
 
   /* Шар набирает масштаб по мере захода в экран: входит небольшим и
      раскрывается к тому моменту, когда встаёт по центру. */
-  var grow = {v: 0.62};
+  var grow = {v: 0.42};
   gsap.to(grow, {v: 1, ease: 'none',
-    scrollTrigger: {trigger: host, start: 'top bottom', end: 'center center',
+    scrollTrigger: {trigger: host, start: 'top bottom', end: 'top 22%',
                     scrub: .5, invalidateOnRefresh: true}});
 
   var live = true;
