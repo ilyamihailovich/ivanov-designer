@@ -10,7 +10,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap&subset=cyrillic" rel="stylesheet">
 <link rel="preload" href="fonts/ak.woff2" as="font" type="font/woff2" crossorigin>
-<script src="cases.js?v=031614"></script>
+<script src="cases.js?v=031812"></script>
 <script src="https://cdn.jsdelivr.net/npm/lenis@1.3.21/dist/lenis.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/gsap.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/ScrollTrigger.min.js"></script>
@@ -554,23 +554,28 @@
        плашку, а лента со съёмкой уходила за её низ — кейс открывался пустым. */
     .cc:not(.solo-head){height:100%;}
     .cc-name{grid-column:1;grid-row:1;font-size:34px;line-height:1;
-      letter-spacing:-.05em;font-weight:600;padding:26px 0 0 20px;}
+      letter-spacing:-.05em;font-weight:600;padding:24px 0 0 20px;}
     .cc-year{grid-column:2;grid-row:1;font-size:13px;font-weight:500;
       opacity:.42;letter-spacing:-.02em;padding:0 0 0 11px;}
-    .cc-rule{grid-column:1 / -1;grid-row:2;height:1px;margin:14px 20px 0;
+    .cc-rule{grid-column:1 / -1;grid-row:2;height:1px;margin:18px 20px 0;
       background:var(--hair);}
     .cc-copy{grid-column:1 / -1;grid-row:3;}
     .cc-nav{grid-column:1 / -1;grid-row:4;}
     /* текст кейса: плотнее и с иерархией */
     /* align-items:baseline у сетки не растягивает ячейку, поэтому колонка
        брала высоту по тексту и вылезала за низ плашки. */
-    .cc-copy{align-self:stretch;padding:0 20px 78px;min-height:0;overflow-y:auto;
+    .cc-copy{align-self:stretch;padding:22px 20px 92px;min-height:0;overflow-y:auto;
+      -webkit-mask-image:linear-gradient(to bottom,#000 calc(100% - 92px),transparent calc(100% - 46px));
+      mask-image:linear-gradient(to bottom,#000 calc(100% - 92px),transparent calc(100% - 46px));
       overscroll-behavior:contain;-webkit-overflow-scrolling:touch;}
+    /* воздух — между блоками, а не внутри абзаца */
+    .cc-h:first-child{margin-top:0;}
     .cc-h{font-size:13px;font-weight:600;letter-spacing:.02em;opacity:.42;
       text-transform:uppercase;margin-top:52px;}
     .cc-b{margin-top:7px;}
-    .cc-b .lead{font-size:15px;line-height:1.06;font-weight:600;letter-spacing:-.025em;}
-    .cc-b .body{font-size:12.5px;line-height:1.26;margin-top:10px;opacity:.56;
+    .cc-b .lead{font-size:15px;line-height:1.02;font-weight:600;letter-spacing:-.025em;
+      margin-top:9px;}
+    .cc-b .body{font-size:12.5px;line-height:1.14;margin-top:13px;opacity:.56;
       font-weight:400;}
     .cc-photo{display:none;}
     /* лента: закрыта, пока не нажата кнопка; раскрывается снизу вверх под
@@ -612,7 +617,16 @@
     .m-page .m-prev img{transform:rotate(180deg);}
     .m-page .m-prev[hidden]{display:none;}
     /* фотокейс и витрина наборов */
-    .cw-screen.ribbon.solo{position:static;top:auto;height:auto;flex:1 1 auto;min-height:0;}
+    .cw-screen.ribbon.solo{position:static;top:auto;height:auto;flex:1 1 auto;min-height:0;
+      margin:18px 16px 16px;border-radius:10px;overflow:hidden;}
+    /* Кадры фотокейса лежат стопкой и меняются перекрёстным затуханием.
+       Поля такие же, как у текста кейса, и кадр больше не упирается в
+       линейку и в край плашки. */
+    .cw-screen.shots{position:relative;flex:1 1 auto;min-height:0;
+      margin:18px 16px 16px;border-radius:10px;overflow:hidden;}
+    .cw-screen.shots .sh{position:absolute;inset:0;display:block;
+      background-size:cover;background-position:50% 50%;
+      will-change:opacity,filter;}
     .cw-scroll.card .cw-stage{display:flex;flex-direction:column;height:100%;}
     /* Между сценой и колонкой кейса стоит .cw-screen — тянуть надо его,
        иначе колонка с текстом вырастает по содержимому и её хвост уходит
@@ -634,9 +648,15 @@
        имя вместе с годом не заезжало под стрелки листания. */
     .cc.solo-head .cc-name{white-space:nowrap;}
     .cc.solo-head .cc-year{grid-column:2;grid-row:1;padding:0 0 0 9px;white-space:nowrap;}
+    /* Витрина наборов: карточки резались низом плашки, подписи не было
+       видно. Теперь колонка прокручивается в своих полях, а карточки стоят
+       в пропорции, при которой подпись всегда в кадре. */
     .cw-sets{display:grid!important;grid-template-columns:1fr 1fr;
-      gap:3vw;padding:20px var(--gm) 26px!important;}
-    .cw-set{height:auto!important;aspect-ratio:624/1789;flex:none!important;}
+      position:static!important;gap:12px;padding:18px 16px 20px!important;
+      flex:1 1 auto;min-height:0;overflow-y:auto;overscroll-behavior:contain;
+      align-content:start;}
+    .cw-set{height:auto!important;aspect-ratio:3/4;flex:none!important;
+      border-radius:10px;overflow:hidden;}
     .cw-all{top:auto;bottom:calc(100% + 2.4svh);font-size:max(14px,3.8vw);}
     .cw-panel.lifted{top:auto;}
     /* крест — за границей плашки сверху и белый, как на большом экране */
@@ -900,9 +920,11 @@
     .t-d{left:34.21%;top:961.1px;}
     /* два кадра, которые он поставил рядом со строкой «любая» */
     .st-tiles{display:block;position:static;}
-    /* Строго по фрейму, узлы 411:28 и 423:70: 80,463 кв., y 844,047,
-       x 160,578 и 254,202 при ширине 375. */
-    .st-t{position:absolute;top:844.05px;width:21.457%;aspect-ratio:1;display:block;
+    /* Размер и горизонталь — по фрейму (411:28 и 423:70): 80,463 кв.,
+       x 160,578 и 254,202. По вертикали подняты на 11,3 от фреймовых
+       844,05, чтобы от их низа до строки «заслуживает» был тот же просвет
+       13,2, что от линии до первого кадра и между кадрами. */
+    .st-t{position:absolute;top:832.75px;width:21.457%;aspect-ratio:1;display:block;
       background-size:cover;background-position:50% 50%;}
     .st-t.a{left:42.821%;background-image:url('cases/stmt/a.jpg');}
     .st-t.b{left:67.787%;background-image:url('cases/stmt/b.jpg');}
@@ -935,9 +957,15 @@
 
     /* витрина наборов инфографики: в потоке, сеткой, иначе высота 100 %
        схлопывалась в ноль и окно открывалось пустым */
+    /* Витрина наборов: карточки резались низом плашки, подписи не было
+       видно. Теперь колонка прокручивается в своих полях, а карточки стоят
+       в пропорции, при которой подпись всегда в кадре. */
     .cw-sets{display:grid!important;grid-template-columns:1fr 1fr;
-      gap:3vw;padding:20px var(--gm) 26px!important;}
-    .cw-set{height:auto!important;aspect-ratio:624/1789;flex:none!important;}
+      position:static!important;gap:12px;padding:18px 16px 20px!important;
+      flex:1 1 auto;min-height:0;overflow-y:auto;overscroll-behavior:contain;
+      align-content:start;}
+    .cw-set{height:auto!important;aspect-ratio:3/4;flex:none!important;
+      border-radius:10px;overflow:hidden;}
     /* ---------- финальный блок по его макету ----------
        Часов и строки «всего лишь» у него нет: на их месте круг с шаром,
        который вращается по прокрутке. Координаты — его, при ширине 375. */
@@ -1162,7 +1190,7 @@
     <div class="m-copy"><span class="sm" data-goo data-fade>’26 © All Right Reserved</span></div>
 
     <div class="tailroom"></div>
-    <span id="buildStamp" style="display:none">BUILD 03.10 16:14</span>
+    <span id="buildStamp" style="display:none">BUILD 03.10 18:12</span>
   </section>
 
 </main>
@@ -1506,15 +1534,25 @@
       if(want){
         list.forEach(function(el, i){
           pend.push(gsap.delayedCall(i * .5, function(){ reGoo(el, true); }));
+          /* Страховка: если проявление через SVG-фильтр почему-то не доедет
+             (а Safari с filter:url() ведёт себя иначе, чем Chromium),
+             строка всё равно выходит простым затуханием. */
+          pend.push(gsap.delayedCall(i * .5 + 1.3, function(){
+            if(!on) return;
+            if(parseFloat(getComputedStyle(el).opacity) < .9){
+              el.style.filter = 'none';
+              gsap.to(el, {opacity: 1, duration: .4, ease: 'none', overwrite: 'auto'});
+            }
+          }));
         });
       } else {
         list.forEach(function(el){ reGoo(el, false); });
       }
     }
-    window.addEventListener('scroll', check, {passive: true});
-    window.addEventListener('resize', check);
-    if(window.lenis && lenis.on) lenis.on('scroll', check);
-    check();
+    /* Проверяем каждый кадр, а не по событию прокрутки: события от Lenis и
+       от окна приходят по-разному в разных браузерах, и подвал то срабатывал,
+       то нет. Сравнение дешёвое — два числа. */
+    (function tick(){ requestAnimationFrame(tick); check(); })();
   }
 
   function armGroup(sel, childSel, start){
@@ -1654,6 +1692,7 @@
   var cwEl = document.getElementById('caseWin');
   var cwScroll = document.getElementById('cwScroll');
   var cwLastFocus = null, cwOpen = false;
+  var NARROW = window.matchMedia('(max-width:900px)').matches;
 
   /* На телефоне плашка кейса обрезает себя по своим границам, и кнопка над
      её верхом внутри плашки не видна. Переносим её в само окно — там она
@@ -1942,6 +1981,66 @@
     }
   }
 
+  /* Фотокейс на телефоне. Раньше кадры лежали одной длинной страницей в
+     рамке, а стрелки прокручивали её вбок: сдвиг было видно, соседний кадр
+     заезжал в окно краем, и никакое размытие поверх этого не превращалось в
+     переход. Теперь кадры лежат стопкой друг на друге, и соседние меняются
+     перекрёстным затуханием через размытие — без всякого съезда. */
+  function shotsDeck(c){
+    var list = c.shots || c.gallery || [];
+    if(!list.length) return '';
+    return '<div class="cw-screen shots solo">' + list.map(function(src, i){
+      return '<i class="sh' + (i === 0 ? ' on' : '') + '" style="background-image:url(' +
+             esc(src).replace(/[()]/g, '') + ')"></i>';
+    }).join('') + '</div>';
+  }
+
+  function wireShots(){
+    var deck = cwScroll.querySelector('.cw-screen.shots');
+    var nav  = cwScroll.querySelector('.cc-nav.solo');
+    if(!deck || !nav) return;
+    var frames = [].slice.call(deck.querySelectorAll('.sh'));
+    var prev = nav.querySelector('.cc-prev'), next = nav.querySelector('.cc-next');
+    var at = 0, busy = false;
+    var BLUR = 16, T = .26;            // быстро: он просил короче прежнего
+    /* Кнопки стоят одна на другой (обе left:0 внутри своей коробки), поэтому
+       «назад» отводится влево. 81 при кнопке 51 даёт просвет 30 — вдвое
+       меньше прежнего. */
+    gsap.set(prev, {x: -81});
+    gsap.set(frames, {autoAlpha: 0, filter: 'blur(' + BLUR + 'px)'});
+    gsap.set(frames[0], {autoAlpha: 1, filter: 'blur(0px)'});
+    function sync(){
+      gsap.to(prev, {opacity: at === 0 ? 0 : 1, duration: .22, ease: 'none'});
+      prev.style.pointerEvents = at === 0 ? 'none' : 'auto';
+      gsap.to(next, {opacity: at === frames.length - 1 ? 0 : 1, duration: .22, ease: 'none'});
+      next.style.pointerEvents = at === frames.length - 1 ? 'none' : 'auto';
+    }
+    function go(dir){
+      if(busy) return;
+      var to = at + dir;
+      if(to < 0 || to >= frames.length) return;
+      busy = true;
+      var from = frames[at], into = frames[to];
+      at = to; sync();
+      gsap.timeline({onComplete: function(){ busy = false; }})
+        .to(from, {autoAlpha: 0, filter: 'blur(' + BLUR + 'px)', duration: T, ease: 'power2.in'}, 0)
+        .fromTo(into, {autoAlpha: 0, filter: 'blur(' + BLUR + 'px)'},
+                      {autoAlpha: 1, filter: 'blur(0px)', duration: T * 1.25, ease: 'power2.out'}, T * .45);
+    }
+    next.addEventListener('click', function(){ go(1); });
+    prev.addEventListener('click', function(){ go(-1); });
+    deck.addEventListener('keydown', function(e){
+      if(e.key === 'ArrowRight') go(1);
+      if(e.key === 'ArrowLeft') go(-1);
+    });
+    document.addEventListener('keydown', function(e){
+      if(!cwOpen || !deck.isConnected) return;
+      if(e.key === 'ArrowRight') go(1);
+      if(e.key === 'ArrowLeft') go(-1);
+    });
+    sync();
+  }
+
   function wireRibbonOnly(){
     var ribS = cwScroll.querySelector('.cw-screen.ribbon.solo');
     if(!ribS) return;
@@ -1950,7 +2049,7 @@
     var prev = nav.querySelector('.cc-prev'), next = nav.querySelector('.cc-next');
     fr.addEventListener('load', function(){ fitRibbonIn(ribS); });
     if(window.ResizeObserver) new ResizeObserver(function(){ fitRibbonIn(ribS); }).observe(ribS);
-    gsap.set(prev, {x: -63, opacity: 0});
+    gsap.set(prev, {x: -81, opacity: 0});
     function syncNav(){
       var atStart = ribS.scrollLeft <= 2;
       prev.style.pointerEvents = atStart ? 'none' : 'auto';
@@ -2456,15 +2555,17 @@
     if(c.page && c.ribbonOnly){
       cwScroll.className = 'cw-scroll card';
       panel0.removeAttribute('style');
+      var deckHtml = NARROW ? shotsDeck(c) : '';
       cwScroll.innerHTML =
         '<div class="cw-stage">' +
           soloHead(c) +
-          '<div class="cw-screen ribbon live solo"><div class="rb-inner">' +
-            '<iframe title="' + esc(c.t) + '" src="' + esc(c.page) + '"></iframe>' +
-          '</div></div>' +
+          (deckHtml ||
+            '<div class="cw-screen ribbon live solo"><div class="rb-inner">' +
+              '<iframe title="' + esc(c.t) + '" src="' + esc(c.page) + '"></iframe>' +
+            '</div></div>') +
         '</div>';
       fitCard();
-      wireRibbonOnly();
+      if(deckHtml) wireShots(); else wireRibbonOnly();
       cwEl.classList.add('on');
       cwEl.setAttribute('aria-hidden', 'false');
       liftForGlobe();
@@ -2885,6 +2986,14 @@
         if(ink.left >= sx || ink.right <= sx) return;
         bands.push([box.top - cr.top, box.bottom - cr.top]);
       });
+      /* Кадры в блоке заявления стоят правее линии и её не пересекают, но
+         линия всё равно должна обрываться по их границам — так нарисовано. */
+      var hard = [];
+      chap.querySelectorAll('.st-t').forEach(function(el){
+        var b = el.getBoundingClientRect();
+        if(b.height <= 0) return;
+        hard.push([b.top - cr.top, b.bottom - cr.top]);
+      });
       bands.sort(function(a, b){ return a[0] - b[0]; });
       var merged = [];
       bands.forEach(function(b){
@@ -2899,6 +3008,17 @@
       // Отступ внутрь одинаковый сверху и снизу: иначе расстояние от линии до
       // строки над разрывом и под ним получается разным.
       merged = merged.map(function(b){ return [b[0] - 8, b[1] + 8]; });
+      // Полосы кадров добавляются без этого припуска: разрыв должен лечь
+      // ровно по их краю.
+      hard.forEach(function(h){
+        var hit = null;
+        for(var k = 0; k < merged.length; k++){
+          if(h[0] <= merged[k][1] && h[1] >= merged[k][0]){ hit = merged[k]; break; }
+        }
+        if(hit){ hit[0] = Math.min(hit[0], h[0]); hit[1] = Math.max(hit[1], h[1]); }
+        else merged.push(h);
+      });
+      merged.sort(function(a, b){ return a[0] - b[0]; });
       // Отрезок короче строки не рисуется: на такой длине линия читается как
       // обрубок, а не как линия. Так короткий кусок невозможен в принципе.
       var MINSEG = 56;
