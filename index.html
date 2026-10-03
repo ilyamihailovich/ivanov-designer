@@ -10,7 +10,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap&subset=cyrillic" rel="stylesheet">
 <link rel="preload" href="fonts/ak.woff2" as="font" type="font/woff2" crossorigin>
-<script src="cases.js?v=032028"></script>
+<script src="cases.js?v=032036"></script>
 <!-- Библиотеки лежат рядом с сайтом, а не на CDN: при недоступном CDN
      страница превращалась в белый экран со счётчиком 0 % — весь скрипт
      падает на первой же строке с gsap. -->
@@ -651,10 +651,13 @@
     .cc-nav.solo img{width:22px;height:22px;}
     /* Ползунок панорамы: выезжает из-под плашки, когда кадр горизонтальный,
        и уходит обратно, когда с него сходишь. */
-    .sh-bar{position:absolute;left:29px;right:29px;top:calc(90svh + 20px);
-      height:22px;border-radius:999px;background:var(--paper);z-index:9;
+    .sh-bar{position:absolute;left:29px;right:29px;top:calc(90svh + 23px);
+      height:20px;border-radius:999px;background:var(--paper);z-index:9;
       box-shadow:0 2px 10px rgba(0,0,0,.10);touch-action:none;}
-    .sh-bar i{position:absolute;left:0;top:4px;height:14px;width:46%;
+    /* дорожка через всю капсулу, по ней ездит короткая ручка */
+    .sh-bar::before{content:'';position:absolute;left:12px;right:12px;top:9px;
+      height:2px;border-radius:2px;background:rgba(0,0,0,.16);}
+    .sh-bar i{position:absolute;left:0;top:6px;height:8px;width:26%;
       border-radius:999px;background:var(--ink);display:block;}
     /* В фотокейсе стрелка «назад» была скрыта общим мобильным правилом,
        и листать можно было только вперёд. */
@@ -1205,7 +1208,7 @@
     <div class="m-copy"><span class="sm" data-goo data-fade>’26 © All Right Reserved</span></div>
 
     <div class="tailroom"></div>
-    <span id="buildStamp" style="display:none">BUILD 03.10 20:28</span>
+    <span id="buildStamp" style="display:none">BUILD 03.10 20:36</span>
   </section>
 
 </main>
@@ -2052,8 +2055,9 @@
       var im = frames[at];
       if(im) im.style.objectPosition = (pan.v * 100).toFixed(2) + '% 50%';
       if(knob){
-        var room = bar.clientWidth - knob.offsetWidth - 6;
-        knob.style.transform = 'translateX(' + (3 + pan.v * Math.max(0, room)).toFixed(1) + 'px)';
+        // ручка ходит ровно по дорожке, от её левого края до правого
+        var room = bar.clientWidth - knob.offsetWidth - 24;
+        knob.style.transform = 'translateX(' + (12 + pan.v * Math.max(0, room)).toFixed(1) + 'px)';
       }
     }
     function setPan(v){
@@ -2126,7 +2130,7 @@
         if(e.cancelable) e.preventDefault();
         moved = true;
         if(mode === 'bar'){
-          var room = bar.clientWidth - knob.offsetWidth - 6;
+          var room = bar.clientWidth - knob.offsetWidth - 24;
           setPan(p0 + dx / Math.max(1, room));
         } else if(wide(at)){
           setPan(p0 - dx / Math.max(1, deck.clientWidth));
