@@ -10,7 +10,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap&subset=cyrillic" rel="stylesheet">
 <link rel="preload" href="fonts/ak.woff2" as="font" type="font/woff2" crossorigin>
-<script src="cases.js?v=032010"></script>
+<script src="cases.js?v=032016"></script>
 <!-- Библиотеки лежат рядом с сайтом, а не на CDN: при недоступном CDN
      страница превращалась в белый экран со счётчиком 0 % — весь скрипт
      падает на первой же строке с gsap. -->
@@ -611,10 +611,10 @@
     .nav-lbl{display:inline;font:600 13.5px/1 'AK','Helvetica Neue',Arial,sans-serif;
       letter-spacing:-.025em;color:var(--ink);}
     /* стрелки листания — в шапке справа, как на большом экране */
-    .m-page{position:absolute;top:24px;right:24px;z-index:8;display:none;
-      gap:14px;}
+    .m-page{position:absolute;top:24px;right:20px;z-index:8;display:none;
+      gap:3px;}
     .cw-panel.m-open .m-page{display:flex;}
-    .m-page button{width:51px;height:51px;border-radius:50%;border:0;
+    .m-page button{width:44px;height:44px;border-radius:50%;border:0;
       background:none;padding:0;display:flex;align-items:center;
       justify-content:center;cursor:pointer;transition:opacity .3s var(--eo);}
     .m-page img{width:33px;height:33px;display:block;}
@@ -626,11 +626,14 @@
     /* Кадры фотокейса лежат стопкой и меняются перекрёстным затуханием.
        Поля такие же, как у текста кейса, и кадр больше не упирается в
        линейку и в край плашки. */
+    /* Кадр вписывается целиком: горизонтальный снимок обрезался в вертикаль,
+       потому что область заполнялась «по размеру». Теперь никакой обрезки —
+       что в файле, то и видно. */
     .cw-screen.shots{position:relative;flex:1 1 auto;min-height:0;
-      margin:14px 16px 16px;border-radius:10px;overflow:hidden;}
+      margin:14px 16px 16px;}
     .cw-screen.shots .sh{position:absolute;inset:0;display:block;
-      background-size:cover;background-position:50% 50%;
-      will-change:opacity,filter;}
+      width:100%;height:100%;object-fit:cover;
+      border-radius:10px;will-change:opacity,filter;}
     .cw-scroll.card .cw-stage{display:flex;flex-direction:column;height:100%;}
     /* Между сценой и колонкой кейса стоит .cw-screen — тянуть надо его,
        иначе колонка с текстом вырастает по содержимому и её хвост уходит
@@ -640,10 +643,11 @@
     .cw-scroll.card .cw-stage > .cc.solo-head{flex:0 0 auto;}
     .cw-screen.card{height:100%;}
     .cc.solo-head{padding-bottom:0;grid-template-rows:auto auto;}
-    .cc-nav.solo{position:absolute;left:auto;right:16px;top:22px;bottom:auto;
-      transform:none;width:51px;height:51px;}
-    .cc-nav.solo button{left:0;right:auto;width:51px;height:51px;
-      border:0;border-radius:50%;background:none;}
+    .cc-nav.solo{position:absolute;left:auto;right:20px;top:26px;bottom:auto;
+      transform:none;width:44px;height:44px;}
+    .cc-nav.solo button{left:0;right:auto;width:44px;height:44px;
+      border:0;border-radius:50%;background:none;
+      display:flex;align-items:center;justify-content:center;}
     .cc-nav.solo img{width:33px;height:33px;}
     /* В фотокейсе стрелка «назад» была скрыта общим мобильным правилом,
        и листать можно было только вперёд. */
@@ -1194,7 +1198,7 @@
     <div class="m-copy"><span class="sm" data-goo data-fade>’26 © All Right Reserved</span></div>
 
     <div class="tailroom"></div>
-    <span id="buildStamp" style="display:none">BUILD 03.10 20:10</span>
+    <span id="buildStamp" style="display:none">BUILD 03.10 20:16</span>
   </section>
 
 </main>
@@ -1993,10 +1997,24 @@
   function shotsDeck(c){
     var list = c.shots || c.gallery || [];
     if(!list.length) return '';
-    return '<div class="cw-screen shots solo">' + list.map(function(src, i){
-      return '<i class="sh' + (i === 0 ? ' on' : '') + '" style="background-image:url(' +
-             esc(src).replace(/[()]/g, '') + ')"></i>';
-    }).join('') + '</div>';
+    var wh = c.shotsWH || [];
+    /* Пропорция окна под кадр — как у вертикального снимка. Горизонтальный
+       не ужимается до узкой полоски: он идёт в ту же высоту и делится на
+       части, которые листаются вбок. */
+    var CELL = 0.74;
+    var out = [], k = 0;
+    list.forEach(function(src, i){
+      var d = wh[i], r = d ? d[0] / d[1] : CELL;
+      var parts = Math.max(1, Math.round(r / CELL));
+      for(var q = 0; q < parts; q++){
+        var pos = parts === 1 ? 50 : Math.round(q / (parts - 1) * 100);
+        out.push('<img class="sh' + (k === 0 ? ' on' : '') + '" alt="" ' +
+                 (k < 2 ? '' : 'loading="lazy" ') +
+                 'style="object-position:' + pos + '% 50%" src="' + esc(src) + '">');
+        k++;
+      }
+    });
+    return '<div class="cw-screen shots solo">' + out.join('') + '</div>';
   }
 
   function wireShots(){
@@ -2008,8 +2026,9 @@
     var at = 0, busy = false;
     var BLUR = 16, T = .26;            // быстро: он просил короче прежнего
     /* Кнопки стоят одна на другой (обе left:0 внутри своей коробки), поэтому
-       «назад» отводится влево. 65 при кнопке 51 даёт просвет 14. */
-    gsap.set(prev, {x: -65});
+       «назад» отводится влево. 47 при кружке 33 даёт просвет 14 между
+       самими кружками — именно их и видно, кнопка вокруг прозрачная. */
+    gsap.set(prev, {x: -47});
     gsap.set(frames, {autoAlpha: 0, filter: 'blur(' + BLUR + 'px)'});
     gsap.set(frames[0], {autoAlpha: 1, filter: 'blur(0px)'});
     function sync(){
@@ -2074,7 +2093,7 @@
     var prev = nav.querySelector('.cc-prev'), next = nav.querySelector('.cc-next');
     fr.addEventListener('load', function(){ fitRibbonIn(ribS); });
     if(window.ResizeObserver) new ResizeObserver(function(){ fitRibbonIn(ribS); }).observe(ribS);
-    gsap.set(prev, {x: -65, opacity: 0});
+    gsap.set(prev, {x: -47, opacity: 0});
     function syncNav(){
       var atStart = ribS.scrollLeft <= 2;
       prev.style.pointerEvents = atStart ? 'none' : 'auto';

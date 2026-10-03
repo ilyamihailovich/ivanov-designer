@@ -227,6 +227,7 @@ window.CASES_DATA = [
   ],
   "page": "flamestar-case.html",
    "shots": ["cases/flamestar-ribbon/01.jpg", "cases/flamestar-ribbon/02.jpg", "cases/flamestar-ribbon/03.jpg", "cases/flamestar-ribbon/04.jpg", "cases/flamestar-ribbon/05.jpg", "cases/flamestar-ribbon/06.jpg", "cases/flamestar-ribbon/07.jpg", "cases/flamestar-ribbon/08.jpg", "cases/flamestar-ribbon/09.jpg", "cases/flamestar-ribbon/10.jpg", "cases/flamestar-ribbon/11.jpg", "cases/flamestar-ribbon/12.jpg", "cases/flamestar-ribbon/13.jpg", "cases/flamestar-ribbon/14.jpg", "cases/flamestar-ribbon/15.jpg"],
+   "shotsWH": [[1402,960], [1402,960], [1402,960], [1402,960], [1402,960], [1402,960], [1402,960], [1402,960], [1402,960], [1402,960], [1402,960], [1402,960], [1402,960], [1402,960], [740,960]],
   "card": {
    "year": "2024",
    "photo": "cases/flamestar-ribbon/card-photo.jpg",
@@ -375,6 +376,7 @@ window.CASES_DATA = [
   ],
   "page": "quoters-case.html",
    "shots": ["cases/quoters-ribbon/01.jpg", "cases/quoters-ribbon/02.jpg", "cases/quoters-ribbon/03.jpg", "cases/quoters-ribbon/04.jpg", "cases/quoters-ribbon/05.jpg", "cases/quoters-ribbon/06.jpg", "cases/quoters-ribbon/07.jpg", "cases/quoters-ribbon/08.jpg", "cases/quoters-ribbon/09.jpg", "cases/quoters-ribbon/10.jpg", "cases/quoters-ribbon/11.jpg", "cases/quoters-ribbon/12.jpg", "cases/quoters-ribbon/13.jpg", "cases/quoters-ribbon/14.jpg"],
+   "shotsWH": [[1402,1520], [1402,1520], [1402,1520], [1402,1520], [1402,1520], [1402,1520], [1402,1520], [1402,1520], [1402,1520], [1402,1520], [1402,1520], [1402,1520], [1402,1520], [160,1520]],
   "card": {
    "year": "2025",
    "photo": "cases/quoters-ribbon/card-photo.jpg",
@@ -608,6 +610,7 @@ window.CASES_DATA = [
   ],
   "page": "esnace-case.html",
    "shots": ["cases/esnace-ribbon/01.jpg", "cases/esnace-ribbon/02.jpg", "cases/esnace-ribbon/03.jpg", "cases/esnace-ribbon/04.jpg", "cases/esnace-ribbon/05.jpg", "cases/esnace-ribbon/06.jpg", "cases/esnace-ribbon/07.jpg", "cases/esnace-ribbon/08.jpg", "cases/esnace-ribbon/09.jpg"],
+   "shotsWH": [[1402,1520], [1402,1520], [1402,1520], [1402,1520], [1402,1520], [1402,1520], [1402,1520], [1402,1520], [1324,1520]],
   "card": {
    "year": "2024",
    "photo": "cases/esnace-ribbon/card-photo.jpg",
@@ -763,6 +766,7 @@ window.CASES_DATA = [
   ],
   "page": "alteya-case.html",
    "shots": ["cases/alteya-ribbon/01.jpg", "cases/alteya-ribbon/02.jpg", "cases/alteya-ribbon/03.jpg", "cases/alteya-ribbon/04.jpg", "cases/alteya-ribbon/05.jpg", "cases/alteya-ribbon/06.jpg", "cases/alteya-ribbon/07.jpg", "cases/alteya-ribbon/08.jpg", "cases/alteya-ribbon/09.jpg", "cases/alteya-ribbon/10.jpg", "cases/alteya-ribbon/11.jpg", "cases/alteya-ribbon/12.jpg", "cases/alteya-ribbon/13.jpg", "cases/alteya-ribbon/14.jpg", "cases/alteya-ribbon/15.jpg", "cases/alteya-ribbon/16.jpg", "cases/alteya-ribbon/17.jpg"],
+   "shotsWH": [[1402,960], [1402,960], [1402,960], [1402,960], [1402,960], [1402,960], [1402,960], [1402,960], [1402,960], [1402,960], [1402,960], [1402,960], [1402,960], [1402,960], [1402,960], [1402,960], [78,960]],
   "card": {
    "year": "2025",
    "photo": "cases/alteya-ribbon/card-photo.jpg",
@@ -899,6 +903,7 @@ window.CASES_DATA = [
   ],
   "page": "blaze-case.html",
    "shots": ["cases/blaze-ribbon/01.jpg", "cases/blaze-ribbon/02.jpg", "cases/blaze-ribbon/03.jpg", "cases/blaze-ribbon/04.jpg", "cases/blaze-ribbon/05.jpg", "cases/blaze-ribbon/06.jpg", "cases/blaze-ribbon/07.jpg", "cases/blaze-ribbon/08.jpg"],
+   "shotsWH": [[1402,1521], [1402,1521], [1402,1521], [1402,1521], [1402,1521], [1402,1521], [1402,1521], [1046,1521]],
   "card": {
    "year": "2025",
    "photo": "cases/blaze-ribbon/card-photo.jpg",
@@ -1221,6 +1226,7 @@ window.CASES_DATA = [
   },
   "page": "gloff-case.html",
    "shots": ["cases/gloff-ribbon/01.jpg", "cases/gloff-ribbon/02.jpg", "cases/gloff-ribbon/03.jpg", "cases/gloff-ribbon/04.jpg", "cases/gloff-ribbon/05.jpg", "cases/gloff-ribbon/06.jpg", "cases/gloff-ribbon/07.jpg", "cases/gloff-ribbon/08.jpg", "cases/gloff-ribbon/09.jpg", "cases/gloff-ribbon/10.jpg"],
+   "shotsWH": [[1402,1520], [1402,1520], [1402,1520], [1402,1520], [1402,1520], [1402,1520], [1402,1520], [1402,1520], [1402,1520], [672,1520]],
   "card": {
    "year": "2024",
    "photo": "cases/gloff-ribbon/card-photo.jpg",
@@ -1244,6 +1250,7 @@ window.CASES_DATA = [
   ],
   "page": "protector-case.html",
    "shots": ["cases/protector-ribbon/01.jpg", "cases/protector-ribbon/02.jpg", "cases/protector-ribbon/03.jpg", "cases/protector-ribbon/04.jpg"],
+   "shotsWH": [[1142,760], [1141,760], [1140,760], [507,760]],
   "ribbonOnly": true,
   "globe": "cases/globe/protector.jpg",
   "card": {
@@ -1262,6 +1269,7 @@ window.CASES_DATA = [
   ],
   "page": "lilies-case.html",
    "shots": ["cases/lilies-ribbon/01.jpg", "cases/lilies-ribbon/02.jpg", "cases/lilies-ribbon/03.jpg"],
+   "shotsWH": [[507,760], [507,760], [507,760]],
   "ribbonOnly": true,
   "globe": "cases/globe/lilies.jpg",
   "card": {
@@ -1282,6 +1290,7 @@ window.CASES_DATA = [
   ],
   "page": "innocence-case.html",
    "shots": ["cases/innocence-ribbon/01.jpg", "cases/innocence-ribbon/02.jpg", "cases/innocence-ribbon/03.jpg", "cases/innocence-ribbon/04.jpg"],
+   "shotsWH": [[573,760], [1186,760], [470,760], [481,760]],
   "ribbonOnly": true,
   "card": {
    "year": "2026"
@@ -1300,6 +1309,7 @@ window.CASES_DATA = [
   ],
   "page": "crash-case.html",
    "shots": ["cases/crash-ribbon/01.jpg", "cases/crash-ribbon/02.jpg", "cases/crash-ribbon/03.jpg", "cases/crash-ribbon/04.jpg"],
+   "shotsWH": [[1140,760], [464,760], [464,760], [1140,760]],
   "ribbonOnly": true,
   "card": {
    "year": "2025"
@@ -1317,6 +1327,7 @@ window.CASES_DATA = [
   ],
   "page": "melting-case.html",
    "shots": ["cases/melting-ribbon/01.jpg", "cases/melting-ribbon/02.jpg", "cases/melting-ribbon/03.jpg"],
+   "shotsWH": [[608,760], [608,760], [608,760]],
   "ribbonOnly": true,
   "globe": "cases/globe/melting.jpg",
   "card": {
@@ -1338,6 +1349,7 @@ window.CASES_DATA = [
   ],
   "page": "seoul-case.html",
    "shots": ["cases/seoul-ribbon/01.jpg", "cases/seoul-ribbon/02.jpg", "cases/seoul-ribbon/03.jpg", "cases/seoul-ribbon/04.jpg", "cases/seoul-ribbon/05.jpg", "cases/seoul-ribbon/06.jpg"],
+   "shotsWH": [[1140,760], [1141,760], [506,760], [1011,760], [1140,760], [1011,760]],
   "ribbonOnly": true,
   "globe": "cases/globe/seoul.jpg",
   "card": {
@@ -1362,6 +1374,7 @@ window.CASES_DATA = [
   ],
   "page": "solstice-case.html",
    "shots": ["cases/solstice-ribbon/01.jpg", "cases/solstice-ribbon/02.jpg", "cases/solstice-ribbon/03.jpg", "cases/solstice-ribbon/04.jpg", "cases/solstice-ribbon/05.jpg", "cases/solstice-ribbon/06.jpg", "cases/solstice-ribbon/07.jpg", "cases/solstice-ribbon/08.jpg", "cases/solstice-ribbon/09.jpg"],
+   "shotsWH": [[1139,760], [591,760], [1139,760], [590,760], [1139,760], [505,760], [528,760], [528,760], [528,760]],
   "ribbonOnly": true,
   "globe": "cases/globe/solstice.jpg",
   "card": {
@@ -1395,6 +1408,7 @@ window.CASES_DATA = [
     "t": "Экшен-камера DJI",
     "page": "inf-dji-case.html",
    "shots": ["cases/inf-dji-ribbon/01.jpg", "cases/inf-dji-ribbon/02.jpg", "cases/inf-dji-ribbon/03.jpg", "cases/inf-dji-ribbon/04.jpg"],
+   "shotsWH": [[570,760], [570,760], [570,760], [570,760]],
     "cover": "cases/inf-covers/dji.jpg",
     "n": 4
    },
@@ -1408,6 +1422,7 @@ window.CASES_DATA = [
     "t": "Скраб для тела The Act",
     "page": "inf-scrub-case.html",
    "shots": ["cases/inf-scrub-ribbon/01.jpg", "cases/inf-scrub-ribbon/02.jpg", "cases/inf-scrub-ribbon/03.jpg", "cases/inf-scrub-ribbon/04.jpg"],
+   "shotsWH": [[570,760], [570,760], [570,760], [570,760]],
     "cover": "cases/inf-covers/scrub.jpg",
     "n": 4
    }
