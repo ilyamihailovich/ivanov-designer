@@ -10,7 +10,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap&subset=cyrillic" rel="stylesheet">
 <link rel="preload" href="fonts/ak.woff2" as="font" type="font/woff2" crossorigin>
-<script src="cases.js?v=032334"></script>
+<script src="cases.js?v=032339"></script>
 <!-- Библиотеки лежат рядом с сайтом, а не на CDN: при недоступном CDN
      страница превращалась в белый экран со счётчиком 0 % — весь скрипт
      падает на первой же строке с gsap. -->
@@ -107,13 +107,14 @@
      над нижним краем. Маска делает переход постепенным, а не полосой. */
   .edge-fade{display:none;position:fixed;left:0;right:0;z-index:7;
     pointer-events:none;backdrop-filter:blur(7px);-webkit-backdrop-filter:blur(7px);}
-  .edge-fade.top{top:0;height:84px;
+  .edge-fade.top{top:0;height:84px;transition:opacity .35s var(--eo);
     -webkit-mask-image:linear-gradient(to bottom,#000 32%,transparent 100%);
     mask-image:linear-gradient(to bottom,#000 32%,transparent 100%);
     background:linear-gradient(to bottom,var(--paper) 18%,transparent 100%);}
   .edge-fade.bot{bottom:0;height:74px;transition:opacity .35s var(--eo);}
   html.at-bottom .edge-fade.bot,
-  html.no-botfade .edge-fade.bot{opacity:0;}
+  html.no-botfade .edge-fade.bot,
+  html.no-botfade .edge-fade.top{opacity:0;}
   .edge-fade.bot{
     -webkit-mask-image:linear-gradient(to top,#000 32%,transparent 100%);
     mask-image:linear-gradient(to top,#000 32%,transparent 100%);
@@ -938,12 +939,12 @@
     .corner.tl{top:24px;}
     .stmt{padding:0;height:0;position:static;}
     .stmt > div{position:absolute;margin:0;}
-    .stmt .s-1{left:14.48%;top:501px;}
-    .stmt .s-2{left:9.55%;top:540px;}
-    .stmt .s-3{left:17.57%;top:578.3px;}
-    .stmt .lg.blk{left:29.6%;top:617.3px;}
-    .stmt .col-r:not(.blk){left:44.51%;top:656px;}
-    .stmt .col-r.ind{left:52.96%;top:694.6px;}
+    .stmt .s-1{left:14.48%;top:461px;}
+    .stmt .s-2{left:9.55%;top:500px;}
+    .stmt .s-3{left:17.57%;top:538.3px;}
+    .stmt .lg.blk{left:29.6%;top:577.3px;}
+    .stmt .col-r:not(.blk){left:44.51%;top:616px;}
+    .stmt .col-r.ind{left:52.96%;top:654.6px;}
     /* «любая идея заслуживает реализации».
        Строки стоят абсолютно на его отметках, а не в потоке: у него шаг между
        ними 32 и 34,7, а не высота строки, и в потоке они расползались.
@@ -1232,7 +1233,7 @@
     <div class="m-copy"><span class="sm" data-goo data-fade>’26 © All Right Reserved</span></div>
 
     <div class="tailroom"></div>
-    <span id="buildStamp" style="display:none">BUILD 03.10 23:34</span>
+    <span id="buildStamp" style="display:none">BUILD 03.10 23:39</span>
   </section>
 
 </main>
