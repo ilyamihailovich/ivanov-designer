@@ -10,7 +10,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap&subset=cyrillic" rel="stylesheet">
 <link rel="preload" href="fonts/ak.woff2" as="font" type="font/woff2" crossorigin>
-<script src="cases.js?v=031553"></script>
+<script src="cases.js?v=031614"></script>
 <script src="https://cdn.jsdelivr.net/npm/lenis@1.3.21/dist/lenis.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/gsap.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/ScrollTrigger.min.js"></script>
@@ -534,7 +534,7 @@
        либо текст кейса, либо сама лента. Стрелка листания живёт в шапке
        справа, как на большом экране, и не мешает ни тексту, ни кадрам. */
 
-    .cw-panel{width:100%;height:80svh;border-radius:16px 16px 0 0;overflow:hidden;}
+    .cw-panel{width:calc(100% - 32px);height:80svh;border-radius:16px;overflow:hidden;}
     .cw-stage{overflow:hidden!important;}
     .cw-scroll.card{padding:0;overflow:hidden;}
     .cw-stage{position:static;overflow:visible;}
@@ -603,7 +603,7 @@
       letter-spacing:-.025em;color:var(--ink);}
     /* стрелки листания — в шапке справа, как на большом экране */
     .m-page{position:absolute;top:24px;right:24px;z-index:8;display:none;
-      gap:11px;}
+      gap:14px;}
     .cw-panel.m-open .m-page{display:flex;}
     .m-page button{width:51px;height:51px;border-radius:50%;border:0;
       background:none;padding:0;display:flex;align-items:center;
@@ -612,21 +612,28 @@
     .m-page .m-prev img{transform:rotate(180deg);}
     .m-page .m-prev[hidden]{display:none;}
     /* фотокейс и витрина наборов */
-    .cw-screen.ribbon.solo{position:static;top:auto;height:62svh;}
+    .cw-screen.ribbon.solo{position:static;top:auto;height:auto;flex:1 1 auto;min-height:0;}
+    .cw-scroll.card .cw-stage{display:flex;flex-direction:column;height:100%;}
+    /* Между сценой и колонкой кейса стоит .cw-screen — тянуть надо его,
+       иначе колонка с текстом вырастает по содержимому и её хвост уходит
+       за низ плашки. */
+    .cw-scroll.card .cw-stage > *{min-height:0;}
+    .cw-scroll.card .cw-stage > .cw-screen{flex:1 1 auto;}
+    .cw-scroll.card .cw-stage > .cc.solo-head{flex:0 0 auto;}
+    .cw-screen.card{height:100%;}
     .cc.solo-head{padding-bottom:0;}
-    .cc-nav.solo{position:absolute;left:auto;right:24px;top:24px;bottom:auto;
-      transform:none;width:57px;height:57px;}
+    .cc-nav.solo{position:absolute;left:auto;right:16px;top:22px;bottom:auto;
+      transform:none;width:51px;height:51px;}
     .cc-nav.solo button{left:0;right:auto;width:51px;height:51px;
       border:0;border-radius:50%;background:none;}
     .cc-nav.solo img{width:33px;height:33px;}
     /* В фотокейсе стрелка «назад» была скрыта общим мобильным правилом,
        и листать можно было только вперёд. */
     .cc-nav.solo .cc-prev{display:flex;align-items:center;justify-content:center;}
-    /* Стрелки стали в полтора раза крупнее и заняли место, где стоял год.
-       В фотокейсе год уходит под имя — рядом с ним он теперь не помещается. */
-    .cc.solo-head{grid-template-rows:auto auto auto;}
-    .cc.solo-head .cc-year{grid-column:1;grid-row:2;padding:4px 0 0 20px;}
-    .cc.solo-head .cc-rule{grid-row:3;}
+    /* Имя и год в одну строку; кегль имени подгоняется в JS так, чтобы
+       имя вместе с годом не заезжало под стрелки листания. */
+    .cc.solo-head .cc-name{white-space:nowrap;}
+    .cc.solo-head .cc-year{grid-column:2;grid-row:1;padding:0 0 0 9px;white-space:nowrap;}
     .cw-sets{display:grid!important;grid-template-columns:1fr 1fr;
       gap:3vw;padding:20px var(--gm) 26px!important;}
     .cw-set{height:auto!important;aspect-ratio:624/1789;flex:none!important;}
@@ -635,12 +642,12 @@
     /* крест — за границей плашки сверху и белый, как на большом экране */
     /* Крест перекрывал стрелки листания. Вместо него — кнопка «Назад» над
        самой плашкой, по центру: она ничего не загораживает и читается. */
-    .cw-x{top:calc(10svh - 55px);bottom:auto;left:50%;right:auto;
+    .cw-x{top:calc(10svh - 31px);bottom:auto;left:50%;right:auto;
       transform:translateX(-50%);
-      width:auto;height:auto;padding:8px 20px;border-radius:999px;
-      background:var(--paper);z-index:9;
-      font:600 13px/1 'AK','Helvetica Neue',Arial,sans-serif;letter-spacing:-.02em;
-      color:var(--ink);}
+      width:auto;height:auto;padding:4px 10px;border-radius:0;
+      background:none;z-index:9;
+      font:600 14px/1 'AK','Helvetica Neue',Arial,sans-serif;letter-spacing:-.02em;
+      color:#fff;}
     .cw-x img{display:none;}
     .cw-x::after{content:'Назад';}
     .cc-prev{display:none;}
@@ -867,10 +874,12 @@
     /* Строки заявления стоят абсолютно на его отметках. В потоке последние
        три уезжали вниз на 3,6–4,3: у строки со сменяющимся словом своя
        высота строки, и она накапливалась. */
-    .chapter{height:1120px;}
+    .chapter{height:1074px;}
     /* линия колонки кончается там же, где у него: 1036 от верха главы */
     #spine{height:1036px!important;}
-    .featured{margin-top:96px;}
+    .featured{margin-top:24px;}
+    /* кнопка меню и пункты мельче */
+    .menu-pill,.menu-item{padding:7px 16px;font-size:10.5px;}
     .stmt{padding:0;height:0;position:static;}
     .stmt > div{position:absolute;margin:0;}
     .stmt .s-1{left:14.48%;top:501px;}
@@ -891,12 +900,12 @@
     .t-d{left:34.21%;top:961.1px;}
     /* два кадра, которые он поставил рядом со строкой «любая» */
     .st-tiles{display:block;position:static;}
-    /* Размер — как во фрейме; подняты вверх, чтобы до строки «заслуживает»
-       был просвет, а не два пиксела. */
-    .st-t{position:absolute;top:823px;width:15.68%;aspect-ratio:1;display:block;
+    /* Строго по фрейму, узлы 411:28 и 423:70: 80,463 кв., y 844,047,
+       x 160,578 и 254,202 при ширине 375. */
+    .st-t{position:absolute;top:844.05px;width:21.457%;aspect-ratio:1;display:block;
       background-size:cover;background-position:50% 50%;}
-    .st-t.a{left:42.83%;background-image:url('cases/stmt/a.jpg');}
-    .st-t.b{left:62.05%;background-image:url('cases/stmt/b.jpg');}
+    .st-t.a{left:42.821%;background-image:url('cases/stmt/a.jpg');}
+    .st-t.b{left:67.787%;background-image:url('cases/stmt/b.jpg');}
     /* ---------- список кейсов по его макету ----------
        номер на 15,8, название на 45,3, подпись 9 кегля в половину тона */
     .idx-row{grid-template-columns:29.5px 1fr;gap:0;align-items:baseline;
@@ -910,7 +919,7 @@
     /* Заголовок раздела отсчитывается от верха самого раздела, а первая
        строка списка встаёт на его 397,6. */
     #cases{position:relative;}
-    .idx-wrap{position:static;padding-top:116.9px;}
+    .idx-wrap{position:static;padding-top:58px;}
     .ix-a,.ix-b,.ix-c{position:absolute;margin:0!important;font-size:11.45vw;}
     .ix-a{left:14.16%;top:146.2px;}
     .ix-b{left:26.4%;top:184.8px;}
@@ -937,7 +946,7 @@
        5737,9). Высота у него 1189 — поэтому ниже копирайта страница не тянется
        и «ilyaivanov» стоит внизу, а не выскакивает к середине. */
     .close-mid,.c-c,.m-hide,.tailroom{display:none;}
-    .close{position:relative;height:1300.6px;padding:0;}
+    .close{position:relative;height:1189px;padding:0;}
     .close > div{position:absolute;margin:0;}
     .c-a,.c-d{margin-left:0;}
     .c-a .p1,.c-a .p2,.c-d .p1,.c-d .p2{display:block;}
@@ -945,14 +954,14 @@
     .c-a .p1{margin-left:21.71%;}
     .c-a .p2{margin-left:9.87%;margin-top:-9.17px;}
     .c-b{top:84.56px;left:18.4%;right:0;}
-    .c-d{top:663.3px;left:0;right:0;}
+    .c-d{top:551.6px;left:0;right:0;}
     .c-d .p1{margin-left:11.07%;}
-    .c-d .p2{margin-left:55.6%;margin-top:-0.84px;}
-    .m-orb{display:block;top:245.8px;left:10.67%;width:78.69%;aspect-ratio:1;
+    .c-d .p2{margin-left:55.6%;margin-top:-9.17px;}
+    .m-orb{display:block;top:195.38px;left:10.656%;width:78.687%;aspect-ratio:1;
       border-radius:50%;overflow:hidden;}
     .m-orb canvas{width:100%;height:100%;display:block;}
     /* у него в макете три кружка с иконками, а не буквы */
-    .socials{top:815.4px;left:20.4%;right:auto;margin:0;gap:12px;}
+    .socials{top:703.74px;left:20.4%;right:auto;margin:0;gap:12px;}
     .socials .lbl{display:none;}
     .socials .ico{display:block;}
     .socials .s-mail{display:flex;}
@@ -963,12 +972,12 @@
     .socials a:hover,.socials a:active{background:var(--ink);border-color:var(--ink);}
     .socials a:hover .ico,.socials a:active .ico{filter:invert(1);}
     /* координаты из фрейма 407:3, не по центру */
-    .m-bye{display:block;top:950.3px;left:0;right:0;}
+    .m-bye{display:block;top:838.61px;left:0;right:0;}
     .b-a{margin-left:6.53%;}
     .b-b{margin-left:17.25%;margin-top:-5px;}
     /* «Открыт для новых проектов.» у него справа на 151, «Написать напрямую:»
        слева на 29, адрес — плашкой под ним */
-    .close-aside{top:1043.6px;left:0;right:0;display:block;padding:0;}
+    .close-aside{top:931.92px;left:0;right:0;display:block;padding:0;}
     .close-aside > div{position:absolute;}
     .close-aside > div:nth-of-type(1){left:40.27%;top:0;}
     .close-aside > div:nth-of-type(2){left:7.73%;right:auto;top:43px;
@@ -979,10 +988,10 @@
     .close-aside > div:nth-of-type(2) .sm:last-child{font-size:10px;
       border:0;background:rgba(0,0,0,.055);border-radius:12px;padding:5px 14px;
       display:inline-block;margin-top:7px;}
-    .m-mark{display:block;top:1203.6px;left:0;right:0;text-align:center;}
+    .m-mark{display:block;top:1092px;left:0;right:0;text-align:center;}
     .m-mark .lg{font-size:19.47vw;line-height:1;display:block;
       color:rgba(0,0,0,.38);}
-    .m-copy{display:block;top:1287.6px;left:0;right:0;text-align:center;}
+    .m-copy{display:block;top:1176px;left:0;right:0;text-align:center;}
     .m-copy .sm{font-size:7px;opacity:.6;}
     /* закреплённые словомарка и копирайт на телефоне не нужны: его вариант
        появляется внизу страницы и проявляется, а не висит весь скролл */
@@ -1153,7 +1162,7 @@
     <div class="m-copy"><span class="sm" data-goo data-fade>’26 © All Right Reserved</span></div>
 
     <div class="tailroom"></div>
-    <span id="buildStamp" style="display:none">BUILD 03.10 15:53</span>
+    <span id="buildStamp" style="display:none">BUILD 03.10 16:14</span>
   </section>
 
 </main>
@@ -1469,39 +1478,43 @@
      куда ни один порог «top N%» не достаёт: до него просто нельзя доскроллить.
      Поэтому он заводится от низа закрывающего блока, с запасом в 90 px, и
      так же уходит обратно, когда от низа отходишь. */
+  /* Подвал — словомарка и копирайт. Он лежит в последней сотне точек
+     документа, куда не достаёт ни один порог, считанный от высоты экрана, и
+     ScrollTrigger тут подводил: его отметки пересчитываются при refresh и на
+     разных телефонах ложились то до низа, то за него. Поэтому здесь простой
+     слушатель прокрутки: смотрим, сколько осталось до конца страницы.
+     Вниз — появление (копирайт на полсекунды позже), вверх — уход обратно:
+     словомарка в кляксу, копирайт плавным затуханием. */
   function armFoot(nodes){
-    var host = document.querySelector('.close');
-    if(!host) return;
     var list = [].slice.call(nodes);
+    if(!list.length) return;
     list.forEach(function(el){
       el.__loop = true; el.__done = true; el.__armed = true;
       gsap.set(el, {opacity: 0});
       el.classList.add('shown');
     });
-    /* Порог взят с большим запасом до низа: в последних 90 px прокрутки
-       анимацию просто не успеваешь увидеть — доезжаешь по инерции уже на
-       готовое. Копирайт выходит на полсекунды позже словомарки. */
-    var pend = [];
-    function show(){
-      pend.forEach(function(t){ t.kill(); }); pend.length = 0;
-      list.forEach(function(el, i){
-        pend.push(gsap.delayedCall(i * .5, function(){ reGoo(el, true); }));
-      });
-    }
-    /* Привязка к самому концу прокрутки, а не к коробке: подвал лежит в
-       последних ста точках документа, и любой порог, считанный от высоты
-       экрана, попадает то до низа, то за него — на разных телефонах
-       по-разному. Здесь порог всегда за 340 точек до конца. */
-    ScrollTrigger.create({
-      trigger: host, invalidateOnRefresh: true,
-      start: function(){ return Math.max(0, ScrollTrigger.maxScroll(window) - 340); },
-      end: function(){ return ScrollTrigger.maxScroll(window); },
-      onEnter: show, onEnterBack: show,
-      onLeaveBack: function(){
-        pend.forEach(function(t){ t.kill(); }); pend.length = 0;
+    var ZONE = 340, on = false, pend = [];
+    function clear(){ pend.forEach(function(t){ t.kill(); }); pend.length = 0; }
+    function check(){
+      var doc = document.documentElement;
+      var left = doc.scrollHeight - window.innerHeight -
+                 (window.scrollY || doc.scrollTop || 0);
+      var want = left <= ZONE;
+      if(want === on) return;
+      on = want;
+      clear();
+      if(want){
+        list.forEach(function(el, i){
+          pend.push(gsap.delayedCall(i * .5, function(){ reGoo(el, true); }));
+        });
+      } else {
         list.forEach(function(el){ reGoo(el, false); });
       }
-    });
+    }
+    window.addEventListener('scroll', check, {passive: true});
+    window.addEventListener('resize', check);
+    if(window.lenis && lenis.on) lenis.on('scroll', check);
+    check();
   }
 
   function armGroup(sel, childSel, start){
@@ -1875,14 +1888,13 @@
     }
     gsap.killTweensOf(st);
     gsap.killTweensOf([inner, veil]);
-    var FADE = .3;
+    var FADE = .42;
+    gsap.set(veil, {opacity: 0});
     gsap.timeline({onComplete: function(){ if(then) then(); }})
-      .to(inner, {filter: 'blur(13px)', duration: FADE, ease: 'power2.in'}, 0)
-      .to(veil,  {opacity: 1, duration: FADE, ease: 'power2.in'}, 0)
-      .to(st, {v: to, duration: .5, ease: EASE.rise,
-               onUpdate: function(){ ribS.scrollLeft = st.v; }}, FADE * .72)
-      .to(inner, {filter: 'blur(0px)', duration: .42, ease: 'power2.out'}, FADE + .18)
-      .to(veil,  {opacity: 0, duration: .42, ease: 'power2.out'}, FADE + .18);
+      .to(inner, {filter: 'blur(18px)', duration: FADE, ease: 'power2.inOut'}, 0)
+      .to(st, {v: to, duration: .62, ease: EASE.glide,
+               onUpdate: function(){ ribS.scrollLeft = st.v; }}, FADE * .55)
+      .to(inner, {filter: 'blur(0px)', duration: .54, ease: 'power2.inOut'}, FADE + .24);
   }
 
   /* Шапка открытого кейса — имя, год и линейка, в тех же проектных точках,
@@ -1904,7 +1916,30 @@
   function placeSoloYear(){
     var nm = cwScroll.querySelector('.cc.solo-head .cc-name');
     var yr = cwScroll.querySelector('#soloYear');
-    if(nm && yr && nm.offsetWidth) yr.style.left = (nm.offsetLeft + nm.offsetWidth + 26) + 'px';
+    if(!nm || !yr) return;
+    if(!window.matchMedia('(max-width:900px)').matches){
+      if(nm.offsetWidth) yr.style.left = (nm.offsetLeft + nm.offsetWidth + 26) + 'px';
+      return;
+    }
+    /* На телефоне справа стоят стрелки листания, и длинное название вместе
+       с годом заезжало под них. Подбираем кегль имени так, чтобы строка
+       кончалась левее стрелок. */
+    var nav = cwScroll.querySelector('.cc-nav.solo');
+    if(!nav) return;
+    var pv = nav.querySelector('.cc-prev') || nav;
+    var limit = pv.getBoundingClientRect().left - 12;
+    /* Мерить надо чернила года, а не его ячейку: ячейка во второй колонке
+       сетки тянется до самого края плашки и в сравнение не годится. */
+    function yearRight(){
+      var r = document.createRange();
+      r.selectNodeContents(yr);
+      return r.getBoundingClientRect().right;
+    }
+    nm.style.fontSize = '';
+    for(var fs = 34; fs >= 18; fs -= 1){
+      nm.style.fontSize = fs + 'px';
+      if(yearRight() <= limit) break;
+    }
   }
 
   function wireRibbonOnly(){
@@ -1915,7 +1950,7 @@
     var prev = nav.querySelector('.cc-prev'), next = nav.querySelector('.cc-next');
     fr.addEventListener('load', function(){ fitRibbonIn(ribS); });
     if(window.ResizeObserver) new ResizeObserver(function(){ fitRibbonIn(ribS); }).observe(ribS);
-    gsap.set(prev, {x: -114, opacity: 0});
+    gsap.set(prev, {x: -63, opacity: 0});
     function syncNav(){
       var atStart = ribS.scrollLeft <= 2;
       prev.style.pointerEvents = atStart ? 'none' : 'auto';
@@ -2509,19 +2544,30 @@
     var pnlC = cwEl.querySelector('.cw-panel');
     if(pnlC) pnlC.classList.remove('m-open');
     var veil = cwEl.querySelector('.cw-veil'), panel = cwEl.querySelector('.cw-panel');
-    gsap.timeline({onComplete: function(){
-        cwEl.classList.remove('on');
-        cwEl.setAttribute('aria-hidden', 'true');
-        cwScroll.innerHTML = '';
-        var pn = cwEl.querySelector('.cw-panel');
-        if(pn) pn.classList.remove('lifted');
-        var ab = cwEl.querySelector('.cw-all'); if(ab) ab.remove();
-        document.documentElement.classList.remove('cw-locked');
-        if(window.lenis && lenis.start) lenis.start();
-        if(cwLastFocus && cwLastFocus.focus) cwLastFocus.focus();
-      }})
-      .to(panel, {opacity: 0, yPercent: 2, duration: .28, ease: 'power2.in'}, 0)
-      .to(veil, {opacity: 0, duration: .28, ease: 'none'}, 0);
+    var back = cwEl.querySelector('.cw-x');
+    var narrow = window.matchMedia('(max-width:900px)').matches;
+    /* Разбор окна вынесен в отдельную функцию и подстрахован таймером:
+       если анимация почему-то не доиграет, страница всё равно не останется
+       заблокированной с невидимым окном поверх неё. */
+    var torn = false;
+    function teardown(){
+      if(torn) return; torn = true;
+      cwEl.classList.remove('on');
+      cwEl.setAttribute('aria-hidden', 'true');
+      cwScroll.innerHTML = '';
+      var pn = cwEl.querySelector('.cw-panel');
+      if(pn){ pn.classList.remove('lifted'); gsap.set(pn, {clearProps: 'transform,opacity'}); }
+      var ab = cwEl.querySelector('.cw-all'); if(ab) ab.remove();
+      document.documentElement.classList.remove('cw-locked');
+      if(window.lenis && lenis.start) lenis.start();
+      if(cwLastFocus && cwLastFocus.focus) cwLastFocus.focus();
+    }
+    setTimeout(teardown, 1100);
+    gsap.timeline({onComplete: teardown})
+      .to(back, {opacity: 0, y: 10, duration: .2, ease: 'power2.in'}, 0)
+      .to(panel, narrow ? {yPercent: 100, duration: .46, ease: EASE.fall || 'power2.in'}
+                        : {opacity: 0, yPercent: 2, duration: .28, ease: 'power2.in'}, narrow ? .06 : 0)
+      .to(veil, {opacity: 0, duration: narrow ? .4 : .28, ease: 'none'}, narrow ? .14 : 0);
   }
 
   if(cwEl){
