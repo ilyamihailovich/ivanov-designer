@@ -10,7 +10,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap&subset=cyrillic" rel="stylesheet">
 <link rel="preload" href="fonts/ak.woff2" as="font" type="font/woff2" crossorigin>
-<script src="cases.js?v=032016"></script>
+<script src="cases.js?v=032028"></script>
 <!-- Библиотеки лежат рядом с сайтом, а не на CDN: при недоступном CDN
      страница превращалась в белый экран со счётчиком 0 % — весь скрипт
      падает на первой же строке с gsap. -->
@@ -643,12 +643,19 @@
     .cw-scroll.card .cw-stage > .cc.solo-head{flex:0 0 auto;}
     .cw-screen.card{height:100%;}
     .cc.solo-head{padding-bottom:0;grid-template-rows:auto auto;}
-    .cc-nav.solo{position:absolute;left:auto;right:20px;top:26px;bottom:auto;
-      transform:none;width:44px;height:44px;}
-    .cc-nav.solo button{left:0;right:auto;width:44px;height:44px;
+    .cc-nav.solo{position:absolute;left:auto;right:19px;top:28px;bottom:auto;
+      transform:none;width:26px;height:26px;}
+    .cc-nav.solo button{left:0;right:auto;width:26px;height:26px;
       border:0;border-radius:50%;background:none;
       display:flex;align-items:center;justify-content:center;}
-    .cc-nav.solo img{width:33px;height:33px;}
+    .cc-nav.solo img{width:22px;height:22px;}
+    /* Ползунок панорамы: выезжает из-под плашки, когда кадр горизонтальный,
+       и уходит обратно, когда с него сходишь. */
+    .sh-bar{position:absolute;left:29px;right:29px;top:calc(90svh + 20px);
+      height:22px;border-radius:999px;background:var(--paper);z-index:9;
+      box-shadow:0 2px 10px rgba(0,0,0,.10);touch-action:none;}
+    .sh-bar i{position:absolute;left:0;top:4px;height:14px;width:46%;
+      border-radius:999px;background:var(--ink);display:block;}
     /* В фотокейсе стрелка «назад» была скрыта общим мобильным правилом,
        и листать можно было только вперёд. */
     .cc-nav.solo .cc-prev{display:flex;align-items:center;justify-content:center;}
@@ -1198,7 +1205,7 @@
     <div class="m-copy"><span class="sm" data-goo data-fade>’26 © All Right Reserved</span></div>
 
     <div class="tailroom"></div>
-    <span id="buildStamp" style="display:none">BUILD 03.10 20:16</span>
+    <span id="buildStamp" style="display:none">BUILD 03.10 20:28</span>
   </section>
 
 </main>
@@ -1998,39 +2005,87 @@
     var list = c.shots || c.gallery || [];
     if(!list.length) return '';
     var wh = c.shotsWH || [];
-    /* Пропорция окна под кадр — как у вертикального снимка. Горизонтальный
-       не ужимается до узкой полоски: он идёт в ту же высоту и делится на
-       части, которые листаются вбок. */
-    var CELL = 0.74;
-    var out = [], k = 0;
-    list.forEach(function(src, i){
-      var d = wh[i], r = d ? d[0] / d[1] : CELL;
-      var parts = Math.max(1, Math.round(r / CELL));
-      for(var q = 0; q < parts; q++){
-        var pos = parts === 1 ? 50 : Math.round(q / (parts - 1) * 100);
-        out.push('<img class="sh' + (k === 0 ? ' on' : '') + '" alt="" ' +
-                 (k < 2 ? '' : 'loading="lazy" ') +
-                 'style="object-position:' + pos + '% 50%" src="' + esc(src) + '">');
-        k++;
-      }
-    });
-    return '<div class="cw-screen shots solo">' + out.join('') + '</div>';
+    return '<div class="cw-screen shots solo">' + list.map(function(src, i){
+      var d = wh[i];
+      return '<img class="sh" alt="" ' + (i < 2 ? '' : 'loading="lazy" ') +
+             'data-r="' + (d ? (d[0] / d[1]).toFixed(4) : '') + '" ' +
+             'src="' + esc(src) + '">';
+    }).join('') + '</div>' +
+    '<div class="sh-bar" aria-hidden="true"><i></i></div>';
   }
 
   function wireShots(){
     var deck = cwScroll.querySelector('.cw-screen.shots');
     var nav  = cwScroll.querySelector('.cc-nav.solo');
+    var bar  = cwScroll.querySelector('.sh-bar');
     if(!deck || !nav) return;
     var frames = [].slice.call(deck.querySelectorAll('.sh'));
+    if(bar && bar.parentNode !== cwEl) cwEl.appendChild(bar);
+    var knob = bar ? bar.querySelector('i') : null;
     var prev = nav.querySelector('.cc-prev'), next = nav.querySelector('.cc-next');
     var at = 0, busy = false;
-    var BLUR = 16, T = .26;            // быстро: он просил короче прежнего
-    /* Кнопки стоят одна на другой (обе left:0 внутри своей коробки), поэтому
-       «назад» отводится влево. 47 при кружке 33 даёт просвет 14 между
-       самими кружками — именно их и видно, кнопка вокруг прозрачная. */
-    gsap.set(prev, {x: -47});
+    var BLUR = 16, T = .26;
+    gsap.set(prev, {x: -26});
     gsap.set(frames, {autoAlpha: 0, filter: 'blur(' + BLUR + 'px)'});
     gsap.set(frames[0], {autoAlpha: 1, filter: 'blur(0px)'});
+    if(bar) gsap.set(bar, {yPercent: -260, opacity: 0});
+
+    /* Панорама: горизонтальный снимок идёт в ту же высоту, что вертикальный,
+       и ездит вбок. Доля показа хранится в pan (0 — левый край, 1 — правый)
+       и переносится на кадр через object-position. */
+    var pan = {v: 0}, auto = null, barIn = null;
+
+    function ratioOf(i){
+      var im = frames[i];
+      if(!im) return 0;
+      var r = parseFloat(im.getAttribute('data-r'));
+      if(!r && im.naturalWidth) r = im.naturalWidth / im.naturalHeight;
+      return r || 0;
+    }
+    function cell(){
+      var w = deck.clientWidth, h = deck.clientHeight;
+      return (w && h) ? w / h : 0.74;
+    }
+    function wide(i){ var r = ratioOf(i), c = cell(); return c > 0 && r > c * 1.06; }
+
+    function paint(){
+      var im = frames[at];
+      if(im) im.style.objectPosition = (pan.v * 100).toFixed(2) + '% 50%';
+      if(knob){
+        var room = bar.clientWidth - knob.offsetWidth - 6;
+        knob.style.transform = 'translateX(' + (3 + pan.v * Math.max(0, room)).toFixed(1) + 'px)';
+      }
+    }
+    function setPan(v){
+      pan.v = v < 0 ? 0 : (v > 1 ? 1 : v);
+      paint();
+    }
+
+    function showBar(run){
+      if(!bar) return;
+      if(barIn) barIn.kill();
+      barIn = gsap.timeline()
+        .to(bar, {yPercent: 0, opacity: 1, duration: .42, ease: EASE.rise}, .3);
+      if(run){
+        if(auto) auto.kill();
+        /* Сразу после появления кадр сам проезжает до правого края — показывает,
+           что его можно листать. */
+        auto = gsap.to(pan, {v: 1, duration: 1, ease: 'power2.inOut',
+                             delay: .72, onUpdate: paint});
+      }
+    }
+    function hideBar(){
+      if(!bar) return;
+      if(barIn) barIn.kill();
+      if(auto) auto.kill();
+      barIn = gsap.to(bar, {yPercent: -260, opacity: 0, duration: .34, ease: 'power2.in'});
+    }
+    function armPan(){
+      if(auto) auto.kill();
+      setPan(0);
+      if(wide(at)) showBar(true); else hideBar();
+    }
+
     function sync(){
       gsap.to(prev, {opacity: at === 0 ? 0 : 1, duration: .22, ease: 'none'});
       prev.style.pointerEvents = at === 0 ? 'none' : 'auto';
@@ -2042,47 +2097,67 @@
       var to = at + dir;
       if(to < 0 || to >= frames.length) return;
       busy = true;
+      if(auto) auto.kill();
       var from = frames[at], into = frames[to];
       at = to; sync();
-      gsap.timeline({onComplete: function(){ busy = false; }})
+      if(wide(at)){ pan.v = 0; paint(); }
+      gsap.timeline({onComplete: function(){ busy = false; armPan(); }})
         .to(from, {autoAlpha: 0, filter: 'blur(' + BLUR + 'px)', duration: T, ease: 'power2.in'}, 0)
         .fromTo(into, {autoAlpha: 0, filter: 'blur(' + BLUR + 'px)'},
                       {autoAlpha: 1, filter: 'blur(0px)', duration: T * 1.25, ease: 'power2.out'}, T * .45);
     }
     next.addEventListener('click', function(){ go(1); });
     prev.addEventListener('click', function(){ go(-1); });
-    /* Пальцем влево-вправо — как по прежней ленте. Стопка кадров сама по себе
-       не прокручивается, поэтому жест разбирается вручную. */
-    (function(){
-      var x0 = 0, y0 = 0, live = false;
-      deck.addEventListener('touchstart', function(e){
+
+    /* Тянуть можно и за сам кадр, и за ползунок. На горизонтальном снимке
+       жест ведёт панораму; на краю — переходит к соседнему кадру. */
+    function drag(el, mode){
+      var x0 = 0, y0 = 0, p0 = 0, live = false, moved = false;
+      el.addEventListener('touchstart', function(e){
         if(e.touches.length !== 1){ live = false; return; }
-        x0 = e.touches[0].clientX; y0 = e.touches[0].clientY; live = true;
+        x0 = e.touches[0].clientX; y0 = e.touches[0].clientY;
+        p0 = pan.v; live = true; moved = false;
+        if(auto) auto.kill();
       }, {passive: true});
-      deck.addEventListener('touchmove', function(e){
+      el.addEventListener('touchmove', function(e){
         if(!live) return;
         var dx = e.touches[0].clientX - x0, dy = e.touches[0].clientY - y0;
-        // вертикальный жест отдаём странице, горизонтальный забираем себе
-        if(Math.abs(dx) > 12 && Math.abs(dx) > Math.abs(dy) * 1.2 && e.cancelable) e.preventDefault();
+        if(Math.abs(dx) < 6 || Math.abs(dx) < Math.abs(dy) * 1.2) return;
+        if(e.cancelable) e.preventDefault();
+        moved = true;
+        if(mode === 'bar'){
+          var room = bar.clientWidth - knob.offsetWidth - 6;
+          setPan(p0 + dx / Math.max(1, room));
+        } else if(wide(at)){
+          setPan(p0 - dx / Math.max(1, deck.clientWidth));
+        }
       }, {passive: false});
-      deck.addEventListener('touchend', function(e){
+      el.addEventListener('touchend', function(e){
         if(!live) return; live = false;
         var t = e.changedTouches[0];
         var dx = t.clientX - x0, dy = t.clientY - y0;
+        if(mode === 'bar') return;
         if(Math.abs(dx) < 42 || Math.abs(dx) < Math.abs(dy)) return;
-        go(dx < 0 ? 1 : -1);
+        // по вертикальному кадру жест листает сразу; по горизонтальному —
+        // только когда панорама уже упёрлась в край
+        if(!wide(at) || (dx < 0 && pan.v > .98) || (dx > 0 && pan.v < .02)) go(dx < 0 ? 1 : -1);
       });
-    })();
-    deck.addEventListener('keydown', function(e){
-      if(e.key === 'ArrowRight') go(1);
-      if(e.key === 'ArrowLeft') go(-1);
-    });
+    }
+    drag(deck, 'deck');
+    if(bar) drag(bar, 'bar');
+
     document.addEventListener('keydown', function(e){
       if(!cwOpen || !deck.isConnected) return;
       if(e.key === 'ArrowRight') go(1);
       if(e.key === 'ArrowLeft') go(-1);
     });
+    window.addEventListener('resize', paint);
+    frames.forEach(function(im){
+      if(im.complete) return;
+      im.addEventListener('load', function(){ if(frames[at] === im) armPan(); });
+    });
     sync();
+    armPan();
   }
 
   function wireRibbonOnly(){
@@ -2517,6 +2592,7 @@
     }
 
     var panel0 = cwEl.querySelector('.cw-panel');
+    var oldBar = cwEl.querySelector('.sh-bar'); if(oldBar) oldBar.remove();
     // у фотокейса card хранит только год — экран с описанием ему не нужен
     if(c.card && !c.ribbonOnly && !(c.sets && c.sets.length)){
       cwScroll.className = 'cw-scroll card';
@@ -2703,6 +2779,7 @@
       var pn = cwEl.querySelector('.cw-panel');
       if(pn){ pn.classList.remove('lifted'); gsap.set(pn, {clearProps: 'transform,opacity'}); }
       var ab = cwEl.querySelector('.cw-all'); if(ab) ab.remove();
+      var sb = cwEl.querySelector('.sh-bar'); if(sb) sb.remove();
       document.documentElement.classList.remove('cw-locked');
       if(window.lenis && lenis.start) lenis.start();
       if(cwLastFocus && cwLastFocus.focus) cwLastFocus.focus();
