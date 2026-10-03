@@ -10,7 +10,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap&subset=cyrillic" rel="stylesheet">
 <link rel="preload" href="fonts/ak.woff2" as="font" type="font/woff2" crossorigin>
-<script src="cases.js?v=032036"></script>
+<script src="cases.js?v=032057"></script>
 <!-- Библиотеки лежат рядом с сайтом, а не на CDN: при недоступном CDN
      страница превращалась в белый экран со счётчиком 0 % — весь скрипт
      падает на первой же строке с gsap. -->
@@ -651,7 +651,7 @@
     .cc-nav.solo img{width:22px;height:22px;}
     /* Ползунок панорамы: выезжает из-под плашки, когда кадр горизонтальный,
        и уходит обратно, когда с него сходишь. */
-    .sh-bar{position:absolute;left:29px;right:29px;top:calc(90svh + 23px);
+    .sh-bar{position:absolute;left:29px;right:29px;top:calc(90svh + 58px);
       height:20px;border-radius:999px;background:var(--paper);z-index:9;
       box-shadow:0 2px 10px rgba(0,0,0,.10);touch-action:none;}
     /* дорожка через всю капсулу, по ней ездит короткая ручка */
@@ -866,10 +866,10 @@
        лента по центру высотой 25,9 % экрана, строки стартуют в 33,1 % от
        середины вверх и вниз. */
     #globeCanvas{display:none;}
-    /* Блок длиннее: лента шла почти вдвое быстрее пальца и кейсы
-       пролетали. На 450svh обложки идут примерно вровень с прокруткой,
-       и строки заголовка сближаются так же спокойнее. */
-    .featured{height:450svh;position:relative;min-height:0;}
+    /* Блок длиннее обычного, чтобы лента шла примерно вровень с пальцем.
+       Хвост после «Перейти ко всем кейсам» укорочен: раньше там оставался
+       целый пустой экран до заголовка списка. */
+    .featured{height:360svh;position:relative;min-height:0;}
     .globe-stage{position:relative;height:100svh;overflow:hidden;}
     .work-head{position:absolute;inset:0;transform:none;display:block;
       z-index:3;pointer-events:none;}
@@ -959,7 +959,7 @@
     /* Заголовок раздела отсчитывается от верха самого раздела, а первая
        строка списка встаёт на его 397,6. */
     #cases{position:relative;}
-    .idx-wrap{position:static;padding-top:58px;}
+    .idx-wrap{position:static;padding-top:18px;}
     .ix-a,.ix-b,.ix-c{position:absolute;margin:0!important;font-size:11.45vw;}
     .ix-a{left:14.16%;top:146.2px;}
     .ix-b{left:26.4%;top:184.8px;}
@@ -1208,7 +1208,7 @@
     <div class="m-copy"><span class="sm" data-goo data-fade>’26 © All Right Reserved</span></div>
 
     <div class="tailroom"></div>
-    <span id="buildStamp" style="display:none">BUILD 03.10 20:36</span>
+    <span id="buildStamp" style="display:none">BUILD 03.10 20:57</span>
   </section>
 
 </main>
@@ -1539,7 +1539,10 @@
       gsap.set(el, {opacity: 0});
       el.classList.add('shown');
     });
-    var ZONE = 340, on = false, pend = [];
+    /* Порог был 340 — анимация запускалась, когда словомарка ещё за низом
+       экрана, и к моменту, когда до неё доскроллишь, всё уже отыграно.
+       150 — это ровно тот момент, когда она входит в кадр. */
+    var ZONE = 150, on = false, pend = [];
     function clear(){ pend.forEach(function(t){ t.kill(); }); pend.length = 0; }
     function check(){
       var doc = document.documentElement;
@@ -3388,15 +3391,15 @@
         pin: stage, pinSpacing: false, anticipatePin: 1}})
       .fromTo(track, {x: function(){ return window.innerWidth + 190; }},
                      {x: function(){ return -track.scrollWidth - 190; },
-                      ease: 'none', duration: .72}, 0)
-      .to(A, {y: function(){ return -near(); }, ease: 'none', duration: .88}, 0)
-      .to(B, {y: function(){ return  near(); }, ease: 'none', duration: .88}, 0)
+                      ease: 'none', duration: .80}, 0)
+      .to(A, {y: function(){ return -near(); }, ease: 'none', duration: .90}, 0)
+      .to(B, {y: function(){ return  near(); }, ease: 'none', duration: .90}, 0)
       /* Строки не просто гаснут: они уходят в размытие, и из размытия
          проявляется «Перейти ко всем кейсам» — как он и просил. */
-      .to([A, B], {opacity: 0, filter: 'blur(16px)', duration: .06, ease: 'none'}, .88)
+      .to([A, B], {opacity: 0, filter: 'blur(16px)', duration: .05, ease: 'none'}, .90)
       .fromTo(link, {opacity: 0, filter: 'blur(16px)'},
-                    {opacity: 1, filter: 'blur(0px)', duration: .08, ease: 'none'}, .9)
-      .to(rule, {width: '52%', ease: 'none', duration: .09, immediateRender: false}, .92);
+                    {opacity: 1, filter: 'blur(0px)', duration: .06, ease: 'none'}, .92)
+      .to(rule, {width: '52%', ease: 'none', duration: .06, immediateRender: false}, .94);
   }
 
   function workHead(){
@@ -3653,6 +3656,8 @@
     armReveals(); wordmark(); menu(); socials();
     if(MOBILE) mobileRail(); else { workHead(); themeFlip(); }
     ScrollTrigger.refresh();
+    // сигнал модулям: прелоадер ушёл, страница открылась
+    window.dispatchEvent(new Event('site:start'));
   }
   if(reduced){
     var p = document.getElementById('pre'); if(p) p.style.display = 'none';
@@ -3922,7 +3927,7 @@ import * as THREE from './vendor/three.module.js';
   // составляющая, у матового материала её нет и ткань читается как бумага.
   var mat = new THREE.MeshPhongMaterial({transparent: true, side: THREE.DoubleSide,
     shininess: 24, specular: new THREE.Color(0x3a3a3a)});
-  new THREE.TextureLoader().load('cloth-photo.jpg', function(tex){
+  new THREE.TextureLoader().load('cloth-photo-2.jpg', function(tex){
     tex.colorSpace = THREE.SRGBColorSpace;
     tex.anisotropy = Math.min(4, renderer.capabilities.getMaxAnisotropy());
     mat.map = tex; mat.needsUpdate = true;
@@ -3984,6 +3989,24 @@ import * as THREE from './vendor/three.module.js';
     var p1 = px0 + NX;
     pos[p1*3+2] = prev[p1*3+2] = Math.sin(u * Math.PI * 4) * 0.05;
   }
+
+  /* Вход на сайт: полотно стоит натянутым вниз, и в момент, когда страница
+     открывается, его отпускают — ткань чуть отлетает и успокаивается. Пока
+     идёт этот отскок, жёсткий предел по высоте снят, иначе натяжение
+     обрезалось бы сразу. */
+  var introLeft = 0;
+  function introPull(amp){
+    for(var i = 0; i < N; i++){
+      var i3 = i * 3;
+      var v = (src[i3 + 1] - H / 2) / -H;          // 0 вверху, 1 внизу
+      var dy = -amp * v * v;
+      pos[i3 + 1] += dy; prev[i3 + 1] += dy;
+      pos[i3 + 2] += amp * 0.22 * v;               // чуть на себя, чтобы пошла волна
+      prev[i3 + 2] = pos[i3 + 2];
+    }
+    introLeft = 1.5;
+  }
+  window.addEventListener('site:start', function(){ introPull(0.13); });
 
   /* ---------- ввод ---------- */
   var ray = new THREE.Raycaster(), ndc = new THREE.Vector2();
@@ -4144,7 +4167,8 @@ import * as THREE from './vendor/three.module.js';
        ниже своей коробки, и полотно не бывает длиннее её никогда. */
     /* Предел держит полотно в коробке, пока его не трогают. Под рукой он
        снимается — тянуть вниз и закрывать слова можно, он просил именно так. */
-    if(grab < 0 && pullPow < 0.02){
+    if(introLeft > 0) introLeft -= dt;
+    if(grab < 0 && pullPow < 0.02 && introLeft <= 0){
       var LOW = -H / 2;
       for(var q = 0; q < N; q++){
         var q3 = q * 3 + 1;
