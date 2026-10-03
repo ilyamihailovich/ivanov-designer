@@ -10,7 +10,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap&subset=cyrillic" rel="stylesheet">
 <link rel="preload" href="fonts/ak.woff2" as="font" type="font/woff2" crossorigin>
-<script src="cases.js?v=030133"></script>
+<script src="cases.js?v=031345"></script>
 <script src="https://cdn.jsdelivr.net/npm/lenis@1.3.21/dist/lenis.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/gsap.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/ScrollTrigger.min.js"></script>
@@ -59,7 +59,9 @@
     font-family:'AK','Helvetica Neue',Helvetica,Arial,sans-serif;
     font-size:13px;line-height:1.25;letter-spacing:-.02em;font-weight:500;
     -webkit-font-smoothing:antialiased;overflow-x:hidden;max-width:100vw;
-    transition:background .9s var(--eo), color .9s var(--eo);
+    transition:background .9s var(--eo), color .9s var(--eo);}
+  html.is-dark body{
+    transition:background 1.8s var(--eo), color 1.8s var(--eo);
   }
   /* The UA stylesheet puts em-based margins on headings and paragraphs, which at
      124px type became 83px above and below the h1 and 103px around the h2 and
@@ -139,11 +141,11 @@
     /* край самого овала тоже растушёван — чёткой границы размытия нет */
     -webkit-mask-image:radial-gradient(58% 52% at 70% 50%,#000 38%,transparent 86%);
     mask-image:radial-gradient(58% 52% at 70% 50%,#000 38%,transparent 86%);
-    opacity:0;transition:opacity .45s var(--eo);}
+    opacity:var(--ovl,0);}
   html.is-dark .menu-list::before{
     background:radial-gradient(58% 52% at 70% 50%,
       var(--paper) 0%, rgba(0,0,0,.78) 44%, rgba(0,0,0,0) 82%);}
-  .menu-wrap.on .menu-list::before{opacity:1;}
+
   .menu-item{background:none;color:var(--ink);border:1px solid var(--ink);
     border-radius:999px;padding:10px 22px;font-size:12px;font-weight:600;line-height:1;
     white-space:nowrap;text-decoration:none;opacity:0;
@@ -531,11 +533,13 @@
        Лист снизу. Шапка — имя, год и линейка — стоит на месте всегда; ниже
        либо текст кейса, либо сама лента. Стрелка листания живёт в шапке
        справа, как на большом экране, и не мешает ни тексту, ни кадрам. */
-    .cw{align-items:flex-end;}
+    #caseWin.on{align-items:flex-end;}
     .cw-panel{width:100%;height:80svh;border-radius:16px 16px 0 0;overflow:hidden;}
     .cw-stage{overflow:hidden!important;}
     .cw-scroll.card{padding:0;overflow:hidden;}
-    .cw-stage{position:static;overflow:visible;}
+    /* Высота должна быть определённой, иначе строка с текстом в сетке
+       разрастается по содержимому и её хвост уходит под обрез плашки. */
+    .cw-stage{position:static;overflow:visible;height:100%;}
     .cw-screen{position:static;}
     .cc{position:static;width:auto;height:auto;transform:none!important;
       font-family:inherit;padding:0;}
@@ -544,7 +548,8 @@
     /* шапка */
     /* Имя и год — в одну строку слева направо и по общей базовой линии,
        как на большом экране. Имя крупнее. */
-    .cc{display:grid;grid-template-columns:auto 1fr;align-items:baseline;}
+    .cc{display:grid;grid-template-columns:auto 1fr;align-items:baseline;
+      grid-template-rows:auto auto minmax(0,1fr);height:100%;}
     .cc-name{grid-column:1;grid-row:1;font-size:34px;line-height:1;
       letter-spacing:-.05em;font-weight:600;padding:26px 0 0 20px;}
     .cc-year{grid-column:2;grid-row:1;font-size:13px;font-weight:500;
@@ -554,7 +559,10 @@
     .cc-copy{grid-column:1 / -1;grid-row:3;}
     .cc-nav{grid-column:1 / -1;grid-row:4;}
     /* текст кейса: плотнее и с иерархией */
-    .cc-copy{padding:0 20px;}
+    /* align-items:baseline у сетки не растягивает ячейку, поэтому колонка
+       брала высоту по тексту и вылезала за низ плашки. */
+    .cc-copy{align-self:stretch;padding:0 20px 78px;min-height:0;overflow-y:auto;
+      overscroll-behavior:contain;-webkit-overflow-scrolling:touch;}
     .cc-h{font-size:13px;font-weight:600;letter-spacing:.02em;opacity:.42;
       text-transform:uppercase;margin-top:52px;}
     .cc-b{margin-top:7px;}
@@ -614,10 +622,16 @@
     .cw-all{top:auto;bottom:calc(100% + 2.4svh);font-size:max(14px,3.8vw);}
     .cw-panel.lifted{top:auto;}
     /* крест — за границей плашки сверху и белый, как на большом экране */
-    /* крест держится внутри окна у верхнего края — за его границей на
-       высоком листе он уходил за верх экрана и пропадал */
-    .cw-x{top:16px;right:16px;width:28px;height:28px;z-index:9;}
-    .cw-x img{filter:invert(1);}
+    /* Крест перекрывал стрелки листания. Вместо него — кнопка «Назад» над
+       самой плашкой, по центру: она ничего не загораживает и читается. */
+    .cw-x{top:auto;bottom:calc(80svh + 13px);left:50%;right:auto;
+      transform:translateX(-50%);
+      width:auto;height:auto;padding:8px 20px;border-radius:999px;
+      background:var(--paper);z-index:9;
+      font:600 13px/1 'AK','Helvetica Neue',Arial,sans-serif;letter-spacing:-.02em;
+      color:var(--ink);}
+    .cw-x img{display:none;}
+    .cw-x::after{content:'Назад';}
     .cc-prev{display:none;}
   }
   .tiles-row{display:contents;}
@@ -807,7 +821,7 @@
     .m-rail-track button{position:relative;height:100%;aspect-ratio:6/5;
       flex:0 0 auto;border:0;padding:0;background:none;overflow:hidden;
       cursor:pointer;will-change:transform;}
-    .m-rail{overflow:visible;}
+    .m-rail{overflow:hidden;}
     .m-rail-track img{width:100%;height:100%;object-fit:cover;display:block;}
     .m-rail-track b{position:absolute;left:0;right:0;bottom:0;padding:7% 6%;
       font-size:max(11px,2.9vw);font-weight:600;letter-spacing:-.03em;color:#fff;
@@ -861,10 +875,12 @@
     .t-d{left:34.21%;top:961.1px;}
     /* два кадра, которые он поставил рядом со строкой «любая» */
     .st-tiles{display:block;position:static;}
-    .st-t{position:absolute;top:865px;width:15.68%;aspect-ratio:1;display:block;
+    /* Выше в полтора раза, но растут вверх: низ остаётся на месте, иначе
+       кадры наезжали бы на строку «заслуживает». */
+    .st-t{position:absolute;top:835.6px;width:15.68%;height:88.2px;display:block;
       background-size:cover;background-position:50% 50%;}
     .st-t.a{left:42.83%;background-image:url('cases/stmt/a.jpg');}
-    .st-t.b{left:61.92%;background-image:url('cases/stmt/b.jpg');}
+    .st-t.b{left:62.05%;background-image:url('cases/stmt/b.jpg');}
     /* ---------- список кейсов по его макету ----------
        номер на 15,8, название на 45,3, подпись 9 кегля в половину тона */
     .idx-row{grid-template-columns:29.5px 1fr;gap:0;align-items:baseline;
@@ -911,7 +927,7 @@
     .c-a .p1,.c-a .p2,.c-d .p1,.c-d .p2{display:block;}
     .c-a{top:11.9px;left:0;right:0;}
     .c-a .p1{margin-left:21.71%;}
-    .c-a .p2{margin-left:9.87%;margin-top:2.7px;}
+    .c-a .p2{margin-left:9.87%;margin-top:-3.8px;}
     .c-b{top:95.3px;left:18.4%;right:0;}
     .c-d{top:551.7px;left:0;right:0;}
     .c-d .p1{margin-left:11.07%;}
@@ -940,7 +956,7 @@
     .close-aside > div:nth-of-type(1){text-align:right;width:52%;}
     .close-aside > div:nth-of-type(1) .sm{text-align:right;}
     .close-aside > div:nth-of-type(2) .sm:last-child{font-size:10px;
-      border:1px solid var(--hair);border-radius:12px;padding:4px 14px;
+      border:0;background:rgba(0,0,0,.055);border-radius:12px;padding:5px 14px;
       display:inline-block;margin-top:7px;}
     .m-mark{display:block;top:1092px;left:0;right:0;text-align:center;}
     .m-mark .lg{font-size:19.47vw;line-height:1;display:block;
@@ -1116,7 +1132,7 @@
     <div class="m-copy"><span class="sm" data-goo data-fade>’26 © All Right Reserved</span></div>
 
     <div class="tailroom"></div>
-    <span id="buildStamp" style="display:none">BUILD 03.10 01:33</span>
+    <span id="buildStamp" style="display:none">BUILD 03.10 13:45</span>
   </section>
 
 </main>
@@ -1411,7 +1427,7 @@
       .to(el, {opacity: show ? 1 : 0, duration: GOO.reveal * .8, ease: 'none'}, 0);
   }
 
-  function armLoop(nodes){
+  function armLoop(nodes, startAt){
     [].slice.call(nodes).forEach(function(el, i){
       if(el.__loop) return;
       el.__loop = true;
@@ -1419,12 +1435,33 @@
       gsap.set(el, {opacity: 0});
       el.classList.add('shown');
       ScrollTrigger.create({
-        trigger: el, start: 'top 88%', end: 'bottom 6%',
+        trigger: el, start: startAt || 'top 88%', end: 'bottom 6%',
         onEnter:     function(){ reGoo(el, true); },
         onEnterBack: function(){ reGoo(el, true); },
         onLeave:     function(){ reGoo(el, false); },
         onLeaveBack: function(){ reGoo(el, false); }
       });
+    });
+  }
+
+  /* Подвал — словомарка и копирайт — лежит в последних 100 px документа,
+     куда ни один порог «top N%» не достаёт: до него просто нельзя доскроллить.
+     Поэтому он заводится от низа закрывающего блока, с запасом в 90 px, и
+     так же уходит обратно, когда от низа отходишь. */
+  function armFoot(nodes){
+    var host = document.querySelector('.close');
+    if(!host) return;
+    var list = [].slice.call(nodes);
+    list.forEach(function(el){
+      el.__loop = true; el.__done = true; el.__armed = true;
+      gsap.set(el, {opacity: 0});
+      el.classList.add('shown');
+    });
+    ScrollTrigger.create({
+      trigger: host, start: 'bottom bottom+=90', invalidateOnRefresh: true,
+      onEnter:      function(){ list.forEach(function(el, i){ gsap.delayedCall(i * .12, function(){ reGoo(el, true);  }); }); },
+      onEnterBack:  function(){ list.forEach(function(el, i){ gsap.delayedCall(i * .12, function(){ reGoo(el, true);  }); }); },
+      onLeaveBack:  function(){ list.forEach(function(el){ reGoo(el, false); }); }
     });
   }
 
@@ -1455,8 +1492,10 @@
     // A third up from the bottom of the screen: late enough that the line is
     // properly in view before it starts, rather than resolving while only a
     // sliver of it has appeared.
-    armGroup('.stmt2', '[data-goo]', 'top 67%');
-    armGroup('.idx-wrap', ':scope > .lg[data-goo]', 'top 67%');
+    if(!MOBILE){
+      armGroup('.stmt2', '[data-goo]', 'top 67%');
+      armGroup('.idx-wrap', ':scope > .lg[data-goo]', 'top 67%');
+    }
     // The closing section is very tall, so hanging one trigger on its top made
     // the lines near its foot play while they were still far below the fold —
     // which is why «всего лишь» and «кадром» never appeared to animate at all.
@@ -1563,6 +1602,15 @@
   var cwEl = document.getElementById('caseWin');
   var cwScroll = document.getElementById('cwScroll');
   var cwLastFocus = null, cwOpen = false;
+
+  /* На телефоне плашка кейса обрезает себя по своим границам, и кнопка над
+     её верхом внутри плашки не видна. Переносим её в само окно — там она
+     стоит над плашкой и ничего не загораживает, в отличие от креста,
+     который ложился на стрелки листания. */
+  if(cwEl && window.matchMedia('(max-width:900px)').matches){
+    var cwBack = cwEl.querySelector('.cw-x');
+    if(cwBack && cwBack.parentNode !== cwEl) cwEl.appendChild(cwBack);
+  }
 
   function esc(v){ return String(v == null ? '' : v)
     .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
@@ -2453,6 +2501,14 @@
     var thumb = document.getElementById('thumb');
     var timg = thumb ? thumb.querySelector('img') : null;
     if(!host) return;
+    var NARROW = window.matchMedia('(max-width:900px)').matches;
+    function idxShow(el, show){
+      gsap.killTweensOf(el);
+      gsap.to(el, {opacity: show ? 1 : 0, yPercent: show ? 0 : 16,
+                   filter: show ? 'blur(0px)' : 'blur(10px)',
+                   duration: show ? .8 : .4, overwrite: 'auto',
+                   ease: show ? EASE.rise : 'power2.in'});
+    }
     ALL_CASES.forEach(function(k, i){
       var row = document.createElement('div');
       row.className = 'idx-row';
@@ -2470,8 +2526,21 @@
         if(e.key === 'Enter' || e.key === ' '){ e.preventDefault(); openCaseAll(i); }
       });
       host.appendChild(row);
-      gsap.from(row, {yPercent: 40, opacity: 0, duration: .9, ease: EASE.rise,
-        scrollTrigger: {trigger: row, start: 'top 95%'}});
+      if(!NARROW){
+        gsap.from(row, {yPercent: 40, opacity: 0, duration: .9, ease: EASE.rise,
+          scrollTrigger: {trigger: row, start: 'top 95%'}});
+      } else {
+        /* На телефоне строка проявляется из размытия каждый раз, когда
+           возвращаешься в блок, а не однократно. Через inline-прозрачность
+           на широком экране это сломало бы приглушение соседей при
+           наведении, поэтому там остаётся однократный заход. */
+        gsap.set(row, {opacity: 0, filter: 'blur(10px)', yPercent: 16});
+        ScrollTrigger.create({trigger: row, start: 'top 97%', end: 'bottom 2%',
+          onEnter:     function(){ idxShow(row, true);  },
+          onEnterBack: function(){ idxShow(row, true);  },
+          onLeave:     function(){ idxShow(row, false); },
+          onLeaveBack: function(){ idxShow(row, false); }});
+      }
     });
     var c = document.getElementById('globeCount');
     if(c) c.textContent = CASES.length + ' проектов';
@@ -2631,6 +2700,7 @@
     var open = false;
 
     gsap.set(items, {opacity: 0, y: -30, scale: .66});
+    gsap.set(list, {'--ovl': 0});
 
     // No filter on the list either. These pills are outlines, and a threshold
     // floods an outline into a solid shape — the motion was there but it read
@@ -2643,6 +2713,12 @@
       // threshold welds them and they neck apart as they travel down
       tl.to(el, {opacity: 1, y: 0, scale: 1, duration: .55, ease: EASE.rise}, i * 0.13);
     });
+    /* Овал раньше жил на CSS-переходе и класс с него снимался сразу: при
+       закрытии он успевал исчезнуть за .45 с, пока пункты складывались
+       почти секунду. Теперь он — тварь этого же таймлайна и ходит с ними
+       в такт в обе стороны. */
+    tl.to(list, {'--ovl': 1, duration: 0.13 * (items.length - 1) + 0.55,
+                 ease: 'none'}, 0);
 
     function run(to){
       if(open === to) return;
@@ -2735,7 +2811,7 @@
       });
       // Отступ внутрь одинаковый сверху и снизу: иначе расстояние от линии до
       // строки над разрывом и под ним получается разным.
-      merged = merged.map(function(b){ return [b[0] + 6, b[1] + 6]; });
+      merged = merged.map(function(b){ return [b[0] - 8, b[1] + 8]; });
       // Отрезок короче строки не рисуется: на такой длине линия читается как
       // обрубок, а не как линия. Так короткий кусок невозможен в принципе.
       var MINSEG = 56;
@@ -2748,14 +2824,15 @@
       }
       // Хвост до кружка короче порога — значит последний разрыв сливается с
       // ним: линия обязана доходить до кружка, а не обрываться перед ним.
-      while(merged.length && end - merged[merged.length - 1][1] < MINSEG) merged.pop();
+      var TAILMIN = 20;
+      while(merged.length && end - merged[merged.length - 1][1] < TAILMIN) merged.pop();
 
       var y = 0, html = '';
       merged.forEach(function(b){
         if(b[0] - y >= MINSEG) html += '<i style="top:' + y.toFixed(1) + 'px;height:' + (b[0] - y).toFixed(1) + 'px"></i>';
         y = Math.max(y, b[1]);
       });
-      if(end - y >= MINSEG) html += '<i style="top:' + y.toFixed(1) + 'px;height:' + (end - y).toFixed(1) + 'px"></i>';
+      if(end - y >= TAILMIN) html += '<i style="top:' + y.toFixed(1) + 'px;height:' + (end - y).toFixed(1) + 'px"></i>';
       sp.innerHTML = html;
     }
     measure();
@@ -2926,6 +3003,14 @@
     gsap.set(B, {y: function(){ return  off(); }});
     gsap.set(link, {opacity: 0});
     gsap.set(rule, {width: 0});
+    gsap.set([A, B], {opacity: 0});   // проявятся из кляксы на входе
+
+    /* Заголовок блока проявляется из кляксы при каждом заходе — так же,
+       как строки списка. Обратного хода здесь нет: уход в размытие уже
+       делает сам закреплённый таймлайн на 0,88. */
+    ScrollTrigger.create({trigger: sec, start: 'top 92%',
+      onEnter:     function(){ reGoo(A, true); reGoo(B, true); },
+      onEnterBack: function(){ reGoo(A, true); reGoo(B, true); }});
 
     // тёмная тема держится, пока блок закреплён, — ровно как у шара
     var rootEl = document.documentElement;
@@ -2961,6 +3046,11 @@
         var sx = 0.92 + 0.08 * Math.min(1, a);
         el.style.transform = 'rotate(' + (u * 4.6).toFixed(2) + 'deg) ' +
                              'scale(' + sx.toFixed(3) + ',' + sy.toFixed(3) + ')';
+        /* Кадр не выезжает из-за края и не торчит обрезанным куском: пока он
+           хотя бы касается границы окна, он прозрачен, и проявляется только
+           целиком войдя внутрь. Он просил именно «из ниоткуда». */
+        var m = Math.min(r.left, W - r.right);
+        el.style.opacity = m <= 0 ? '0' : (m >= 44 ? '1' : (m / 44).toFixed(3));
       }
     })();
 
@@ -3220,12 +3310,22 @@
   }
 
   function start(){
-    spine(); intro(); armReveals(); wordmark(); menu(); socials();
-    if(MOBILE) mobileRail(); else { workHead(); themeFlip(); }
+    spine(); intro();
+    /* Постоянное проявление заводится ДО armReveals, иначе на одну и ту же
+       строку вешаются два проявителя: однократный ставил прозрачность в ноль
+       на своих долях и перебивал клякcу — из-за этого весь закрывающий блок
+       на телефоне оставался невидимым. Флаги __armed/__done armReveals
+       уважает, так что теперь дубля не возникает.
+       Подвал — отдельной группой: он лежит в последних 100 px страницы, где
+       порог «top N%» недостижим (у «ilyaivanov» он приходился на 5452 при
+       максимуме прокрутки 5403), поэтому ни клякса, ни «All Right Reserved»
+       не показывались ни разу. */
     if(MOBILE){
-      // на телефоне заголовки проявляются каждый раз, когда возвращаешься
-      armLoop(document.querySelectorAll('.idx-wrap > .lg, .close .lg, .m-mark .lg'));
+      armFoot(document.querySelectorAll('.m-mark .lg, .m-copy .sm'));
+      armLoop(document.querySelectorAll('.idx-wrap > .lg, .close .lg, .stmt2 .lg'));
     }
+    armReveals(); wordmark(); menu(); socials();
+    if(MOBILE) mobileRail(); else { workHead(); themeFlip(); }
     ScrollTrigger.refresh();
   }
   if(reduced){
@@ -3796,6 +3896,12 @@ import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.m
      сфере, разложенные золотым углом, каждая развёрнута лицом к центру. */
   var group = new THREE.Group();
   scene.add(group);
+  /* Эти три числа объявлялись НИЖЕ цикла размножения, и из-за подъёма var
+     REPEAT в самом цикле был undefined: «1 < undefined» ложно, повтор не
+     выполнялся ни разу. Поэтому шар всё это время держал ровно 11 плиток —
+     сколько кейсов с обложкой, — и прежние правки числа кадров не давали
+     никакого эффекта. Теперь объявление стоит до цикла. */
+  var RADIUS = 1.0, TILE = 0.28, REPEAT = 2;   // 11 кейсов x 2 = 22 кадра
   var ORBIT = (window.CASES_DATA || []).filter(function(c){ return !!c.globe; });
   var ONCE = ORBIT.slice();
   for(var rp = 1; rp < REPEAT; rp++) ORBIT = ORBIT.concat(ONCE);
@@ -3804,9 +3910,6 @@ import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.m
   /* Плотный шар: кадров много, они небольшие и стоят почти вплотную. При 44
      плитках шаг по сфере ~0,534, плитка 0,5 оставляет зазор 0,034 — вдвое
      меньше прежнего. Каждая обложка встаёт на шар четырежды. */
-  /* Как на большом экране: много мелких квадратов с узкими просветами.
-     88 плиток, шаг по сфере ~0,378, плитка 0,3 — зазор 0,078. */
-  var RADIUS = 1.0, TILE = 0.3, REPEAT = 8;
   var loader = new THREE.TextureLoader();
   ORBIT.forEach(function(item, i){
     var y = 1 - (i / (n - 1)) * 2;
