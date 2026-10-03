@@ -10,7 +10,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap&subset=cyrillic" rel="stylesheet">
 <link rel="preload" href="fonts/ak.woff2" as="font" type="font/woff2" crossorigin>
-<script src="cases.js?v=032007"></script>
+<script src="cases.js?v=032010"></script>
 <!-- Библиотеки лежат рядом с сайтом, а не на CDN: при недоступном CDN
      страница превращалась в белый экран со счётчиком 0 % — весь скрипт
      падает на первой же строке с gsap. -->
@@ -666,7 +666,7 @@
     /* крест — за границей плашки сверху и белый, как на большом экране */
     /* Крест перекрывал стрелки листания. Вместо него — кнопка «Назад» над
        самой плашкой, по центру: она ничего не загораживает и читается. */
-    .cw-x{top:calc(10svh - 31px);bottom:auto;left:50%;right:auto;
+    .cw-x{top:calc(10svh - 26px);bottom:auto;left:50%;right:auto;
       transform:translateX(-50%);
       width:auto;height:auto;padding:4px 10px;border-radius:0;
       background:none;z-index:9;
@@ -1194,7 +1194,7 @@
     <div class="m-copy"><span class="sm" data-goo data-fade>’26 © All Right Reserved</span></div>
 
     <div class="tailroom"></div>
-    <span id="buildStamp" style="display:none">BUILD 03.10 20:07</span>
+    <span id="buildStamp" style="display:none">BUILD 03.10 20:10</span>
   </section>
 
 </main>
@@ -4173,6 +4173,13 @@ import * as THREE from './vendor/three.module.js';
     scrollTrigger: {trigger: host, start: 'top bottom', end: 'bottom top',
                     scrub: .5, invalidateOnRefresh: true}});
 
+  /* Шар набирает масштаб по мере захода в экран: входит небольшим и
+     раскрывается к тому моменту, когда встаёт по центру. */
+  var grow = {v: 0.62};
+  gsap.to(grow, {v: 1, ease: 'none',
+    scrollTrigger: {trigger: host, start: 'top bottom', end: 'center center',
+                    scrub: .5, invalidateOnRefresh: true}});
+
   var live = true;
   if(window.IntersectionObserver){
     new IntersectionObserver(function(e){ live = e[0].isIntersecting; },
@@ -4183,6 +4190,7 @@ import * as THREE from './vendor/three.module.js';
     if(!live) return;
     group.rotation.y = spin.v;
     group.rotation.x = -0.16;
+    group.scale.setScalar(grow.v);
     renderer.render(scene, camera);
   })();
 })();
