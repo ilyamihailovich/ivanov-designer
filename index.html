@@ -10,7 +10,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap&subset=cyrillic" rel="stylesheet">
 <link rel="preload" href="fonts/ak.woff2" as="font" type="font/woff2" crossorigin>
-<script src="cases.js?v=032002"></script>
+<script src="cases.js?v=032005"></script>
 <!-- Библиотеки лежат рядом с сайтом, а не на CDN: при недоступном CDN
      страница превращалась в белый экран со счётчиком 0 % — весь скрипт
      падает на первой же строке с gsap. -->
@@ -112,7 +112,8 @@
     mask-image:linear-gradient(to bottom,#000 32%,transparent 100%);
     background:linear-gradient(to bottom,var(--paper) 18%,transparent 100%);}
   .edge-fade.bot{bottom:0;height:74px;transition:opacity .35s var(--eo);}
-  html.at-bottom .edge-fade.bot{opacity:0;}
+  html.at-bottom .edge-fade.bot,
+  html.no-botfade .edge-fade.bot{opacity:0;}
   .edge-fade.bot{
     -webkit-mask-image:linear-gradient(to top,#000 32%,transparent 100%);
     mask-image:linear-gradient(to top,#000 32%,transparent 100%);
@@ -621,12 +622,12 @@
     .m-page .m-prev[hidden]{display:none;}
     /* фотокейс и витрина наборов */
     .cw-screen.ribbon.solo{position:static;top:auto;height:auto;flex:1 1 auto;min-height:0;
-      margin:18px 16px 16px;border-radius:10px;overflow:hidden;}
+      margin:14px 16px 16px;border-radius:10px;overflow:hidden;}
     /* Кадры фотокейса лежат стопкой и меняются перекрёстным затуханием.
        Поля такие же, как у текста кейса, и кадр больше не упирается в
        линейку и в край плашки. */
     .cw-screen.shots{position:relative;flex:1 1 auto;min-height:0;
-      margin:18px 16px 16px;border-radius:10px;overflow:hidden;}
+      margin:14px 16px 16px;border-radius:10px;overflow:hidden;}
     .cw-screen.shots .sh{position:absolute;inset:0;display:block;
       background-size:cover;background-position:50% 50%;
       will-change:opacity,filter;}
@@ -638,7 +639,7 @@
     .cw-scroll.card .cw-stage > .cw-screen{flex:1 1 auto;}
     .cw-scroll.card .cw-stage > .cc.solo-head{flex:0 0 auto;}
     .cw-screen.card{height:100%;}
-    .cc.solo-head{padding-bottom:0;}
+    .cc.solo-head{padding-bottom:0;grid-template-rows:auto auto;}
     .cc-nav.solo{position:absolute;left:auto;right:16px;top:22px;bottom:auto;
       transform:none;width:51px;height:51px;}
     .cc-nav.solo button{left:0;right:auto;width:51px;height:51px;
@@ -1193,7 +1194,7 @@
     <div class="m-copy"><span class="sm" data-goo data-fade>’26 © All Right Reserved</span></div>
 
     <div class="tailroom"></div>
-    <span id="buildStamp" style="display:none">BUILD 03.10 20:02</span>
+    <span id="buildStamp" style="display:none">BUILD 03.10 20:05</span>
   </section>
 
 </main>
