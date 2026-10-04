@@ -10,7 +10,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap&subset=cyrillic" rel="stylesheet">
 <link rel="preload" href="fonts/ak.woff2" as="font" type="font/woff2" crossorigin>
-<script src="cases.js?v=041029"></script>
+<script src="cases.js?v=041113"></script>
 <!-- Библиотеки лежат рядом с сайтом, а не на CDN: при недоступном CDN
      страница превращалась в белый экран со счётчиком 0 % — весь скрипт
      падает на первой же строке с gsap. -->
@@ -112,6 +112,7 @@
     mask-image:linear-gradient(to bottom,#000 32%,transparent 100%);
     background:linear-gradient(to bottom,var(--paper) 18%,transparent 100%);}
   .edge-fade.bot{bottom:0;height:74px;transition:opacity .35s var(--eo);}
+  html.kn-open .edge-fade,
   html.at-bottom .edge-fade.bot,
   html.no-botfade .edge-fade.bot,
   html.no-botfade .edge-fade.top{opacity:0;}
@@ -123,7 +124,8 @@
   /* ---------- всё, что нужно знать ----------
      Сцена живёт в координатах макета и целиком масштабируется под ширину
      блока, поэтому каждая отметка здесь — ровно та, что во фрейме. */
-  #know{position:relative;width:100%;overflow:hidden;}
+  /* по вертикали не режем: под окнами лежит падающая тень */
+#know{position:relative;width:100%;overflow:visible;}
   .know-stage{position:absolute;left:0;top:0;transform-origin:top left;}
   #know img{max-width:none;}
   .kn-t{position:absolute;font-weight:500;color:#000;white-space:nowrap;}
@@ -140,7 +142,7 @@
 
   .kn-veil{position:absolute;inset:0;z-index:5;opacity:0;pointer-events:none;
     backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
-    background:rgba(255,255,255,.28);transition:opacity .45s var(--eo);}
+    background:rgba(0,0,0,.04);transition:opacity .45s var(--eo);}
   #know.on .kn-veil{opacity:1;pointer-events:auto;}
   /* пока окно открыто, меню уходит в размытие и не спорит с ним */
   .menu-wrap{transition:opacity .4s var(--eo), filter .4s var(--eo);}
@@ -154,8 +156,8 @@
                0 100px 60px rgba(171,171,171,.07), 0 178px 71px rgba(171,171,171,.02);}
   .kn-win.on{pointer-events:auto;}
   @media (max-width:900px){
-    .kn-win{box-shadow:0 3px 8px rgba(171,171,171,.16), 0 10px 18px rgba(171,171,171,.13),
-                       0 22px 30px rgba(171,171,171,.07);}
+    .kn-win{box-shadow:0 176px 70px rgba(0,0,0,.01), 0 99px 60px rgba(0,0,0,.04),
+                       0 44px 44px rgba(0,0,0,.07), 0 11.5px 24px rgba(0,0,0,.09);}
   }
   .kn-shot{position:absolute;left:-0.6%;top:-0.6%;width:101.2%;height:101.2%;
     object-fit:cover;display:block;}
@@ -201,13 +203,24 @@
       padding:11.3px 5px 11.3px 20.4px;margin:0 0 0 1.2px;letter-spacing:-.037em;}
     .kn-text p.hl::before{left:11.2px;top:12.8px;bottom:12.5px;width:2.4px;border-radius:1.2px;}
   }
-  .kn-fade{display:none;position:sticky;left:0;bottom:0;height:54px;margin-top:-54px;
-    pointer-events:none;backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px);
-    -webkit-mask-image:linear-gradient(to bottom,transparent,#000 72%);
-    mask-image:linear-gradient(to bottom,transparent,#000 72%);
-    background:linear-gradient(to bottom,rgba(255,255,255,0),#fff 78%);}
-  @media (max-width:900px){ .kn-fade{display:block;height:96px;margin-top:-96px;
-    backdrop-filter:blur(5.4px);-webkit-backdrop-filter:blur(5.4px);} }
+  .kn-fade{position:absolute;z-index:4;pointer-events:none;
+    transition:opacity .25s linear;}
+  .kn-fade b{position:absolute;left:0;right:0;bottom:0;display:block;}
+  .kn-fade b:nth-of-type(1){height:100%;
+    backdrop-filter:blur(2px);-webkit-backdrop-filter:blur(2px);
+    -webkit-mask-image:linear-gradient(to bottom,transparent 0%,#000 38%);
+    mask-image:linear-gradient(to bottom,transparent 0%,#000 38%);}
+  .kn-fade b:nth-of-type(2){height:72%;
+    backdrop-filter:blur(7px);-webkit-backdrop-filter:blur(7px);
+    -webkit-mask-image:linear-gradient(to bottom,transparent 0%,#000 48%);
+    mask-image:linear-gradient(to bottom,transparent 0%,#000 48%);}
+  .kn-fade b:nth-of-type(3){height:44%;
+    backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);
+    -webkit-mask-image:linear-gradient(to bottom,transparent 0%,#000 52%);
+    mask-image:linear-gradient(to bottom,transparent 0%,#000 52%);}
+  .kn-fade u{position:absolute;inset:0;display:block;
+    background:linear-gradient(to bottom,rgba(255,255,255,0) 0%,
+               rgba(255,255,255,.72) 62%,#fff 94%);}
 
   .corner{position:fixed;z-index:8;}
   .corner.tl{top:clamp(12px,2.2vh,22px);left:var(--gut);}
@@ -927,6 +940,66 @@
   /* room for the wordmark to come together underneath everything */
   .tailroom{height:clamp(220px,34vh,420px);}
 
+
+  /* ---------- финал на десктопе: сцена 1425x2657 из фрейма 379:7 ----------
+     Координаты макета переведены в cqw (1cqw = 1% ширины блока), поэтому
+     композиция держит пропорции макета на любой ширине. */
+  @media (min-width:901px){
+    .close{container-type:inline-size;position:relative;padding:0;
+      width:min(100%,1600px);margin:0 auto;height:186.456cqw;}
+    .close > *{position:absolute;margin:0;}
+    .close .lg{white-space:nowrap;font-size:6.3158cqw;line-height:5.5579cqw;
+      letter-spacing:-0.3158cqw;}
+    .c-a{left:16.111cqw;top:16.435cqw;}
+    .c-b{left:45.012cqw;top:22.540cqw;}
+
+    .close-mid{position:absolute;inset:0;display:block;gap:0;}
+    .close-mid .clock{position:absolute;top:44.863cqw;display:block;gap:0;
+      font-size:9.8246cqw;line-height:12.2807cqw;letter-spacing:-0.3930cqw;}
+    .close-mid .clock.l{left:0;}
+    .close-mid .clock.r{left:72.161cqw;}
+    .close-mid .clock > span{position:absolute;top:0;display:block;}
+    .close-mid .clock.l > span:nth-child(1){left:0;}
+    .close-mid .clock.l > span:nth-child(2){left:9.881cqw;}
+    .close-mid .clock.l > span:nth-child(3){left:26.646cqw;}
+    .close-mid .clock.r > span:nth-child(1){left:0;}
+    .close-mid .clock.r > span:nth-child(2){left:9.137cqw;}
+    .close-mid .clock.r > span:nth-child(3){left:26.463cqw;}
+    .close-still{position:absolute;left:41.846cqw;top:39.551cqw;
+      width:17.179cqw;height:22.905cqw;aspect-ratio:auto;justify-self:auto;}
+
+    .c-c{left:16.873cqw;top:74.449cqw;}
+    /* «прекрасной» уехало в строку выше — на телефоне оно остаётся здесь */
+    .c-d{left:60.230cqw;top:80.063cqw;font-size:0;}
+    .c-d .p1{display:none;}
+    .c-d .p2{font-size:6.3158cqw;}
+
+    .socials{left:0;right:0;top:92.573cqw;margin:0;}
+
+    .m-bye{display:block;position:absolute;left:0;right:0;top:0;height:0;}
+    .m-bye > div{position:absolute;}
+    .b-a{left:13.785cqw;top:106.769cqw;}
+    .b-b{left:19.965cqw;top:112.755cqw;}
+
+    .close-aside{position:absolute;inset:0;display:block;margin:0;gap:0;}
+    .close-aside > div{position:absolute;}
+    .close-aside .m-hide{display:none;}
+    .close-aside > div:nth-child(1){left:34.175cqw;top:127.353cqw;}
+    .close-aside > div:nth-child(1) .sm{font-size:2.2456cqw;line-height:1.316cqw;
+      color:var(--ink);opacity:.45;}
+    .close-aside > div:nth-child(2){left:68.192cqw;top:138.430cqw;width:17.474cqw;
+      text-align:center;}
+    .close-aside > div:nth-child(2) .sm{font-size:1.6842cqw;line-height:1.316cqw;
+      color:var(--ink);opacity:1;}
+    .close-aside > div:nth-child(2) .sm:first-child{margin-bottom:1.702cqw;}
+    /* в макете кружка три — почта больше не прячется на десктопе */
+    .socials .s-mail{display:flex;}
+    .socials .s-mail .ico{display:block;width:40%;height:40%;}
+    .close-aside > div:nth-child(2) .sm a{display:flex;align-items:center;
+      justify-content:center;height:3.2281cqw;border-radius:32px;background:#eee;
+      color:rgba(0,0,0,.64);text-decoration:none;}
+  }
+
   @media (max-width:900px){
     :root{
       --gm:4.07%; --gg:3.053%; --colw:12.76%;
@@ -1295,7 +1368,7 @@
       <span class="clock r" id="clockM" data-goo data-nosplit>41 )</span>
     </div>
 
-    <div class="lg c-c" data-goo>всего лишь</div>
+    <div class="lg c-c" data-goo>лишь прекрасной</div>
     <div class="lg c-d" data-goo><span class="p1">прекрасной</span> <span class="p2">идеей.</span></div>
     <!-- шар в круге: на телефоне он встаёт на место часов -->
     <div class="m-orb" id="mOrb"><canvas id="mOrbCanvas"></canvas></div>
@@ -1333,7 +1406,7 @@
     <div class="m-copy"><span class="sm" data-goo data-fade>’26 © All Right Reserved</span></div>
 
     <div class="tailroom"></div>
-    <span id="buildStamp" style="display:none">BUILD 04.10 10:29</span>
+    <span id="buildStamp" style="display:none">BUILD 04.10 11:13</span>
   </section>
 
 </main>
@@ -3839,12 +3912,12 @@
       w: 1425, h: 900, fs: 90, lh: 79.2, ls: -4.5,
       head: [{t:'всё,',x:127.39,y:91.17},{t:'что нужно',x:211.39,y:177.17},{t:'знать',x:270.75,y:263.17}],
       items: [
-        {win:'setup', ic:'folder.png', x:449.61, y:459.64, w:97.75, h:82.18,
-         lb:'label-setup.svg',  lx:478.36,  ly:556.60, lw:39.09, lh:8.81},
-        {win:'skills',ic:'folder.png', x:986.86, y:602.07, w:97.75, h:82.18,
-         lb:'label-skilly.svg', lx:1009.11, ly:699.03, lw:52.40, lh:8.81},
-        {win:'about', ic:'notes.png',  x:1175.72,y:139.08, w:84.20, h:84.20,
-         lb:'label-opyt.svg',   lx:1199.70, ly:243.57, lw:35.59, lh:8.81}
+        {win:'setup', ic:'folder.png', x:210.50, y:547.50, w:97.75, h:82.18,
+         lb:'label-setup.svg',  lx:239.25,  ly:644.46, lw:39.09, lh:8.81},
+        {win:'skills',ic:'folder.png', x:686.00, y:722.10, w:97.75, h:82.18,
+         lb:'label-skilly.svg', lx:708.25,  ly:819.06, lw:52.40, lh:8.81},
+        {win:'about', ic:'notes.png',  x:1071.00,y:282.60, w:84.20, h:84.20,
+         lb:'label-opyt.svg',   lx:1094.98, ly:387.09, lw:35.59, lh:8.81}
       ],
       win: {
         skills:{x:519.49,y:303.17,w:846,h:541,r:14,shot:'win-skills.png',
@@ -3902,15 +3975,17 @@
          lb:'label-skilly.svg', lx:180.82,ly:528.28,lw:40.77,lh:6.86}
       ],
       win: {
-        skills:{x:49.5,y:25,w:280,h:587,r:14,shot:'m-win.png',kin:280/243.89,
+        skills:{x:49.5,y:25,w:280,h:587,r:10.43,shot:'m-win.png',kin:280/243.89,
                 shotBox:{x:-4.0,y:-3.0,w:285.7,h:599.4},
                 tab:{x:65.5,y:9.0,w:55.5,h:11.5},
                 tabl:{x:77.0,y:12.0,w:32.5,h:5.5,src:'label-skilly.svg'}},
-        setup: {x:49.5,y:25,w:280,h:587,r:14,shot:'m-win.png',kin:280/243.89,
+        setup: {x:49.5,y:25,w:280,h:587,r:10.43,shot:'m-win.png',kin:280/243.89,
                 shotBox:{x:-4.0,y:-3.0,w:285.7,h:599.4},
                 tab:{x:65.5,y:9.0,w:55.5,h:11.5},
                 tabl:{x:81.1,y:12.0,w:24.3,h:5.5,src:'label-setup.svg'}},
-        about: {x:49.5,y:60,w:280,h:510,r:14,shot:'m-about.png',about:true,
+        about: {x:49.5,y:60,w:280,h:510,r:10.43,shot:'m-about.png',about:true,
+                /* подложка внизу текста — по фрейму (447:1209) */
+                fade:{x:7.21,y:414.18,w:261.33,h:95.82},
                 side:null,
                 /* тело окна закрывается белым целиком: иначе слева торчала
                    полоса снимка, а снизу его же строка с адресом */
@@ -4089,8 +4164,19 @@
           tx.appendChild(p);
         });
         box.appendChild(tx);
-        box.appendChild(el('i', 'kn-fade'));
         w.appendChild(box);
+        if(c.fade){
+          var fd = el('i', 'kn-fade', 'left:' + px(c.fade.x) + ';top:' + px(c.fade.y) +
+            ';width:' + px(c.fade.w) + ';height:' + px(c.fade.h));
+          fd.innerHTML = '<b></b><b></b><b></b><u></u>';
+          w.appendChild(fd);
+          var tune = function(){
+            var rest = box.scrollHeight - box.scrollTop - box.clientHeight;
+            fd.style.opacity = rest < 3 ? '0' : String(Math.min(1, rest / 26));
+          };
+          box.addEventListener('scroll', tune, {passive: true});
+          w.__tuneFade = tune;
+        }
       }
       /* кружки светофора на снимке — по ним окно тоже закрывается */
       var dk = SMALL ? (c.kin || 1) * 0.45 : 1;
@@ -4147,7 +4233,9 @@
       });
       items.forEach(function(it, i){
         gsap.to(it, {opacity: 1, duration: .3, ease: 'none', delay: .3 + i * .1});
-        gsap.to(it, {x: 0, y: 0, duration: 1.15, ease: 'power4.out', delay: .3 + i * .1});
+        gsap.to(it, {x: 0, y: 0, duration: 1.15, ease: 'power4.out', delay: .3 + i * .1,
+          /* иначе остаточный инлайн-transform перебивает увеличение при наведении */
+          onComplete: function(){ gsap.set(it, {clearProps: 'transform'}); }});
       });
     }});
 
@@ -4194,6 +4282,7 @@
         if(ps.length){
           var box = w.querySelector('.kn-textbox');
           if(box) box.scrollTop = 0;
+          if(w.__tuneFade) w.__tuneFade();
           gsap.killTweensOf(ps);
           /* строки выходят из размытия одна за другой — будто текст
              быстро допечатывается сверху вниз */
@@ -4213,8 +4302,28 @@
           .eventCallback('onComplete', function(){ w.classList.remove('on'); });
       });
     }
+    /* окно не должно вылезать за край экрана: сперва подводим блок
+       к середине, и только затем тянем окно из папки */
+    function center(done){
+      var r = sec.getBoundingClientRect();
+      var to = Math.max(0, window.scrollY + r.top - (window.innerHeight - r.height) / 2);
+      if(Math.abs(window.scrollY - to) < 10){ done(); return; }
+      /* открытие заводим по времени, а не по onComplete прокрутки:
+         иначе сорванная прокрутка оставила бы папку нерабочей */
+      if(window.lenis && window.lenis.scrollTo) window.lenis.scrollTo(to, {duration: .7});
+      else window.scrollTo({top: to, behavior: 'smooth'});
+      setTimeout(function(){
+        /* если плавная прокрутка не тронулась с места — доводим жёстко,
+           чтобы папка срабатывала при любом состоянии прокрутки */
+        if(Math.abs(window.scrollY - to) > 24) window.scrollTo(0, to);
+        done();
+      }, 620);
+    }
     stage.querySelectorAll('.kn-item').forEach(function(b){
-      b.addEventListener('click', function(){ open(b.getAttribute('data-win')); });
+      b.addEventListener('click', function(){
+        var n = b.getAttribute('data-win');
+        center(function(){ open(n); });
+      });
     });
     veil.addEventListener('click', close);
     stage.querySelectorAll('.kn-dots').forEach(function(d){
