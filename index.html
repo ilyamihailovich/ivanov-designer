@@ -10,7 +10,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap&subset=cyrillic" rel="stylesheet">
 <link rel="preload" href="fonts/ak.woff2" as="font" type="font/woff2" crossorigin>
-<script src="cases.js?v=041113"></script>
+<script src="cases.js?v=041122"></script>
 <!-- Библиотеки лежат рядом с сайтом, а не на CDN: при недоступном CDN
      страница превращалась в белый экран со счётчиком 0 % — весь скрипт
      падает на первой же строке с gsap. -->
@@ -124,8 +124,10 @@
   /* ---------- всё, что нужно знать ----------
      Сцена живёт в координатах макета и целиком масштабируется под ширину
      блока, поэтому каждая отметка здесь — ровно та, что во фрейме. */
-  /* по вертикали не режем: под окнами лежит падающая тень */
-#know{position:relative;width:100%;overflow:visible;}
+  /* по горизонтали режем — иначе сцена шириной 1425 разгоняет страницу
+     и масштаб считается по ней; по вертикали нет, там падающая тень */
+  #know{position:relative;width:100%;overflow:hidden;
+    overflow-x:clip;overflow-y:visible;}
   .know-stage{position:absolute;left:0;top:0;transform-origin:top left;}
   #know img{max-width:none;}
   .kn-t{position:absolute;font-weight:500;color:#000;white-space:nowrap;}
@@ -1406,7 +1408,7 @@
     <div class="m-copy"><span class="sm" data-goo data-fade>’26 © All Right Reserved</span></div>
 
     <div class="tailroom"></div>
-    <span id="buildStamp" style="display:none">BUILD 04.10 11:13</span>
+    <span id="buildStamp" style="display:none">BUILD 04.10 11:22</span>
   </section>
 
 </main>
@@ -4326,6 +4328,13 @@
       });
     });
     veil.addEventListener('click', close);
+    /* окно не остаётся раскрытым, когда блок ушёл с экрана, — иначе оно
+       торчит поверх следующего блока */
+    window.addEventListener('scroll', function(){
+      if(!sec.classList.contains('on')) return;
+      var r = sec.getBoundingClientRect();
+      if(r.bottom < window.innerHeight * .35 || r.top > window.innerHeight * .65) close();
+    }, {passive: true});
     stage.querySelectorAll('.kn-dots').forEach(function(d){
       d.addEventListener('click', function(e){ e.stopPropagation(); close(); });
     });
