@@ -10,7 +10,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap&subset=cyrillic" rel="stylesheet">
 <link rel="preload" href="fonts/ak.woff2" as="font" type="font/woff2" crossorigin>
-<script src="cases.js?v=040929"></script>
+<script src="cases.js?v=041002"></script>
 <!-- Библиотеки лежат рядом с сайтом, а не на CDN: при недоступном CDN
      страница превращалась в белый экран со счётчиком 0 % — весь скрипт
      падает на первой же строке с gsap. -->
@@ -142,7 +142,13 @@
     backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
     background:rgba(255,255,255,.28);transition:opacity .45s var(--eo);}
   #know.on .kn-veil{opacity:1;pointer-events:auto;}
+  /* пока окно открыто, меню уходит в размытие и не спорит с ним */
+  .menu-wrap{transition:opacity .4s var(--eo), filter .4s var(--eo);}
+  html.kn-open .menu-wrap{opacity:0!important;filter:blur(8px)!important;
+    pointer-events:none;}
   .kn-win{position:absolute;z-index:6;overflow:hidden;opacity:0;pointer-events:none;
+    -webkit-mask-image:-webkit-radial-gradient(#fff,#000);
+    isolation:isolate;
     transform:scale(.9);transform-origin:50% 50%;
     box-shadow:0 11px 24px rgba(171,171,171,.13), 0 45px 45px rgba(171,171,171,.11),
                0 100px 60px rgba(171,171,171,.07), 0 178px 71px rgba(171,171,171,.02);}
@@ -152,9 +158,11 @@
   .kn-tab{position:absolute;background:#fefffe;display:block;}
   .kn-tabl,.kn-note{position:absolute;display:block;}
   .kn-chip{position:absolute;display:block;}
+  .kn-dots{position:absolute;z-index:3;cursor:pointer;background:none;border:0;padding:0;}
 
-  .kn-tile{position:absolute;transition:transform .28s var(--eo);}
-  .kn-tile:hover{transform:translateY(-9px);}
+  .kn-tile{position:absolute;transition:transform .28s var(--eo);
+    transform-origin:50% 50%;}
+  .kn-tile:hover{transform:scale(1.09);}
   .kn-tile img{position:absolute;display:block;}
   .kn-tile .sh{filter:drop-shadow(0 2px 4px rgba(110,110,110,.10))
                       drop-shadow(0 7px 7px rgba(110,110,110,.09))
@@ -347,6 +355,9 @@
     top:calc(1.85px * var(--k,1));right:calc(-68.83px * var(--k,1));}
   .cw-x img{width:100%;height:100%;display:block;}
   .cw-x:hover{opacity:.7;}
+  /* браузер рисовал синюю рамку фокуса поверх креста и стрелок */
+  #caseWin button:focus{outline:none;}
+  #caseWin button:focus-visible{outline:2px solid var(--ink);outline-offset:2px;}
   .cw-scroll{overflow-y:auto;overscroll-behavior:contain;height:100%;
     padding:clamp(26px,4vw,64px);-webkit-overflow-scrolling:touch;}
   .cw-cat{font-size:max(13px,.972vw);font-weight:500;color:var(--dim);letter-spacing:-.027em;}
@@ -1301,7 +1312,7 @@
     <div class="m-copy"><span class="sm" data-goo data-fade>’26 © All Right Reserved</span></div>
 
     <div class="tailroom"></div>
-    <span id="buildStamp" style="display:none">BUILD 04.10 09:29</span>
+    <span id="buildStamp" style="display:none">BUILD 04.10 10:02</span>
   </section>
 
 </main>
@@ -3822,11 +3833,11 @@
                 tab:{x:157.71,y:15.15,w:71.90,h:16.86},
                 tabl:{x:158.59,y:19.17,w:39.09,h:8.81,src:'label-setup.svg'}},
         about: {x:569.88,y:68.50,w:775.95,h:533.33,r:11,shot:'win-about.png',about:true,
-                side:{x:9.43,y:116.17,w:101.27,h:417.17},
-                chips:[{x:47.52,y:84.07,w:54.12,h:10.08,c:'#dddcdc'},
-                       {x:94.91,y:17.26,w:43.90,h:9.42,c:'#fff'},
-                       {x:394.75,y:34.66,w:111.63,h:15.74,c:'#fff'},
-                       {x:19.88,y:83.43,w:30.20,h:10.72,c:'#d9d9d9'}],
+                side:{x:0,y:116.17,w:110.70,h:417.17},
+                chips:[{x:44.00,y:82.40,w:61.00,h:13.60,c:'#dddcdc'},
+                       {x:92.00,y:14.60,w:50.00,h:14.40,c:'#fff'},
+                       {x:392.00,y:32.60,w:116.00,h:19.00,c:'#fff'},
+                       {x:17.00,y:82.40,w:34.00,h:13.60,c:'#d9d9d9'}],
                 note:{x:98.07,y:18.55,w:31.24,h:5.00},
                 date:{x:399.52,y:42.40,fs:8},
                 time:{x:21.83,y:86.15,fs:7},
@@ -3844,9 +3855,9 @@
       ],
       setup: [
         {ic:['st-rgbspot.png'],x:40.85,y:230.43,w:82.67,h:82.67,lb:'sl-rgbspot.svg',cx:43.16,cy:325.91,cw:82.67,ch:12.03},
-        {ic:['st-flash.png'],x:147.15,y:234.58,w:71.17,h:66.22,text:'импульсная|вспышка',cx:157.15,cy:313.22,cw:70,fs:13},
+        {ic:['st-flash.png'],x:156.55,y:234.58,w:71.17,h:66.22,text:'импульсная|вспышка',cx:157.15,cy:313.22,cw:70,fs:13},
         {ic:['st-camera.png'],x:152.32,y:77.94,w:82.67,h:56.99,lb:'sl-camera.svg',cx:161.64,cy:145.60,cw:72.73,ch:12.02},
-        {ic:['st-lens-uni.png'],x:282.73,y:65.35,w:42.19,h:76.19,rot:22.48,lb:'sl-lens-uni.svg',cx:267.83,cy:158.99,cw:89.03,ch:23.11},
+        {ic:['st-lens-uni.png'],x:291.26,y:65.35,w:42.19,h:76.19,rot:22.48,lb:'sl-lens-uni.svg',cx:267.83,cy:158.99,cw:89.03,ch:23.11},
         {ic:['st-lens-macro.png'],x:396.23,y:68.92,w:41.48,h:76.79,rot:-3.83,lb:'sl-lens-macro.svg',cx:396.95,cy:159.93,cw:52.18,ch:20.16},
         {ic:['st-octo.png','st-octo.png'],x:377.48,y:219.26,w:56.44,h:61.19,dx:-28.22,dy:20.35,lb:'sl-octo.svg',cx:370.58,cy:316.23,cw:67.16,ch:9.91},
         {ic:['st-rgbpanel.png'],x:247.87,y:245.53,w:74.70,h:89.69,lb:'sl-rgbpanel.svg',cx:255.47,cy:344.33,cw:59.88,ch:12.03},
@@ -3878,8 +3889,8 @@
                 tabl:{x:60.60,y:22.10,w:21.10,h:4.76,src:'label-setup.svg'}},
         about: {x:62,y:105,w:258,h:429,r:12,shot:'m-about.png',about:true,shotBox:{x:7.09,y:-14.93,w:241.65,h:444.26},
                 side:null,
-                chips:[{x:78.95,y:-9.96,w:32.22,h:15.26,c:'#fff'},
-                       {x:10,y:9.96,w:238,h:414.26,c:'#fff'}],
+                chips:[{x:10,y:9.96,w:238,h:414.26,c:'#fff'},
+                       {x:76.95,y:-11.00,w:36.22,h:17.26,c:'#fff'}],
                 note:{x:80.83,y:-0.40,w:22.92,h:3.67},
                 date:{x:92,y:19.58,fs:7},
                 time:null,
@@ -3897,9 +3908,9 @@
       ],
       setup: [
         {ic:['st-rgbspot.png'],x:40.44,y:142.84,w:38.49,h:38.49,lb:'sl-rgbspot.svg',cx:41.52,cy:187.30,cw:38.49,ch:5.60},
-        {ic:['st-flash.png'],x:169.66,y:176.49,w:33.14,h:30.83,lb:'sl-...',cx:175.20,cy:214.03,cw:31.23,ch:9.39,lbSrc:'lb-flash'},
+        {ic:['st-flash.png'],x:174.26,y:176.49,w:33.14,h:30.83,cx:175.20,cy:214.03,cw:31.23,ch:9.39},
         {ic:['st-camera.png'],x:43.44,y:61.34,w:38.49,h:26.54,lb:'sl-camera.svg',cx:47.78,cy:92.84,cw:33.86,ch:5.60},
-        {ic:['st-lens-uni.png'],x:133.20,y:56.56,w:31.71,h:40.29,rot:22.48,lb:'sl-lens-uni.svg',cx:112.70,cy:100.16,cw:41.45,ch:10.76},
+        {ic:['st-lens-uni.png'],x:117.60,y:56.56,w:31.71,h:40.29,rot:22.48,lb:'sl-lens-uni.svg',cx:112.70,cy:100.16,cw:41.45,ch:10.76},
         {ic:['st-lens-macro.png'],x:173.92,y:96.93,w:21.66,h:36.97,rot:-3.83,lb:'sl-lens-macro.svg',cx:174.25,cy:138.02,cw:24.30,ch:9.39},
         {ic:['st-octo.png','st-octo.png'],x:114.32,y:131.57,w:26.28,h:28.49,dx:-13.14,dy:9.48,lb:'sl-octo.svg',cx:111.11,cy:176.72,cw:31.27,ch:4.61},
         {ic:['st-rgbpanel.png'],x:48.10,y:226.25,w:34.78,h:41.76,lb:'sl-rgbpanel.svg',cx:51.64,cy:272.25,cw:27.88,ch:5.60},
@@ -4045,6 +4056,13 @@
         box.appendChild(el('i', 'kn-fade'));
         w.appendChild(box);
       }
+      /* кружки светофора на снимке — по ним окно тоже закрывается */
+      var dk = SMALL ? 0.45 : 1;
+      var dots = el('button', 'kn-dots', 'left:' + px(10 * dk) + ';top:' + px(8 * dk) +
+        ';width:' + px(58 * dk) + ';height:' + px(24 * dk));
+      dots.type = 'button';
+      dots.setAttribute('aria-label', 'Закрыть');
+      w.appendChild(dots);
       if(name !== 'about') (L[name] || []).forEach(function(t){ w.appendChild(tile(t)); });
       return w;
     }
@@ -4121,6 +4139,7 @@
 
     function open(name){
       sec.classList.add('on');
+      document.documentElement.classList.add('kn-open');
       ['skills','setup','about'].forEach(function(n){
         var w = document.getElementById('kn-' + n);
         if(!w) return;
@@ -4148,6 +4167,7 @@
     }
     function close(){
       sec.classList.remove('on');
+      document.documentElement.classList.remove('kn-open');
       ['skills','setup','about'].forEach(function(n){
         var w = document.getElementById('kn-' + n);
         if(!w || !w.classList.contains('on')) return;
@@ -4159,6 +4179,9 @@
       b.addEventListener('click', function(){ open(b.getAttribute('data-win')); });
     });
     veil.addEventListener('click', close);
+    stage.querySelectorAll('.kn-dots').forEach(function(d){
+      d.addEventListener('click', function(e){ e.stopPropagation(); close(); });
+    });
     document.addEventListener('keydown', function(e){
       if(e.key === 'Escape' && sec.classList.contains('on')) close();
     });
@@ -4602,9 +4625,9 @@ import * as THREE from './vendor/three.module.js';
     if(!aim(e)) return;
     hoverWant = 1;
     pullAt.copy(hit);
-    pull.subVectors(hit, hitPrev).multiplyScalar(26);
+    pull.subVectors(hit, hitPrev).multiplyScalar(9);   // мягче отклик на мышь
     pull.z += 0.5;                         // немного на себя, чтобы пошла волна
-    pullPow = Math.min(1, pullPow + 0.5);
+    pullPow = Math.min(1, pullPow + 0.2);
   }, {passive: true});
 
   holder.addEventListener('pointerdown', function(e){
