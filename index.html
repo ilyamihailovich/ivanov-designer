@@ -10,7 +10,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap&subset=cyrillic" rel="stylesheet">
 <link rel="preload" href="fonts/ak.woff2" as="font" type="font/woff2" crossorigin>
-<script src="cases.js?v=041011"></script>
+<script src="cases.js?v=041029"></script>
 <!-- Библиотеки лежат рядом с сайтом, а не на CDN: при недоступном CDN
      страница превращалась в белый экран со счётчиком 0 % — весь скрипт
      падает на первой же строке с gsap. -->
@@ -153,6 +153,10 @@
     box-shadow:0 11px 24px rgba(171,171,171,.13), 0 45px 45px rgba(171,171,171,.11),
                0 100px 60px rgba(171,171,171,.07), 0 178px 71px rgba(171,171,171,.02);}
   .kn-win.on{pointer-events:auto;}
+  @media (max-width:900px){
+    .kn-win{box-shadow:0 3px 8px rgba(171,171,171,.16), 0 10px 18px rgba(171,171,171,.13),
+                       0 22px 30px rgba(171,171,171,.07);}
+  }
   .kn-shot{position:absolute;left:-0.6%;top:-0.6%;width:101.2%;height:101.2%;
     object-fit:cover;display:block;}
   .kn-tab{position:absolute;background:#fefffe;display:block;}
@@ -173,20 +177,37 @@
   .kn-date,.kn-time{position:absolute;color:#000;white-space:nowrap;font-weight:510;
     font-family:'SF Pro','AK','Helvetica Neue',Arial,sans-serif;letter-spacing:-.03em;}
   .kn-date{opacity:.4;}
+  .kn-head{position:absolute;color:#000;white-space:nowrap;opacity:.76;font-weight:700;
+    font-family:'SF Pro','AK','Helvetica Neue',Arial,sans-serif;letter-spacing:-.05em;}
   /* Текст длиннее поля, поэтому поле прокручивается, а его низ уходит
      в размытие и в белое — так в макете. */
   .kn-textbox{position:absolute;overflow-y:auto;overscroll-behavior:contain;
-    -webkit-overflow-scrolling:touch;}
+    -webkit-overflow-scrolling:touch;scrollbar-width:none;-ms-overflow-style:none;}
+  .kn-textbox::-webkit-scrollbar{width:0;height:0;display:none;}
   .kn-text{font-family:'SF Pro','AK','Helvetica Neue',Arial,sans-serif;
     font-weight:400;letter-spacing:-.045em;opacity:.8;color:#000;text-transform:lowercase;}
   .kn-text b{font-weight:590;}
   .kn-text p{margin:0;}
+  /* выделенный абзац — жёлтая подсветка с полоской слева, как в заметках */
+  .kn-text p.hl{position:relative;border-radius:7px;background:rgba(255,196,0,.10);
+    padding:5px 10px 5px 22px;margin:0 0 0 -10px;}
+  .kn-text p.hl::before{content:'';position:absolute;left:10px;top:12px;bottom:12px;
+    width:2px;border-radius:1px;background:#ffc400;}
+  .kn-text p.h1{font-weight:700;letter-spacing:-.05em;}
+  /* на телефоне кегли свои: заголовок крупнее, выделенный абзац мельче — по фрейму */
+  @media (max-width:900px){
+    .kn-text p.h1{font-size:18.45px;line-height:13.8px;}
+    .kn-text p.hl{font-size:8.07px;line-height:9.18px;opacity:.8;border-radius:8px;
+      padding:11.3px 5px 11.3px 20.4px;margin:0 0 0 1.2px;letter-spacing:-.037em;}
+    .kn-text p.hl::before{left:11.2px;top:12.8px;bottom:12.5px;width:2.4px;border-radius:1.2px;}
+  }
   .kn-fade{display:none;position:sticky;left:0;bottom:0;height:54px;margin-top:-54px;
     pointer-events:none;backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px);
     -webkit-mask-image:linear-gradient(to bottom,transparent,#000 72%);
     mask-image:linear-gradient(to bottom,transparent,#000 72%);
     background:linear-gradient(to bottom,rgba(255,255,255,0),#fff 78%);}
-  @media (max-width:900px){ .kn-fade{display:block;} }
+  @media (max-width:900px){ .kn-fade{display:block;height:96px;margin-top:-96px;
+    backdrop-filter:blur(5.4px);-webkit-backdrop-filter:blur(5.4px);} }
 
   .corner{position:fixed;z-index:8;}
   .corner.tl{top:clamp(12px,2.2vh,22px);left:var(--gut);}
@@ -1312,7 +1333,7 @@
     <div class="m-copy"><span class="sm" data-goo data-fade>’26 © All Right Reserved</span></div>
 
     <div class="tailroom"></div>
-    <span id="buildStamp" style="display:none">BUILD 04.10 10:11</span>
+    <span id="buildStamp" style="display:none">BUILD 04.10 10:29</span>
   </section>
 
 </main>
@@ -3840,8 +3861,8 @@
                        {x:17.00,y:82.40,w:34.00,h:13.60,c:'#d9d9d9'}],
                 note:{x:98.07,y:19.60,w:31.24,h:5.00},
                 date:{x:399.52,y:42.40,fs:8},
-                time:{x:21.83,y:83.00,fs:7},
-                text:{x:143.53,y:91.10,w:578.83,h:411.60,fs:11,lh:13}}
+                time:{x:22.38,y:83.00,fs:7},
+                text:{x:143.53,y:91.10,w:593.99,h:411.60,fs:11,lh:13}}
       },
       skills: [
         {ic:['ic-ps.png'],x:116.59,y:292.63,w:55.86,h:54.46,lb:'lb-ps.svg',cx:115.86,cy:357.11,cw:57.65,ch:23.90},
@@ -3882,21 +3903,24 @@
       ],
       win: {
         skills:{x:49.5,y:25,w:280,h:587,r:14,shot:'m-win.png',kin:280/243.89,
-                tab:{x:66.5,y:22.2,w:55.1,h:12.5},
-                tabl:{x:68.4,y:25.4,w:32.5,h:5.5,src:'label-skilly.svg'}},
+                shotBox:{x:-4.0,y:-3.0,w:285.7,h:599.4},
+                tab:{x:65.5,y:9.0,w:55.5,h:11.5},
+                tabl:{x:77.0,y:12.0,w:32.5,h:5.5,src:'label-skilly.svg'}},
         setup: {x:49.5,y:25,w:280,h:587,r:14,shot:'m-win.png',kin:280/243.89,
-                tab:{x:66.5,y:22.2,w:55.1,h:12.5},
-                tabl:{x:69.6,y:25.4,w:24.3,h:5.5,src:'label-setup.svg'}},
+                shotBox:{x:-4.0,y:-3.0,w:285.7,h:599.4},
+                tab:{x:65.5,y:9.0,w:55.5,h:11.5},
+                tabl:{x:81.1,y:12.0,w:24.3,h:5.5,src:'label-setup.svg'}},
         about: {x:49.5,y:60,w:280,h:510,r:14,shot:'m-about.png',about:true,
                 side:null,
                 /* тело окна закрывается белым целиком: иначе слева торчала
                    полоса снимка, а снизу его же строка с адресом */
-                chips:[{x:0,y:15.5,w:280,h:494.5,c:'#fff'},
-                       {x:74.5,y:-2.7,w:55.4,h:15.5,c:'#fff'}],
-                note:{x:86,y:1.1,w:24.8,h:4},
-                date:{x:98,y:22.8,fs:7.6},
+                chips:[{x:0,y:17,w:280,h:493,c:'#fff'},
+                       {x:83.26,y:3.4,w:37.33,h:20.3,c:'#fff'}],
+                head:{x:85.44,y:6.89,fs:6.92},
+                note:{x:85.44,y:16.68,w:26.56,h:4.21},
+                date:{x:98.38,y:39.62,fs:6.92},
                 time:null,
-                text:{x:23.9,y:43.7,w:232,h:453,fs:8,lh:10.1}}
+                text:{x:17.89,y:66.38,w:243.57,h:443,fs:10.38,lh:13.78}}
       },
       skills: [
         {ic:['ic-ps.png'],x:46.44,y:97.71,w:30.30,h:29.55,lb:'lb-ps.svg',cx:46.04,cy:132.68,cw:31.27,ch:12.96},
@@ -3930,20 +3954,22 @@
     var L = SMALL ? M : D;
 
     var ABOUT_D = [
-      'В проектах отвечал за разработку и реализацию визуальных решений для брендов. Работал с задачами на уровне концепции и позиционирования, определяя, как бренд должен выглядеть, восприниматься и проявляться в разных каналах коммуникации.',
+      'Сильная сторона моего подхода в том, что я совмещаю SMM со знаниями в дизайне и продакшене. Это позволяет закрывать несколько задач в рамках одного проекта без передачи работы между несколькими специалистами, быстро переходить от идеи к реализации и самостоятельно организовывать производство контента. а Собственная техническая база дополнительно позволяет не зависеть от подрядчиков.',
+      '',
+      {hl: true, t: 'В проектах отвечал за разработку и реализацию визуальных решений для брендов. Работал с задачами на уровне концепции и позиционирования, определяя, как бренд должен выглядеть, восприниматься и проявляться в разных каналах коммуникации.'},
       '',
       'занимался Разработкой визуальных концепций и айдентики, формируя визуальный язык бренда и систему его применения. Определял ключевые принципы композиции, типографики, цветовой палитры, работы с изображением и графическими элементами, чтобы визуальная система оставалась цельной и узнаваемой при масштабировании на разные носители.',
       '',
-      'Разрабатывал SMM-стратегии с учетом задач бизнеса, аудитории и конкурентной среды. Определял позиционирование, контентные направления и формат присутствия бренда в социальных сетях. Планировал контент, ставил задачи на производство, координировал работу над материалами и контролировал их качество. Анализировал ключевые показатели социальных сетей и на основе данных корректировал контент и форматы.',
-      '',
-      '<b>Сильная сторона моего подхода в том, что я совмещаю SMM со знаниями в дизайне и продакшене.</b> Это позволяет закрывать несколько задач в рамках одного проекта без передачи работы между несколькими специалистами, быстро переходить от идеи к реализации и самостоятельно организовывать производство контента. а Собственная техническая база дополнительно позволяет не зависеть от подрядчиков.'
+      'Разрабатывал SMM-стратегии с учетом задач бизнеса, аудитории и конкурентной среды. Определял позиционирование, контентные направления и формат присутствия бренда в социальных сетях. Планировал контент, ставил задачи на производство, координировал работу над материалами и контролировал их качество. Анализировал ключевые показатели социальных сетей и на основе данных корректировал контент и форматы.'
     ];
     var ABOUT_M = [
-      '<b>обо мне</b>',
+      {h1: true, t: 'обо мне'},
       '',
-      'Сильная сторона моего подхода в том, что я совмещаю SMM со знаниями в дизайне и продакшене. Это позволяет закрывать несколько задач в рамках одного проекта без передачи работы между несколькими специалистами, быстро переходить от идеи к реализации и самостоятельно организовывать производство контента. а Собственная техническая база дополнительно позволяет не зависеть от подрядчиков.',
+      '<b>Сильная сторона моего подхода в том, что я совмещаю SMM со знаниями в дизайне и продакшене.</b>',
       '',
-      'В проектах отвечал за разработку и реализацию визуальных решений для брендов. Работал с задачами на уровне концепции позиционирования, определяя, как бренд должен выглядеть, восприниматься и проявляться в разных каналах коммуникации.',
+      'Это позволяет закрывать несколько задач в рамках одного проекта без передачи работы между несколькими специалистами, быстро переходить от идеи к реализации и самостоятельно организовывать производство контента. а Собственная техническая база дополнительно позволяет не зависеть от подрядчиков.',
+      '',
+      {hl: true, t: 'В проектах отвечал за разработку и реализацию визуальных решений для брендов. Работал с задачами на уровне концепции позиционирования, определяя, как бренд должен выглядеть, восприниматься и проявляться в разных каналах коммуникации.'},
       '',
       'занимался Разработкой визуальных концепций и айдентики, формируя визуальный язык бренда и систему его применения. Определял ключевые принципы композиции, типографики, цветовой палитры, работы с изображением и графическими элементами, чтобы визуальная система оставалась цельной и узнаваемой при масштабировании на разные носители.',
       '',
@@ -4016,7 +4042,7 @@
       w.id = 'kn-' + name;
       var sb = c.shotBox;
       w.innerHTML = '<img class="kn-shot" src="about/' + c.shot + '" alt=""' +
-        (sb ? ' style="left:' + px(sb.x) + ';top:' + px(sb.y) + ';width:' + px(sb.w) + ';height:' + px(sb.h) + ';inset:auto"' : '') + '>';
+        (sb ? ' style="inset:auto;left:' + px(sb.x) + ';top:' + px(sb.y) + ';width:' + px(sb.w) + ';height:' + px(sb.h) + '"' : '') + '>';
       (c.chips || []).forEach(function(ch){
         w.appendChild(el('i', 'kn-chip', 'left:' + px(ch.x) + ';top:' + px(ch.y) +
           ';width:' + px(ch.w) + ';height:' + px(ch.h) + ';background:' + ch.c));
@@ -4030,6 +4056,12 @@
           ';width:' + px(c.tabl.w) + ';height:' + px(c.tabl.h));
         tl.src = 'about/' + c.tabl.src; tl.alt = '';
         w.appendChild(tl);
+      }
+      if(c.head){
+        var hd = el('span', 'kn-head', 'left:' + px(c.head.x) + ';top:' + px(c.head.y) +
+          ';font-size:' + c.head.fs + 'px');
+        hd.textContent = 'обо мне';
+        w.appendChild(hd);
       }
       if(c.note){
         var n = el('img', 'kn-note', 'left:' + px(c.note.x) + ';top:' + px(c.note.y) +
@@ -4052,7 +4084,8 @@
         (SMALL ? ABOUT_M : ABOUT_D).forEach(function(par){
           if(!par){ tx.appendChild(el('div', 'kn-gap', 'height:' + c.text.lh + 'px')); return; }
           var p = el('p');
-          p.innerHTML = par;
+          if(typeof par === 'object'){ p.className = par.h1 ? 'h1' : 'hl'; p.innerHTML = par.t; }
+          else p.innerHTML = par;
           tx.appendChild(p);
         });
         box.appendChild(tx);
