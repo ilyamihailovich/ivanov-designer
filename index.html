@@ -10,7 +10,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap&subset=cyrillic" rel="stylesheet">
 <link rel="preload" href="fonts/ak.woff2" as="font" type="font/woff2" crossorigin>
-<script src="cases.js?v=041006"></script>
+<script src="cases.js?v=041011"></script>
 <!-- Библиотеки лежат рядом с сайтом, а не на CDN: при недоступном CDN
      страница превращалась в белый экран со счётчиком 0 % — весь скрипт
      падает на первой же строке с gsap. -->
@@ -1312,7 +1312,7 @@
     <div class="m-copy"><span class="sm" data-goo data-fade>’26 © All Right Reserved</span></div>
 
     <div class="tailroom"></div>
-    <span id="buildStamp" style="display:none">BUILD 04.10 10:06</span>
+    <span id="buildStamp" style="display:none">BUILD 04.10 10:11</span>
   </section>
 
 </main>
@@ -3838,9 +3838,9 @@
                        {x:92.00,y:14.60,w:50.00,h:14.40,c:'#fff'},
                        {x:392.00,y:32.60,w:116.00,h:19.00,c:'#fff'},
                        {x:17.00,y:82.40,w:34.00,h:13.60,c:'#d9d9d9'}],
-                note:{x:98.07,y:18.55,w:31.24,h:5.00},
+                note:{x:98.07,y:19.60,w:31.24,h:5.00},
                 date:{x:399.52,y:42.40,fs:8},
-                time:{x:21.83,y:86.15,fs:7},
+                time:{x:21.83,y:83.00,fs:7},
                 text:{x:143.53,y:91.10,w:578.83,h:411.60,fs:11,lh:13}}
       },
       skills: [
@@ -3870,7 +3870,7 @@
     };
 
     var M = {
-      w: 379, h: 633, fs: 24, lh: 21, ls: -1.2,
+      w: 379, h: 633, fs: 43, lh: 38, ls: -2.15,
       head: [{t:'всё,',x:39.37,y:42.95},{t:'что нужно',x:76.20,y:80.07},{t:'знать',x:76.78,y:121.58}],
       items: [
         {win:'setup', ic:'folder.png', x:227.57,y:224.22,w:76.06,h:63.95,
@@ -3881,23 +3881,22 @@
          lb:'label-skilly.svg', lx:180.82,ly:528.28,lw:40.77,lh:6.86}
       ],
       win: {
-        skills:{x:43,y:40,w:293,h:560,r:14,shot:'m-win.png',kin:293/243.89,
-                tab:{x:69.6,y:23.2,w:57.7,h:13.1},
-                tabl:{x:71.6,y:26.6,w:34.0,h:5.7,src:'label-skilly.svg'}},
-        setup: {x:43,y:40,w:293,h:560,r:14,shot:'m-win.png',kin:293/243.89,
-                tab:{x:69.6,y:23.2,w:57.7,h:13.1},
-                tabl:{x:72.8,y:26.6,w:25.4,h:5.7,src:'label-setup.svg'}},
-        about: {x:43,y:40,w:293,h:560,r:14,shot:'m-about.png',about:true,
-                shotBox:{x:8.05,y:-19.4,w:274.5,h:579.8},
+        skills:{x:49.5,y:25,w:280,h:587,r:14,shot:'m-win.png',kin:280/243.89,
+                tab:{x:66.5,y:22.2,w:55.1,h:12.5},
+                tabl:{x:68.4,y:25.4,w:32.5,h:5.5,src:'label-skilly.svg'}},
+        setup: {x:49.5,y:25,w:280,h:587,r:14,shot:'m-win.png',kin:280/243.89,
+                tab:{x:66.5,y:22.2,w:55.1,h:12.5},
+                tabl:{x:69.6,y:25.4,w:24.3,h:5.5,src:'label-setup.svg'}},
+        about: {x:49.5,y:60,w:280,h:510,r:14,shot:'m-about.png',about:true,
                 side:null,
                 /* тело окна закрывается белым целиком: иначе слева торчала
                    полоса снимка, а снизу его же строка с адресом */
-                chips:[{x:0,y:17,w:293,h:543,c:'#fff'},
-                       {x:78,y:-3,w:58,h:17,c:'#fff'}],
-                note:{x:90,y:1.2,w:26,h:4.2},
-                date:{x:103,y:25,fs:8},
+                chips:[{x:0,y:15.5,w:280,h:494.5,c:'#fff'},
+                       {x:74.5,y:-2.7,w:55.4,h:15.5,c:'#fff'}],
+                note:{x:86,y:1.1,w:24.8,h:4},
+                date:{x:98,y:22.8,fs:7.6},
                 time:null,
-                text:{x:25,y:48,w:243,h:498,fs:8.4,lh:10.6}}
+                text:{x:23.9,y:43.7,w:232,h:453,fs:8,lh:10.1}}
       },
       skills: [
         {ic:['ic-ps.png'],x:46.44,y:97.71,w:30.30,h:29.55,lb:'lb-ps.svg',cx:46.04,cy:132.68,cw:31.27,ch:12.96},
@@ -4076,8 +4075,9 @@
     function fit(){
       var w = sec.clientWidth;
       if(!w) return;
-      var k = w / L.w;
+      var k = Math.min(w / L.w, (window.innerHeight * 0.94) / L.h);
       stage.style.transform = 'scale(' + k.toFixed(5) + ')';
+      stage.style.left = Math.round((w - L.w * k) / 2) + 'px';
       sec.style.height = Math.round(L.h * k) + 'px';
     }
     fit();
@@ -4154,7 +4154,8 @@
         if(tl.length){
           gsap.killTweensOf(tl);
           gsap.fromTo(tl, {opacity: 0, scale: .66, y: 14},
-            {opacity: 1, scale: 1, y: 0, duration: .5, ease: EASE.rise, stagger: .045, delay: .2});
+            {opacity: 1, scale: 1, y: 0, duration: .5, ease: EASE.rise, stagger: .045, delay: .2,
+             onComplete: function(){ gsap.set(tl, {clearProps: 'transform'}); }});
         }
         var ps = w.querySelectorAll('.kn-text p, .kn-text .kn-gap');
         if(ps.length){
