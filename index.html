@@ -10,7 +10,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap&subset=cyrillic" rel="stylesheet">
 <link rel="preload" href="fonts/ak.woff2" as="font" type="font/woff2" crossorigin>
-<script src="cases.js?v=040421"></script>
+<script src="cases.js?v=040929"></script>
 <!-- Библиотеки лежат рядом с сайтом, а не на CDN: при недоступном CDN
      страница превращалась в белый экран со счётчиком 0 % — весь скрипт
      падает на первой же строке с gsap. -->
@@ -125,6 +125,7 @@
      блока, поэтому каждая отметка здесь — ровно та, что во фрейме. */
   #know{position:relative;width:100%;overflow:hidden;}
   .know-stage{position:absolute;left:0;top:0;transform-origin:top left;}
+  #know img{max-width:none;}
   .kn-t{position:absolute;font-weight:500;color:#000;white-space:nowrap;}
 
   .kn-item{position:absolute;border:0;background:none;padding:0;cursor:pointer;
@@ -146,7 +147,8 @@
     box-shadow:0 11px 24px rgba(171,171,171,.13), 0 45px 45px rgba(171,171,171,.11),
                0 100px 60px rgba(171,171,171,.07), 0 178px 71px rgba(171,171,171,.02);}
   .kn-win.on{pointer-events:auto;}
-  .kn-shot{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block;}
+  .kn-shot{position:absolute;left:-0.6%;top:-0.6%;width:101.2%;height:101.2%;
+    object-fit:cover;display:block;}
   .kn-tab{position:absolute;background:#fefffe;display:block;}
   .kn-tabl,.kn-note{position:absolute;display:block;}
   .kn-chip{position:absolute;display:block;}
@@ -171,11 +173,12 @@
     font-weight:400;letter-spacing:-.045em;opacity:.8;color:#000;text-transform:lowercase;}
   .kn-text b{font-weight:590;}
   .kn-text p{margin:0;}
-  .kn-fade{position:sticky;left:0;bottom:0;display:block;height:54px;margin-top:-54px;
+  .kn-fade{display:none;position:sticky;left:0;bottom:0;height:54px;margin-top:-54px;
     pointer-events:none;backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px);
     -webkit-mask-image:linear-gradient(to bottom,transparent,#000 72%);
     mask-image:linear-gradient(to bottom,transparent,#000 72%);
     background:linear-gradient(to bottom,rgba(255,255,255,0),#fff 78%);}
+  @media (max-width:900px){ .kn-fade{display:block;} }
 
   .corner{position:fixed;z-index:8;}
   .corner.tl{top:clamp(12px,2.2vh,22px);left:var(--gut);}
@@ -1298,7 +1301,7 @@
     <div class="m-copy"><span class="sm" data-goo data-fade>’26 © All Right Reserved</span></div>
 
     <div class="tailroom"></div>
-    <span id="buildStamp" style="display:none">BUILD 04.10 04:21</span>
+    <span id="buildStamp" style="display:none">BUILD 04.10 09:29</span>
   </section>
 
 </main>
@@ -4073,18 +4076,49 @@
 
     /* ---- появление блока: заголовок из кляксы, папки наплывом ---- */
     var heads = stage.querySelectorAll('.kn-t');
-    var items = stage.querySelectorAll('.kn-item');
-    gsap.set(items, {opacity: 0, scale: .72, y: 26});
+    var items = [].slice.call(stage.querySelectorAll('.kn-item'));
+    /* Каждая папка выезжает со своей стороны и тормозит на месте — скольжение
+       по льду: быстрый старт и долгое затухание скорости. */
+    var SLIDE = [{x: -L.w * .46, y: L.h * .10}, {x: L.w * .42, y: L.h * .16},
+                 {x: L.w * .30, y: -L.h * .22}];
+    items.forEach(function(it, i){
+      var s0 = SLIDE[i % SLIDE.length];
+      gsap.set(it, {opacity: 0, x: s0.x, y: s0.y});
+    });
     [].slice.call(heads).forEach(function(h){ h.classList.add('shown'); gsap.set(h, {opacity: 0}); });
     ScrollTrigger.create({trigger: sec, start: 'top 72%', once: true, onEnter: function(){
       [].slice.call(heads).forEach(function(h, i){
         gsap.delayedCall(i * .12, function(){ reGoo(h, true); });
       });
-      gsap.to(items, {opacity: 1, scale: 1, y: 0, duration: .62, ease: EASE.rise,
-                      stagger: .1, delay: .34});
+      items.forEach(function(it, i){
+        gsap.to(it, {opacity: 1, duration: .3, ease: 'none', delay: .3 + i * .1});
+        gsap.to(it, {x: 0, y: 0, duration: 1.15, ease: 'power4.out', delay: .3 + i * .1});
+      });
     }});
 
     /* ---- открытие окна: само окно и всё внутри него наплывом ---- */
+    /* Окно вытягивается из своей папки и втягивается обратно — как джинн
+       на маке: сперва узкая полоска у иконки, потом раскрытие по ширине. */
+    function genie(w, from, back){
+      var wr = {x: parseFloat(w.style.left), y: parseFloat(w.style.top),
+                w: parseFloat(w.style.width), h: parseFloat(w.style.height)};
+      var ix = from ? parseFloat(from.style.left) + parseFloat(from.style.width) / 2 : wr.x + wr.w / 2;
+      var iy = from ? parseFloat(from.style.top) + parseFloat(from.style.height) / 2 : wr.y + wr.h / 2;
+      var dx = ix - (wr.x + wr.w / 2), dy = iy - (wr.y + wr.h / 2);
+      var shut = {x: dx, y: dy, scaleX: .06, scaleY: .015, opacity: 0};
+      var full = {x: 0, y: 0, scaleX: 1, scaleY: 1, opacity: 1};
+      gsap.killTweensOf(w);
+      if(back){
+        return gsap.timeline()
+          .to(w, {scaleY: .22, duration: .16, ease: 'power2.in'}, 0)
+          .to(w, shut, {duration: .34, ease: 'power3.in'}, .1);
+      }
+      return gsap.timeline()
+        .fromTo(w, shut, {x: 0, y: 0, scaleX: 1, scaleY: .2, opacity: 1,
+                          duration: .3, ease: 'power3.out'}, 0)
+        .to(w, {scaleY: 1, duration: .38, ease: EASE.rise}, .22);
+    }
+
     function open(name){
       sec.classList.add('on');
       ['skills','setup','about'].forEach(function(n){
@@ -4092,8 +4126,7 @@
         if(!w) return;
         if(n !== name){ w.classList.remove('on'); return; }
         w.classList.add('on');
-        gsap.killTweensOf(w);
-        gsap.fromTo(w, {opacity: 0, scale: .9}, {opacity: 1, scale: 1, duration: .5, ease: EASE.rise});
+        genie(w, stage.querySelector('.kn-item[data-win="' + name + '"]'), false);
         var tl = w.querySelectorAll('.kn-tile');
         if(tl.length){
           gsap.killTweensOf(tl);
@@ -4117,7 +4150,9 @@
       sec.classList.remove('on');
       ['skills','setup','about'].forEach(function(n){
         var w = document.getElementById('kn-' + n);
-        if(w) w.classList.remove('on');
+        if(!w || !w.classList.contains('on')) return;
+        genie(w, stage.querySelector('.kn-item[data-win="' + n + '"]'), true)
+          .eventCallback('onComplete', function(){ w.classList.remove('on'); });
       });
     }
     stage.querySelectorAll('.kn-item').forEach(function(b){
