@@ -10,7 +10,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap&subset=cyrillic" rel="stylesheet">
 <link rel="preload" href="fonts/ak.woff2" as="font" type="font/woff2" crossorigin>
-<script src="cases.js?v=041002"></script>
+<script src="cases.js?v=041006"></script>
 <!-- Библиотеки лежат рядом с сайтом, а не на CDN: при недоступном CDN
      страница превращалась в белый экран со счётчиком 0 % — весь скрипт
      падает на первой же строке с gsap. -->
@@ -1312,7 +1312,7 @@
     <div class="m-copy"><span class="sm" data-goo data-fade>’26 © All Right Reserved</span></div>
 
     <div class="tailroom"></div>
-    <span id="buildStamp" style="display:none">BUILD 04.10 10:02</span>
+    <span id="buildStamp" style="display:none">BUILD 04.10 10:06</span>
   </section>
 
 </main>
@@ -3881,20 +3881,23 @@
          lb:'label-skilly.svg', lx:180.82,ly:528.28,lw:40.77,lh:6.86}
       ],
       win: {
-        skills:{x:64,y:70.24,w:243.89,h:492.52,r:12,shot:'m-win.png',pad:10,
-                tab:{x:57.94,y:19.34,w:47.99,h:10.89},
-                tabl:{x:59.60,y:22.10,w:28.30,h:4.76,src:'label-skilly.svg'}},
-        setup: {x:64,y:70.24,w:243.89,h:492.52,r:12,shot:'m-win.png',pad:10,
-                tab:{x:57.94,y:19.34,w:47.99,h:10.89},
-                tabl:{x:60.60,y:22.10,w:21.10,h:4.76,src:'label-setup.svg'}},
-        about: {x:62,y:105,w:258,h:429,r:12,shot:'m-about.png',about:true,shotBox:{x:7.09,y:-14.93,w:241.65,h:444.26},
+        skills:{x:43,y:40,w:293,h:560,r:14,shot:'m-win.png',kin:293/243.89,
+                tab:{x:69.6,y:23.2,w:57.7,h:13.1},
+                tabl:{x:71.6,y:26.6,w:34.0,h:5.7,src:'label-skilly.svg'}},
+        setup: {x:43,y:40,w:293,h:560,r:14,shot:'m-win.png',kin:293/243.89,
+                tab:{x:69.6,y:23.2,w:57.7,h:13.1},
+                tabl:{x:72.8,y:26.6,w:25.4,h:5.7,src:'label-setup.svg'}},
+        about: {x:43,y:40,w:293,h:560,r:14,shot:'m-about.png',about:true,
+                shotBox:{x:8.05,y:-19.4,w:274.5,h:579.8},
                 side:null,
-                chips:[{x:10,y:9.96,w:238,h:414.26,c:'#fff'},
-                       {x:76.95,y:-11.00,w:36.22,h:17.26,c:'#fff'}],
-                note:{x:80.83,y:-0.40,w:22.92,h:3.67},
-                date:{x:92,y:19.58,fs:7},
+                /* тело окна закрывается белым целиком: иначе слева торчала
+                   полоса снимка, а снизу его же строка с адресом */
+                chips:[{x:0,y:17,w:293,h:543,c:'#fff'},
+                       {x:78,y:-3,w:58,h:17,c:'#fff'}],
+                note:{x:90,y:1.2,w:26,h:4.2},
+                date:{x:103,y:25,fs:8},
                 time:null,
-                text:{x:22.53,y:42.89,w:210.21,h:381,fs:7.4,lh:9.2}}
+                text:{x:25,y:48,w:243,h:498,fs:8.4,lh:10.6}}
       },
       skills: [
         {ic:['ic-ps.png'],x:46.44,y:97.71,w:30.30,h:29.55,lb:'lb-ps.svg',cx:46.04,cy:132.68,cw:31.27,ch:12.96},
@@ -3910,11 +3913,11 @@
         {ic:['st-rgbspot.png'],x:40.44,y:142.84,w:38.49,h:38.49,lb:'sl-rgbspot.svg',cx:41.52,cy:187.30,cw:38.49,ch:5.60},
         {ic:['st-flash.png'],x:174.26,y:176.49,w:33.14,h:30.83,cx:175.20,cy:214.03,cw:31.23,ch:9.39},
         {ic:['st-camera.png'],x:43.44,y:61.34,w:38.49,h:26.54,lb:'sl-camera.svg',cx:47.78,cy:92.84,cw:33.86,ch:5.60},
-        {ic:['st-lens-uni.png'],x:117.60,y:56.56,w:31.71,h:40.29,rot:22.48,lb:'sl-lens-uni.svg',cx:112.70,cy:100.16,cw:41.45,ch:10.76},
+        {ic:['st-lens-uni.png'],x:102.60,y:56.56,w:31.71,h:40.29,rot:22.48,lb:'sl-lens-uni.svg',cx:112.70,cy:100.16,cw:41.45,ch:10.76},
         {ic:['st-lens-macro.png'],x:173.92,y:96.93,w:21.66,h:36.97,rot:-3.83,lb:'sl-lens-macro.svg',cx:174.25,cy:138.02,cw:24.30,ch:9.39},
         {ic:['st-octo.png','st-octo.png'],x:114.32,y:131.57,w:26.28,h:28.49,dx:-13.14,dy:9.48,lb:'sl-octo.svg',cx:111.11,cy:176.72,cw:31.27,ch:4.61},
         {ic:['st-rgbpanel.png'],x:48.10,y:226.25,w:34.78,h:41.76,lb:'sl-rgbpanel.svg',cx:51.64,cy:272.25,cw:27.88,ch:5.60},
-        {ic:['st-speedlight.png'],x:128.56,y:239.22,w:23.76,h:50.34,lb:'sl-speedlight.svg',cx:118.23,cy:295.90,cw:31.48,ch:9.39},
+        {ic:['st-speedlight.png'],x:124.50,y:239.22,w:23.76,h:50.34,lb:'sl-speedlight.svg',cx:118.23,cy:295.90,cw:31.48,ch:9.39},
         {ic:['st-tripod.png'],x:61.04,y:386.76,w:41.79,h:47.00,lb:'sl-tripod.svg',cx:69.05,cy:443.24,cw:32.82,ch:11.49},
         {ic:['st-gimbal.png'],x:149.82,y:354.33,w:35.94,h:59.44,lb:'sl-gimbal.svg',cx:152.44,cy:422.08,cw:32.99,ch:11.67},
         {ic:['st-power.png'],x:55.56,y:305.76,w:38.49,h:31.11,lb:'sl-power.svg',cx:54.03,cy:344.79,cw:42.39,ch:10.39},
@@ -3981,24 +3984,25 @@
     var veil = el('div', 'kn-veil');
     stage.appendChild(veil);
 
-    function tile(t){
-      var left = Math.min(t.x, t.cx), top = Math.min(t.y, t.cy);
+    function tile(t, k){
+      k = k || 1;
+      var left = Math.min(t.x, t.cx) * k, top = Math.min(t.y, t.cy) * k;
       var d = el('div', 'kn-tile', 'left:' + px(left) + ';top:' + px(top));
       var html = '';
       t.ic.forEach(function(src, i){
-        var ix = t.x - left + (t.dx ? t.dx * i : 0);
-        var iy = t.y - top + (t.gap ? t.gap * i : 0) + (t.dy ? t.dy * i : 0);
+        var ix = (t.x + (t.dx ? t.dx * i : 0)) * k - left;
+        var iy = (t.y + (t.gap ? t.gap * i : 0) + (t.dy ? t.dy * i : 0)) * k - top;
         html += '<img class="sh" src="about/' + src + '" alt="" style="left:' + px(ix) + ';top:' + px(iy) +
-                ';width:' + px(t.w) + ';height:' + px(t.h) +
-                (t.r ? ';border-radius:' + t.r + 'px' : '') +
+                ';width:' + px(t.w * k) + ';height:' + px(t.h * k) +
+                (t.r ? ';border-radius:' + (t.r * k).toFixed(1) + 'px' : '') +
                 (t.rot ? ';transform:rotate(' + t.rot + 'deg)' : '') + '">';
       });
       if(t.lb){
-        html += '<img src="about/' + t.lb + '" alt="" style="left:' + px(t.cx - left) + ';top:' + px(t.cy - top) +
-                ';width:' + px(t.cw) + ';height:' + px(t.ch) + '">';
+        html += '<img src="about/' + t.lb + '" alt="" style="left:' + px(t.cx * k - left) + ';top:' + px(t.cy * k - top) +
+                ';width:' + px(t.cw * k) + ';height:' + px(t.ch * k) + '">';
       } else if(t.text){
-        html += '<span class="kn-cap" style="left:' + px(t.cx - left) + ';top:' + px(t.cy - top) +
-                ';width:' + px(t.cw) + ';font-size:' + (t.fs || 13) + 'px">' +
+        html += '<span class="kn-cap" style="left:' + px(t.cx * k - left) + ';top:' + px(t.cy * k - top) +
+                ';width:' + px(t.cw * k) + ';font-size:' + ((t.fs || 13) * k).toFixed(2) + 'px">' +
                 t.text.split('|').join('<br>') + '</span>';
       }
       d.innerHTML = html;
@@ -4057,13 +4061,13 @@
         w.appendChild(box);
       }
       /* кружки светофора на снимке — по ним окно тоже закрывается */
-      var dk = SMALL ? 0.45 : 1;
+      var dk = SMALL ? (c.kin || 1) * 0.45 : 1;
       var dots = el('button', 'kn-dots', 'left:' + px(10 * dk) + ';top:' + px(8 * dk) +
         ';width:' + px(58 * dk) + ';height:' + px(24 * dk));
       dots.type = 'button';
       dots.setAttribute('aria-label', 'Закрыть');
       w.appendChild(dots);
-      if(name !== 'about') (L[name] || []).forEach(function(t){ w.appendChild(tile(t)); });
+      if(name !== 'about') (L[name] || []).forEach(function(t){ w.appendChild(tile(t, c.kin || 1)); });
       return w;
     }
     ['skills','setup','about'].forEach(function(n){ stage.appendChild(buildWin(n)); });
