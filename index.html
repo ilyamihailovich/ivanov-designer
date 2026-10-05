@@ -10,7 +10,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap&subset=cyrillic" rel="stylesheet">
 <link rel="preload" href="fonts/ak.woff2" as="font" type="font/woff2" crossorigin>
-<script src="cases.js?v=051700"></script>
+<script src="cases.js?v=051846"></script>
 <!-- Библиотеки лежат рядом с сайтом, а не на CDN: при недоступном CDN
      страница превращалась в белый экран со счётчиком 0 % — весь скрипт
      падает на первой же строке с gsap. -->
@@ -144,7 +144,7 @@
 
   .kn-veil{position:fixed;left:0;right:0;top:0;bottom:0;z-index:5;opacity:0;pointer-events:none;
     backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
-    background:rgba(0,0,0,.04);transition:opacity .45s var(--eo);}
+    background:rgba(0,0,0,.55);transition:opacity .45s var(--eo);}
   #know.on .kn-veil{opacity:1;pointer-events:auto;}
   /* пока окно открыто, меню уходит в размытие и не спорит с ним */
   .menu-wrap{transition:opacity .4s var(--eo), filter .4s var(--eo);}
@@ -192,21 +192,21 @@
     -webkit-overflow-scrolling:touch;scrollbar-width:none;-ms-overflow-style:none;}
   .kn-textbox::-webkit-scrollbar{width:0;height:0;display:none;}
   .kn-text{font-family:'SF Pro','AK','Helvetica Neue',Arial,sans-serif;
-    font-weight:400;letter-spacing:-.045em;opacity:.8;color:#000;text-transform:lowercase;}
-  .kn-text b{font-weight:590;}
-  .kn-text p{margin:0;text-wrap:balance;}
+    font-weight:400;letter-spacing:-.045em;opacity:.8;color:#000;text-transform:lowercase;text-align:left;}
+  .kn-text b{font-weight:650;}
+  .kn-text p{margin:0;text-align:left;}
   /* выделенный абзац — жёлтая подсветка с полоской слева, как в заметках */
-  .kn-text p.hl{position:relative;border-radius:7px;background:rgba(255,196,0,.10);
-    padding:5px 10px 5px 22px;margin:0 0 0 -10px;font-weight:650;}
+  .kn-text p.hl{position:relative;border-radius:10px;background:rgba(255,196,0,.10);
+    padding:12px 10px 12px 28px;margin:0;font-weight:650;}
   .kn-text p.hl::before{content:'';position:absolute;left:12px;top:12px;bottom:12px;
-    width:2px;border-radius:1px;background:#ffc400;}
+    width:2.5px;border-radius:1.25px;background:#ffc400;}
   .kn-text p.h1{font-weight:700;letter-spacing:-.05em;}
   /* на телефоне кегли свои: заголовок крупнее, выделенный абзац мельче — по фрейму */
   @media (max-width:900px){
     .kn-text p.h1{font-size:18.45px;line-height:13.8px;}
     .kn-text p.hl{font-size:8.07px;line-height:9.18px;opacity:.8;border-radius:8px;
-      padding:11.3px 5px 11.3px 20.4px;margin:0 0 0 1.2px;letter-spacing:-.037em;}
-    .kn-text p.hl::before{left:11.2px;top:12.8px;bottom:12.5px;width:2.4px;border-radius:1.2px;}
+      padding:11.3px 5px 11.3px 20.4px;margin:0;letter-spacing:-.037em;}
+    .kn-text p.hl::before{left:11.2px;top:11.3px;bottom:11.3px;width:2.4px;border-radius:1.2px;}
   }
   .kn-fade{position:absolute;z-index:4;pointer-events:none;
     transition:opacity .25s linear;}
@@ -938,13 +938,17 @@
   .socials a:hover .ico,.socials a:active .ico,.socials a:focus-visible .ico{filter:invert(1);}
   html.is-dark .socials a:hover .ico,html.is-dark .socials a:active .ico{filter:none;}
   .socials .s-mail{display:none;}
+  @media (max-width:900px){
+    .socials{gap:12px;}
+    .socials a{width:66px;height:66px;}
+  }
   /* they arrive filled and empty out once the block is properly in view */
   .socials a{background:var(--ink);color:var(--paper);border-color:var(--ink);
     transition:background .6s var(--eo), color .6s var(--eo), border-color .6s var(--eo);}
   .socials.lit a{background:none;color:var(--ink);border-color:var(--ink);}
   .socials.lit a:hover{background:var(--ink);color:var(--paper);}
   /* room for the wordmark to come together underneath everything */
-  .tailroom{height:clamp(220px,34vh,420px);}
+  .tailroom{height:clamp(80px,12vh,150px);}
 
 
   /* ---------- финал на десктопе: сцена 1425x2657 из фрейма 379:7 ----------
@@ -1000,7 +1004,7 @@
     .close-aside > div:nth-child(2) .sm:first-child{margin-bottom:1.702cqw;}
     /* в макете кружка три — почта больше не прячется на десктопе */
     .socials .s-mail{display:flex;}
-    .socials .s-mail .ico{display:block;width:40%;height:40%;}
+    .socials .s-mail .ico{display:block;width:50%;height:50%;}
     .close-aside > div:nth-child(2) .sm a{display:flex;align-items:center;
       justify-content:center;height:3.2281cqw;border-radius:32px;background:#eee;
       color:rgba(0,0,0,.64);text-decoration:none;}
@@ -1412,7 +1416,7 @@
     <div class="m-copy"><span class="sm" data-goo data-fade>’26 © All Right Reserved</span></div>
 
     <div class="tailroom"></div>
-    <span id="buildStamp" style="display:none">BUILD 05.10 17:00</span>
+    <span id="buildStamp" style="display:none">BUILD 05.10 18:46</span>
   </section>
 
 </main>
@@ -3573,17 +3577,9 @@
 
     var A = document.getElementById('workA'), B = document.getElementById('workB');
     var rule = link.querySelector('i');
-    // строки расходятся от середины на те же 33,1 % высоты экрана, что и на
-    // референсе, и сходятся обратно по мере прокрутки
-    var off = function(){ return window.innerHeight * 0.331; };
-    // Строки не сливаются в одну точку: на референсе они сходятся до полутора
-    // кеглей от середины и на этом их подменяет ссылка. Сведённые в ноль, они
-    // просто легли бы друг на друга.
-    // строки сходятся вплотную, и только тогда их подменяет ссылка
-    var near = function(){ return (parseFloat(getComputedStyle(A).fontSize) || 40) * 0.56; };
 
-    gsap.set(A, {y: function(){ return -off(); }});
-    gsap.set(B, {y: function(){ return  off(); }});
+    gsap.set(A, {x: 0});
+    gsap.set(B, {x: 0});
     gsap.set(link, {opacity: 0});
     gsap.set(rule, {width: 0});
 
@@ -3654,8 +3650,8 @@
       .fromTo(track, {x: function(){ return window.innerWidth + 190; }},
                      {x: function(){ return -track.scrollWidth - 190; },
                       ease: 'none', duration: .80}, 0)
-      .to(A, {y: function(){ return -near(); }, ease: 'none', duration: .90}, 0)
-      .to(B, {y: function(){ return  near(); }, ease: 'none', duration: .90}, 0)
+      .to(A, {x: function(){ return -window.innerWidth * 0.25; }, ease: 'none', duration: .90}, 0)
+      .to(B, {x: function(){ return  window.innerWidth * 0.25; }, ease: 'none', duration: .90}, 0)
       /* Строки не просто гаснут: они уходят в размытие, и из размытия
          проявляется «Перейти ко всем кейсам» — как он и просил. */
       .to([A, B], {opacity: 0, filter: 'blur(16px)', duration: .05, ease: 'none'}, .90)
@@ -3926,13 +3922,13 @@
          lb:'label-opyt.svg',   lx:1094.98, ly:387.09, lw:35.59, lh:8.81}
       ],
       win: {
-        skills:{x:519.49,y:303.17,w:846,h:541,r:14,shot:'win-skills.png',
+        skills:{x:519.49,y:303.17,w:846,h:541,r:14,shot:'about/win-skills-desktop.png',
                 tab:{x:154.63,y:15.15,w:71.90,h:16.86},
                 tabl:{x:156.51,y:19.43,w:52.40,h:8.81,src:'label-skilly.svg'}},
-        setup: {x:96.49, y:257.17,w:846,h:541,r:14,shot:'win-skills.png',
+        setup: {x:96.49, y:257.17,w:846,h:541,r:14,shot:'about/win-setup-desktop.png',
                 tab:{x:157.71,y:15.15,w:71.90,h:16.86},
                 tabl:{x:158.59,y:19.17,w:39.09,h:8.81,src:'label-setup.svg'}},
-        about: {x:569.88,y:68.50,w:775.95,h:533.33,r:11,shot:'win-about.png',about:true,
+        about: {x:569.88,y:68.50,w:775.95,h:533.33,r:11,shot:'about/win-about-desktop.png',about:true,
                 side:{x:0,y:116.17,w:110.70,h:417.17},
                 chips:[{x:44.00,y:82.40,w:61.00,h:13.60,c:'#dddcdc'},
                        {x:92.00,y:14.60,w:50.00,h:14.40,c:'#fff'},
@@ -3981,15 +3977,15 @@
          lb:'label-skilly.svg', lx:281.26,ly:528.28,lw:40.77,lh:6.86}
       ],
       win: {
-        skills:{x:39,y:25,w:301,h:587,r:10.43,shot:'m-win.png',kin:301/243.89,
+        skills:{x:39,y:25,w:301,h:587,r:10.43,shot:'about/win-skills-mob.png',kin:301/243.89,
                 shotBox:{x:-4.0,y:-3.0,w:310.7,h:599.4},
                 tab:{x:122.75,y:9.0,w:55.5,h:11.5},
                 tabl:{x:78.57,y:12.0,w:32.5,h:5.5,src:'label-skilly.svg'}},
-        setup: {x:39,y:25,w:301,h:587,r:10.43,shot:'m-win.png',kin:301/243.89,
+        setup: {x:39,y:25,w:301,h:587,r:10.43,shot:'about/win-setup-mob.png',kin:301/243.89,
                 shotBox:{x:-4.0,y:-3.0,w:310.7,h:599.4},
                 tab:{x:122.75,y:9.0,w:55.5,h:11.5},
                 tabl:{x:91.6,y:12.0,w:24.3,h:5.5,src:'label-setup.svg'}},
-        about: {x:39,y:60,w:301,h:510,r:10.43,shot:'m-about.png',about:true,
+        about: {x:39,y:60,w:301,h:510,r:10.43,shot:'about/win-about-mob.png',about:true,
                 /* подложка внизу текста — по фрейму (447:1209) */
                 fade:{x:7.21,y:414.18,w:282.33,h:95.82},
                 side:null,
@@ -4035,7 +4031,7 @@
     var L = SMALL ? M : D;
 
     var ABOUT_D = [
-      {hl:true,t:'Сильная сторона моего подхода в том, что я совмещаю SMM со знаниями в дизайне и продакшене.'},
+      '<b>Сильная сторона моего подхода в том, что я совмещаю SMM со знаниями в дизайне и продакшене.</b>',
       '',
       'Это позволяет закрывать несколько задач в рамках одного проекта без передачи работы между несколькими специалистами, быстро переходить от идеи к реализации и самостоятельно организовывать производство контента. А собственная техническая база дополнительно позволяет не зависеть от подрядчиков.',
       '',
@@ -4235,17 +4231,37 @@
       gsap.set(it, {opacity: 0, x: s0.x, y: s0.y});
     });
     [].slice.call(heads).forEach(function(h){ h.classList.add('shown'); gsap.set(h, {opacity: 0}); });
-    ScrollTrigger.create({trigger: sec, start: 'top 72%', once: true, onEnter: function(){
+
+    function animateKnowEnter(){
       [].slice.call(heads).forEach(function(h, i){
         gsap.delayedCall(i * .12, function(){ reGoo(h, true); });
       });
       items.forEach(function(it, i){
-        gsap.to(it, {opacity: 1, duration: .3, ease: 'none', delay: .3 + i * .1});
-        gsap.to(it, {x: 0, y: 0, duration: 1.15, ease: 'power4.out', delay: .3 + i * .1,
-          /* иначе остаточный инлайн-transform перебивает увеличение при наведении */
-          onComplete: function(){ gsap.set(it, {clearProps: 'transform'}); }});
+        var s0 = SLIDE[i % SLIDE.length];
+        gsap.killTweensOf(it);
+        gsap.fromTo(it, {opacity: 0, x: s0.x, y: s0.y},
+          {opacity: 1, x: 0, y: 0, duration: 1.15, ease: 'power4.out', delay: .3 + i * .1,
+           onComplete: function(){ gsap.set(it, {clearProps: 'transform'}); }});
       });
-    }});
+    }
+
+    function animateKnowLeave(){
+      items.forEach(function(it, i){
+        var s0 = SLIDE[i % SLIDE.length];
+        gsap.killTweensOf(it);
+        gsap.to(it, {opacity: 0, x: s0.x, y: s0.y, duration: .8, ease: 'power2.in', delay: i * .08});
+      });
+    }
+
+    ScrollTrigger.create({
+      trigger: sec,
+      start: 'top 72%',
+      end: 'top 33%',
+      onEnter: animateKnowEnter,
+      onEnterBack: animateKnowEnter,
+      onLeave: animateKnowLeave,
+      onLeaveBack: animateKnowLeave
+    });
 
     /* ---- открытие окна: само окно и всё внутри него наплывом ---- */
     /* Окно вытягивается из своей папки и втягивается обратно — как джинн
@@ -4261,8 +4277,8 @@
       gsap.killTweensOf(w);
       if(back){
         return gsap.timeline()
-          .to(w, {scaleY: .22, duration: .16, ease: 'power2.in'}, 0)
-          .to(w, shut, {duration: .34, ease: 'power3.in'}, .1);
+          .to(w, {scaleY: .2, duration: .38, ease: 'power3.in'}, 0)
+          .to(w, shut, {duration: .3, ease: 'power3.in'}, .16);
       }
       return gsap.timeline()
         .fromTo(w, shut, {x: 0, y: 0, scaleX: 1, scaleY: .2, opacity: 1,
