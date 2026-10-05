@@ -10,7 +10,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap&subset=cyrillic" rel="stylesheet">
 <link rel="preload" href="fonts/ak.woff2" as="font" type="font/woff2" crossorigin>
-<script src="cases.js?v=041122"></script>
+<script src="cases.js?v=051700"></script>
 <!-- Библиотеки лежат рядом с сайтом, а не на CDN: при недоступном CDN
      страница превращалась в белый экран со счётчиком 0 % — весь скрипт
      падает на первой же строке с gsap. -->
@@ -142,7 +142,7 @@
            drop-shadow(0 26px 10px rgba(110,110,110,.01));}
   .kn-lb{position:absolute;display:block;}
 
-  .kn-veil{position:absolute;inset:0;z-index:5;opacity:0;pointer-events:none;
+  .kn-veil{position:fixed;left:0;right:0;top:0;bottom:0;z-index:5;opacity:0;pointer-events:none;
     backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
     background:rgba(0,0,0,.04);transition:opacity .45s var(--eo);}
   #know.on .kn-veil{opacity:1;pointer-events:auto;}
@@ -154,12 +154,15 @@
     -webkit-mask-image:-webkit-radial-gradient(#fff,#000);
     isolation:isolate;
     transform:scale(.9);transform-origin:50% 50%;
-    box-shadow:0 11px 24px rgba(171,171,171,.13), 0 45px 45px rgba(171,171,171,.11),
-               0 100px 60px rgba(171,171,171,.07), 0 178px 71px rgba(171,171,171,.02);}
+    /* маска скругления срезает тени, убрана — скругление задано border-radius */
+    box-shadow:0 238px 67px rgba(171,171,171,0), 0 153px 61px rgba(171,171,171,.01),
+               0 86px 52px rgba(171,171,171,.04), 0 38px 38px rgba(171,171,171,.07),
+               0 10px 21px rgba(171,171,171,.09);}
   .kn-win.on{pointer-events:auto;}
   @media (max-width:900px){
-    .kn-win{box-shadow:0 176px 70px rgba(0,0,0,.01), 0 99px 60px rgba(0,0,0,.04),
-                       0 44px 44px rgba(0,0,0,.07), 0 11.5px 24px rgba(0,0,0,.09);}
+    .kn-win{box-shadow:0 238px 67px rgba(0,0,0,0), 0 153px 61px rgba(0,0,0,.01),
+                       0 86px 52px rgba(0,0,0,.04), 0 38px 38px rgba(0,0,0,.07),
+                       0 10px 21px rgba(0,0,0,.09);}
   }
   .kn-shot{position:absolute;left:-0.6%;top:-0.6%;width:101.2%;height:101.2%;
     object-fit:cover;display:block;}
@@ -191,11 +194,11 @@
   .kn-text{font-family:'SF Pro','AK','Helvetica Neue',Arial,sans-serif;
     font-weight:400;letter-spacing:-.045em;opacity:.8;color:#000;text-transform:lowercase;}
   .kn-text b{font-weight:590;}
-  .kn-text p{margin:0;}
+  .kn-text p{margin:0;text-wrap:balance;}
   /* выделенный абзац — жёлтая подсветка с полоской слева, как в заметках */
   .kn-text p.hl{position:relative;border-radius:7px;background:rgba(255,196,0,.10);
-    padding:5px 10px 5px 22px;margin:0 0 0 -10px;}
-  .kn-text p.hl::before{content:'';position:absolute;left:10px;top:12px;bottom:12px;
+    padding:5px 10px 5px 22px;margin:0 0 0 -10px;font-weight:650;}
+  .kn-text p.hl::before{content:'';position:absolute;left:12px;top:12px;bottom:12px;
     width:2px;border-radius:1px;background:#ffc400;}
   .kn-text p.h1{font-weight:700;letter-spacing:-.05em;}
   /* на телефоне кегли свои: заголовок крупнее, выделенный абзац мельче — по фрейму */
@@ -924,13 +927,14 @@
   .close-aside{margin-top:clamp(50px,10vh,130px);display:flex;flex-direction:column;
     align-items:center;text-align:center;gap:clamp(18px,3.4vh,40px);}
   .close-aside .sm{font-size:clamp(15px,1.35vw,20px);line-height:1.25;}
-  .socials{display:flex;gap:12px;margin-top:clamp(46px,9vh,110px);justify-content:center;}
-  .socials a{width:66px;height:66px;border-radius:50%;border:1px solid var(--hair);
+  .socials{display:flex;gap:24px;margin-top:clamp(46px,9vh,110px);justify-content:center;}
+  .socials a{width:132px;height:132px;border-radius:50%;border:1px solid var(--hair);
     display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:600;
     letter-spacing:.06em;text-transform:uppercase;
     transition:background .3s var(--eo), color .3s var(--eo), border-color .3s var(--eo);}
   .socials a:hover{background:var(--ink);color:var(--paper);border-color:var(--ink);}
-  .socials .ico{display:none;width:100%;height:100%;}
+  .socials .lbl{display:none;}
+  .socials .ico{display:block;width:100%;height:100%;}
   .socials a:hover .ico,.socials a:active .ico,.socials a:focus-visible .ico{filter:invert(1);}
   html.is-dark .socials a:hover .ico,html.is-dark .socials a:active .ico{filter:none;}
   .socials .s-mail{display:none;}
@@ -1389,11 +1393,11 @@
 
     <div class="close-aside">
       <div>
-        <p class="sm" data-goo data-fade style="margin:0 0 6px;">Открыт для новых проектов.</p>
+        <p class="sm dim" data-goo data-fade style="margin:0 0 6px;">Открыт для новых проектов.</p>
         <p class="sm dim m-hide" data-goo data-fade style="margin:0;">Свободен с ноября</p>
       </div>
       <div>
-        <p class="sm dim" data-goo data-fade style="margin:0 0 6px;">Написать напрямую:</p>
+        <p class="sm dim" data-goo data-fade style="margin:0 0 14px;">Написать напрямую</p>
         <p class="sm" data-goo data-fade style="margin:0;"><a href="https://t.me/llyaMihailovich" target="_blank" rel="noopener">@llyaMihailovich</a></p>
       </div>
       <div class="m-hide">
@@ -1408,7 +1412,7 @@
     <div class="m-copy"><span class="sm" data-goo data-fade>’26 © All Right Reserved</span></div>
 
     <div class="tailroom"></div>
-    <span id="buildStamp" style="display:none">BUILD 04.10 11:22</span>
+    <span id="buildStamp" style="display:none">BUILD 05.10 17:00</span>
   </section>
 
 </main>
@@ -3969,35 +3973,35 @@
       w: 379, h: 633, fs: 43, lh: 38, ls: -2.15,
       head: [{t:'всё,',x:39.37,y:42.95},{t:'что нужно',x:76.20,y:80.07},{t:'знать',x:76.78,y:121.58}],
       items: [
-        {win:'setup', ic:'folder.png', x:227.57,y:224.22,w:76.06,h:63.95,
-         lb:'label-setup.svg',  lx:249.94,ly:299.68,lw:30.42,lh:6.86},
-        {win:'about', ic:'notes.png',  x:65.76, y:300.71,w:65.52,h:65.52,
-         lb:'label-opyt.svg',   lx:84.41, ly:382.02,lw:27.69,lh:6.86},
-        {win:'skills',ic:'folder.png', x:163.50,y:452.83,w:76.06,h:63.95,
-         lb:'label-skilly.svg', lx:180.82,ly:528.28,lw:40.77,lh:6.86}
+        {win:'setup', ic:'folder.png', x:263.94,y:224.22,w:76.06,h:63.95,
+         lb:'label-setup.svg',  lx:286.31,ly:299.68,lw:30.42,lh:6.86},
+        {win:'about', ic:'notes.png',  x:39, y:300.71,w:65.52,h:65.52,
+         lb:'label-opyt.svg',   lx:57.65, ly:382.02,lw:27.69,lh:6.86},
+        {win:'skills',ic:'folder.png', x:263.94,y:452.83,w:76.06,h:63.95,
+         lb:'label-skilly.svg', lx:281.26,ly:528.28,lw:40.77,lh:6.86}
       ],
       win: {
-        skills:{x:49.5,y:25,w:280,h:587,r:10.43,shot:'m-win.png',kin:280/243.89,
-                shotBox:{x:-4.0,y:-3.0,w:285.7,h:599.4},
-                tab:{x:65.5,y:9.0,w:55.5,h:11.5},
-                tabl:{x:77.0,y:12.0,w:32.5,h:5.5,src:'label-skilly.svg'}},
-        setup: {x:49.5,y:25,w:280,h:587,r:10.43,shot:'m-win.png',kin:280/243.89,
-                shotBox:{x:-4.0,y:-3.0,w:285.7,h:599.4},
-                tab:{x:65.5,y:9.0,w:55.5,h:11.5},
-                tabl:{x:81.1,y:12.0,w:24.3,h:5.5,src:'label-setup.svg'}},
-        about: {x:49.5,y:60,w:280,h:510,r:10.43,shot:'m-about.png',about:true,
+        skills:{x:39,y:25,w:301,h:587,r:10.43,shot:'m-win.png',kin:301/243.89,
+                shotBox:{x:-4.0,y:-3.0,w:310.7,h:599.4},
+                tab:{x:122.75,y:9.0,w:55.5,h:11.5},
+                tabl:{x:78.57,y:12.0,w:32.5,h:5.5,src:'label-skilly.svg'}},
+        setup: {x:39,y:25,w:301,h:587,r:10.43,shot:'m-win.png',kin:301/243.89,
+                shotBox:{x:-4.0,y:-3.0,w:310.7,h:599.4},
+                tab:{x:122.75,y:9.0,w:55.5,h:11.5},
+                tabl:{x:91.6,y:12.0,w:24.3,h:5.5,src:'label-setup.svg'}},
+        about: {x:39,y:60,w:301,h:510,r:10.43,shot:'m-about.png',about:true,
                 /* подложка внизу текста — по фрейму (447:1209) */
-                fade:{x:7.21,y:414.18,w:261.33,h:95.82},
+                fade:{x:7.21,y:414.18,w:282.33,h:95.82},
                 side:null,
                 /* тело окна закрывается белым целиком: иначе слева торчала
                    полоса снимка, а снизу его же строка с адресом */
-                chips:[{x:0,y:17,w:280,h:493,c:'#fff'},
-                       {x:83.26,y:3.4,w:37.33,h:20.3,c:'#fff'}],
-                head:{x:85.44,y:6.89,fs:6.92},
-                note:{x:85.44,y:16.68,w:26.56,h:4.21},
-                date:{x:98.38,y:39.62,fs:6.92},
+                chips:[{x:0,y:20.5,w:301,h:489.5,c:'#fff'},
+                       {x:93.76,y:3.4,w:37.33,h:20.3,c:'#fff'}],
+                head:{x:34.47,y:6.89,fs:6.92},
+                note:{x:34.47,y:16.68,w:102.9,h:4.21},
+                date:{x:108.88,y:39.62,fs:6.92},
                 time:null,
-                text:{x:17.89,y:66.38,w:243.57,h:443,fs:10.38,lh:13.78}}
+                text:{x:17.89,y:66.38,w:264.57,h:365.73,fs:10.38,lh:13.78}}
       },
       skills: [
         {ic:['ic-ps.png'],x:46.44,y:97.71,w:30.30,h:29.55,lb:'lb-ps.svg',cx:46.04,cy:132.68,cw:31.27,ch:12.96},
@@ -4031,7 +4035,9 @@
     var L = SMALL ? M : D;
 
     var ABOUT_D = [
-      'Сильная сторона моего подхода в том, что я совмещаю SMM со знаниями в дизайне и продакшене. Это позволяет закрывать несколько задач в рамках одного проекта без передачи работы между несколькими специалистами, быстро переходить от идеи к реализации и самостоятельно организовывать производство контента. а Собственная техническая база дополнительно позволяет не зависеть от подрядчиков.',
+      {hl:true,t:'Сильная сторона моего подхода в том, что я совмещаю SMM со знаниями в дизайне и продакшене.'},
+      '',
+      'Это позволяет закрывать несколько задач в рамках одного проекта без передачи работы между несколькими специалистами, быстро переходить от идеи к реализации и самостоятельно организовывать производство контента. А собственная техническая база дополнительно позволяет не зависеть от подрядчиков.',
       '',
       {hl: true, t: 'В проектах отвечал за разработку и реализацию визуальных решений для брендов. Работал с задачами на уровне концепции и позиционирования, определяя, как бренд должен выглядеть, восприниматься и проявляться в разных каналах коммуникации.'},
       '',
