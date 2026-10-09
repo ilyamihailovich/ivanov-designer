@@ -10,7 +10,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap&subset=cyrillic" rel="stylesheet">
 <link rel="preload" href="fonts/ak.woff2" as="font" type="font/woff2" crossorigin>
-<script src="cases.js?v=091051"></script>
+<script src="cases.js?v=091115"></script>
 <!-- Библиотеки лежат рядом с сайтом, а не на CDN: при недоступном CDN
      страница превращалась в белый экран со счётчиком 0 % — весь скрипт
      падает на первой же строке с gsap. -->
@@ -142,10 +142,11 @@
            drop-shadow(0 26px 10px rgba(110,110,110,.01));}
   .kn-lb{position:absolute;display:block;}
 
-  .kn-veil{position:fixed;left:0;right:0;top:0;bottom:0;z-index:5;opacity:0;pointer-events:none;
+  .kn-veil{position:absolute;left:-300%;top:-300%;width:700%;height:700%;
+    z-index:5;opacity:0;pointer-events:none;
     backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
     background:rgba(0,0,0,.04);transition:opacity .45s var(--eo);}
-  #know.on .kn-veil{opacity:1;pointer-events:auto;}
+  .kn-veil.on{opacity:1;pointer-events:auto;}
   /* пока окно открыто, меню уходит в размытие и не спорит с ним */
   .menu-wrap{transition:opacity .4s var(--eo), filter .4s var(--eo);}
   html.kn-open .menu-wrap{opacity:0!important;filter:blur(8px)!important;
@@ -643,7 +644,10 @@
        либо текст кейса, либо сама лента. Стрелка листания живёт в шапке
        справа, как на большом экране, и не мешает ни тексту, ни кадрам. */
 
-    .cw-panel{width:calc(100% - 32px);height:80svh;border-radius:16px;overflow:hidden;}
+    .cw-panel{width:calc(100% - 32px);height:72svh;border-radius:16px;overflow:hidden;
+      /* нижний отступ сдвигает плашку вверх при центровке и освобождает
+         полосу под кнопку «Перейти к просмотру» */
+      margin-bottom:66px;}
     .cw-stage{overflow:hidden!important;}
     .cw-scroll.card{padding:0;overflow:hidden;}
     .cw-stage{position:static;overflow:visible;}
@@ -698,7 +702,7 @@
     .cw-screen.ribbon{scrollbar-width:none;}
     /* Лента начинается сразу под линейкой: вычиталось 108 при том, что
        линейка кончается на 77 — оставалась пустая белая полоса. */
-    .cw-panel.m-open .cw-screen.ribbon:not(.solo){height:calc(80svh - 78px);
+    .cw-panel.m-open .cw-screen.ribbon:not(.solo){height:calc(72svh - 78px);
       pointer-events:auto;}
     /* текст уходит в размытие снизу вверх и в прозрачность */
     .cc-copy{transition:opacity .4s var(--eo), filter .5s var(--eo),
@@ -707,7 +711,9 @@
       mask-image:linear-gradient(to top,#000 0,#000 100%);}
     .cw-panel.m-open .cc-copy{opacity:0;filter:blur(9px);}
     /* кнопка «Перейти к просмотру» внизу; при раскрытии уходит */
-    .cc-nav{position:absolute;left:20px;right:20px;bottom:18px;top:auto;
+    /* кнопка живёт под плашкой, а не поверх текста */
+    .cc-nav{position:fixed;left:16px;right:16px;top:auto;
+      bottom:calc((100svh - 72svh - 66px) / 2 + 8px);
       transform:none;width:auto;height:auto;z-index:7;
       transition:opacity .35s var(--eo);}
     .cw-panel.m-open .cc-nav{opacity:0;pointer-events:none;}
@@ -793,12 +799,12 @@
       align-content:start;}
     .cw-set{height:auto!important;aspect-ratio:3/4;flex:none!important;
       border-radius:10px;overflow:hidden;}
-    .cw-all{top:auto;bottom:calc(100% + 2.4svh);font-size:max(14px,3.8vw);}
+    .cw-all{top:auto;bottom:calc(100% + 1.6svh);font-size:max(14px,3.8vw);}
     .cw-panel.lifted{top:auto;}
     /* крест — за границей плашки сверху и белый, как на большом экране */
     /* Крест перекрывал стрелки листания. Вместо него — кнопка «Назад» над
        самой плашкой, по центру: она ничего не загораживает и читается. */
-    .cw-x{top:calc(10svh - 26px);bottom:auto;left:50%;right:auto;
+    .cw-x{top:calc(14svh - 59px);bottom:auto;left:50%;right:auto;
       transform:translateX(-50%);
       width:auto;height:auto;padding:4px 10px;border-radius:0;
       background:none;z-index:9;
@@ -946,7 +952,10 @@
      композиция держит пропорции макета на любой ширине. */
   @media (min-width:901px){
     .close{container-type:inline-size;position:relative;padding:0;
-      width:min(100%,1600px);margin:0 auto;height:186.456cqw;}
+      width:min(100%,1600px);margin:0 auto;
+      /* последний элемент — плашка «@llyaMihailovich» — кончается на 144,7cqw;
+         хвост оставлен только на поля, иначе внизу зиял пустой экран */
+      height:152cqw;}
     .close > *{position:absolute;margin:0;}
     .close .lg{white-space:nowrap;font-size:6.3158cqw;line-height:5.5579cqw;
       letter-spacing:-0.3158cqw;}
@@ -993,8 +1002,8 @@
       color:var(--ink);opacity:1;}
     .close-aside > div:nth-child(2) .sm:first-child{margin-bottom:1.702cqw;}
     /* в макете кружка три — почта больше не прячется на десктопе */
+    /* почта — такой же кружок и такой же глиф, как телеграм с инстаграмом */
     .socials .s-mail{display:flex;}
-    .socials .s-mail .ico{display:block;width:40%;height:40%;}
     .close-aside > div:nth-child(2) .sm a{display:flex;align-items:center;
       justify-content:center;height:3.2281cqw;border-radius:32px;background:#eee;
       color:rgba(0,0,0,.64);text-decoration:none;}
@@ -1198,6 +1207,8 @@
     .m-orb canvas{width:100%;height:100%;display:block;}
     /* у него в макете три кружка с иконками, а не буквы */
     .socials{top:703.74px;left:20.4%;right:auto;margin:0;gap:12px;}
+    /* на телефоне кружки своего, мелкого размера — не десктопные 132 */
+    .socials a{width:48px;height:48px;}
     .socials .lbl{display:none;}
     .socials .ico{display:block;}
     .socials .s-mail{display:flex;}
@@ -1406,7 +1417,7 @@
     <div class="m-copy"><span class="sm" data-goo data-fade>’26 © All Right Reserved</span></div>
 
     <div class="tailroom"></div>
-    <span id="buildStamp" style="display:none">BUILD 09.10 10:51</span>
+    <span id="buildStamp" style="display:none">BUILD 09.10 11:15</span>
   </section>
 
 </main>
@@ -1737,36 +1748,34 @@
       gsap.set(el, {opacity: 0});
       el.classList.add('shown');
     });
-    /* Порог был 340 — анимация запускалась, когда словомарка ещё за низом
-       экрана, и к моменту, когда до неё доскроллишь, всё уже отыграно.
-       150 — это ровно тот момент, когда она входит в кадр. */
-    var ZONE = 150, on = false, pend = [];
-    function clear(){ pend.forEach(function(t){ t.kill(); }); pend.length = 0; }
+    /* Считали расстояние до низа документа: к моменту порога словомарка
+       давно была в кадре, и она просто вспыхивала с задержкой. Теперь
+       каждая строка следит за собой и выходит, едва войдя в экран. */
     function check(){
-      var doc = document.documentElement;
-      var left = doc.scrollHeight - window.innerHeight -
-                 (window.scrollY || doc.scrollTop || 0);
-      var want = left <= ZONE;
-      if(want === on) return;
-      on = want;
-      clear();
-      if(want){
-        list.forEach(function(el, i){
-          pend.push(gsap.delayedCall(i * .5, function(){ reGoo(el, true); }));
+      list.forEach(function(el, i){
+        var r = el.getBoundingClientRect();
+        if(!r.height) return;
+        var vis = r.top < window.innerHeight * .92 && r.bottom > 0;
+        if(vis === el.__vis) return;
+        el.__vis = vis;
+        if(el.__pend) el.__pend.kill();
+        if(el.__safe) el.__safe.kill();
+        if(vis){
+          el.__pend = gsap.delayedCall(i * .12, function(){ reGoo(el, true); });
           /* Страховка: если проявление через SVG-фильтр почему-то не доедет
              (а Safari с filter:url() ведёт себя иначе, чем Chromium),
              строка всё равно выходит простым затуханием. */
-          pend.push(gsap.delayedCall(i * .5 + 1.3, function(){
-            if(!on) return;
+          el.__safe = gsap.delayedCall(i * .12 + 1.1, function(){
+            if(!el.__vis) return;
             if(parseFloat(getComputedStyle(el).opacity) < .9){
               el.style.filter = 'none';
-              gsap.to(el, {opacity: 1, duration: .4, ease: 'none', overwrite: 'auto'});
+              gsap.to(el, {opacity: 1, duration: .45, ease: 'none', overwrite: 'auto'});
             }
-          }));
-        });
-      } else {
-        list.forEach(function(el){ reGoo(el, false); });
-      }
+          });
+        } else {
+          reGoo(el, false);
+        }
+      });
     }
     /* Проверяем каждый кадр, а не по событию прокрутки: события от Lenis и
        от окна приходят по-разному в разных браузерах, и подвал то срабатывал,
@@ -3370,9 +3379,10 @@
         if(last && b[0] <= last[1] + tol) last[1] = Math.max(last[1], b[1]);
         else merged.push([b[0], b[1]]);
       });
-      // Отступ внутрь одинаковый сверху и снизу: иначе расстояние от линии до
-      // строки над разрывом и под ним получается разным.
-      merged = merged.map(function(b){ return [b[0] - 8, b[1] + 8]; });
+      /* Снизу отступ больше: бокс строки заканчивается у базовой линии,
+         и при равных числах линия начиналась ближе к слову, чем обрывалась
+         над ним. 14 выравнивает просветы на глаз. */
+      merged = merged.map(function(b){ return [b[0] - 8, b[1] + 14]; });
       /* Кадры линию не рвут — они правее её. Они только задают, где разрыв
          начинается: линия должна дойти ровно до НИЖНЕЙ границы кадров, а
          дальше уже уступить место тексту. */
@@ -3928,31 +3938,32 @@
                 plate:{x:-122.04,y:-27.00,w:1020.37,h:885.33},
                 side:null,
                 date:{x:399.52,y:42.40,fs:8},
+                time:{x:22.67,y:83.00,fs:7},
                 text:{x:143.53,y:91.10,w:593.99,h:411.60,fs:11,lh:13}}
       },
       skills: [
         {ic:['ic-ps.png'],x:116.59,y:292.63,w:55.86,h:54.46,lb:'lb-ps.svg',cx:115.86,cy:357.11,cw:57.65,ch:23.90},
         {ic:['ic-ae.png'],x:195.49,y:304.63,w:55.86,h:54.46,lb:'lb-ae.svg',cx:191.20,cy:369.11,cw:64.40,ch:21.73},
         {ic:['ic-ai.png'],x:269.39,y:285.50,w:55.86,h:55.86,lb:'lb-ai.svg',cx:273.30,cy:349.97,cw:49.55,ch:21.73},
-        {ic:['ic-lr.png'],x:343.29,y:255.28,w:54.46,h:54.46,lb:'lb-lr.svg',cx:346.72,cy:319.76,cw:50.12,ch:24.03},
+        {ic:['ic-lr.png'],x:344.55,y:255.28,w:54.46,h:54.46,lb:'lb-lr.svg',cx:346.72,cy:319.76,cw:50.12,ch:24.03},
         {ic:['ic-ups1.png','ic-ups2.png'],x:427.24,y:233.97,w:55.86,h:55.95,gap:65.17,r:15,lb:'lb-ups.svg',cx:432.10,cy:363.24,cw:45.75,ch:22.11},
         {ic:['ic-img2.png','ic-img1.png'],x:507.14,y:240.62,w:55.86,h:55.86,gap:65.08,r:13,lb:'lb-img.svg',cx:497.13,cy:372.75,cw:76.87,ch:21.33},
         {ic:['ic-img2.png','ic-vid2.png','ic-vid3.png'],x:589.03,y:154.55,w:55.86,h:55.86,gap:64.86,r:13,lb:'lb-vid.svg',cx:584.16,cy:351.75,cw:66.60,ch:20.84},
         {ic:['ic-text.png'],x:664.93,y:291.52,w:55.86,h:55.86,lb:'lb-text.svg',cx:668.95,cy:358.57,cw:47.62,ch:32.84}
       ],
       setup: [
-        {ic:['st-rgbspot.png'],x:40.85,y:230.43,w:82.67,h:82.67,lb:'sl-rgbspot.svg',cx:43.16,cy:325.91,cw:82.67,ch:12.03},
+        {ic:['st-rgbspot.png'],x:43.16,y:230.43,w:82.67,h:82.67,lb:'sl-rgbspot.svg',cx:43.16,cy:325.91,cw:82.67,ch:12.03},
         {ic:['st-flash.png'],x:156.55,y:234.58,w:71.17,h:66.22,text:'импульсная|вспышка',cx:157.15,cy:313.22,cw:70,fs:13},
-        {ic:['st-camera.png'],x:152.32,y:77.94,w:82.67,h:56.99,lb:'sl-camera.svg',cx:161.64,cy:145.60,cw:72.73,ch:12.02},
+        {ic:['st-camera.png'],x:156.67,y:77.94,w:82.67,h:56.99,lb:'sl-camera.svg',cx:161.64,cy:145.60,cw:72.73,ch:12.02},
         {ic:['st-lens-uni.png'],x:291.26,y:65.35,w:42.19,h:76.19,rot:22.48,lb:'sl-lens-uni.svg',cx:267.83,cy:158.99,cw:89.03,ch:23.11},
-        {ic:['st-lens-macro.png'],x:396.23,y:68.92,w:41.48,h:76.79,rot:-3.83,lb:'sl-lens-macro.svg',cx:396.95,cy:159.93,cw:52.18,ch:20.16},
-        {ic:['st-octo.png','st-octo.png'],x:377.48,y:219.26,w:56.44,h:61.19,dx:-28.22,dy:20.35,lb:'sl-octo.svg',cx:370.58,cy:316.23,cw:67.16,ch:9.91},
+        {ic:['st-lens-macro.png'],x:402.3,y:68.92,w:41.48,h:76.79,rot:-3.83,lb:'sl-lens-macro.svg',cx:396.95,cy:159.93,cw:52.18,ch:20.16},
+        {ic:['st-octo.png','st-octo.png'],x:375.94,y:219.26,w:56.44,h:61.19,dx:-28.22,dy:20.35,lb:'sl-octo.svg',cx:370.58,cy:316.23,cw:67.16,ch:9.91},
         {ic:['st-rgbpanel.png'],x:247.87,y:245.53,w:74.70,h:89.69,lb:'sl-rgbpanel.svg',cx:255.47,cy:344.33,cw:59.88,ch:12.03},
-        {ic:['st-speedlight.png'],x:470.70,y:209.76,w:39.25,h:104.27,rot:6.63,lb:'sl-speedlight.svg',cx:460.56,cy:331.49,cw:67.62,ch:20.16},
-        {ic:['st-tripod.png'],x:621.74,y:296.27,w:89.76,h:100.94,lb:'sl-tripod.svg',cx:638.95,cy:417.57,cw:70.48,ch:24.68},
-        {ic:['st-gimbal.png'],x:704.81,y:76.78,w:77.18,h:127.66,lb:'sl-gimbal.svg',cx:710.42,cy:222.29,cw:70.84,ch:25.07},
+        {ic:['st-speedlight.png'],x:474.74,y:209.76,w:39.25,h:104.27,rot:6.63,lb:'sl-speedlight.svg',cx:460.56,cy:331.49,cw:67.62,ch:20.16},
+        {ic:['st-tripod.png'],x:629.31,y:296.27,w:89.76,h:100.94,lb:'sl-tripod.svg',cx:638.95,cy:417.57,cw:70.48,ch:24.68},
+        {ic:['st-gimbal.png'],x:707.25,y:76.78,w:77.18,h:127.66,lb:'sl-gimbal.svg',cx:710.42,cy:222.29,cw:70.84,ch:25.07},
         {ic:['st-power.png'],x:216.64,y:393.54,w:82.67,h:66.82,lb:'sl-power.svg',cx:213.35,cy:477.36,cw:91.03,ch:22.33},
-        {ic:['st-mics.png'],x:358.13,y:400.86,w:69.02,h:52.19,lb:'sl-mics.svg',cx:360.17,cy:477.36,cw:67.49,ch:22.33}
+        {ic:['st-mics.png'],x:359.41,y:400.86,w:69.02,h:52.19,lb:'sl-mics.svg',cx:360.17,cy:477.36,cw:67.49,ch:22.33}
       ]
     };
 
@@ -3996,13 +4007,13 @@
       setup: [
         {ic:['st-rgbspot.png'],x:40.44,y:142.84,w:38.49,h:38.49,lb:'sl-rgbspot.svg',cx:41.52,cy:187.30,cw:38.49,ch:5.60},
         {ic:['st-flash.png'],x:174.26,y:176.49,w:33.14,h:30.83,cx:175.20,cy:214.03,cw:31.23,ch:9.39},
-        {ic:['st-camera.png'],x:43.44,y:61.34,w:38.49,h:26.54,lb:'sl-camera.svg',cx:47.78,cy:92.84,cw:33.86,ch:5.60},
-        {ic:['st-lens-uni.png'],x:102.60,y:56.56,w:31.71,h:40.29,rot:22.48,lb:'sl-lens-uni.svg',cx:112.70,cy:100.16,cw:41.45,ch:10.76},
-        {ic:['st-lens-macro.png'],x:173.92,y:96.93,w:21.66,h:36.97,rot:-3.83,lb:'sl-lens-macro.svg',cx:174.25,cy:138.02,cw:24.30,ch:9.39},
+        {ic:['st-camera.png'],x:45.47,y:61.34,w:38.49,h:26.54,lb:'sl-camera.svg',cx:47.78,cy:92.84,cw:33.86,ch:5.60},
+        {ic:['st-lens-uni.png'],x:117.570,y:39.58,w:31.71,h:57.27,rot:22.48,lb:'sl-lens-uni.svg',cx:112.70,cy:100.16,cw:41.45,ch:10.76},
+        {ic:['st-lens-macro.png'],x:175.57,y:93.8,w:21.66,h:40.1,rot:-3.83,lb:'sl-lens-macro.svg',cx:174.25,cy:138.02,cw:24.30,ch:9.39},
         {ic:['st-octo.png','st-octo.png'],x:114.32,y:131.57,w:26.28,h:28.49,dx:-13.14,dy:9.48,lb:'sl-octo.svg',cx:111.11,cy:176.72,cw:31.27,ch:4.61},
         {ic:['st-rgbpanel.png'],x:48.10,y:226.25,w:34.78,h:41.76,lb:'sl-rgbpanel.svg',cx:51.64,cy:272.25,cw:27.88,ch:5.60},
-        {ic:['st-speedlight.png'],x:124.50,y:239.22,w:23.76,h:50.34,lb:'sl-speedlight.svg',cx:118.23,cy:295.90,cw:31.48,ch:9.39},
-        {ic:['st-tripod.png'],x:61.04,y:386.76,w:41.79,h:47.00,lb:'sl-tripod.svg',cx:69.05,cy:443.24,cw:32.82,ch:11.49},
+        {ic:['st-speedlight.png'],x:122.09,y:226.44,w:23.76,h:63.12,lb:'sl-speedlight.svg',cx:118.23,cy:295.90,cw:31.48,ch:9.39},
+        {ic:['st-tripod.png'],x:64.56,y:386.76,w:41.79,h:47.00,lb:'sl-tripod.svg',cx:69.05,cy:443.24,cw:32.82,ch:11.49},
         {ic:['st-gimbal.png'],x:149.82,y:354.33,w:35.94,h:59.44,lb:'sl-gimbal.svg',cx:152.44,cy:422.08,cw:32.99,ch:11.67},
         {ic:['st-power.png'],x:55.56,y:305.76,w:38.49,h:31.11,lb:'sl-power.svg',cx:54.03,cy:344.79,cw:42.39,ch:10.39},
         {ic:['st-mics.png'],x:174.64,y:284.00,w:32.14,h:24.30,lb:'sl-mics.svg',cx:175.59,cy:319.62,cw:31.42,ch:10.39}
@@ -4015,8 +4026,7 @@
     var L = SMALL ? M : D;
 
     var ABOUT_D = [
-      {hl:true,t:'Сильная сторона моего подхода в том, что я совмещаю SMM со знаниями в дизайне и продакшене.'},
-      '',
+      '<b>Сильная сторона моего подхода в том, что я совмещаю SMM со знаниями в дизайне и продакшене.</b>',
       'Это позволяет закрывать несколько задач в рамках одного проекта без передачи работы между несколькими специалистами, быстро переходить от идеи к реализации и самостоятельно организовывать производство контента. А собственная техническая база дополнительно позволяет не зависеть от подрядчиков.',
       '',
       {hl: true, t: 'В проектах отвечал за разработку и реализацию визуальных решений для брендов. Работал с задачами на уровне концепции и позиционирования, определяя, как бренд должен выглядеть, восприниматься и проявляться в разных каналах коммуникации.'},
@@ -4029,8 +4039,7 @@
       {h1: true, t: 'обо мне'},
       '',
       '<b>Сильная сторона моего подхода в том, что я совмещаю SMM со знаниями в дизайне и продакшене.</b>',
-      '',
-      'Это позволяет закрывать несколько задач в рамках одного проекта без передачи работы между несколькими специалистами, быстро переходить от идеи к реализации и самостоятельно организовывать производство контента. а Собственная техническая база дополнительно позволяет не зависеть от подрядчиков.',
+      'Это позволяет закрывать несколько задач в рамках одного проекта без передачи работы между несколькими специалистами, быстро переходить от идеи к реализации и самостоятельно организовывать производство контента. А собственная техническая база дополнительно позволяет не зависеть от подрядчиков.',
       '',
       {hl: true, t: 'В проектах отвечал за разработку и реализацию визуальных решений для брендов. Работал с задачами на уровне концепции позиционирования, определяя, как бренд должен выглядеть, восприниматься и проявляться в разных каналах коммуникации.'},
       '',
@@ -4038,6 +4047,16 @@
       '',
       'Разрабатывал SMM-стратегии с учетом задач бизнеса, аудитории и конкурентной среды. Определял позиционирование, контентные направления и формат присутствия бренда в соц-сетях. Планировал контент, ставил задачи на производство, координировал работу над материалами и контролировал их качество. Анализировал ключевые показатели соц-сетей, на основе которых корректировал контент и форматы.'
     ];
+
+    /* Предлоги и союзы не остаются в конце строки: короткое слово
+       склеивается со следующим неразрывным пробелом. */
+    var TIGHT = /(^|[\s>(«„—–-])((?:[А-ЯЁа-яёA-Za-z]{1,2}|для|как|что|чем|при|над|под|без|про|или|его|их|так|уже|ещё|еще)\s)/g;
+    function tight(t){
+      for(var i = 0; i < 3; i++) t = t.replace(TIGHT, function(m, p, w){
+        return p + w.slice(0, -1) + '\u00A0';
+      });
+      return t;
+    }
 
     /* ---- сборка ---- */
     function px(v){ return v.toFixed(2) + 'px'; }
@@ -4069,6 +4088,10 @@
       stage.appendChild(b);
     });
 
+    /* Вуаль живёт в сцене — только там она ложится между папками и окном.
+       Fixed внутри масштабированной сцены обрезался её габаритами (отсюда
+       чёрная рамка по краю блока), поэтому она absolute с таким запасом,
+       что при любом масштабе выходит далеко за экран. */
     var veil = el('div', 'kn-veil');
     stage.appendChild(veil);
 
@@ -4153,8 +4176,8 @@
         (SMALL ? ABOUT_M : ABOUT_D).forEach(function(par){
           if(!par){ tx.appendChild(el('div', 'kn-gap', 'height:' + c.text.lh + 'px')); return; }
           var p = el('p');
-          if(typeof par === 'object'){ p.className = par.h1 ? 'h1' : 'hl'; p.innerHTML = par.t; }
-          else p.innerHTML = par;
+          if(typeof par === 'object'){ p.className = par.h1 ? 'h1' : 'hl'; p.innerHTML = tight(par.t); }
+          else p.innerHTML = tight(par);
           tx.appendChild(p);
         });
         box.appendChild(tx);
@@ -4274,28 +4297,43 @@
     /* ---- открытие окна: само окно и всё внутри него наплывом ---- */
     /* Окно вытягивается из своей папки и втягивается обратно — как джинн
        на маке: сперва узкая полоска у иконки, потом раскрытие по ширине. */
-    function genie(w, from, back){
+    /* Закрытие — тот же самый таймлайн, отыгранный назад: так обе стороны
+       совпадают до кадра, а не повторяют друг друга на глаз. */
+    function genie(w, from, back, done){
+      if(back){
+        var prev = w.__genie;
+        if(prev){
+          prev.eventCallback('onReverseComplete', done || null);
+          prev.timeScale(1).reverse();
+          return prev;
+        }
+      }
       var wr = {x: parseFloat(w.style.left), y: parseFloat(w.style.top),
                 w: parseFloat(w.style.width), h: parseFloat(w.style.height)};
       var ix = from ? parseFloat(from.style.left) + parseFloat(from.style.width) / 2 : wr.x + wr.w / 2;
       var iy = from ? parseFloat(from.style.top) + parseFloat(from.style.height) / 2 : wr.y + wr.h / 2;
       var dx = ix - (wr.x + wr.w / 2), dy = iy - (wr.y + wr.h / 2);
       var shut = {x: dx, y: dy, scaleX: .06, scaleY: .015, opacity: 0};
-      var full = {x: 0, y: 0, scaleX: 1, scaleY: 1, opacity: 1};
       gsap.killTweensOf(w);
-      if(back){
-        return gsap.timeline()
-          .to(w, {scaleY: .22, duration: .16, ease: 'power2.in'}, 0)
-          .to(w, shut, {duration: .34, ease: 'power3.in'}, .1);
-      }
-      return gsap.timeline()
+      var tl = gsap.timeline()
         .fromTo(w, shut, {x: 0, y: 0, scaleX: 1, scaleY: .2, opacity: 1,
                           duration: .3, ease: 'power3.out'}, 0)
         .to(w, {scaleY: 1, duration: .38, ease: EASE.rise}, .22);
+      w.__genie = tl;
+      if(back){
+        /* запасной путь: таймлайна открытия ещё не было */
+        tl.progress(1).eventCallback('onReverseComplete', done || null);
+        tl.reverse();
+      } else if(done){
+        tl.eventCallback('onComplete', done);
+      }
+      return tl;
     }
 
     function open(name){
       sec.classList.add('on');
+      /* правим стиль напрямую: класс на вуали в Safari не доезжал до opacity */
+      veil.style.opacity = '1'; veil.style.pointerEvents = 'auto';
       document.documentElement.classList.add('kn-open');
       ['skills','setup','about'].forEach(function(n){
         var w = document.getElementById('kn-' + n);
@@ -4326,12 +4364,13 @@
     }
     function close(){
       sec.classList.remove('on');
+      veil.style.opacity = '0'; veil.style.pointerEvents = 'none';
       document.documentElement.classList.remove('kn-open');
       ['skills','setup','about'].forEach(function(n){
         var w = document.getElementById('kn-' + n);
         if(!w || !w.classList.contains('on')) return;
-        genie(w, stage.querySelector('.kn-item[data-win="' + n + '"]'), true)
-          .eventCallback('onComplete', function(){ w.classList.remove('on'); });
+        genie(w, stage.querySelector('.kn-item[data-win="' + n + '"]'), true,
+              function(){ w.classList.remove('on'); });
       });
     }
     /* окно не должно вылезать за край экрана: сперва подводим блок
