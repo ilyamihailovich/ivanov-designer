@@ -10,7 +10,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap&subset=cyrillic" rel="stylesheet">
 <link rel="preload" href="fonts/ak.woff2" as="font" type="font/woff2" crossorigin>
-<script src="cases.js?v=091812"></script>
+<script src="cases.js?v=092114"></script>
 <!-- Библиотеки лежат рядом с сайтом, а не на CDN: при недоступном CDN
      страница превращалась в белый экран со счётчиком 0 % — весь скрипт
      падает на первой же строке с gsap. -->
@@ -661,8 +661,10 @@
       overflow:visible;
       /* нижний отступ сдвигает плашку вверх при центровке и освобождает
          полосу под кнопку «Перейти к просмотру»; раньше он был вдвое
-         больше и плашка почти упиралась в «Назад» */
-      margin-bottom:30px;}
+         больше и плашка почти упиралась в «Назад»; отрицательный опускает
+         её ещё ниже — после того как кнопки встали к самому её краю,
+         просвет снова сошёл на нет */
+      margin-bottom:-14px;}
     .cw-stage{overflow:hidden!important;}
     .cw-scroll.card{padding:0;overflow:hidden;border-radius:16px;}
     .cw-stage{position:static;overflow:visible;}
@@ -736,7 +738,7 @@
        что дальше есть что листать. Полоса начинается там, где отмечено на
        образце: за две строки до нижнего края, а не за полплашки. Лежит на
        самом листе, потому что плашка больше не обрезает. */
-    .cw-scroll.card::after{content:'';position:absolute;left:0;right:0;bottom:0;
+    .cw-scroll.card.has-copy::after{content:'';position:absolute;left:0;right:0;bottom:0;
       height:58px;z-index:5;pointer-events:none;border-radius:0 0 16px 16px;
       opacity:var(--fadeBot,1);
       backdrop-filter:blur(5px);-webkit-backdrop-filter:blur(5px);
@@ -748,7 +750,7 @@
     /* Та же полоса сверху: когда текст уехал вверх, его край не обрезается
        линейкой, а уходит в размытие. Пока текст стоит в начале, полосы нет —
        прозрачность обеих считается от положения прокрутки. */
-    .cw-scroll.card::before{content:'';position:absolute;left:0;right:0;
+    .cw-scroll.card.has-copy::before{content:'';position:absolute;left:0;right:0;
       top:var(--copyTop,0px);height:46px;z-index:5;pointer-events:none;
       opacity:var(--fadeTop,0);
       backdrop-filter:blur(5px);-webkit-backdrop-filter:blur(5px);
@@ -757,8 +759,8 @@
       background:linear-gradient(to top,rgba(255,255,255,0) 0%,
                  rgba(255,255,255,.86) 66%,#fff 100%);
       transition:opacity .2s linear;}
-    .cw-panel.m-open .cw-scroll.card::after,
-    .cw-panel.m-open .cw-scroll.card::before{opacity:0;}
+    .cw-panel.m-open .cw-scroll.card.has-copy::after,
+    .cw-panel.m-open .cw-scroll.card.has-copy::before{opacity:0;}
     /* кнопка «Перейти к просмотру» внизу; при раскрытии уходит */
     /* кнопка живёт под плашкой, а не поверх текста */
     .cc-nav{position:absolute;left:0;right:0;top:calc(100% + 14px);bottom:auto;
@@ -1472,7 +1474,7 @@
     <div class="m-copy"><span class="sm" data-goo data-fade>’26 © All Right Reserved</span></div>
 
     <div class="tailroom"></div>
-    <span id="buildStamp" style="display:none">BUILD 09.10 18:12</span>
+    <span id="buildStamp" style="display:none">BUILD 09.10 21:14</span>
   </section>
 
 </main>
@@ -1814,9 +1816,11 @@
         if(vis === el.__vis) return;
         el.__vis = vis;
         gsap.killTweensOf(el);
+        /* Появление вдвое медленнее и с секундной выдержкой: подпись внизу
+           должна проступать, а не выскакивать вместе с низом страницы. */
         gsap.to(el, {opacity: vis ? 1 : 0, y: vis ? 0 : 16,
-                     duration: vis ? .7 : .3, ease: 'power2.out',
-                     delay: vis ? i * .09 : 0, overwrite: 'auto'});
+                     duration: vis ? 1.4 : .3, ease: 'power2.out',
+                     delay: vis ? 1 + i * .18 : 0, overwrite: 'auto'});
       });
     }
     /* Проверяем каждый кадр, а не по событию прокрутки: события от Lenis и
@@ -2139,6 +2143,8 @@
        крае самого текста, а не карточки, поэтому её место замеряется; обе
        гаснут, когда с их стороны листать уже нечего. */
     var copy = cwScroll.querySelector('.cc-copy');
+    /* У фотокейса описания нет, и белая полоса снизу только мутила снимок. */
+    cwScroll.classList.toggle('has-copy', !!(mob && copy));
     if(mob && copy){
       if(!copy.__fadeWired){
         copy.__fadeWired = true;
@@ -2339,7 +2345,9 @@
     var BLUR = 16, T = .26;
     gsap.set(prev, {x: -26});
     gsap.set(frames, {autoAlpha: 0, filter: 'blur(' + BLUR + 'px)'});
-    gsap.set(frames[0], {autoAlpha: 1, filter: 'blur(0px)'});
+    /* filter:none, а не blur(0): с любым фильтром Safari уводит картинку в
+       sRGB и широкий цвет снимка гаснет — фото выглядело тусклее исходника. */
+    gsap.set(frames[0], {autoAlpha: 1, filter: 'none'});
     if(bar) gsap.set(bar, {yPercent: -260, opacity: 0});
 
     /* Панорама: горизонтальный снимок идёт в ту же высоту, что вертикальный,
@@ -2356,7 +2364,7 @@
     }
     function cell(){
       var w = deck.clientWidth, h = deck.clientHeight;
-      return (w && h) ? w / h : 0.74;
+      return (w && h) ? w / h : 0;
     }
     function wide(i){ var r = ratioOf(i), c = cell(); return c > 0 && r > c * 1.06; }
 
@@ -2415,9 +2423,15 @@
       if(auto) auto.kill();
       barIn = gsap.to(bar, {yPercent: -260, opacity: 0, duration: .34, ease: 'power2.in'});
     }
+    var panTries = 0;
     function armPan(){
       if(auto) auto.kill();
       setPan(0);
+      /* Пока окно скрыто, у ленты нет размеров, и «широкий ли кадр» решалось
+         по запасному отношению 0,74 — вертикальный кадр 0,8 попадал в широкие,
+         и под ним вылезал ползунок. Ждём настоящих размеров ленты. */
+      if(!cell()){ if(panTries++ < 90) requestAnimationFrame(armPan); return; }
+      panTries = 0;
       if(wide(at)) showBar(true); else hideBar();
     }
 
@@ -2436,7 +2450,12 @@
       var from = frames[at], into = frames[to];
       at = to; sync();
       if(wide(at)){ pan.v = 0; paint(); }
-      gsap.timeline({onComplete: function(){ busy = false; armPan(); }})
+      gsap.timeline({onComplete: function(){
+          busy = false;
+          /* снимаем фильтр с кадра, на котором остановились: см. выше */
+          gsap.set(into, {filter: 'none'});
+          armPan();
+        }})
         .to(from, {autoAlpha: 0, filter: 'blur(' + BLUR + 'px)', duration: T, ease: 'power2.in'}, 0)
         .fromTo(into, {autoAlpha: 0, filter: 'blur(' + BLUR + 'px)'},
                       {autoAlpha: 1, filter: 'blur(0px)', duration: T * 1.25, ease: 'power2.out'}, T * .45);
