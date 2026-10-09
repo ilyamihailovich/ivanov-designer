@@ -1300,7 +1300,7 @@ window.CASES_DATA = [
   "t": "Краш-тест",
   "c": "Концептуальная съёмка",
   "role": "Съёмка, свет, ретушь",
-  "img": "cases/crash/01.jpg",
+  "img": "cases/crash/03.jpg",
   "gallery": [
    "cases/crash/01.jpg",
    "cases/crash/02.jpg",
