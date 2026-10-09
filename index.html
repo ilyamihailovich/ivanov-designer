@@ -10,7 +10,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap&subset=cyrillic" rel="stylesheet">
 <link rel="preload" href="fonts/ak.woff2" as="font" type="font/woff2" crossorigin>
-<script src="cases.js?v=051700"></script>
+<script src="cases.js?v=091051"></script>
 <!-- Библиотеки лежат рядом с сайтом, а не на CDN: при недоступном CDN
      страница превращалась в белый экран со счётчиком 0 % — весь скрипт
      падает на первой же строке с gsap. -->
@@ -150,22 +150,16 @@
   .menu-wrap{transition:opacity .4s var(--eo), filter .4s var(--eo);}
   html.kn-open .menu-wrap{opacity:0!important;filter:blur(8px)!important;
     pointer-events:none;}
-  .kn-win{position:absolute;z-index:6;overflow:hidden;opacity:0;pointer-events:none;
-    -webkit-mask-image:-webkit-radial-gradient(#fff,#000);
-    isolation:isolate;
-    transform:scale(.9);transform-origin:50% 50%;
-    /* маска скругления срезает тени, убрана — скругление задано border-radius */
-    box-shadow:0 238px 67px rgba(171,171,171,0), 0 153px 61px rgba(171,171,171,.01),
-               0 86px 52px rgba(171,171,171,.04), 0 38px 38px rgba(171,171,171,.07),
-               0 10px 21px rgba(171,171,171,.09);}
+  /* Окно — прозрачная рамка: тень живёт в самой подложке (готовый PNG),
+     поэтому здесь нет ни box-shadow, ни обрезки — иначе тень срежется. */
+  .kn-win{position:absolute;z-index:6;opacity:0;pointer-events:none;
+    transform:scale(.9);transform-origin:50% 50%;}
   .kn-win.on{pointer-events:auto;}
-  @media (max-width:900px){
-    .kn-win{box-shadow:0 238px 67px rgba(0,0,0,0), 0 153px 61px rgba(0,0,0,.01),
-                       0 86px 52px rgba(0,0,0,.04), 0 38px 38px rgba(0,0,0,.07),
-                       0 10px 21px rgba(0,0,0,.09);}
-  }
-  .kn-shot{position:absolute;left:-0.6%;top:-0.6%;width:101.2%;height:101.2%;
-    object-fit:cover;display:block;}
+  /* Подложка выходит за границы окна ровно на поля тени в PNG. */
+  .kn-plate{position:absolute;display:block;pointer-events:none;max-width:none;}
+  /* Содержимое обрезается по скруглению окна, подложка — нет. */
+  .kn-body{position:absolute;left:0;top:0;right:0;bottom:0;overflow:hidden;
+    isolation:isolate;}
   .kn-tab{position:absolute;background:#fefffe;display:block;}
   .kn-tabl,.kn-note{position:absolute;display:block;}
   .kn-chip{position:absolute;display:block;}
@@ -1412,7 +1406,7 @@
     <div class="m-copy"><span class="sm" data-goo data-fade>’26 © All Right Reserved</span></div>
 
     <div class="tailroom"></div>
-    <span id="buildStamp" style="display:none">BUILD 05.10 17:00</span>
+    <span id="buildStamp" style="display:none">BUILD 09.10 10:51</span>
   </section>
 
 </main>
@@ -3926,21 +3920,14 @@
          lb:'label-opyt.svg',   lx:1094.98, ly:387.09, lw:35.59, lh:8.81}
       ],
       win: {
-        skills:{x:519.49,y:303.17,w:846,h:541,r:14,shot:'win-skills.png',
-                tab:{x:154.63,y:15.15,w:71.90,h:16.86},
-                tabl:{x:156.51,y:19.43,w:52.40,h:8.81,src:'label-skilly.svg'}},
-        setup: {x:96.49, y:257.17,w:846,h:541,r:14,shot:'win-skills.png',
-                tab:{x:157.71,y:15.15,w:71.90,h:16.86},
-                tabl:{x:158.59,y:19.17,w:39.09,h:8.81,src:'label-setup.svg'}},
-        about: {x:569.88,y:68.50,w:775.95,h:533.33,r:11,shot:'win-about.png',about:true,
-                side:{x:0,y:116.17,w:110.70,h:417.17},
-                chips:[{x:44.00,y:82.40,w:61.00,h:13.60,c:'#dddcdc'},
-                       {x:92.00,y:14.60,w:50.00,h:14.40,c:'#fff'},
-                       {x:392.00,y:32.60,w:116.00,h:19.00,c:'#fff'},
-                       {x:17.00,y:82.40,w:34.00,h:13.60,c:'#d9d9d9'}],
-                note:{x:98.07,y:19.60,w:31.24,h:5.00},
+        skills:{x:519.49,y:303.17,w:846,h:541,r:14,shot:'win-skills-desktop.png',
+                plate:{x:-71.00,y:-13.00,w:988.33,h:803.33}},
+        setup: {x:96.49, y:257.17,w:846,h:541,r:14,shot:'win-setup-desktop.png',
+                plate:{x:-122.00,y:-27.00,w:1090.33,h:893.33}},
+        about: {x:569.88,y:68.50,w:775.95,h:533.33,r:11,shot:'win-about-desktop.png',about:true,
+                plate:{x:-122.04,y:-27.00,w:1020.37,h:885.33},
+                side:null,
                 date:{x:399.52,y:42.40,fs:8},
-                time:{x:22.38,y:83.00,fs:7},
                 text:{x:143.53,y:91.10,w:593.99,h:411.60,fs:11,lh:13}}
       },
       skills: [
@@ -3981,24 +3968,17 @@
          lb:'label-skilly.svg', lx:281.26,ly:528.28,lw:40.77,lh:6.86}
       ],
       win: {
-        skills:{x:39,y:25,w:301,h:587,r:10.43,shot:'m-win.png',kin:301/243.89,
-                shotBox:{x:-4.0,y:-3.0,w:310.7,h:599.4},
-                tab:{x:122.75,y:9.0,w:55.5,h:11.5},
-                tabl:{x:78.57,y:12.0,w:32.5,h:5.5,src:'label-skilly.svg'}},
-        setup: {x:39,y:25,w:301,h:587,r:10.43,shot:'m-win.png',kin:301/243.89,
-                shotBox:{x:-4.0,y:-3.0,w:310.7,h:599.4},
-                tab:{x:122.75,y:9.0,w:55.5,h:11.5},
-                tabl:{x:91.6,y:12.0,w:24.3,h:5.5,src:'label-setup.svg'}},
-        about: {x:39,y:60,w:301,h:510,r:10.43,shot:'m-about.png',about:true,
+        skills:{x:39,y:25,w:301,h:587,r:10.43,shot:'win-skills-mob.png',kin:301/243.89,
+                plate:{x:-82.66,y:-13.67,w:466.32,h:867.04}},
+        setup: {x:39,y:25,w:301,h:587,r:10.43,shot:'win-setup-mob.png',kin:301/243.89,
+                plate:{x:-82.66,y:-13.67,w:466.32,h:867.04}},
+        about: {x:39,y:60,w:301,h:510,r:10.43,shot:'win-about-mob.png',about:true,
+                plate:{x:-75.98,y:-15.08,w:452.95,h:818.47},
                 /* подложка внизу текста — по фрейму (447:1209) */
                 fade:{x:7.21,y:414.18,w:282.33,h:95.82},
                 side:null,
-                /* тело окна закрывается белым целиком: иначе слева торчала
-                   полоса снимка, а снизу его же строка с адресом */
-                chips:[{x:0,y:20.5,w:301,h:489.5,c:'#fff'},
-                       {x:93.76,y:3.4,w:37.33,h:20.3,c:'#fff'}],
-                head:{x:34.47,y:6.89,fs:6.92},
-                note:{x:34.47,y:16.68,w:102.9,h:4.21},
+                /* шапка и чистое белое тело уже нарисованы в подложке —
+                   своих заглушек поверх неё больше не нужно */
                 date:{x:108.88,y:39.62,fs:6.92},
                 time:null,
                 text:{x:17.89,y:66.38,w:264.57,h:365.73,fs:10.38,lh:13.78}}
@@ -4120,45 +4100,51 @@
     function buildWin(name){
       var c = L.win[name];
       var w = el('div', 'kn-win' + (c.about ? ' about' : ''),
-        'left:' + px(c.x) + ';top:' + px(c.y) + ';width:' + px(c.w) + ';height:' + px(c.h) +
-        ';border-radius:' + c.r + 'px');
+        'left:' + px(c.x) + ';top:' + px(c.y) + ';width:' + px(c.w) + ';height:' + px(c.h));
       w.id = 'kn-' + name;
-      var sb = c.shotBox;
-      w.innerHTML = '<img class="kn-shot" src="about/' + c.shot + '" alt=""' +
-        (sb ? ' style="inset:auto;left:' + px(sb.x) + ';top:' + px(sb.y) + ';width:' + px(sb.w) + ';height:' + px(sb.h) + '"' : '') + '>';
+      /* Готовая подложка: её белая часть ложится ровно в границы окна,
+         а тень выходит наружу — поэтому рамка окна ничего не обрезает. */
+      var pb = c.plate;
+      var plate = el('img', 'kn-plate', 'left:' + px(pb.x) + ';top:' + px(pb.y) +
+        ';width:' + px(pb.w) + ';height:' + px(pb.h));
+      plate.src = 'about/' + c.shot; plate.alt = '';
+      w.appendChild(plate);
+      /* Всё содержимое живёт в обрезанном по скруглению теле. */
+      var body = el('div', 'kn-body', 'border-radius:' + c.r + 'px');
+      w.appendChild(body);
       (c.chips || []).forEach(function(ch){
-        w.appendChild(el('i', 'kn-chip', 'left:' + px(ch.x) + ';top:' + px(ch.y) +
+        body.appendChild(el('i', 'kn-chip', 'left:' + px(ch.x) + ';top:' + px(ch.y) +
           ';width:' + px(ch.w) + ';height:' + px(ch.h) + ';background:' + ch.c));
       });
-      if(c.side) w.appendChild(el('i', 'kn-chip', 'left:' + px(c.side.x) + ';top:' + px(c.side.y) +
+      if(c.side) body.appendChild(el('i', 'kn-chip', 'left:' + px(c.side.x) + ';top:' + px(c.side.y) +
         ';width:' + px(c.side.w) + ';height:' + px(c.side.h) + ';background:#fff'));
       if(c.tab){
-        w.appendChild(el('i', 'kn-tab', 'left:' + px(c.tab.x) + ';top:' + px(c.tab.y) +
+        body.appendChild(el('i', 'kn-tab', 'left:' + px(c.tab.x) + ';top:' + px(c.tab.y) +
           ';width:' + px(c.tab.w) + ';height:' + px(c.tab.h)));
         var tl = el('img', 'kn-tabl', 'left:' + px(c.tabl.x) + ';top:' + px(c.tabl.y) +
           ';width:' + px(c.tabl.w) + ';height:' + px(c.tabl.h));
         tl.src = 'about/' + c.tabl.src; tl.alt = '';
-        w.appendChild(tl);
+        body.appendChild(tl);
       }
       if(c.head){
         var hd = el('span', 'kn-head', 'left:' + px(c.head.x) + ';top:' + px(c.head.y) +
           ';font-size:' + c.head.fs + 'px');
         hd.textContent = 'обо мне';
-        w.appendChild(hd);
+        body.appendChild(hd);
       }
       if(c.note){
         var n = el('img', 'kn-note', 'left:' + px(c.note.x) + ';top:' + px(c.note.y) +
           ';width:' + px(c.note.w) + ';height:' + px(c.note.h));
         n.src = 'about/lb-note.svg'; n.alt = '';
-        w.appendChild(n);
+        body.appendChild(n);
       }
       if(c.date){
         var dt = el('span', 'kn-date', 'left:' + px(c.date.x) + ';top:' + px(c.date.y) + ';font-size:' + c.date.fs + 'px');
-        dt.id = 'knDate'; w.appendChild(dt);
+        dt.id = 'knDate'; body.appendChild(dt);
       }
       if(c.time){
         var tm = el('span', 'kn-time', 'left:' + px(c.time.x) + ';top:' + px(c.time.y) + ';font-size:' + c.time.fs + 'px');
-        tm.id = 'knTime'; w.appendChild(tm);
+        tm.id = 'knTime'; body.appendChild(tm);
       }
       if(c.text){
         var box = el('div', 'kn-textbox', 'left:' + px(c.text.x) + ';top:' + px(c.text.y) +
@@ -4172,12 +4158,12 @@
           tx.appendChild(p);
         });
         box.appendChild(tx);
-        w.appendChild(box);
+        body.appendChild(box);
         if(c.fade){
           var fd = el('i', 'kn-fade', 'left:' + px(c.fade.x) + ';top:' + px(c.fade.y) +
             ';width:' + px(c.fade.w) + ';height:' + px(c.fade.h));
           fd.innerHTML = '<b></b><b></b><b></b><u></u>';
-          w.appendChild(fd);
+          body.appendChild(fd);
           var tune = function(){
             var rest = box.scrollHeight - box.scrollTop - box.clientHeight;
             fd.style.opacity = rest < 3 ? '0' : String(Math.min(1, rest / 26));
@@ -4192,8 +4178,8 @@
         ';width:' + px(58 * dk) + ';height:' + px(24 * dk));
       dots.type = 'button';
       dots.setAttribute('aria-label', 'Закрыть');
-      w.appendChild(dots);
-      if(name !== 'about') (L[name] || []).forEach(function(t){ w.appendChild(tile(t, c.kin || 1)); });
+      body.appendChild(dots);
+      if(name !== 'about') (L[name] || []).forEach(function(t){ body.appendChild(tile(t, c.kin || 1)); });
       return w;
     }
     ['skills','setup','about'].forEach(function(n){ stage.appendChild(buildWin(n)); });
@@ -4235,17 +4221,55 @@
       gsap.set(it, {opacity: 0, x: s0.x, y: s0.y});
     });
     [].slice.call(heads).forEach(function(h){ h.classList.add('shown'); gsap.set(h, {opacity: 0}); });
-    ScrollTrigger.create({trigger: sec, start: 'top 72%', once: true, onEnter: function(){
+
+    /* Блок оживает при каждом заходе, а не один раз за сессию: заголовок
+       снова собирается из кляксы, папки снова прискальзывают на места. */
+    var knowOn = false;
+    function knowShow(){
+      if(knowOn) return;
+      knowOn = true;
       [].slice.call(heads).forEach(function(h, i){
         gsap.delayedCall(i * .12, function(){ reGoo(h, true); });
       });
       items.forEach(function(it, i){
-        gsap.to(it, {opacity: 1, duration: .3, ease: 'none', delay: .3 + i * .1});
-        gsap.to(it, {x: 0, y: 0, duration: 1.15, ease: 'power4.out', delay: .3 + i * .1,
-          /* иначе остаточный инлайн-transform перебивает увеличение при наведении */
-          onComplete: function(){ gsap.set(it, {clearProps: 'transform'}); }});
+        var s0 = SLIDE[i % SLIDE.length];
+        gsap.killTweensOf(it);
+        gsap.fromTo(it, {opacity: 0, x: s0.x, y: s0.y},
+          {opacity: 1, x: 0, y: 0, duration: 1.15, ease: 'power4.out', delay: .3 + i * .1,
+           /* иначе остаточный инлайн-transform перебивает увеличение при наведении */
+           onComplete: function(){ gsap.set(it, {clearProps: 'transform'}); }});
       });
-    }});
+    }
+    /* Папки уходят той же дорогой, какой пришли, — будто ускальзывают. */
+    function knowHide(){
+      if(!knowOn) return;
+      knowOn = false;
+      items.forEach(function(it, i){
+        var s0 = SLIDE[i % SLIDE.length];
+        gsap.killTweensOf(it);
+        gsap.to(it, {opacity: 0, x: s0.x, y: s0.y, duration: .75,
+                     ease: 'power3.in', delay: i * .06});
+      });
+      [].slice.call(heads).forEach(function(h){
+        gsap.killTweensOf(h);
+        if(h.__fx) h.__fx.kill();
+        h.style.filter = 'none';
+        gsap.set(h, {opacity: 0});
+      });
+    }
+
+    /* Низ блока у 40 % экрана — значит он уже заметно уехал вверх и
+       пользователь действительно уходит; по верхней границе срабатывало бы,
+       пока блок ещё целиком перед глазами. */
+    ScrollTrigger.create({
+      trigger: sec,
+      start: 'top 72%',
+      end: 'bottom 40%',
+      onEnter: knowShow,
+      onEnterBack: knowShow,
+      onLeave: knowHide,
+      onLeaveBack: knowHide
+    });
 
     /* ---- открытие окна: само окно и всё внутри него наплывом ---- */
     /* Окно вытягивается из своей папки и втягивается обратно — как джинн
