@@ -10,7 +10,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap&subset=cyrillic" rel="stylesheet">
 <link rel="preload" href="fonts/ak.woff2" as="font" type="font/woff2" crossorigin>
-<script src="cases.js?v=092114"></script>
+<script src="cases.js?v=092116"></script>
 <!-- Библиотеки лежат рядом с сайтом, а не на CDN: при недоступном CDN
      страница превращалась в белый экран со счётчиком 0 % — весь скрипт
      падает на первой же строке с gsap. -->
@@ -1474,7 +1474,7 @@
     <div class="m-copy"><span class="sm" data-goo data-fade>’26 © All Right Reserved</span></div>
 
     <div class="tailroom"></div>
-    <span id="buildStamp" style="display:none">BUILD 09.10 21:14</span>
+    <span id="buildStamp" style="display:none">BUILD 09.10 21:16</span>
   </section>
 
 </main>
@@ -4993,8 +4993,11 @@ import * as THREE from './vendor/three.module.js';
     if(!aim(e)) return;
     hoverWant = 1;
     pullAt.copy(hit);
-    pull.subVectors(hit, hitPrev).multiplyScalar(9);   // мягче отклик на мышь
-    pull.z += 0.5;                         // немного на себя, чтобы пошла волна
+    /* Вчетверо мягче прежнего: полотно вздрагивало от любого движения мыши,
+       хотя от наведения нужен лишь намёк на волну. Тяга за зажатую мышь
+       считается отдельно и осталась прежней. */
+    pull.subVectors(hit, hitPrev).multiplyScalar(2.25);
+    pull.z += 0.125;                       // немного на себя, чтобы пошла волна
     pullPow = Math.min(1, pullPow + 0.2);
   }, {passive: true});
 
