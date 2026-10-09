@@ -10,7 +10,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap&subset=cyrillic" rel="stylesheet">
 <link rel="preload" href="fonts/ak.woff2" as="font" type="font/woff2" crossorigin>
-<script src="cases.js?v=091701"></script>
+<script src="cases.js?v=091812"></script>
 <!-- Библиотеки лежат рядом с сайтом, а не на CDN: при недоступном CDN
      страница превращалась в белый экран со счётчиком 0 % — весь скрипт
      падает на первой же строке с gsap. -->
@@ -203,8 +203,12 @@
     /* Всё снято с образца. Поля сверху, справа и снизу одинаковые, слева
        шире ровно на жёлтую полоску; плашка во всю ширину текстовой колонки,
        а воздух вокруг неё вдвое больше межабзацного. */
-    .kn-text p.hl{font-size:9px;line-height:10.3px;opacity:.86;border-radius:7px;
-      padding:12.4px 12.4px 12.4px 23px;margin:14px 0;letter-spacing:-.03em;}
+    /* Строки в плашке ложились рвано: склеенные неразрывными пробелами
+       пары — длинные куски, и перенос бросал то короткую строку, то длинную.
+       Выравнивание по длине собирает их в ровный блок. */
+    .kn-text p.hl{font-size:9px;line-height:10.3px;opacity:.7;border-radius:7px;
+      padding:12.4px 12.4px 12.4px 23px;margin:14px 0;letter-spacing:-.03em;
+      text-wrap:balance;}
     .kn-text p.hl::before{left:12.4px;top:12.4px;bottom:12.4px;width:2.5px;border-radius:1.25px;}
     /* заголовок отбит от первого абзаца сильнее, чем абзацы между собой */
     .kn-text p.h1{margin-bottom:6px;}
@@ -734,13 +738,27 @@
        самом листе, потому что плашка больше не обрезает. */
     .cw-scroll.card::after{content:'';position:absolute;left:0;right:0;bottom:0;
       height:58px;z-index:5;pointer-events:none;border-radius:0 0 16px 16px;
+      opacity:var(--fadeBot,1);
       backdrop-filter:blur(5px);-webkit-backdrop-filter:blur(5px);
       -webkit-mask-image:linear-gradient(to bottom,transparent 0%,#000 64%);
       mask-image:linear-gradient(to bottom,transparent 0%,#000 64%);
       background:linear-gradient(to bottom,rgba(255,255,255,0) 0%,
                  rgba(255,255,255,.86) 66%,#fff 100%);
-      transition:opacity .35s var(--eo);}
-    .cw-panel.m-open .cw-scroll.card::after{opacity:0;}
+      transition:opacity .2s linear;}
+    /* Та же полоса сверху: когда текст уехал вверх, его край не обрезается
+       линейкой, а уходит в размытие. Пока текст стоит в начале, полосы нет —
+       прозрачность обеих считается от положения прокрутки. */
+    .cw-scroll.card::before{content:'';position:absolute;left:0;right:0;
+      top:var(--copyTop,0px);height:46px;z-index:5;pointer-events:none;
+      opacity:var(--fadeTop,0);
+      backdrop-filter:blur(5px);-webkit-backdrop-filter:blur(5px);
+      -webkit-mask-image:linear-gradient(to top,transparent 0%,#000 64%);
+      mask-image:linear-gradient(to top,transparent 0%,#000 64%);
+      background:linear-gradient(to top,rgba(255,255,255,0) 0%,
+                 rgba(255,255,255,.86) 66%,#fff 100%);
+      transition:opacity .2s linear;}
+    .cw-panel.m-open .cw-scroll.card::after,
+    .cw-panel.m-open .cw-scroll.card::before{opacity:0;}
     /* кнопка «Перейти к просмотру» внизу; при раскрытии уходит */
     /* кнопка живёт под плашкой, а не поверх текста */
     .cc-nav{position:absolute;left:0;right:0;top:calc(100% + 14px);bottom:auto;
@@ -800,7 +818,7 @@
     /* Отсчёт от верха плашки, а не от доли экрана: плашка опустилась, и при
        старом значении пара кнопок почти упиралась в её край. Просвет здесь
        тот же, что у одиночной «Назад». */
-    .cw-pair{position:absolute;left:16px;right:16px;top:calc(14svh - 68px);
+    .cw-pair{position:absolute;left:16px;right:16px;top:calc(14svh - 45px);
       display:flex;justify-content:space-between;z-index:9;}
     /* Овалы всегда светлые: кейс из блока работ открывается на тёмной теме,
        и фон «бумаги» там чёрный — капсул было не видно. */
@@ -808,7 +826,11 @@
       font:600 13px/1 'AK','Helvetica Neue',Arial,sans-serif;letter-spacing:-.02em;
       padding:9px 18px;border-radius:999px;cursor:pointer;}
     #caseWin.pair-on .cw-x{display:none;}
-    .sh-bar{position:absolute;left:29px;right:29px;top:calc(90svh + 58px);
+    /* Ползунок панорамы отсчитывался от доли экрана и уходил под нижнюю
+       панель браузера — его просто не было видно. Теперь он привязан к
+       нижнему краю плашки: тот считается как 86svh минус половина её
+       нижнего отступа. */
+    .sh-bar{position:absolute;left:29px;right:29px;top:calc(86svh + 2px);
       height:20px;border-radius:999px;background:var(--paper);z-index:9;
       box-shadow:0 2px 10px rgba(0,0,0,.10);touch-action:none;}
     /* дорожка через всю капсулу, по ней ездит короткая ручка */
@@ -837,7 +859,7 @@
     /* крест — за границей плашки сверху и белый, как на большом экране */
     /* Крест перекрывал стрелки листания. Вместо него — кнопка «Назад» над
        самой плашкой, по центру: она ничего не загораживает и читается. */
-    .cw-x{top:calc(14svh - 59px);bottom:auto;left:50%;right:auto;
+    .cw-x{top:calc(14svh - 36px);bottom:auto;left:50%;right:auto;
       transform:translateX(-50%);
       width:auto;height:auto;padding:4px 10px;border-radius:0;
       background:none;z-index:9;
@@ -1450,7 +1472,7 @@
     <div class="m-copy"><span class="sm" data-goo data-fade>’26 © All Right Reserved</span></div>
 
     <div class="tailroom"></div>
-    <span id="buildStamp" style="display:none">BUILD 09.10 17:01</span>
+    <span id="buildStamp" style="display:none">BUILD 09.10 18:12</span>
   </section>
 
 </main>
@@ -2107,11 +2129,33 @@
        переезжает к самой плашке, которая ничего не обрезает. */
     var pnl0 = cwEl.querySelector('.cw-panel');
     var nav0 = cwEl.querySelector('.cc-nav:not(.solo)');
+    var mob = window.matchMedia('(max-width:900px)').matches;
     if(nav0 && pnl0){
-      var mob = window.matchMedia('(max-width:900px)').matches;
       if(mob && nav0.parentNode !== pnl0) pnl0.appendChild(nav0);
       /* на большом экране кнопка живёт в координатах макета, внутри карточки */
       if(!mob && nav0.parentNode === pnl0) card.appendChild(nav0);
+    }
+    /* Полосы размытия сверху и снизу текста кейса: верхняя стоит на верхнем
+       крае самого текста, а не карточки, поэтому её место замеряется; обе
+       гаснут, когда с их стороны листать уже нечего. */
+    var copy = cwScroll.querySelector('.cc-copy');
+    if(mob && copy){
+      if(!copy.__fadeWired){
+        copy.__fadeWired = true;
+        copy.__updFade = function(){
+          /* Место верхней полосы меряется здесь, а не при первом проходе:
+             карточку меряют ещё до того, как она встанет на место, и там
+             смещение выходило нулевым — полоса садилась на имя кейса. */
+          if(copy.offsetTop) cwScroll.style.setProperty('--copyTop', copy.offsetTop + 'px');
+          var rest = copy.scrollHeight - copy.scrollTop - copy.clientHeight;
+          cwScroll.style.setProperty('--fadeTop',
+            String(Math.min(1, copy.scrollTop / 24)));
+          cwScroll.style.setProperty('--fadeBot',
+            rest < 3 ? '0' : String(Math.min(1, rest / 24)));
+        };
+        copy.addEventListener('scroll', copy.__updFade, {passive: true});
+      }
+      requestAnimationFrame(copy.__updFade);
     }
     var w = cwScroll.clientWidth;
     if(!w) return;
@@ -2332,14 +2376,24 @@
 
     /* Ползунок встаёт под фактический низ плашки: когда кейс открыт из
        блока работ, плашка приподнята, и жёсткий отсчёт от 90svh промахивался. */
+    var barTries = 0;
     function placeBar(){
       if(!bar) return;
       var pn = cwScroll.closest('.cw-panel');
       if(!pn) return;
-      var r = pn.getBoundingClientRect();
-      bar.style.top = Math.round(r.bottom + 58) + 'px';
-      bar.style.left = Math.round(r.left + 13) + 'px';
-      bar.style.right = Math.round(window.innerWidth - r.right + 13) + 'px';
+      /* Место берём из раскладки, а не из прямоугольника на экране: ползунок
+         ставится в тот момент, когда плашка ещё выехала за нижний край
+         (её поднимает анимация открытия), и измеренный низ уводил его
+         далеко под экран — ползунка и не было видно. Пока окно скрыто,
+         размеров нет вовсе, поэтому ждём следующего кадра. */
+      if(!pn.offsetHeight){ if(barTries++ < 90) requestAnimationFrame(placeBar); return; }
+      barTries = 0;
+      /* 58 было отмерено от прежнего положения плашки; после того как она
+         опустилась, ползунок уезжал под нижнюю панель браузера. 30 — тот же
+         просвет, что у кнопки под плашкой. */
+      bar.style.top = Math.round(pn.offsetTop + pn.offsetHeight + 30) + 'px';
+      bar.style.left = Math.round(pn.offsetLeft + 13) + 'px';
+      bar.style.right = Math.round(cwEl.clientWidth - (pn.offsetLeft + pn.offsetWidth) + 13) + 'px';
     }
     function showBar(run){
       if(!bar) return;
@@ -4043,7 +4097,7 @@
                 /* Полоса размытия лежит на нижних строках самого текста,
                    а не под ним: раньше она начиналась там, где текст уже
                    кончался, и размывать ей было нечего. */
-                fade:{x:7.21,y:428,w:282.33,h:74},
+                fade:{x:7.21,y:416,w:282.33,h:74},
                 side:null,
                 /* шапка и чистое белое тело уже нарисованы в подложке —
                    своих заглушек поверх неё больше не нужно */
@@ -4053,7 +4107,7 @@
                    было 12,35/16,50 — строки стояли слишком редко, и текст
                    не доходил даже до третьего абзаца. Текст идёт до самого
                    низа окна, а хвост уходит в размытие. */
-                text:{x:20.50,y:65.20,w:260.70,h:437.00,fs:11,lh:15}}
+                text:{x:20.50,y:65.20,w:260.70,h:424.80,fs:11,lh:14.2}}
       },
       skills: [
         {ic:['ic-ps.png'],x:46.44,y:97.71,w:30.30,h:29.55,lb:'lb-ps.svg',cx:46.04,cy:132.68,cw:31.27,ch:12.96},
@@ -4375,11 +4429,11 @@
          как и текст внизу карточки. Размытие живёт в том же таймлайне,
          поэтому при закрытии оно само отыгрывается в обратную сторону. */
       var shut = {x: dx, y: dy, scaleX: .06, scaleY: .015, opacity: 0,
-                  filter: 'blur(12px)'};
+                  filter: 'blur(26px)'};
       gsap.killTweensOf(w);
       var tl = gsap.timeline()
         .fromTo(w, shut, {x: 0, y: 0, scaleX: 1, scaleY: .2, opacity: 1,
-                          filter: 'blur(3px)', duration: .3, ease: 'power3.out'}, 0)
+                          filter: 'blur(16px)', duration: .3, ease: 'power3.out'}, 0)
         .to(w, {scaleY: 1, filter: 'blur(0px)', duration: .38, ease: EASE.rise}, .22);
       w.__genie = tl;
       if(back){
