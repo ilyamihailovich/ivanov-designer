@@ -10,7 +10,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap&subset=cyrillic" rel="stylesheet">
 <link rel="preload" href="fonts/ak.woff2" as="font" type="font/woff2" crossorigin>
-<script src="cases.js?v=091600"></script>
+<script src="cases.js?v=091701"></script>
 <!-- Библиотеки лежат рядом с сайтом, а не на CDN: при недоступном CDN
      страница превращалась в белый экран со счётчиком 0 % — весь скрипт
      падает на первой же строке с gsap. -->
@@ -200,14 +200,14 @@
   /* на телефоне кегли свои: заголовок крупнее, выделенный абзац мельче — по фрейму */
   @media (max-width:900px){
     .kn-text p.h1{font-size:20.50px;line-height:16.4px;}
-    /* Кегль был вдвое мельче основного текста, а справа оставалось пять
-       пикселей против одиннадцати сверху и снизу — плашка читалась как
-       сноска и выглядела кривой. Теперь текст почти в рост основного,
-       а поля сверху, справа и снизу одинаковые; слева шире ровно на
-       жёлтую полоску. */
-    .kn-text p.hl{font-size:11px;line-height:13.8px;opacity:.86;border-radius:9px;
-      padding:13px 13px 13px 26px;margin:0 0 0 1.2px;letter-spacing:-.03em;}
-    .kn-text p.hl::before{left:13px;top:13px;bottom:13px;width:2.4px;border-radius:1.2px;}
+    /* Всё снято с образца. Поля сверху, справа и снизу одинаковые, слева
+       шире ровно на жёлтую полоску; плашка во всю ширину текстовой колонки,
+       а воздух вокруг неё вдвое больше межабзацного. */
+    .kn-text p.hl{font-size:9px;line-height:10.3px;opacity:.86;border-radius:7px;
+      padding:12.4px 12.4px 12.4px 23px;margin:14px 0;letter-spacing:-.03em;}
+    .kn-text p.hl::before{left:12.4px;top:12.4px;bottom:12.4px;width:2.5px;border-radius:1.25px;}
+    /* заголовок отбит от первого абзаца сильнее, чем абзацы между собой */
+    .kn-text p.h1{margin-bottom:6px;}
   }
   .kn-fade{position:absolute;z-index:4;pointer-events:none;
     transition:opacity .25s linear;}
@@ -1450,7 +1450,7 @@
     <div class="m-copy"><span class="sm" data-goo data-fade>’26 © All Right Reserved</span></div>
 
     <div class="tailroom"></div>
-    <span id="buildStamp" style="display:none">BUILD 09.10 16:00</span>
+    <span id="buildStamp" style="display:none">BUILD 09.10 17:01</span>
   </section>
 
 </main>
@@ -4040,14 +4040,20 @@
                 plate:{x:-82.66,y:-13.67,w:466.32,h:867.04}},
         about: {x:39,y:60,w:301,h:510,r:10.43,shot:'win-about-mob.png',about:true,
                 plate:{x:-75.98,y:-15.08,w:452.95,h:818.47},
-                /* подложка внизу текста — по фрейму (447:1209) */
-                fade:{x:7.21,y:414.18,w:282.33,h:95.82},
+                /* Полоса размытия лежит на нижних строках самого текста,
+                   а не под ним: раньше она начиналась там, где текст уже
+                   кончался, и размывать ей было нечего. */
+                fade:{x:7.21,y:428,w:282.33,h:74},
                 side:null,
                 /* шапка и чистое белое тело уже нарисованы в подложке —
                    своих заглушек поверх неё больше не нужно */
                 date:{x:108.88,y:39.62,fs:6.92},
                 time:null,
-                text:{x:17.89,y:66.38,w:264.57,h:365.73,fs:12.35,lh:16.50}}
+                /* Кегль и интерлиньяж сняты с образца (301 по ширине окна):
+                   было 12,35/16,50 — строки стояли слишком редко, и текст
+                   не доходил даже до третьего абзаца. Текст идёт до самого
+                   низа окна, а хвост уходит в размытие. */
+                text:{x:20.50,y:65.20,w:260.70,h:437.00,fs:11,lh:15}}
       },
       skills: [
         {ic:['ic-ps.png'],x:46.44,y:97.71,w:30.30,h:29.55,lb:'lb-ps.svg',cx:46.04,cy:132.68,cw:31.27,ch:12.96},
@@ -4242,6 +4248,9 @@
           };
           box.addEventListener('scroll', tune, {passive: true});
           w.__tuneFade = tune;
+          /* Считаем сразу: полоса рисовалась во всю силу или не рисовалась
+             вовсе, потому что первый пересчёт случался только при прокрутке. */
+          requestAnimationFrame(tune);
         }
       }
       /* кружки светофора на снимке — по ним окно тоже закрывается */
@@ -4362,12 +4371,16 @@
       var ix = from ? parseFloat(from.style.left) + parseFloat(from.style.width) / 2 : wr.x + wr.w / 2;
       var iy = from ? parseFloat(from.style.top) + parseFloat(from.style.height) / 2 : wr.y + wr.h / 2;
       var dx = ix - (wr.x + wr.w / 2), dy = iy - (wr.y + wr.h / 2);
-      var shut = {x: dx, y: dy, scaleX: .06, scaleY: .015, opacity: 0};
+      /* Окно не просто втягивается в папку — оно на ходу уходит в размытие,
+         как и текст внизу карточки. Размытие живёт в том же таймлайне,
+         поэтому при закрытии оно само отыгрывается в обратную сторону. */
+      var shut = {x: dx, y: dy, scaleX: .06, scaleY: .015, opacity: 0,
+                  filter: 'blur(12px)'};
       gsap.killTweensOf(w);
       var tl = gsap.timeline()
         .fromTo(w, shut, {x: 0, y: 0, scaleX: 1, scaleY: .2, opacity: 1,
-                          duration: .3, ease: 'power3.out'}, 0)
-        .to(w, {scaleY: 1, duration: .38, ease: EASE.rise}, .22);
+                          filter: 'blur(3px)', duration: .3, ease: 'power3.out'}, 0)
+        .to(w, {scaleY: 1, filter: 'blur(0px)', duration: .38, ease: EASE.rise}, .22);
       w.__genie = tl;
       if(back){
         /* запасной путь: таймлайна открытия ещё не было */
