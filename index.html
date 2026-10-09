@@ -10,7 +10,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap&subset=cyrillic" rel="stylesheet">
 <link rel="preload" href="fonts/ak.woff2" as="font" type="font/woff2" crossorigin>
-<script src="cases.js?v=091144"></script>
+<script src="cases.js?v=091600"></script>
 <!-- Библиотеки лежат рядом с сайтом, а не на CDN: при недоступном CDN
      страница превращалась в белый экран со счётчиком 0 % — весь скрипт
      падает на первой же строке с gsap. -->
@@ -200,9 +200,14 @@
   /* на телефоне кегли свои: заголовок крупнее, выделенный абзац мельче — по фрейму */
   @media (max-width:900px){
     .kn-text p.h1{font-size:20.50px;line-height:16.4px;}
-    .kn-text p.hl{font-size:8.07px;line-height:9.18px;opacity:.8;border-radius:8px;
-      padding:11.3px 5px 11.3px 20.4px;margin:0 0 0 1.2px;letter-spacing:-.037em;}
-    .kn-text p.hl::before{left:11.2px;top:12.8px;bottom:12.5px;width:2.4px;border-radius:1.2px;}
+    /* Кегль был вдвое мельче основного текста, а справа оставалось пять
+       пикселей против одиннадцати сверху и снизу — плашка читалась как
+       сноска и выглядела кривой. Теперь текст почти в рост основного,
+       а поля сверху, справа и снизу одинаковые; слева шире ровно на
+       жёлтую полоску. */
+    .kn-text p.hl{font-size:11px;line-height:13.8px;opacity:.86;border-radius:9px;
+      padding:13px 13px 13px 26px;margin:0 0 0 1.2px;letter-spacing:-.03em;}
+    .kn-text p.hl::before{left:13px;top:13px;bottom:13px;width:2.4px;border-radius:1.2px;}
   }
   .kn-fade{position:absolute;z-index:4;pointer-events:none;
     transition:opacity .25s linear;}
@@ -645,15 +650,21 @@
        либо текст кейса, либо сама лента. Стрелка листания живёт в шапке
        справа, как на большом экране, и не мешает ни тексту, ни кадрам. */
 
-    .cw-panel{width:calc(100% - 32px);height:72svh;border-radius:16px;overflow:hidden;
+    /* Плашка не обрезает: иначе кнопка «Перейти к просмотру», которая
+       живёт под её нижним краем, срезалась вместе со всем, что выходит
+       наружу. Скругление и обрезка переехали внутрь, на сам лист. */
+    .cw-panel{width:calc(100% - 32px);height:72svh;border-radius:16px;
+      overflow:visible;
       /* нижний отступ сдвигает плашку вверх при центровке и освобождает
-         полосу под кнопку «Перейти к просмотру» */
-      margin-bottom:66px;}
+         полосу под кнопку «Перейти к просмотру»; раньше он был вдвое
+         больше и плашка почти упиралась в «Назад» */
+      margin-bottom:30px;}
     .cw-stage{overflow:hidden!important;}
-    .cw-scroll.card{padding:0;overflow:hidden;}
+    .cw-scroll.card{padding:0;overflow:hidden;border-radius:16px;}
     .cw-stage{position:static;overflow:visible;}
-    /* кнопка под плашкой отсчитывается от самой плашки */
-    .cw-scroll.card{position:static;}
+    /* лист — точка отсчёта для полосы размытия и для ленты; сама кнопка
+       «Перейти к просмотру» переехала наружу, к плашке */
+    .cw-scroll.card{position:relative;}
 
     .cw-screen{position:static;}
     .cc{position:static;width:auto;height:auto;transform:none!important;
@@ -680,10 +691,12 @@
     /* текст кейса: плотнее и с иерархией */
     /* align-items:baseline у сетки не растягивает ячейку, поэтому колонка
        брала высоту по тексту и вылезала за низ плашки. */
-    .cc-copy{align-self:stretch;padding:22px 20px 92px;min-height:0;overflow-y:auto;
+    .cc-copy{align-self:stretch;padding:22px 20px 26px;min-height:0;overflow-y:auto;
+      scrollbar-width:none;
       -webkit-mask-image:linear-gradient(to bottom,#000 calc(100% - 92px),transparent calc(100% - 46px));
       mask-image:linear-gradient(to bottom,#000 calc(100% - 92px),transparent calc(100% - 46px));
       overscroll-behavior:contain;-webkit-overflow-scrolling:touch;}
+    .cc-copy::-webkit-scrollbar{display:none;}
     /* воздух — между блоками, а не внутри абзаца */
     .cc-h:first-child{margin-top:0;}
     .cc-h{font-size:13px;font-weight:600;letter-spacing:.02em;opacity:.42;
@@ -715,15 +728,19 @@
     .cw-panel.m-open .cc-copy{opacity:0;filter:blur(9px);}
     /* Низ текста, который не поместился, уходит в размытие и в белое —
        тем же приёмом, что и в «обо мне». */
-    .cw-panel::after{content:'';position:absolute;left:0;right:0;bottom:0;
-      height:104px;z-index:5;pointer-events:none;border-radius:0 0 16px 16px;
+    /* Низ непоместившегося текста уходит в размытие и в белое — так видно,
+       что дальше есть что листать. Полоса начинается там, где отмечено на
+       образце: за две строки до нижнего края, а не за полплашки. Лежит на
+       самом листе, потому что плашка больше не обрезает. */
+    .cw-scroll.card::after{content:'';position:absolute;left:0;right:0;bottom:0;
+      height:58px;z-index:5;pointer-events:none;border-radius:0 0 16px 16px;
       backdrop-filter:blur(5px);-webkit-backdrop-filter:blur(5px);
-      -webkit-mask-image:linear-gradient(to bottom,transparent 0%,#000 58%);
-      mask-image:linear-gradient(to bottom,transparent 0%,#000 58%);
+      -webkit-mask-image:linear-gradient(to bottom,transparent 0%,#000 64%);
+      mask-image:linear-gradient(to bottom,transparent 0%,#000 64%);
       background:linear-gradient(to bottom,rgba(255,255,255,0) 0%,
-                 rgba(255,255,255,.88) 62%,#fff 100%);
+                 rgba(255,255,255,.86) 66%,#fff 100%);
       transition:opacity .35s var(--eo);}
-    .cw-panel.m-open::after{opacity:0;}
+    .cw-panel.m-open .cw-scroll.card::after{opacity:0;}
     /* кнопка «Перейти к просмотру» внизу; при раскрытии уходит */
     /* кнопка живёт под плашкой, а не поверх текста */
     .cc-nav{position:absolute;left:0;right:0;top:calc(100% + 14px);bottom:auto;
@@ -780,7 +797,10 @@
     /* Пара кнопок над плашкой — для кейса, открытого из блока работ.
        «Назад» по левому краю кадра, «Все кейсы» по правому. Отступ сверху
        тот же, что у одиночной кнопки при открытии из списка. */
-    .cw-pair{position:absolute;left:16px;right:16px;top:calc(10svh - 34px);
+    /* Отсчёт от верха плашки, а не от доли экрана: плашка опустилась, и при
+       старом значении пара кнопок почти упиралась в её край. Просвет здесь
+       тот же, что у одиночной «Назад». */
+    .cw-pair{position:absolute;left:16px;right:16px;top:calc(14svh - 68px);
       display:flex;justify-content:space-between;z-index:9;}
     /* Овалы всегда светлые: кейс из блока работ открывается на тёмной теме,
        и фон «бумаги» там чёрный — капсул было не видно. */
@@ -1430,7 +1450,7 @@
     <div class="m-copy"><span class="sm" data-goo data-fade>’26 © All Right Reserved</span></div>
 
     <div class="tailroom"></div>
-    <span id="buildStamp" style="display:none">BUILD 09.10 11:44</span>
+    <span id="buildStamp" style="display:none">BUILD 09.10 16:00</span>
   </section>
 
 </main>
@@ -1934,6 +1954,29 @@
   function esc(v){ return String(v == null ? '' : v)
     .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
 
+  /* Предлоги и союзы не остаются в конце строки: короткое слово склеивается
+     со следующим неразрывным пробелом. Лежит на общем уровне, потому что
+     нужно и в «обо мне», и в текстах кейсов — раньше жило внутри одного
+     блока и до кейсов не доставало. */
+  var TIGHT_WORDS = '(?:[А-ЯЁа-яёA-Za-z]{1,2}|для|как|что|чем|при|над|под|без|про|или|его|их|так|уже|ещё|еще)';
+  /* Граница слева проверяется, но не съедается: когда она входила в саму
+     находку, следующее короткое слово оставалось без границы и повисало —
+     «что я» склеивалось только наполовину. */
+  var TIGHT_RE = null;
+  try{ TIGHT_RE = new RegExp('(?<![^\\s>(«„—–-])' + TIGHT_WORDS + '\\s', 'g'); }
+  catch(e){ TIGHT_RE = new RegExp('(^|[\\s>(«„—–-])(' + TIGHT_WORDS + '\\s)', 'g'); }
+  var TIGHT_HAS_LOOKBEHIND = TIGHT_RE.source.indexOf('(?<!') === 0;
+  window.tightenText = function(t){
+    t = String(t == null ? '' : t);
+    for(var i = 0; i < 3; i++){
+      t = TIGHT_HAS_LOOKBEHIND
+        ? t.replace(TIGHT_RE, function(m){ return m.slice(0, -1) + '\u00A0'; })
+        : t.replace(TIGHT_RE, function(m, p, w){ return p + w.slice(0, -1) + '\u00A0'; });
+    }
+    return t;
+  };
+  function tightEsc(v){ return window.tightenText(esc(v)); }
+
 
   /* Renders a case that carries its own block layout. Falls back to the plain
      text-and-gallery view for cases that do not have one yet. */
@@ -1942,7 +1985,7 @@
       return '<img loading="lazy" ' + (cls ? 'class="'+cls+'" ' : '') +
              'src="' + esc(src) + '" alt="' + esc(c.t) + '">'; };
     var ps = function(arr){ return (arr||[]).map(function(t){
-      return '<p>' + esc(t) + '</p>'; }).join(''); };
+      return '<p>' + tightEsc(t) + '</p>'; }).join(''); };
     var drips = function(list){ return (list||[]).map(function(d){
       return '<span class="drip ' + esc(d) + '"></span>'; }).join(''); };
 
@@ -2013,8 +2056,8 @@
     var sec = function(h, lead, body, top, htop){
       return '<div class="cc-t cc-h" style="top:' + htop + 'px">' + esc(h) + '</div>' +
              '<div class="cc-b" style="top:' + top + 'px">' +
-               '<p class="lead">' + esc(lead) + '</p>' +
-               '<p class="body">' + esc(body) + '</p></div>';
+               '<p class="lead">' + tightEsc(lead) + '</p>' +
+               '<p class="body">' + tightEsc(body) + '</p></div>';
     };
     return '<div class="cc">' +
       '<div class="cc-t cc-name">' + esc(c.t) + '</div>' +
@@ -2058,6 +2101,18 @@
   function fitCard(){
     var card = cwScroll && cwScroll.querySelector('.cc');
     if(!card) return;
+    /* На телефоне кнопка «Перейти к просмотру» стоит под плашкой, а лист
+       внутри обрезан по скруглению — оставаясь в разметке карточки, кнопка
+       срезалась вместе со всем, что выходит за нижний край. Поэтому она
+       переезжает к самой плашке, которая ничего не обрезает. */
+    var pnl0 = cwEl.querySelector('.cw-panel');
+    var nav0 = cwEl.querySelector('.cc-nav:not(.solo)');
+    if(nav0 && pnl0){
+      var mob = window.matchMedia('(max-width:900px)').matches;
+      if(mob && nav0.parentNode !== pnl0) pnl0.appendChild(nav0);
+      /* на большом экране кнопка живёт в координатах макета, внутри карточки */
+      if(!mob && nav0.parentNode === pnl0) card.appendChild(nav0);
+    }
     var w = cwScroll.clientWidth;
     if(!w) return;
     var k = w / 1358.102;
@@ -4049,15 +4104,8 @@
       'Разрабатывал SMM-стратегии с учетом задач бизнеса, аудитории и конкурентной среды. Определял позиционирование, контентные направления и формат присутствия бренда в соц-сетях. Планировал контент, ставил задачи на производство, координировал работу над материалами и контролировал их качество. Анализировал ключевые показатели соц-сетей, на основе которых корректировал контент и форматы.'
     ];
 
-    /* Предлоги и союзы не остаются в конце строки: короткое слово
-       склеивается со следующим неразрывным пробелом. */
-    var TIGHT = /(^|[\s>(«„—–-])((?:[А-ЯЁа-яёA-Za-z]{1,2}|для|как|что|чем|при|над|под|без|про|или|его|их|так|уже|ещё|еще)\s)/g;
-    function tight(t){
-      for(var i = 0; i < 3; i++) t = t.replace(TIGHT, function(m, p, w){
-        return p + w.slice(0, -1) + '\u00A0';
-      });
-      return t;
-    }
+    /* склейка коротких слов — общая для всего сайта */
+    function tight(t){ return window.tightenText(t); }
 
     /* ---- сборка ---- */
     function px(v){ return v.toFixed(2) + 'px'; }
