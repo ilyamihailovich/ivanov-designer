@@ -10,7 +10,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap&subset=cyrillic" rel="stylesheet">
 <link rel="preload" href="fonts/ak.woff2" as="font" type="font/woff2" crossorigin>
-<script src="cases.js?v=092116"></script>
+<script src="cases.js?v=092131"></script>
 <!-- Библиотеки лежат рядом с сайтом, а не на CDN: при недоступном CDN
      страница превращалась в белый экран со счётчиком 0 % — весь скрипт
      падает на первой же строке с gsap. -->
@@ -168,7 +168,10 @@
 
   .kn-tile{position:absolute;transition:transform .28s var(--eo);
     transform-origin:50% 50%;}
-  .kn-tile:hover{transform:scale(1.09);}
+  /* !important, потому что анимация открытия оставляет на плитке свой
+     transform инлайном, и обычное правило наведения до неё не доходило —
+     плитки перестали отзываться на мышь. */
+  .kn-tile:hover{transform:scale(1.09)!important;}
   .kn-tile img{position:absolute;display:block;}
   .kn-tile .sh{filter:drop-shadow(0 2px 4px rgba(110,110,110,.10))
                       drop-shadow(0 7px 7px rgba(110,110,110,.09))
@@ -180,8 +183,12 @@
     font-family:'SF Pro','AK','Helvetica Neue',Arial,sans-serif;letter-spacing:-.03em;}
   .kn-date{opacity:.4;}
   .kn-time{opacity:.5;}
-  .kn-head{position:absolute;color:#000;white-space:nowrap;opacity:.76;font-weight:700;
-    font-family:'SF Pro','AK','Helvetica Neue',Arial,sans-serif;letter-spacing:-.05em;}
+  /* Заголовок «обо мне» на большом экране запечён в самой подложке, поэтому
+     свой рисуется поверх на белой подложке того же цвета — только так его
+     кегль можно менять, не перерисовывая PNG. */
+  .kn-head{position:absolute;color:#000;white-space:nowrap;opacity:.9;font-weight:700;
+    font-family:'SF Pro','AK','Helvetica Neue',Arial,sans-serif;letter-spacing:-.05em;
+    line-height:1;background:#fff;padding:3px 12px 4px 0;}
   /* Текст длиннее поля, поэтому поле прокручивается, а его низ уходит
      в размытие и в белое — так в макете. */
   .kn-textbox{position:absolute;overflow-y:auto;overscroll-behavior:contain;
@@ -193,10 +200,18 @@
   .kn-text p{margin:0;}
   /* выделенный абзац — жёлтая подсветка с полоской слева, как в заметках */
   .kn-text p.hl{position:relative;border-radius:7px;background:rgba(255,196,0,.10);
-    padding:5px 10px 5px 22px;margin:0 0 0 -10px;font-weight:650;}
+    padding:5px 10px 5px 22px;margin:0 0 0 -10px;font-weight:650;opacity:.6;}
   .kn-text p.hl::before{content:'';position:absolute;left:12px;top:12px;bottom:12px;
     width:2px;border-radius:1px;background:#ffc400;}
   .kn-text p.h1{font-weight:780;letter-spacing:-.05em;}
+  /* На большом экране: ведущая фраза крупнее остального текста, вокруг
+     жёлтой плашки воздуха вдвое больше межабзацного, а внутри неё поля
+     вдвое шире — прежние пять пикселей читались как теснота. */
+  @media (min-width:901px){
+    .kn-text p:first-child{font-size:12.4px;line-height:15px;}
+    .kn-text p.hl{padding:10px 20px 10px 30px;margin:9px 0 9px -10px;}
+    .kn-text p.hl::before{left:12px;top:10px;bottom:10px;}
+  }
   /* на телефоне кегли свои: заголовок крупнее, выделенный абзац мельче — по фрейму */
   @media (max-width:900px){
     .kn-text p.h1{font-size:20.50px;line-height:16.4px;}
@@ -1001,7 +1016,8 @@
   .socials.lit a{background:none;color:var(--ink);border-color:var(--ink);}
   .socials.lit a:hover{background:var(--ink);color:var(--paper);}
   /* room for the wordmark to come together underneath everything */
-  .tailroom{height:clamp(220px,34vh,420px);}
+  /* Запас под словомаркой: прежние 34vh оставляли внизу пустой экран. */
+  .tailroom{height:clamp(60px,8vh,120px);}
 
 
   /* ---------- финал на десктопе: сцена 1425x2657 из фрейма 379:7 ----------
@@ -1012,7 +1028,7 @@
       width:min(100%,1600px);margin:0 auto;
       /* последний элемент — плашка «@llyaMihailovich» — кончается на 144cqw;
          хвост оставлен только на поля, иначе внизу зиял пустой экран */
-      height:148cqw;}
+      height:145cqw;}
     .close > *{position:absolute;margin:0;}
     .close .lg{white-space:nowrap;font-size:6.3158cqw;line-height:5.5579cqw;
       letter-spacing:-0.3158cqw;}
@@ -1051,8 +1067,10 @@
     .close-aside > div{position:absolute;}
     .close-aside .m-hide{display:none;}
     .close-aside > div:nth-child(1){left:34.175cqw;top:127.353cqw;}
+    /* Полупрозрачность задана цветом, а не opacity: проявление строки
+       пишет свою прозрачность инлайном и затирало бы её. */
     .close-aside > div:nth-child(1) .sm{font-size:2.2456cqw;line-height:1.316cqw;
-      color:var(--ink);opacity:.45;}
+      color:rgba(0,0,0,.5);}
     .close-aside > div:nth-child(2){left:68.192cqw;top:138.430cqw;width:17.474cqw;
       text-align:center;}
     .close-aside > div:nth-child(2) .sm{font-size:1.6842cqw;line-height:1.316cqw;
@@ -1474,7 +1492,7 @@
     <div class="m-copy"><span class="sm" data-goo data-fade>’26 © All Right Reserved</span></div>
 
     <div class="tailroom"></div>
-    <span id="buildStamp" style="display:none">BUILD 09.10 21:16</span>
+    <span id="buildStamp" style="display:none">BUILD 09.10 21:31</span>
   </section>
 
 </main>
@@ -2343,7 +2361,9 @@
     var prev = nav.querySelector('.cc-prev'), next = nav.querySelector('.cc-next');
     var at = 0, busy = false;
     var BLUR = 16, T = .26;
-    gsap.set(prev, {x: -26});
+    /* Диски стояли в 26 пикселях друг от друга при своей ширине 57 —
+       они налезали один на другой. 69 даёт между ними ровный просвет. */
+    gsap.set(prev, {x: -69});
     gsap.set(frames, {autoAlpha: 0, filter: 'blur(' + BLUR + 'px)'});
     /* filter:none, а не blur(0): с любым фильтром Safari уводит картинку в
        sRGB и широкий цвет снимка гаснет — фото выглядело тусклее исходника. */
@@ -2522,7 +2542,7 @@
     var prev = nav.querySelector('.cc-prev'), next = nav.querySelector('.cc-next');
     fr.addEventListener('load', function(){ fitRibbonIn(ribS); });
     if(window.ResizeObserver) new ResizeObserver(function(){ fitRibbonIn(ribS); }).observe(ribS);
-    gsap.set(prev, {x: -47, opacity: 0});
+    gsap.set(prev, {x: -69, opacity: 0});
     function syncNav(){
       var atStart = ribS.scrollLeft <= 2;
       prev.style.pointerEvents = atStart ? 'none' : 'auto';
@@ -3604,6 +3624,32 @@
     (function tick(){ requestAnimationFrame(tick); check(); })();
   })();
 
+  /* Хвост финального блока. Высота была задана числом в долях ширины, и на
+     экранах выше расчётного внизу оставался пустой кусок. Теперь низ блока
+     считается по фактическому низу самого нижнего элемента — ровно столько,
+     сколько нужно словомарке под ним. */
+  function fitClose(){
+    var c = document.querySelector('.close');
+    if(!c) return;
+    if(!window.matchMedia('(min-width:901px)').matches){ c.style.height = ''; return; }
+    c.style.height = '';
+    var top = c.getBoundingClientRect().top, bot = 0;
+    [].forEach.call(c.querySelectorAll('*'), function(d){
+      if(d.classList.contains('tailroom')) return;
+      var r = d.getBoundingClientRect();
+      if(r.height && r.width) bot = Math.max(bot, r.bottom - top);
+    });
+    /* У самой обёртки словомарки высоты нет — её держат половинки. */
+    var half = document.querySelector('#markWrap .mark-half');
+    var room = (half ? half.getBoundingClientRect().height : 90) + 34;
+    if(bot) c.style.height = Math.ceil(bot + room) + 'px';
+  }
+  window.addEventListener('resize', fitClose);
+  window.addEventListener('load', function(){
+    fitClose();
+    if(window.ScrollTrigger) ScrollTrigger.refresh();
+  });
+
   function wordmark(){
     var wrap = document.getElementById('markWrap');
     if(!wrap) return;
@@ -4065,6 +4111,7 @@
         about: {x:569.88,y:68.50,w:775.95,h:533.33,r:11,shot:'win-about-desktop.png',about:true,
                 plate:{x:-122.04,y:-27.00,w:1020.37,h:885.33},
                 side:null,
+                head:{x:143.53,y:50.00,fs:15},
                 date:{x:399.52,y:42.40,fs:8},
                 time:{x:22.67,y:83.00,fs:7},
                 text:{x:143.53,y:91.10,w:593.99,h:411.60,fs:11,lh:13}}
