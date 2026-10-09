@@ -10,7 +10,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap&subset=cyrillic" rel="stylesheet">
 <link rel="preload" href="fonts/ak.woff2" as="font" type="font/woff2" crossorigin>
-<script src="cases.js?v=091115"></script>
+<script src="cases.js?v=091144"></script>
 <!-- Библиотеки лежат рядом с сайтом, а не на CDN: при недоступном CDN
      страница превращалась в белый экран со счётчиком 0 % — весь скрипт
      падает на первой же строке с gsap. -->
@@ -179,6 +179,7 @@
   .kn-date,.kn-time{position:absolute;color:#000;white-space:nowrap;font-weight:510;
     font-family:'SF Pro','AK','Helvetica Neue',Arial,sans-serif;letter-spacing:-.03em;}
   .kn-date{opacity:.4;}
+  .kn-time{opacity:.5;}
   .kn-head{position:absolute;color:#000;white-space:nowrap;opacity:.76;font-weight:700;
     font-family:'SF Pro','AK','Helvetica Neue',Arial,sans-serif;letter-spacing:-.05em;}
   /* Текст длиннее поля, поэтому поле прокручивается, а его низ уходит
@@ -186,19 +187,19 @@
   .kn-textbox{position:absolute;overflow-y:auto;overscroll-behavior:contain;
     -webkit-overflow-scrolling:touch;scrollbar-width:none;-ms-overflow-style:none;}
   .kn-textbox::-webkit-scrollbar{width:0;height:0;display:none;}
-  .kn-text{font-family:'SF Pro','AK','Helvetica Neue',Arial,sans-serif;
-    font-weight:400;letter-spacing:-.045em;opacity:.8;color:#000;text-transform:lowercase;}
-  .kn-text b{font-weight:590;}
-  .kn-text p{margin:0;text-wrap:balance;}
+  .kn-text{font-family:'Inter','SF Pro','Helvetica Neue',Arial,sans-serif;
+    font-weight:400;letter-spacing:-.022em;color:rgba(0,0,0,.82);text-transform:lowercase;}
+  .kn-text b{font-weight:600;color:rgba(0,0,0,.92);}
+  .kn-text p{margin:0;}
   /* выделенный абзац — жёлтая подсветка с полоской слева, как в заметках */
   .kn-text p.hl{position:relative;border-radius:7px;background:rgba(255,196,0,.10);
     padding:5px 10px 5px 22px;margin:0 0 0 -10px;font-weight:650;}
   .kn-text p.hl::before{content:'';position:absolute;left:12px;top:12px;bottom:12px;
     width:2px;border-radius:1px;background:#ffc400;}
-  .kn-text p.h1{font-weight:700;letter-spacing:-.05em;}
+  .kn-text p.h1{font-weight:780;letter-spacing:-.05em;}
   /* на телефоне кегли свои: заголовок крупнее, выделенный абзац мельче — по фрейму */
   @media (max-width:900px){
-    .kn-text p.h1{font-size:18.45px;line-height:13.8px;}
+    .kn-text p.h1{font-size:20.50px;line-height:16.4px;}
     .kn-text p.hl{font-size:8.07px;line-height:9.18px;opacity:.8;border-radius:8px;
       padding:11.3px 5px 11.3px 20.4px;margin:0 0 0 1.2px;letter-spacing:-.037em;}
     .kn-text p.hl::before{left:11.2px;top:12.8px;bottom:12.5px;width:2.4px;border-radius:1.2px;}
@@ -305,7 +306,7 @@
   }
 
   /* ---------- torn wordmark ---------- */
-  #markWrap{position:fixed;left:0;right:0;bottom:-.14em;z-index:3;pointer-events:none;opacity:0;}
+  #markWrap{position:fixed;left:0;right:0;bottom:.06em;z-index:3;pointer-events:none;opacity:0;}
   .mark-half{position:absolute;bottom:0;font-size:clamp(3rem,8.4vw,7rem);font-weight:700;
     letter-spacing:-.05em;color:var(--ghost);line-height:.8;white-space:nowrap;}
   .mark-half.l{left:clamp(10px,1.8vw,24px);}
@@ -651,6 +652,8 @@
     .cw-stage{overflow:hidden!important;}
     .cw-scroll.card{padding:0;overflow:hidden;}
     .cw-stage{position:static;overflow:visible;}
+    /* кнопка под плашкой отсчитывается от самой плашки */
+    .cw-scroll.card{position:static;}
 
     .cw-screen{position:static;}
     .cc{position:static;width:auto;height:auto;transform:none!important;
@@ -710,10 +713,20 @@
       -webkit-mask-image:linear-gradient(to top,#000 0,#000 100%);
       mask-image:linear-gradient(to top,#000 0,#000 100%);}
     .cw-panel.m-open .cc-copy{opacity:0;filter:blur(9px);}
+    /* Низ текста, который не поместился, уходит в размытие и в белое —
+       тем же приёмом, что и в «обо мне». */
+    .cw-panel::after{content:'';position:absolute;left:0;right:0;bottom:0;
+      height:104px;z-index:5;pointer-events:none;border-radius:0 0 16px 16px;
+      backdrop-filter:blur(5px);-webkit-backdrop-filter:blur(5px);
+      -webkit-mask-image:linear-gradient(to bottom,transparent 0%,#000 58%);
+      mask-image:linear-gradient(to bottom,transparent 0%,#000 58%);
+      background:linear-gradient(to bottom,rgba(255,255,255,0) 0%,
+                 rgba(255,255,255,.88) 62%,#fff 100%);
+      transition:opacity .35s var(--eo);}
+    .cw-panel.m-open::after{opacity:0;}
     /* кнопка «Перейти к просмотру» внизу; при раскрытии уходит */
     /* кнопка живёт под плашкой, а не поверх текста */
-    .cc-nav{position:fixed;left:16px;right:16px;top:auto;
-      bottom:calc((100svh - 72svh - 66px) / 2 + 8px);
+    .cc-nav{position:absolute;left:0;right:0;top:calc(100% + 14px);bottom:auto;
       transform:none;width:auto;height:auto;z-index:7;
       transition:opacity .35s var(--eo);}
     .cw-panel.m-open .cc-nav{opacity:0;pointer-events:none;}
@@ -953,9 +966,9 @@
   @media (min-width:901px){
     .close{container-type:inline-size;position:relative;padding:0;
       width:min(100%,1600px);margin:0 auto;
-      /* последний элемент — плашка «@llyaMihailovich» — кончается на 144,7cqw;
+      /* последний элемент — плашка «@llyaMihailovich» — кончается на 144cqw;
          хвост оставлен только на поля, иначе внизу зиял пустой экран */
-      height:152cqw;}
+      height:148cqw;}
     .close > *{position:absolute;margin:0;}
     .close .lg{white-space:nowrap;font-size:6.3158cqw;line-height:5.5579cqw;
       letter-spacing:-0.3158cqw;}
@@ -1191,7 +1204,7 @@
        5737,9). Высота у него 1189 — поэтому ниже копирайта страница не тянется
        и «ilyaivanov» стоит внизу, а не выскакивает к середине. */
     .close-mid,.c-c,.m-hide,.tailroom{display:none;}
-    .close{position:relative;height:1189px;padding:0;}
+    .close{position:relative;height:1252px;padding:0;}
     .close > div{position:absolute;margin:0;}
     .c-a,.c-d{margin-left:0;}
     .c-a .p1,.c-a .p2,.c-d .p1,.c-d .p2{display:block;}
@@ -1206,7 +1219,7 @@
       border-radius:50%;overflow:hidden;}
     .m-orb canvas{width:100%;height:100%;display:block;}
     /* у него в макете три кружка с иконками, а не буквы */
-    .socials{top:703.74px;left:20.4%;right:auto;margin:0;gap:12px;}
+    .socials{top:703.74px;left:0;right:0;margin:0;gap:12px;justify-content:center;}
     /* на телефоне кружки своего, мелкого размера — не десктопные 132 */
     .socials a{width:48px;height:48px;}
     .socials .lbl{display:none;}
@@ -1238,7 +1251,7 @@
     .m-mark{display:block;top:1092px;left:0;right:0;text-align:center;}
     .m-mark .lg{font-size:19.47vw;line-height:1;display:block;
       color:rgba(0,0,0,.38);}
-    .m-copy{display:block;top:1176px;left:0;right:0;text-align:center;}
+    .m-copy{display:block;top:1182px;left:0;right:0;text-align:center;}
     .m-copy .sm{font-size:7px;opacity:.6;}
     /* закреплённые словомарка и копирайт на телефоне не нужны: его вариант
        появляется внизу страницы и проявляется, а не висит весь скролл */
@@ -1417,7 +1430,7 @@
     <div class="m-copy"><span class="sm" data-goo data-fade>’26 © All Right Reserved</span></div>
 
     <div class="tailroom"></div>
-    <span id="buildStamp" style="display:none">BUILD 09.10 11:15</span>
+    <span id="buildStamp" style="display:none">BUILD 09.10 11:44</span>
   </section>
 
 </main>
@@ -1745,36 +1758,23 @@
     if(!list.length) return;
     list.forEach(function(el){
       el.__loop = true; el.__done = true; el.__armed = true;
-      gsap.set(el, {opacity: 0});
       el.classList.add('shown');
+      /* никаких SVG-фильтров: подвалу нужно обычное проявление, а клякса
+         через filter:url() в Safari то доезжала, то нет */
+      el.style.filter = 'none';
+      gsap.set(el, {opacity: 0, y: 16});
     });
-    /* Считали расстояние до низа документа: к моменту порога словомарка
-       давно была в кадре, и она просто вспыхивала с задержкой. Теперь
-       каждая строка следит за собой и выходит, едва войдя в экран. */
     function check(){
       list.forEach(function(el, i){
         var r = el.getBoundingClientRect();
         if(!r.height) return;
-        var vis = r.top < window.innerHeight * .92 && r.bottom > 0;
+        var vis = r.top < window.innerHeight * .95 && r.bottom > 0;
         if(vis === el.__vis) return;
         el.__vis = vis;
-        if(el.__pend) el.__pend.kill();
-        if(el.__safe) el.__safe.kill();
-        if(vis){
-          el.__pend = gsap.delayedCall(i * .12, function(){ reGoo(el, true); });
-          /* Страховка: если проявление через SVG-фильтр почему-то не доедет
-             (а Safari с filter:url() ведёт себя иначе, чем Chromium),
-             строка всё равно выходит простым затуханием. */
-          el.__safe = gsap.delayedCall(i * .12 + 1.1, function(){
-            if(!el.__vis) return;
-            if(parseFloat(getComputedStyle(el).opacity) < .9){
-              el.style.filter = 'none';
-              gsap.to(el, {opacity: 1, duration: .45, ease: 'none', overwrite: 'auto'});
-            }
-          });
-        } else {
-          reGoo(el, false);
-        }
+        gsap.killTweensOf(el);
+        gsap.to(el, {opacity: vis ? 1 : 0, y: vis ? 0 : 16,
+                     duration: vis ? .7 : .3, ease: 'power2.out',
+                     delay: vis ? i * .09 : 0, overwrite: 'auto'});
       });
     }
     /* Проверяем каждый кадр, а не по событию прокрутки: события от Lenis и
@@ -3992,7 +3992,7 @@
                    своих заглушек поверх неё больше не нужно */
                 date:{x:108.88,y:39.62,fs:6.92},
                 time:null,
-                text:{x:17.89,y:66.38,w:264.57,h:365.73,fs:10.38,lh:13.78}}
+                text:{x:17.89,y:66.38,w:264.57,h:365.73,fs:12.35,lh:16.50}}
       },
       skills: [
         {ic:['ic-ps.png'],x:46.44,y:97.71,w:30.30,h:29.55,lb:'lb-ps.svg',cx:46.04,cy:132.68,cw:31.27,ch:12.96},
@@ -4008,7 +4008,7 @@
         {ic:['st-rgbspot.png'],x:40.44,y:142.84,w:38.49,h:38.49,lb:'sl-rgbspot.svg',cx:41.52,cy:187.30,cw:38.49,ch:5.60},
         {ic:['st-flash.png'],x:174.26,y:176.49,w:33.14,h:30.83,cx:175.20,cy:214.03,cw:31.23,ch:9.39},
         {ic:['st-camera.png'],x:45.47,y:61.34,w:38.49,h:26.54,lb:'sl-camera.svg',cx:47.78,cy:92.84,cw:33.86,ch:5.60},
-        {ic:['st-lens-uni.png'],x:117.570,y:39.58,w:31.71,h:57.27,rot:22.48,lb:'sl-lens-uni.svg',cx:112.70,cy:100.16,cw:41.45,ch:10.76},
+        {ic:['st-lens-uni.png'],x:122.33,y:56.75,w:22.20,h:40.10,rot:22.48,lb:'sl-lens-uni.svg',cx:112.70,cy:100.16,cw:41.45,ch:10.76},
         {ic:['st-lens-macro.png'],x:175.57,y:93.8,w:21.66,h:40.1,rot:-3.83,lb:'sl-lens-macro.svg',cx:174.25,cy:138.02,cw:24.30,ch:9.39},
         {ic:['st-octo.png','st-octo.png'],x:114.32,y:131.57,w:26.28,h:28.49,dx:-13.14,dy:9.48,lb:'sl-octo.svg',cx:111.11,cy:176.72,cw:31.27,ch:4.61},
         {ic:['st-rgbpanel.png'],x:48.10,y:226.25,w:34.78,h:41.76,lb:'sl-rgbpanel.svg',cx:51.64,cy:272.25,cw:27.88,ch:5.60},
@@ -4039,6 +4039,7 @@
       {h1: true, t: 'обо мне'},
       '',
       '<b>Сильная сторона моего подхода в том, что я совмещаю SMM со знаниями в дизайне и продакшене.</b>',
+      '',
       'Это позволяет закрывать несколько задач в рамках одного проекта без передачи работы между несколькими специалистами, быстро переходить от идеи к реализации и самостоятельно организовывать производство контента. А собственная техническая база дополнительно позволяет не зависеть от подрядчиков.',
       '',
       {hl: true, t: 'В проектах отвечал за разработку и реализацию визуальных решений для брендов. Работал с задачами на уровне концепции позиционирования, определяя, как бренд должен выглядеть, восприниматься и проявляться в разных каналах коммуникации.'},
@@ -4174,7 +4175,7 @@
           ';width:' + px(c.text.w) + ';height:' + px(c.text.h));
         var tx = el('div', 'kn-text', 'font-size:' + c.text.fs + 'px;line-height:' + c.text.lh + 'px');
         (SMALL ? ABOUT_M : ABOUT_D).forEach(function(par){
-          if(!par){ tx.appendChild(el('div', 'kn-gap', 'height:' + c.text.lh + 'px')); return; }
+          if(!par){ tx.appendChild(el('div', 'kn-gap', 'height:' + (c.text.lh * .7).toFixed(2) + 'px')); return; }
           var p = el('p');
           if(typeof par === 'object'){ p.className = par.h1 ? 'h1' : 'hl'; p.innerHTML = tight(par.t); }
           else p.innerHTML = tight(par);
@@ -4341,12 +4342,14 @@
         if(n !== name){ w.classList.remove('on'); return; }
         w.classList.add('on');
         genie(w, stage.querySelector('.kn-item[data-win="' + name + '"]'), false);
+        /* Анимации содержимого запоминаем: при закрытии они отыгрываются
+           назад, иначе иконки и строки просто схлопывались вместе с окном. */
+        w.__inner = [];
         var tl = w.querySelectorAll('.kn-tile');
         if(tl.length){
           gsap.killTweensOf(tl);
-          gsap.fromTo(tl, {opacity: 0, scale: .66, y: 14},
-            {opacity: 1, scale: 1, y: 0, duration: .5, ease: EASE.rise, stagger: .045, delay: .2,
-             onComplete: function(){ gsap.set(tl, {clearProps: 'transform'}); }});
+          w.__inner.push(gsap.fromTo(tl, {opacity: 0, scale: .66, y: 14},
+            {opacity: 1, scale: 1, y: 0, duration: .5, ease: EASE.rise, stagger: .045, delay: .2}));
         }
         var ps = w.querySelectorAll('.kn-text p, .kn-text .kn-gap');
         if(ps.length){
@@ -4356,9 +4359,9 @@
           gsap.killTweensOf(ps);
           /* строки выходят из размытия одна за другой — будто текст
              быстро допечатывается сверху вниз */
-          gsap.fromTo(ps, {opacity: 0, filter: 'blur(6px)', y: 6},
+          w.__inner.push(gsap.fromTo(ps, {opacity: 0, filter: 'blur(6px)', y: 6},
             {opacity: 1, filter: 'blur(0px)', y: 0, duration: .34, ease: 'power2.out',
-             stagger: .07, delay: .22});
+             stagger: .07, delay: .22}));
         }
       });
     }
@@ -4369,8 +4372,14 @@
       ['skills','setup','about'].forEach(function(n){
         var w = document.getElementById('kn-' + n);
         if(!w || !w.classList.contains('on')) return;
-        genie(w, stage.querySelector('.kn-item[data-win="' + n + '"]'), true,
-              function(){ w.classList.remove('on'); });
+        var from = stage.querySelector('.kn-item[data-win="' + n + '"]');
+        /* Сперва содержимое уходит тем же ходом, каким пришло, и только
+           следом втягивается само окно — закрытие зеркально открытию. */
+        var inner = w.__inner || [];
+        inner.forEach(function(t){ t.timeScale(1.5).reverse(); });
+        gsap.delayedCall(inner.length ? .2 : 0, function(){
+          genie(w, from, true, function(){ w.classList.remove('on'); });
+        });
       });
     }
     /* окно не должно вылезать за край экрана: сперва подводим блок
