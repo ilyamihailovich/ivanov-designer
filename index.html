@@ -10,7 +10,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap&subset=cyrillic" rel="stylesheet">
 <link rel="preload" href="fonts/ak.woff2" as="font" type="font/woff2" crossorigin>
-<script src="cases.js?v=101044"></script>
+<script src="cases.js?v=101105"></script>
 <!-- Библиотеки лежат рядом с сайтом, а не на CDN: при недоступном CDN
      страница превращалась в белый экран со счётчиком 0 % — весь скрипт
      падает на первой же строке с gsap. -->
@@ -1002,6 +1002,9 @@
     background:var(--ghost);will-change:transform;transform-style:preserve-3d;}
   .close-still img{width:100%;height:100%;object-fit:cover;}
   /* 240,4 / 431,4 на 1425 */
+  /* «лишь» живёт отдельной строкой только на телефоне: на большом экране
+     это слово уже стоит в строке «лишь прекрасной». */
+  .c-d .p0{display:none;}
   .c-c{margin-left:16.8702%;}
   .c-d{margin-left:30.2737%;}
   /* three columns spread across the page instead of piling up on the left edge */
@@ -1277,13 +1280,18 @@
     .close{position:relative;height:1252px;padding:0;}
     .close > div{position:absolute;margin:0;}
     .c-a,.c-d{margin-left:0;}
-    .c-a .p1,.c-a .p2,.c-d .p1,.c-d .p2{display:block;}
-    .c-a{top:11.9px;left:0;right:0;}
+    .c-a .p1,.c-a .p2,.c-d .p0,.c-d .p1,.c-d .p2{display:block;}
+    /* Вся надпись опущена: сверху было 11,9, и шапка почти упиралась в неё. */
+    .c-a{top:19.9px;left:0;right:0;}
     .c-a .p1{margin-left:21.71%;}
     .c-a .p2{margin-left:9.87%;margin-top:-9.17px;}
-    .c-b{top:84.56px;left:18.4%;right:0;}
-    .c-d{top:551.6px;left:0;right:0;}
-    .c-d .p1{margin-left:11.07%;}
+    /* «сначала было» стояло на 7 пикселей ниже, чем требует тот же шаг
+       строк, что между «Всё» и «прекрасное,» — просветы были разные. */
+    .c-b{top:85.56px;left:18.4%;right:0;}
+    /* Нижняя надпись — в три строки: «лишь / прекрасной / идеей.» */
+    .c-d{top:566px;left:0;right:0;}
+    .c-d .p0{margin-left:24.6%;}
+    .c-d .p1{margin-left:11.07%;margin-top:-9.17px;}
     .c-d .p2{margin-left:55.6%;margin-top:-9.17px;}
     .m-orb{display:block;top:195.38px;left:10.656%;width:78.687%;aspect-ratio:1;
       border-radius:50%;overflow:hidden;}
@@ -1466,7 +1474,7 @@
     </div>
 
     <div class="lg c-c" data-goo>лишь прекрасной</div>
-    <div class="lg c-d" data-goo><span class="p1">прекрасной</span> <span class="p2">идеей.</span></div>
+    <div class="lg c-d" data-goo><span class="p0">лишь</span> <span class="p1">прекрасной</span> <span class="p2">идеей.</span></div>
     <!-- шар в круге: на телефоне он встаёт на место часов -->
     <div class="m-orb" id="mOrb"><canvas id="mOrbCanvas"></canvas></div>
 
@@ -1503,7 +1511,7 @@
     <div class="m-copy"><span class="sm" data-goo data-fade>’26 © All Right Reserved</span></div>
 
     <div class="tailroom"></div>
-    <span id="buildStamp" style="display:none">BUILD 10.10 10:44</span>
+    <span id="buildStamp" style="display:none">BUILD 10.10 11:05</span>
   </section>
 
 </main>
