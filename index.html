@@ -10,7 +10,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap&subset=cyrillic" rel="stylesheet">
 <link rel="preload" href="fonts/ak.woff2" as="font" type="font/woff2" crossorigin>
-<script src="cases.js?v=092141"></script>
+<script src="cases.js?v=101044"></script>
 <!-- Библиотеки лежат рядом с сайтом, а не на CDN: при недоступном CDN
      страница превращалась в белый экран со счётчиком 0 % — весь скрипт
      падает на первой же строке с gsap. -->
@@ -865,12 +865,24 @@
     /* Витрина наборов: карточки резались низом плашки, подписи не было
        видно. Теперь колонка прокручивается в своих полях, а карточки стоят
        в пропорции, при которой подпись всегда в кадре. */
-    .cw-sets{display:grid!important;grid-template-columns:1fr 1fr;
-      position:static!important;gap:12px;padding:18px 16px 20px!important;
-      flex:1 1 auto;min-height:0;overflow-y:auto;overscroll-behavior:contain;
-      align-content:start;}
-    .cw-set{height:auto!important;aspect-ratio:3/4;flex:none!important;
-      border-radius:10px;overflow:hidden;}
+    /* Как на большом экране: обложки стоят в ряд во всю высоту плашки и
+       листаются вбок. Сетка в две колонки резала их и ломала композицию. */
+    .cw-sets{display:flex!important;position:static!important;gap:10px;
+      padding:14px 16px 16px!important;flex:1 1 auto;min-height:0;
+      /* без min-width:0 ряд раздувался по содержимому и уезжал влево,
+         вместо того чтобы прокручиваться внутри плашки */
+      width:100%;min-width:0;align-self:stretch;box-sizing:border-box;
+      align-items:stretch;justify-content:flex-start;
+      overflow-x:auto;overflow-y:hidden;
+      overscroll-behavior:contain;-webkit-overflow-scrolling:touch;
+      scrollbar-width:none;}
+    .cw-sets::-webkit-scrollbar{display:none;}
+    /* Ширина задана долей окна, высота приходит растяжением: пропорция
+       через aspect-ratio в Safari не давала карточкам ни ширины, ни высоты —
+       витрина открывалась пустой. */
+    .cw-set{aspect-ratio:auto!important;align-self:stretch;
+      width:52%;height:auto!important;flex:0 0 auto!important;
+      border-radius:12px;overflow:hidden;}
     .cw-all{top:auto;bottom:calc(100% + 1.6svh);font-size:max(14px,3.8vw);}
     .cw-panel.lifted{top:auto;}
     /* крест — за границей плашки сверху и белый, как на большом экране */
@@ -1252,12 +1264,8 @@
     /* Витрина наборов: карточки резались низом плашки, подписи не было
        видно. Теперь колонка прокручивается в своих полях, а карточки стоят
        в пропорции, при которой подпись всегда в кадре. */
-    .cw-sets{display:grid!important;grid-template-columns:1fr 1fr;
-      position:static!important;gap:12px;padding:18px 16px 20px!important;
-      flex:1 1 auto;min-height:0;overflow-y:auto;overscroll-behavior:contain;
-      align-content:start;}
-    .cw-set{height:auto!important;aspect-ratio:3/4;flex:none!important;
-      border-radius:10px;overflow:hidden;}
+    /* Правило для витрины наборов стояло здесь вторым и перебивало то,
+       что выше: обложки снова ложились в две колонки. Оставлено одно. */
     /* ---------- финальный блок по его макету ----------
        Часов и строки «всего лишь» у него нет: на их месте круг с шаром,
        который вращается по прокрутке. Координаты — его, при ширине 375. */
@@ -1301,15 +1309,18 @@
        слева на 29, адрес — плашкой под ним */
     .close-aside{top:931.92px;left:0;right:0;display:block;padding:0;}
     .close-aside > div{position:absolute;}
-    .close-aside > div:nth-of-type(1){left:40.27%;top:0;}
+    .close-aside > div:nth-of-type(1){left:40.27%;top:14px;}
     .close-aside > div:nth-of-type(2){left:7.73%;right:auto;top:43px;
       text-align:left;}
     .close-aside .sm{font-size:12px;text-align:left;}
     .close-aside > div:nth-of-type(1){text-align:right;width:52%;}
     .close-aside > div:nth-of-type(1) .sm{text-align:right;}
+    /* Между «Написать напрямую» и плашкой с ником было 14 + 7 пикселей —
+       вдвое больше, чем нужно. */
+    .close-aside > div:nth-of-type(2) .sm:first-child{margin-bottom:7px!important;}
     .close-aside > div:nth-of-type(2) .sm:last-child{font-size:10px;
       border:0;background:rgba(0,0,0,.055);border-radius:12px;padding:5px 14px;
-      display:inline-block;margin-top:7px;}
+      display:inline-block;margin-top:3px;}
     .m-mark{display:block;top:1092px;left:0;right:0;text-align:center;}
     .m-mark .lg{font-size:19.47vw;line-height:1;display:block;
       color:rgba(0,0,0,.38);}
@@ -1492,7 +1503,7 @@
     <div class="m-copy"><span class="sm" data-goo data-fade>’26 © All Right Reserved</span></div>
 
     <div class="tailroom"></div>
-    <span id="buildStamp" style="display:none">BUILD 09.10 21:41</span>
+    <span id="buildStamp" style="display:none">BUILD 10.10 10:44</span>
   </section>
 
 </main>
@@ -2313,22 +2324,55 @@
     }
     /* На телефоне справа стоят стрелки листания, и длинное название вместе
        с годом заезжало под них. Подбираем кегль имени так, чтобы строка
-       кончалась левее стрелок. */
+       кончалась левее стрелок.
+       Год ставится своей координатой, а не ячейкой сетки: Safari не
+       пересчитывал ширину колонки после смены кегля, и год оставался стоять
+       там, где его место было при исходном размере имени — отсюда провал
+       между названием и годом. */
     var nav = cwScroll.querySelector('.cc-nav.solo');
     if(!nav) return;
-    var pv = nav.querySelector('.cc-prev') || nav;
-    var limit = pv.getBoundingClientRect().left - 12;
-    /* Мерить надо чернила года, а не его ячейку: ячейка во второй колонке
-       сетки тянется до самого края плашки и в сравнение не годится. */
-    function yearRight(){
+    /* Запас считается от левого края ПАРЫ стрелок, а не от одной: вторая
+       встаёт левее первой уже после замера, и строка заезжала под неё. */
+    var navR = nav.getBoundingClientRect();
+    var nx = nav.querySelector('.cc-next');
+    var bw = (nx && nx.offsetWidth) || navR.width || 26;
+    var limit = navR.left - (bw + 12) - 12;
+    function ink(el){
       var r = document.createRange();
-      r.selectNodeContents(yr);
-      return r.getBoundingClientRect().right;
+      r.selectNodeContents(el);
+      return r.getBoundingClientRect();
     }
+    /* Кегль считается один раз, а не подбирается циклом: при пошаговой
+       подгонке Safari отдавал ширину колонки от прошлого кегля, и год
+       оставался стоять там, где его место было при исходном размере имени. */
     nm.style.fontSize = '';
-    for(var fs = 34; fs >= 18; fs -= 1){
-      nm.style.fontSize = fs + 'px';
-      if(yearRight() <= limit) break;
+    yr.style.marginLeft = '0px';
+    var ni = ink(nm), yw = ink(yr).width;
+    var room = limit - ni.left - 10 - yw;
+    var base = ni.width;
+    var fs = 34;
+    if(base > room && room > 0) fs = Math.max(18, Math.floor(34 * room / base));
+    nm.style.fontSize = fs + 'px';
+    /* Ячейка года в сетке шире его чернил и шире имени, и год отъезжал от
+       названия. Двигаем его отступом к фактическому концу имени — в потоке,
+       поэтому общая базовая линия сохраняется. */
+    var ni2 = ink(nm), yi2 = ink(yr);
+    yr.style.marginLeft = Math.round(ni2.right + 10 - yi2.left) + 'px';
+    /* Первый замер случается до того, как дорисуется фирменный шрифт: имя
+       потом становится шире и заезжает под стрелки. Повторяем, когда шрифты
+       готовы. */
+    if(!yr.__fontsWait){
+      yr.__fontsWait = true;
+      if(document.fonts && document.fonts.ready){
+        document.fonts.ready.then(function(){
+          if(yr.isConnected) placeSoloYear();
+        });
+      }
+      /* fonts.ready дожидается только тех шрифтов, что уже запрошены, —
+         фирменный подключается позже, поэтому пересчитываем ещё дважды. */
+      [320, 1200].forEach(function(ms){
+        setTimeout(function(){ if(yr.isConnected) placeSoloYear(); }, ms);
+      });
     }
   }
 
@@ -2361,9 +2405,16 @@
     var prev = nav.querySelector('.cc-prev'), next = nav.querySelector('.cc-next');
     var at = 0, busy = false;
     var BLUR = 16, T = .26;
-    /* Диски стояли в 26 пикселях друг от друга при своей ширине 57 —
-       они налезали один на другой. 69 даёт между ними ровный просвет. */
-    gsap.set(prev, {x: -69});
+    /* Просвет считается от самих дисков: на большом экране они 57 пикселей,
+       на телефоне 26, и одно и то же смещение там разводило их через пол-окна.
+       Пока окно скрыто, ширины ещё нет — ждём кадра, иначе берётся запасное
+       значение от большого экрана и на телефоне диски разъезжаются. */
+    var prevTries = 0;
+    (function placePrev(){
+      var bw = next.offsetWidth;
+      if(!bw){ if(prevTries++ < 90) requestAnimationFrame(placePrev); return; }
+      gsap.set(prev, {x: -(bw + 12)});
+    })();
     gsap.set(frames, {autoAlpha: 0, filter: 'blur(' + BLUR + 'px)'});
     /* filter:none, а не blur(0): с любым фильтром Safari уводит картинку в
        sRGB и широкий цвет снимка гаснет — фото выглядело тусклее исходника. */
@@ -2542,7 +2593,13 @@
     var prev = nav.querySelector('.cc-prev'), next = nav.querySelector('.cc-next');
     fr.addEventListener('load', function(){ fitRibbonIn(ribS); });
     if(window.ResizeObserver) new ResizeObserver(function(){ fitRibbonIn(ribS); }).observe(ribS);
-    gsap.set(prev, {x: -69, opacity: 0});
+    gsap.set(prev, {opacity: 0});
+    var prevTries2 = 0;
+    (function placePrev2(){
+      var bw = next.offsetWidth;
+      if(!bw){ if(prevTries2++ < 90) requestAnimationFrame(placePrev2); return; }
+      gsap.set(prev, {x: -(bw + 12)});
+    })();
     function syncNav(){
       var atStart = ribS.scrollLeft <= 2;
       prev.style.pointerEvents = atStart ? 'none' : 'auto';
