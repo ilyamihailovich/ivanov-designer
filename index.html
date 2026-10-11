@@ -10,7 +10,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap&subset=cyrillic" rel="stylesheet">
 <link rel="preload" href="fonts/ak.woff2" as="font" type="font/woff2" crossorigin>
-<script src="cases.js?v=101105"></script>
+<script src="cases.js?v=111134"></script>
 <!-- Библиотеки лежат рядом с сайтом, а не на CDN: при недоступном CDN
      страница превращалась в белый экран со счётчиком 0 % — весь скрипт
      падает на первой же строке с gsap. -->
@@ -1288,16 +1288,21 @@
     /* «сначала было» стояло на 7 пикселей ниже, чем требует тот же шаг
        строк, что между «Всё» и «прекрасное,» — просветы были разные. */
     .c-b{top:85.56px;left:18.4%;right:0;}
-    /* Нижняя надпись — в три строки: «лишь / прекрасной / идеей.» */
-    .c-d{top:566px;left:0;right:0;}
-    .c-d .p0{margin-left:24.6%;}
-    .c-d .p1{margin-left:11.07%;margin-top:-9.17px;}
-    .c-d .p2{margin-left:55.6%;margin-top:-9.17px;}
+    /* Нижняя надпись — в три строки: «лишь / прекрасной / идеей.».
+       Лесенка сдвинута на 12,5 пикселя вправо: её левый край («прекрасной»)
+       стоял в 45 пикселях от края кадра, правый («идеей.») — в 70, и блок
+       сидел не по центру. Теперь с обеих сторон по 57,5. */
+    .c-d{top:556px;left:0;right:0;}
+    .c-d .p0{margin-left:27.71%;}
+    .c-d .p1{margin-left:14.18%;margin-top:-9.17px;}
+    .c-d .p2{margin-left:58.71%;margin-top:-9.17px;}
     .m-orb{display:block;top:195.38px;left:10.656%;width:78.687%;aspect-ratio:1;
       border-radius:50%;overflow:hidden;}
     .m-orb canvas{width:100%;height:100%;display:block;}
     /* у него в макете три кружка с иконками, а не буквы */
-    .socials{top:703.74px;left:0;right:0;margin:0;gap:12px;justify-content:center;}
+    /* Кружки стояли почти вплотную к «идеей.» (28 пикселей) при 83 до
+       «Ещё увидимся» — просветы сверху и снизу теперь равны, по 60. */
+    .socials{top:726.5px;left:0;right:0;margin:0;gap:12px;justify-content:center;}
     /* на телефоне кружки своего, мелкого размера — не десктопные 132 */
     .socials a{width:48px;height:48px;}
     .socials .lbl{display:none;}
@@ -1511,7 +1516,7 @@
     <div class="m-copy"><span class="sm" data-goo data-fade>’26 © All Right Reserved</span></div>
 
     <div class="tailroom"></div>
-    <span id="buildStamp" style="display:none">BUILD 10.10 11:05</span>
+    <span id="buildStamp" style="display:none">BUILD 11.10 11:34</span>
   </section>
 
 </main>
