@@ -31,4 +31,4 @@ git add -A
 git commit -q -m "$MSG" || { echo "нечего коммитить"; exit 0; }
 git push -q origin main
 echo "опубликовано: $STAMP — $MSG"
-echo "https://ilyamihailovich.github.io/ivanov-designer/"
+echo "https://ivanovilya.ru/"
