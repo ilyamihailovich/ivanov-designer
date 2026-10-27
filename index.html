@@ -15,7 +15,7 @@
      Браузер забирает её сразу, вместе со шрифтом, и к моменту запуска
      модуля она уже в кеше. -->
 <link rel="preload" href="cloth-photo-3.jpg" as="image">
-<script src="cases.js?v=271950"></script>
+<script src="cases.js?v=271956"></script>
 <!-- Библиотеки лежат рядом с сайтом, а не на CDN: при недоступном CDN
      страница превращалась в белый экран со счётчиком 0 % — весь скрипт
      падает на первой же строке с gsap. -->
@@ -813,7 +813,11 @@
     .m-page .m-prev[hidden]{display:none;}
     /* фотокейс и витрина наборов */
     .cw-screen.ribbon.solo{position:static;top:auto;height:auto;flex:1 1 auto;min-height:0;
-      margin:14px 16px 16px;border-radius:10px;overflow:hidden;}
+      margin:14px 16px 16px;border-radius:10px;overflow:hidden;
+      /* Нижние углы карточки оставались острыми: внутри лежит масштабированный
+         кадр, он на своём слое, и скруглённая обрезка через overflow до него
+         не доходила. clip-path режет слои, а не только поток. */
+      clip-path:inset(0 round 10px);}
     /* Кадры фотокейса лежат стопкой и меняются перекрёстным затуханием.
        Поля такие же, как у текста кейса, и кадр больше не упирается в
        линейку и в край плашки. */
@@ -1557,7 +1561,7 @@
     <div class="m-copy"><span class="sm" data-goo data-fade>’26 © All Right Reserved</span></div>
 
     <div class="tailroom"></div>
-    <span id="buildStamp" style="display:none">BUILD 27.10 19:50</span>
+    <span id="buildStamp" style="display:none">BUILD 27.10 19:56</span>
   </section>
 
 </main>
@@ -5206,6 +5210,12 @@ import * as THREE from './vendor/three.module.js';
      идёт этот отскок, жёсткий предел по высоте снят, иначе натяжение
      обрезалось бы сразу. */
   var introLeft = 0;
+  /* Пока held, ткань не считается — она просто стоит натянутой и рисуется.
+     Раньше натяжение накладывалось в момент открытия сайта: первые кадры
+     полотно висело обычно, и только потом его дёргало — это и была задержка
+     в секунду. Теперь оно натянуто с первого же кадра, а «site:start»
+     только отпускает его. */
+  var held = true;
   function introPull(amp){
     for(var i = 0; i < N; i++){
       var i3 = i * 3;
@@ -5217,7 +5227,12 @@ import * as THREE from './vendor/three.module.js';
     }
     introLeft = 1.5;
   }
-  window.addEventListener('site:start', function(){ introPull(0.13); });
+  /* Натяжение сильнее прежнего втрое с небольшим. Семикратное (0,91 при
+     высоте полотна 1,0) ткань не держит: она складывается сама на себя и
+     собирается в комок — снимок перестаёт читаться вовсе. 0,34 — предел, на
+     котором отскок уже размашистый, а полотно ещё остаётся полотном. */
+  introPull(0.34);
+  window.addEventListener('site:start', function(){ held = false; });
 
   /* ---------- ввод ---------- */
   var ray = new THREE.Raycaster(), ndc = new THREE.Vector2();
@@ -5415,6 +5430,14 @@ import * as THREE from './vendor/three.module.js';
     requestAnimationFrame(frame);
     var dt = Math.min(0.033, (now - last) / 1000); last = now;
     if(!live || !dt) return;
+    if(held){
+      /* держим натянутой и показываем — считать нечего, пока не отпустили */
+      attr.array.set(pos);
+      attr.needsUpdate = true;
+      geo.computeVertexNormals();
+      renderer.render(scene, camera);
+      return;
+    }
     step(dt);
     attr.array.set(pos);
     attr.needsUpdate = true;
