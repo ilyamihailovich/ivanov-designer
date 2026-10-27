@@ -15,7 +15,7 @@
      Браузер забирает её сразу, вместе со шрифтом, и к моменту запуска
      модуля она уже в кеше. -->
 <link rel="preload" href="cloth-photo-3.jpg" as="image">
-<script src="cases.js?v=271928"></script>
+<script src="cases.js?v=271950"></script>
 <!-- Библиотеки лежат рядом с сайтом, а не на CDN: при недоступном CDN
      страница превращалась в белый экран со счётчиком 0 % — весь скрипт
      падает на первой же строке с gsap. -->
@@ -1557,7 +1557,7 @@
     <div class="m-copy"><span class="sm" data-goo data-fade>’26 © All Right Reserved</span></div>
 
     <div class="tailroom"></div>
-    <span id="buildStamp" style="display:none">BUILD 27.10 19:28</span>
+    <span id="buildStamp" style="display:none">BUILD 27.10 19:50</span>
   </section>
 
 </main>
@@ -2273,24 +2273,41 @@
     var doc;
     try{ doc = fr.contentDocument; }catch(e){ return; }
     if(!doc || !doc.body) return;
+    var el = doc.scrollingElement || doc.documentElement;
+    var w = Math.max(el.scrollWidth, doc.body.scrollWidth);
+    var h = Math.max(doc.body.offsetHeight, el.clientHeight) || 760;
     var boxH = ribS.clientHeight;
-    if(boxH < 120) return;
-    /* Тот же круг, что и у кейсовой ленты: мерить кадр, которому мы сами
-       задали размер, нельзя. Снимаем естественные размеры один раз. */
-    if(!fr.__nat){
-      if(doc.readyState !== 'complete') return;
-      var el = doc.scrollingElement || doc.documentElement;
-      var w0 = Math.max(el.scrollWidth, doc.body.scrollWidth);
-      var h0 = Math.max(doc.body.offsetHeight, el.clientHeight) || 760;
-      if(!w0 || !h0) return;
-      fr.__nat = {w: w0, h: h0};
-    }
-    var w = fr.__nat.w, h = fr.__nat.h;
+    if(!w || boxH < 120) return;
     var z = boxH / h;
     fr.style.width = w + 'px';
     fr.style.height = h + 'px';
     fr.style.transform = 'scale(' + z + ')';
     inner.style.width = (w * z) + 'px';
+    /* Карточка набора уже контейнера: рядом с ней выглядывал край следующей.
+       Шаг между кадрами ленты известен из data-stops — по нему контейнер
+       сужается ровно до одной карточки и встаёт по центру плашки. */
+    if(ribS.__hugCard){
+      var lane = doc.querySelector('.lane[data-stops]');
+      var sp = lane && lane.getAttribute('data-stops').split(',').map(parseFloat);
+      var boxW = ribS.clientWidth;
+      if(sp && sp.length > 1 && sp[1] > sp[0] && boxW > 40){
+        /* Масштаб берётся по ширине, а не по высоте: карточка набора должна
+           помещаться целиком и ровно во всю ширину, а контейнер — садиться
+           по её высоте. По высоте карточка выходила шире контейнера, и её
+           резало по краям, а рядом выглядывал край следующей. */
+        z = boxW / (sp[1] - sp[0]);
+        fr.style.transform = 'scale(' + z + ')';
+        inner.style.width = (w * z) + 'px';
+        ribS.style.flex = '0 0 auto';
+        ribS.style.height = Math.round(h * z) + 'px';
+        /* Плашка садится по карточке: иначе под ней оставалось пустое белое
+           поле во всю прежнюю высоту окна. */
+        var pnl = ribS.closest('.cw-panel');
+        if(pnl && ribS.offsetHeight){
+          pnl.style.height = Math.round(ribS.offsetTop + ribS.offsetHeight + 16) + 'px';
+        }
+      }
+    }
     var st = doc.getElementById('__noBar');
     if(!st){
       st = doc.createElement('style'); st.id = '__noBar';
@@ -3193,9 +3210,32 @@
                  экране, и запас до них считается по-настоящему. */
               placeSoloYear();
               var rib = stage.querySelector('.cw-screen.ribbon.solo');
+              rib.__hugCard = true;
+              /* Кнопка под плашкой — такая же, как «Перейти к просмотру», и
+                 на том же месте: сверху «Назад» закрывает окно, снизу —
+                 возвращает к выбору набора. */
+              var backBtn = document.createElement('div');
+              backBtn.className = 'cc-nav sets-back';
+              /* Только на телефоне: на большом экране .cc-nav стоит в
+                 координатах макета карточки, и кнопка уехала бы в пустоту. */
+              var narrowSet = window.matchMedia('(max-width:900px)').matches;
+              backBtn.innerHTML =
+                '<button class="cc-next" type="button" aria-label="Назад">' +
+                  '<img src="cases/sanek-tpl/arrow.svg" alt="" style="transform:scaleX(-1)">' +
+                  '<span class="nav-lbl">Назад</span></button>';
+              if(narrowSet){
+                panel0.appendChild(backBtn);
+                backBtn.querySelector('button').addEventListener('click', function(){
+                  if(rib.__backToSets) rib.__backToSets();
+                });
+              }
               rib.__backToSets = function(){
-                gsap.to(rib, {opacity: 0, duration: .26, ease: 'none', onComplete: function(){
+                gsap.to([rib, backBtn], {opacity: 0, duration: .26, ease: 'none', onComplete: function(){
                   rib.remove();
+                  backBtn.remove();
+                  /* Плашка садилась по карточке набора — на витрине ей нужна
+                     прежняя высота. */
+                  if(panel0) panel0.style.removeProperty('height');
                   if(navSets) navSets.style.display = 'none';
                   sets.style.removeProperty('display');
                   gsap.set(sets, {opacity: 0});
