@@ -10,7 +10,12 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap&subset=cyrillic" rel="stylesheet">
 <link rel="preload" href="fonts/ak.woff2" as="font" type="font/woff2" crossorigin>
-<script src="cases.js?v=271759"></script>
+<!-- Фотография для полотна в интро: её грузил модуль three.js, а он стартует
+     последним, поэтому снимок появлялся секунд через пять после открытия.
+     Браузер забирает её сразу, вместе со шрифтом, и к моменту запуска
+     модуля она уже в кеше. -->
+<link rel="preload" href="cloth-photo-3.jpg" as="image">
+<script src="cases.js?v=271813"></script>
 <!-- Библиотеки лежат рядом с сайтом, а не на CDN: при недоступном CDN
      страница превращалась в белый экран со счётчиком 0 % — весь скрипт
      падает на первой же строке с gsap. -->
@@ -1110,9 +1115,14 @@
     /* в макете кружка три — почта больше не прячется на десктопе */
     /* почта — такой же кружок и такой же глиф, как телеграм с инстаграмом */
     .socials .s-mail{display:flex;}
-    .close-aside > div:nth-child(2) .sm a{display:flex;align-items:center;
+    /* Плашек теперь две — ник и почта. Признаком служит класс, а не «последний
+       абзац»: с появлением второй плашки ник перестал быть последним и терял
+       оформление. */
+    .close-aside > div:nth-child(2) .sm.pl a{display:flex;align-items:center;
       justify-content:center;height:3.2281cqw;border-radius:32px;background:#eee;
-      color:rgba(0,0,0,.64);text-decoration:none;}
+      color:rgba(0,0,0,.64);text-decoration:none;white-space:nowrap;
+      padding:0 .7cqw;}
+    .close-aside > div:nth-child(2) .sm.pl + .sm.pl{margin-top:.62cqw!important;}
   }
 
   @media (max-width:900px){
@@ -1356,9 +1366,14 @@
     /* Между «Написать напрямую» и плашкой с ником было 14 + 7 пикселей —
        вдвое больше, чем нужно. */
     .close-aside > div:nth-of-type(2) .sm:first-child{margin-bottom:7px!important;}
-    .close-aside > div:nth-of-type(2) .sm:last-child{font-size:10px;
+    .close-aside > div:nth-of-type(2) .sm.pl{font-size:10px;
       border:0;background:rgba(0,0,0,.055);border-radius:12px;padding:5px 14px;
-      display:inline-block;margin-top:3px;}
+      display:block;width:fit-content;margin-top:3px;}
+    /* display:block + width по содержимому, а не inline-block: две плашки
+       подряд вставали бы в одну строку. */
+    /* !important: у абзацев в разметке стоит margin:0 прямо в атрибуте, а он
+       перебивает таблицу стилей — плашки вставали вплотную. */
+    .close-aside > div:nth-of-type(2) .sm.pl + .sm.pl{margin-top:6px!important;}
     .m-mark{display:block;top:1092px;left:0;right:0;text-align:center;}
     .m-mark .lg{font-size:19.47vw;line-height:1;display:block;
       color:rgba(0,0,0,.38);}
@@ -1527,7 +1542,8 @@
       </div>
       <div>
         <p class="sm dim" data-goo data-fade style="margin:0 0 14px;">Написать напрямую</p>
-        <p class="sm" data-goo data-fade style="margin:0;"><a href="https://t.me/llyaMihailovich" target="_blank" rel="noopener">@llyaMihailovich</a></p>
+        <p class="sm pl" data-goo data-fade style="margin:0;"><a href="https://t.me/llyaMihailovich" target="_blank" rel="noopener">@llyaMihailovich</a></p>
+        <p class="sm pl" data-goo data-fade style="margin:0;"><a href="mailto:hello@ivanovilya.ru">hello@ivanovilya.ru</a></p>
       </div>
       <div class="m-hide">
         <p class="sm dim" data-goo data-fade style="margin:0 0 6px;">Ещё:</p>
@@ -1541,7 +1557,7 @@
     <div class="m-copy"><span class="sm" data-goo data-fade>’26 © All Right Reserved</span></div>
 
     <div class="tailroom"></div>
-    <span id="buildStamp" style="display:none">BUILD 27.10 17:59</span>
+    <span id="buildStamp" style="display:none">BUILD 27.10 18:13</span>
   </section>
 
 </main>
@@ -4154,9 +4170,26 @@
   function preload(done){
     var pre = document.getElementById('pre'), num = document.getElementById('preNum');
     if(!pre){ done(); return; }
-    var urls = CASES.map(function(c){ return c.img; });
+    /* Фотография полотна считается наравне с обложками: без этого счётчик
+       добегал до ста, прелоудер уходил, а снимок дотягивался уже на открытой
+       странице. */
+    var urls = CASES.map(function(c){ return c.img; }).concat(['cloth-photo-3.jpg']);
     var total = urls.length, loaded = 0, shown = {v: 0}, fired = false;
-    function finish(){ if(fired) return; fired = true; done(); }
+    /* Подпись в углу проявляется прямо на прелоудере и ровно там, где стоит
+       на странице: её поднимают над белым слоем и проявляют тем же приёмом,
+       что и всё остальное. revealText помечает узел сделанным, поэтому
+       вступительная анимация его уже не трогает и он не моргает. */
+    var brand = document.querySelector('.corner.tl');
+    var brandTxt = brand && brand.querySelector('.sm');
+    if(brand && brandTxt){
+      brand.style.zIndex = '201';
+      revealText(brandTxt, .15);
+    }
+    function finish(){
+      if(fired) return; fired = true;
+      if(brand) brand.style.zIndex = '';
+      done();
+    }
     var line = document.getElementById('preLine');
     function paint(){
       num.innerHTML = Math.round(shown.v) + '<span>%</span>';
