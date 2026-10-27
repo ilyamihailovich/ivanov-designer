@@ -10,7 +10,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap&subset=cyrillic" rel="stylesheet">
 <link rel="preload" href="fonts/ak.woff2" as="font" type="font/woff2" crossorigin>
-<script src="cases.js?v=271751"></script>
+<script src="cases.js?v=271759"></script>
 <!-- Библиотеки лежат рядом с сайтом, а не на CDN: при недоступном CDN
      страница превращалась в белый экран со счётчиком 0 % — весь скрипт
      падает на первой же строке с gsap. -->
@@ -782,8 +782,16 @@
       transform:none;width:auto;height:auto;z-index:7;
       transition:opacity .35s var(--eo);}
     .cw-panel.m-open .cc-nav{opacity:0;pointer-events:none;}
+    /* Кнопка стеклянная: сквозь неё видно затемнение под окном, размытое,
+       а по краю идёт светлая каёмка — как на матовом стекле. */
     .cc-nav .cc-next{position:relative;left:auto;top:auto;width:100%;height:50px;
-      border-radius:25px;border:1px solid var(--hair);background:var(--paper);
+      border-radius:25px;border:1px solid rgba(255,255,255,.5);
+      background:rgba(255,255,255,.42);
+      -webkit-backdrop-filter:blur(18px) saturate(170%);
+      backdrop-filter:blur(18px) saturate(170%);
+      box-shadow:inset 0 1px 0 rgba(255,255,255,.65),
+                 inset 0 -1px 0 rgba(255,255,255,.28),
+                 0 6px 20px rgba(0,0,0,.10);
       display:flex;align-items:center;justify-content:center;gap:9px;}
     .cc-nav .cc-next img{width:17px;height:17px;}
     .nav-lbl{display:inline;font:600 13.5px/1 'AK','Helvetica Neue',Arial,sans-serif;
@@ -847,14 +855,22 @@
        панель браузера — его просто не было видно. Теперь он привязан к
        нижнему краю плашки: тот считается как 86svh минус половина её
        нижнего отступа. */
+    /* Ползунок стеклянный, как кнопка: сквозь него видно размытое затемнение
+       под окном, по краю светлая каёмка. Каёмка нарисована внутренней тенью,
+       а не рамкой: рамка сместила бы дорожку и ручку на свой пиксель. */
     .sh-bar{position:absolute;left:29px;right:29px;top:calc(86svh + 2px);
-      height:20px;border-radius:999px;background:var(--paper);z-index:9;
-      box-shadow:0 2px 10px rgba(0,0,0,.10);touch-action:none;}
+      height:20px;border-radius:999px;z-index:9;
+      background:rgba(255,255,255,.42);
+      -webkit-backdrop-filter:blur(18px) saturate(170%);
+      backdrop-filter:blur(18px) saturate(170%);
+      box-shadow:inset 0 0 0 1px rgba(255,255,255,.5),
+                 inset 0 1px 0 rgba(255,255,255,.65),
+                 0 6px 20px rgba(0,0,0,.10);touch-action:none;}
     /* дорожка через всю капсулу, по ней ездит короткая ручка */
     .sh-bar::before{content:'';position:absolute;left:12px;right:12px;top:9px;
-      height:2px;border-radius:2px;background:rgba(0,0,0,.16);}
+      height:2px;border-radius:2px;background:rgba(255,255,255,.38);}
     .sh-bar i{position:absolute;left:0;top:6px;height:8px;width:26%;
-      border-radius:999px;background:var(--ink);display:block;}
+      border-radius:999px;background:#fff;display:block;}
     /* В фотокейсе стрелка «назад» была скрыта общим мобильным правилом,
        и листать можно было только вперёд. */
     .cc-nav.solo .cc-prev{display:flex;align-items:center;justify-content:center;}
@@ -1525,7 +1541,7 @@
     <div class="m-copy"><span class="sm" data-goo data-fade>’26 © All Right Reserved</span></div>
 
     <div class="tailroom"></div>
-    <span id="buildStamp" style="display:none">BUILD 27.10 17:51</span>
+    <span id="buildStamp" style="display:none">BUILD 27.10 17:59</span>
   </section>
 
 </main>
@@ -2507,7 +2523,7 @@
         /* Сразу после появления кадр сам проезжает до правого края — показывает,
            что его можно листать. */
         auto = gsap.to(pan, {v: 1, duration: 1, ease: 'power2.inOut',
-                             delay: .72, onUpdate: paint});
+                             delay: 1, onUpdate: paint});
       }
     }
     function hideBar(){
@@ -2822,7 +2838,11 @@
     // threshold welds them into a single blob, and as the left one slides clear
     // the blob necks and splits. The filter comes off once they are apart, so
     // nothing on the page is left carrying one.
-    var nav = cardS.querySelector('.cc-nav');
+    /* На телефоне fitCard переносит кнопку из карточки к самой плашке — она
+       там не срезается. Поиск же шёл только внутри карточки и возвращал
+       пустоту: обработчик не вешался вовсе, и «Перейти к просмотру» не
+       отзывалась на нажатие. Ищем по всему окну. */
+    var nav = cwEl.querySelector('.cc-nav:not(.solo)');
     var prev = nav && nav.querySelector('.cc-prev');
     var next = nav && nav.querySelector('.cc-next');
     var split = false;
@@ -3046,6 +3066,10 @@
 
     var panel0 = cwEl.querySelector('.cw-panel');
     var oldBar = cwEl.querySelector('.sh-bar'); if(oldBar) oldBar.remove();
+    /* Кнопка «Перейти к просмотру» живёт у плашки, а не внутри cwScroll, и
+       смена содержимого окна её не стирала: она висела над следующим кейсом,
+       в том числе над фотокейсом, которому листать нечего. */
+    var oldNav = cwEl.querySelector('.cw-panel > .cc-nav'); if(oldNav) oldNav.remove();
     var oldPair = cwEl.querySelector('.cw-pair'); if(oldPair) oldPair.remove();
     cwEl.classList.remove('pair-on');
     // у фотокейса card хранит только год — экран с описанием ему не нужен
