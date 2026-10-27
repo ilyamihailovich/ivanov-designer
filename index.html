@@ -15,7 +15,7 @@
      Браузер забирает её сразу, вместе со шрифтом, и к моменту запуска
      модуля она уже в кеше. -->
 <link rel="preload" href="cloth-photo-3.jpg" as="image">
-<script src="cases.js?v=271956"></script>
+<script src="cases.js?v=272111"></script>
 <!-- Библиотеки лежат рядом с сайтом, а не на CDN: при недоступном CDN
      страница превращалась в белый экран со счётчиком 0 % — весь скрипт
      падает на первой же строке с gsap. -->
@@ -801,6 +801,9 @@
     .cc-nav .cc-next img{width:17px;height:17px;}
     .nav-lbl{display:inline;font:600 13.5px/1 'AK','Helvetica Neue',Arial,sans-serif;
       letter-spacing:-.025em;color:var(--ink);}
+    /* Кнопка возврата из набора инфографики: подпись и стрелка белые. */
+    .cc-nav.sets-back .nav-lbl{color:#fff;}
+    .cc-nav.sets-back img{filter:invert(1);}
     /* стрелки листания — в шапке справа, как на большом экране */
     .m-page{position:absolute;top:24px;right:20px;z-index:8;display:none;
       gap:3px;}
@@ -911,8 +914,10 @@
     .cw-all{top:auto;bottom:calc(100% + 1.6svh);font-size:max(14px,3.8vw);}
     .cw-panel.lifted{top:auto;}
     /* крест — за границей плашки сверху и белый, как на большом экране */
-    /* Крест перекрывал стрелки листания. Вместо него — кнопка «Назад» над
-       самой плашкой, по центру: она ничего не загораживает и читается. */
+    /* Крест перекрывал стрелки листания. Вместо него — кнопка над самой
+       плашкой, по центру: она ничего не загораживает и читается. Называется
+       «Выход» — она закрывает окно, а «Назад» живёт под плашкой и возвращает
+       на шаг назад. */
     .cw-x{top:calc(14svh - 36px);bottom:auto;left:50%;right:auto;
       transform:translateX(-50%);
       width:auto;height:auto;padding:4px 10px;border-radius:0;
@@ -920,7 +925,7 @@
       font:600 14px/1 'AK','Helvetica Neue',Arial,sans-serif;letter-spacing:-.02em;
       color:#fff;}
     .cw-x img{display:none;}
-    .cw-x::after{content:'Назад';}
+    .cw-x::after{content:'Выход';}
     .cc-prev{display:none;}
   }
   .tiles-row{display:contents;}
@@ -1561,7 +1566,7 @@
     <div class="m-copy"><span class="sm" data-goo data-fade>’26 © All Right Reserved</span></div>
 
     <div class="tailroom"></div>
-    <span id="buildStamp" style="display:none">BUILD 27.10 19:56</span>
+    <span id="buildStamp" style="display:none">BUILD 27.10 21:11</span>
   </section>
 
 </main>
@@ -2308,7 +2313,14 @@
            поле во всю прежнюю высоту окна. */
         var pnl = ribS.closest('.cw-panel');
         if(pnl && ribS.offsetHeight){
-          pnl.style.height = Math.round(ribS.offsetTop + ribS.offsetHeight + 16) + 'px';
+          if(pnl.__fullH == null) pnl.__fullH = pnl.offsetHeight;
+          var newH = Math.round(ribS.offsetTop + ribS.offsetHeight + 16);
+          pnl.style.height = newH + 'px';
+          /* Окно центрируется по вертикали, поэтому укоротить плашку значит
+             опустить её верх на половину разницы — и «Выход» над ней начинал
+             висеть заметно выше. Отрицательный верхний отступ ровно в эту
+             разницу возвращает верх плашки на прежнее место. */
+          pnl.style.marginTop = -(pnl.__fullH - newH) + 'px';
         }
       }
     }
@@ -3239,7 +3251,10 @@
                   backBtn.remove();
                   /* Плашка садилась по карточке набора — на витрине ей нужна
                      прежняя высота. */
-                  if(panel0) panel0.style.removeProperty('height');
+                  if(panel0){
+                    panel0.style.removeProperty('height');
+                    panel0.style.removeProperty('margin-top');
+                  }
                   if(navSets) navSets.style.display = 'none';
                   sets.style.removeProperty('display');
                   gsap.set(sets, {opacity: 0});
