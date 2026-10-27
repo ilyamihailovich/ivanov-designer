@@ -15,7 +15,7 @@
      Браузер забирает её сразу, вместе со шрифтом, и к моменту запуска
      модуля она уже в кеше. -->
 <link rel="preload" href="cloth-photo-3.jpg" as="image">
-<script src="cases.js?v=271923"></script>
+<script src="cases.js?v=271928"></script>
 <!-- Библиотеки лежат рядом с сайтом, а не на CDN: при недоступном CDN
      страница превращалась в белый экран со счётчиком 0 % — весь скрипт
      падает на первой же строке с gsap. -->
@@ -1557,7 +1557,7 @@
     <div class="m-copy"><span class="sm" data-goo data-fade>’26 © All Right Reserved</span></div>
 
     <div class="tailroom"></div>
-    <span id="buildStamp" style="display:none">BUILD 27.10 19:23</span>
+    <span id="buildStamp" style="display:none">BUILD 27.10 19:28</span>
   </section>
 
 </main>
@@ -2273,11 +2273,19 @@
     var doc;
     try{ doc = fr.contentDocument; }catch(e){ return; }
     if(!doc || !doc.body) return;
-    var el = doc.scrollingElement || doc.documentElement;
-    var w = Math.max(el.scrollWidth, doc.body.scrollWidth);
-    var h = Math.max(doc.body.offsetHeight, el.clientHeight) || 760;
     var boxH = ribS.clientHeight;
-    if(!w || boxH < 120) return;
+    if(boxH < 120) return;
+    /* Тот же круг, что и у кейсовой ленты: мерить кадр, которому мы сами
+       задали размер, нельзя. Снимаем естественные размеры один раз. */
+    if(!fr.__nat){
+      if(doc.readyState !== 'complete') return;
+      var el = doc.scrollingElement || doc.documentElement;
+      var w0 = Math.max(el.scrollWidth, doc.body.scrollWidth);
+      var h0 = Math.max(doc.body.offsetHeight, el.clientHeight) || 760;
+      if(!w0 || !h0) return;
+      fr.__nat = {w: w0, h: h0};
+    }
+    var w = fr.__nat.w, h = fr.__nat.h;
     var z = boxH / h;
     fr.style.width = w + 'px';
     fr.style.height = h + 'px';
@@ -2328,12 +2336,20 @@
       }
       to = Math.min(max, Math.max(0, to));
     }
-    /* Переход между кадрами: лента уходит в размытие и в белое, под этой
-       белизной происходит сам сдвиг, и следующий кадр выходит обратно из
-       белого и размытия. Шаг при этом остаётся прежним — по промежуткам
-       между кадрами, так что ничего не режется. */
     var st = {v: ribS.scrollLeft};
     var inner = ribS.querySelector('.rb-inner') || ribS;
+    /* У кейсовой ленты (Санёк и прочие) переход без размытия и вдвое быстрее:
+       он просил листать сразу. У фотокейсов (.solo) переход прежний — там
+       кадр уходит в размытие и в белое. */
+    if(!ribS.classList.contains('solo')){
+      gsap.killTweensOf(st);
+      gsap.killTweensOf(inner);
+      gsap.set(inner, {filter: 'none'});
+      gsap.to(st, {v: to, duration: .34, ease: 'power2.out',
+        onUpdate: function(){ ribS.scrollLeft = st.v; },
+        onComplete: function(){ if(then) then(); }});
+      return;
+    }
     var veil = ribS.__veil;
     if(!veil){
       veil = document.createElement('i');
@@ -2388,6 +2404,11 @@
     /* Запас считается от левого края ПАРЫ стрелок, а не от одной: вторая
        встаёт левее первой уже после замера, и строка заезжала под неё. */
     var navR = nav.getBoundingClientRect();
+    /* В инфографике стрелки спрятаны, пока на экране витрина наборов, и в
+       этот момент их прямоугольник — сплошные нули: запас выходил
+       отрицательным, кегль не убавлялся, и длинное название набора уезжало
+       под стрелку и под год. Пока стрелок нет на экране — не меряем. */
+    if(!navR.width || nav.style.display === 'none') return;
     var nx = nav.querySelector('.cc-next');
     var bw = (nx && nx.offsetWidth) || navR.width || 26;
     var limit = navR.left - (bw + 12) - 12;
@@ -2655,12 +2676,17 @@
       gsap.set(prev, {x: -(bw + 12)});
     })();
     function syncNav(){
-      var atStart = ribS.scrollLeft <= 2;
-      prev.style.pointerEvents = atStart ? 'none' : 'auto';
-      gsap.to(prev, {opacity: atStart ? 0 : 1, duration: .3, ease: 'none'});
+      /* У набора инфографики «назад» нужен и на первом кадре — он уводит
+         обратно к витрине, поэтому стрелка там не гаснет. */
+      var canBack = ribS.scrollLeft > 2 || !!ribS.__backToSets;
+      prev.style.pointerEvents = canBack ? 'auto' : 'none';
+      gsap.to(prev, {opacity: canBack ? 1 : 0, duration: .3, ease: 'none'});
     }
     next.addEventListener('click', function(){ pageRibbon(ribS, 1, syncNav); syncNav(); });
-    prev.addEventListener('click', function(){ pageRibbon(ribS, -1, syncNav); });
+    prev.addEventListener('click', function(){
+      if(ribS.scrollLeft <= 2 && ribS.__backToSets){ ribS.__backToSets(); return; }
+      pageRibbon(ribS, -1, syncNav);
+    });
     ribS.addEventListener('scroll', syncNav);
     document.addEventListener('keydown', function(e){
       if(!cwOpen || !ribS.isConnected) return;
@@ -2975,13 +3001,28 @@
       var doc;
       try{ doc = fr.contentDocument; }catch(e){ return; }
       if(!doc || !doc.body) return;
-      var el = doc.scrollingElement || doc.documentElement;
-      var w = Math.max(el.scrollWidth, doc.body.scrollWidth);
-      var h = Math.max(doc.body.offsetHeight, el.clientHeight) || 760;
       var boxH = ribS.clientHeight;
       // Подгонка по недомеренной коробке оставляла ленту полоской наверху и
       // больше не пересчитывалась. Пока коробка явно не та — не трогаем.
-      if(!w || boxH < 120) return;
+      if(boxH < 120) return;
+      /* Свой размер лента получает один раз. Раньше её мерили на каждом
+         проходе — но мерили кадр, которому мы сами уже задали ширину: если
+         первый замер случался до того, как встали картинки, кадр выходил
+         узким, содержимое в нём переносилось и становилось очень высоким, а
+         следующий замер брал эту высоту и сжимал ленту в полоску наверху —
+         и выбраться из этого круга было уже нельзя. Санёк весит почти шесть
+         мегабайт, поэтому попадался именно он. Теперь естественные размеры
+         снимаются только с полностью загруженного документа и запоминаются,
+         а дальше лента лишь пересчитывает масштаб. */
+      if(!fr.__nat){
+        if(doc.readyState !== 'complete') return;
+        var el = doc.scrollingElement || doc.documentElement;
+        var w0 = Math.max(el.scrollWidth, doc.body.scrollWidth);
+        var h0 = Math.max(doc.body.offsetHeight, el.clientHeight) || 760;
+        if(!w0 || !h0) return;
+        fr.__nat = {w: w0, h: h0};
+      }
+      var w = fr.__nat.w, h = fr.__nat.h;
       var z = boxH / h;
       fr.style.width = w + 'px';
       fr.style.height = h + 'px';
@@ -3138,16 +3179,32 @@
             var st = c.sets[+btn.getAttribute('data-set')];
             var sets = stage.querySelector('.cw-sets');
             gsap.to(sets, {opacity: 0, duration: .3, ease: 'none', onComplete: function(){
-              sets.remove();
+              /* Витрина не удаляется, а прячется: «назад» с первого кадра
+                 набора возвращает к выбору, а не закрывает окно целиком. */
+              sets.style.setProperty('display', 'none', 'important');
               var head = stage.querySelector('.cc.solo-head .cc-name');
               if(head) head.textContent = st.t;
-              placeSoloYear();
               stage.insertAdjacentHTML('beforeend',
                 '<div class="cw-screen ribbon live solo"><div class="rb-inner">' +
                   '<iframe title="' + esc(st.t) + '" src="' + esc(st.page) + '"></iframe>' +
                 '</div></div>');
               if(navSets) navSets.style.display = '';
+              /* Кегль названия подбирается только теперь: стрелки уже на
+                 экране, и запас до них считается по-настоящему. */
+              placeSoloYear();
               var rib = stage.querySelector('.cw-screen.ribbon.solo');
+              rib.__backToSets = function(){
+                gsap.to(rib, {opacity: 0, duration: .26, ease: 'none', onComplete: function(){
+                  rib.remove();
+                  if(navSets) navSets.style.display = 'none';
+                  sets.style.removeProperty('display');
+                  gsap.set(sets, {opacity: 0});
+                  var h2 = stage.querySelector('.cc.solo-head .cc-name');
+                  if(h2) h2.textContent = c.t;
+                  placeSoloYear();
+                  gsap.to(sets, {opacity: 1, duration: .3, ease: 'none'});
+                }});
+              };
               gsap.fromTo(rib, {opacity: 0}, {opacity: 1, duration: .45, ease: 'none'});
               wireRibbonOnly();
             }});
