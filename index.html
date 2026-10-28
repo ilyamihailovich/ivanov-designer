@@ -15,7 +15,7 @@
      Браузер забирает её сразу, вместе со шрифтом, и к моменту запуска
      модуля она уже в кеше. -->
 <link rel="preload" href="cloth-photo-3.jpg" as="image">
-<script src="cases.js?v=281104"></script>
+<script src="cases.js?v=281114"></script>
 <!-- Библиотеки лежат рядом с сайтом, а не на CDN: при недоступном CDN
      страница превращалась в белый экран со счётчиком 0 % — весь скрипт
      падает на первой же строке с gsap. -->
@@ -1571,7 +1571,7 @@
     <div class="m-copy"><span class="sm" data-goo data-fade>’26 © All Right Reserved</span></div>
 
     <div class="tailroom"></div>
-    <span id="buildStamp" style="display:none">BUILD 28.10 11:04</span>
+    <span id="buildStamp" style="display:none">BUILD 28.10 11:14</span>
   </section>
 
 </main>
@@ -5570,10 +5570,19 @@ import * as THREE from './vendor/three.module.js';
      выполнялся ни разу. Поэтому шар всё это время держал ровно 11 плиток —
      сколько кейсов с обложкой, — и прежние правки числа кадров не давали
      никакого эффекта. Теперь объявление стоит до цикла. */
-  var RADIUS = 1.0, TILE = 0.28, REPEAT = 2;   // 11 кейсов x 2 = 22 кадра
-  var ORBIT = (window.CASES_DATA || []).filter(function(c){ return !!c.globe; });
-  var ONCE = ORBIT.slice();
-  for(var rp = 1; rp < REPEAT; rp++) ORBIT = ORBIT.concat(ONCE);
+  var RADIUS = 1.0, TILE = 0.28, TOTAL = 22;   // плиток на шаре
+  /* Обложек кейсов одиннадцать, а плиток двадцать две — остальное набиралось
+     повтором, и половина шара была вторым кругом тех же кадров. К обложкам
+     добавлены отдельные снимки из cases/globe: своих кадров стало шестнадцать,
+     повторяются только последние шесть. */
+  var COVERS = (window.CASES_DATA || []).filter(function(c){ return !!c.globe; })
+                 .map(function(c){ return c.globe; });
+  var EXTRA = ['cases/globe/extra-1.jpg', 'cases/globe/extra-2.jpg',
+               'cases/globe/extra-3.jpg', 'cases/globe/extra-4.jpg',
+               'cases/globe/extra-5.jpg'];
+  var POOL = COVERS.concat(EXTRA);
+  var ORBIT = [];
+  for(var rp = 0; rp < TOTAL; rp++) ORBIT.push(POOL[rp % POOL.length]);
   var n = Math.max(ORBIT.length, 2);
   var golden = Math.PI * (3 - Math.sqrt(5));
   /* Плотный шар: кадров много, они небольшие и стоят почти вплотную. При 44
@@ -5592,7 +5601,7 @@ import * as THREE from './vendor/three.module.js';
     tile.lookAt(0, 0, 0);
     tile.rotateY(Math.PI);
     group.add(tile);
-    loader.load(item.globe, function(tex){
+    loader.load(item, function(tex){
       tex.colorSpace = THREE.SRGBColorSpace;
       tex.anisotropy = Math.min(4, renderer.capabilities.getMaxAnisotropy());
       mat.map = tex; mat.color.set(0xffffff); mat.needsUpdate = true;
