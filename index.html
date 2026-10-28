@@ -15,7 +15,7 @@
      Браузер забирает её сразу, вместе со шрифтом, и к моменту запуска
      модуля она уже в кеше. -->
 <link rel="preload" href="cloth-photo-3.jpg" as="image">
-<script src="cases.js?v=272111"></script>
+<script src="cases.js?v=281056"></script>
 <!-- Библиотеки лежат рядом с сайтом, а не на CDN: при недоступном CDN
      страница превращалась в белый экран со счётчиком 0 % — весь скрипт
      падает на первой же строке с gsap. -->
@@ -1566,7 +1566,7 @@
     <div class="m-copy"><span class="sm" data-goo data-fade>’26 © All Right Reserved</span></div>
 
     <div class="tailroom"></div>
-    <span id="buildStamp" style="display:none">BUILD 27.10 21:11</span>
+    <span id="buildStamp" style="display:none">BUILD 28.10 10:56</span>
   </section>
 
 </main>
@@ -5157,10 +5157,12 @@ import * as THREE from './vendor/three.module.js';
   // составляющая, у матового материала её нет и ткань читается как бумага.
   var mat = new THREE.MeshPhongMaterial({transparent: true, side: THREE.DoubleSide,
     shininess: 24, specular: new THREE.Color(0x3a3a3a)});
+  var texReady = false;
   new THREE.TextureLoader().load('cloth-photo-3.jpg', function(tex){
     tex.colorSpace = THREE.SRGBColorSpace;
     tex.anisotropy = Math.min(4, renderer.capabilities.getMaxAnisotropy());
     mat.map = tex; mat.needsUpdate = true;
+    texReady = true;
   });
   var mesh = new THREE.Mesh(geo, mat);
   scene.add(mesh);
@@ -5242,12 +5244,23 @@ import * as THREE from './vendor/three.module.js';
     }
     introLeft = 1.5;
   }
-  /* Натяжение сильнее прежнего втрое с небольшим. Семикратное (0,91 при
-     высоте полотна 1,0) ткань не держит: она складывается сама на себя и
-     собирается в комок — снимок перестаёт читаться вовсе. 0,34 — предел, на
-     котором отскок уже размашистый, а полотно ещё остаётся полотном. */
-  introPull(0.34);
-  window.addEventListener('site:start', function(){ held = false; });
+  /* Поза, в которой полотно ждёт открытия, должна помещаться в свою коробку:
+     при 0,34 натянутая ткань вылезала наружу и наезжала на заголовок, а на
+     медленной связи эта поза висит на экране долго. Поэтому натяжение
+     скромное, а сила уходит в толчок при отпускании: узлам задаётся скорость
+     вверх — так отскок получается размашистым, а статичная поза остаётся
+     аккуратной. */
+  introPull(0.12);
+  function introKick(power){
+    for(var i = 0; i < N; i++){
+      var i3 = i * 3;
+      var v = (src[i3 + 1] - H / 2) / -H;          // 0 вверху, 1 внизу
+      prev[i3 + 1] -= power * v * v;               // скорость = pos - prev
+      prev[i3 + 2] += power * 0.25 * v;
+    }
+    introLeft = 1.5;
+  }
+  window.addEventListener('site:start', function(){ held = false; introKick(0.055); });
 
   /* ---------- ввод ---------- */
   var ray = new THREE.Raycaster(), ndc = new THREE.Vector2();
@@ -5445,6 +5458,9 @@ import * as THREE from './vendor/three.module.js';
     requestAnimationFrame(frame);
     var dt = Math.min(0.033, (now - last) / 1000); last = now;
     if(!live || !dt) return;
+    /* Пока фотография не пришла, холст пуст. Иначе на медленной связи на её
+       месте стоял серый прямоугольник — материал без текстуры. */
+    if(!texReady) return;
     if(held){
       /* держим натянутой и показываем — считать нечего, пока не отпустили */
       attr.array.set(pos);
