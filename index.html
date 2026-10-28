@@ -15,7 +15,7 @@
      Браузер забирает её сразу, вместе со шрифтом, и к моменту запуска
      модуля она уже в кеше. -->
 <link rel="preload" href="cloth-photo-3.jpg" as="image">
-<script src="cases.js?v=281056"></script>
+<script src="cases.js?v=281059"></script>
 <!-- Библиотеки лежат рядом с сайтом, а не на CDN: при недоступном CDN
      страница превращалась в белый экран со счётчиком 0 % — весь скрипт
      падает на первой же строке с gsap. -->
@@ -801,12 +801,17 @@
     .cc-nav .cc-next img{width:17px;height:17px;}
     .nav-lbl{display:inline;font:600 13.5px/1 'AK','Helvetica Neue',Arial,sans-serif;
       letter-spacing:-.025em;color:var(--ink);}
-    /* Кнопка возврата из набора инфографики: подпись и стрелка белые. */
+    /* Кнопка возврата из набора инфографики: подпись белая, кружок со
+       стрелкой — свой, светлый (инверсия делала его чёрным). */
     .cc-nav.sets-back .nav-lbl{color:#fff;}
-    .cc-nav.sets-back img{filter:invert(1);}
     /* стрелки листания — в шапке справа, как на большом экране */
+    /* Просвет между дисками тот же, что и у пары в шапке набора, — 6
+       пикселей по самим кружкам. Кнопка шире своего кружка на 11, поэтому
+       зазор между кнопками отрицательный; отрицательного gap не бывает, его
+       делает отступ. */
     .m-page{position:absolute;top:24px;right:20px;z-index:8;display:none;
-      gap:3px;}
+      gap:0;}
+    .m-page .m-next{margin-left:-5px;}
     .cw-panel.m-open .m-page{display:flex;}
     .m-page button{width:44px;height:44px;border-radius:50%;border:0;
       background:none;padding:0;display:flex;align-items:center;
@@ -1566,7 +1571,7 @@
     <div class="m-copy"><span class="sm" data-goo data-fade>’26 © All Right Reserved</span></div>
 
     <div class="tailroom"></div>
-    <span id="buildStamp" style="display:none">BUILD 28.10 10:56</span>
+    <span id="buildStamp" style="display:none">BUILD 28.10 10:59</span>
   </section>
 
 </main>
@@ -2069,6 +2074,11 @@
     if(cwBack && cwBack.parentNode !== cwEl) cwEl.appendChild(cwBack);
   }
 
+  /* Просвет между дисками листания. Одно число на все места: карточка
+     кейса, фотокейс и наборы инфографики — иначе они расходились по-разному.
+     Было 12 и жёстко прошитые 76 у пары на большом экране. */
+  var DISC_GAP = 6;
+
   function esc(v){ return String(v == null ? '' : v)
     .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
 
@@ -2444,7 +2454,7 @@
     if(!navR.width || nav.style.display === 'none') return;
     var nx = nav.querySelector('.cc-next');
     var bw = (nx && nx.offsetWidth) || navR.width || 26;
-    var limit = navR.left - (bw + 12) - 12;
+    var limit = navR.left - (bw + DISC_GAP) - 12;
     function ink(el){
       var r = document.createRange();
       r.selectNodeContents(el);
@@ -2521,7 +2531,7 @@
     (function placePrev(){
       var bw = next.offsetWidth;
       if(!bw){ if(prevTries++ < 90) requestAnimationFrame(placePrev); return; }
-      gsap.set(prev, {x: -(bw + 12)});
+      gsap.set(prev, {x: -(bw + DISC_GAP)});
     })();
     gsap.set(frames, {autoAlpha: 0, filter: 'blur(' + BLUR + 'px)'});
     /* filter:none, а не blur(0): с любым фильтром Safari уводит картинку в
@@ -2706,7 +2716,7 @@
     (function placePrev2(){
       var bw = next.offsetWidth;
       if(!bw){ if(prevTries2++ < 90) requestAnimationFrame(placePrev2); return; }
-      gsap.set(prev, {x: -(bw + 12)});
+      gsap.set(prev, {x: -(bw + DISC_GAP)});
     })();
     function syncNav(){
       /* У набора инфографики «назад» нужен и на первом кадре — он уводит
@@ -3000,7 +3010,8 @@
       split = true;
       gsap.timeline()
         .set(prev, {opacity: 1, pointerEvents: 'auto', x: 0, scale: .55})
-        .to(prev, {x: -76, scale: 1, duration: .78, ease: EASE.rise}, 0);
+        .to(prev, {x: -((next.offsetWidth || 57) + DISC_GAP),
+                   scale: 1, duration: .78, ease: EASE.rise}, 0);
     }
 
     // On the card the right-hand disc opens the case. Once open it stays where
