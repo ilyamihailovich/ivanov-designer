@@ -15,7 +15,7 @@
      Браузер забирает её сразу, вместе со шрифтом, и к моменту запуска
      модуля она уже в кеше. -->
 <link rel="preload" href="cloth-photo-3.jpg" as="image">
-<script src="cases.js?v=281059"></script>
+<script src="cases.js?v=281104"></script>
 <!-- Библиотеки лежат рядом с сайтом, а не на CDN: при недоступном CDN
      страница превращалась в белый экран со счётчиком 0 % — весь скрипт
      падает на первой же строке с gsap. -->
@@ -798,20 +798,20 @@
                  inset 0 -1px 0 rgba(255,255,255,.28),
                  0 6px 20px rgba(0,0,0,.10);
       display:flex;align-items:center;justify-content:center;gap:9px;}
-    .cc-nav .cc-next img{width:17px;height:17px;}
+    .cc-nav .cc-next img,.cc-nav .cc-next svg{width:17px;height:17px;}
     .nav-lbl{display:inline;font:600 13.5px/1 'AK','Helvetica Neue',Arial,sans-serif;
       letter-spacing:-.025em;color:var(--ink);}
     /* Кнопка возврата из набора инфографики: подпись белая, кружок со
        стрелкой — свой, светлый (инверсия делала его чёрным). */
     .cc-nav.sets-back .nav-lbl{color:#fff;}
     /* стрелки листания — в шапке справа, как на большом экране */
-    /* Просвет между дисками тот же, что и у пары в шапке набора, — 6
-       пикселей по самим кружкам. Кнопка шире своего кружка на 11, поэтому
+    /* Просвет между дисками тот же, что и у пары в шапке набора, — 3
+       пикселя по самим кружкам. Кнопка шире своего кружка на 11, поэтому
        зазор между кнопками отрицательный; отрицательного gap не бывает, его
        делает отступ. */
     .m-page{position:absolute;top:24px;right:20px;z-index:8;display:none;
       gap:0;}
-    .m-page .m-next{margin-left:-5px;}
+    .m-page .m-next{margin-left:-8px;}
     .cw-panel.m-open .m-page{display:flex;}
     .m-page button{width:44px;height:44px;border-radius:50%;border:0;
       background:none;padding:0;display:flex;align-items:center;
@@ -1571,7 +1571,7 @@
     <div class="m-copy"><span class="sm" data-goo data-fade>’26 © All Right Reserved</span></div>
 
     <div class="tailroom"></div>
-    <span id="buildStamp" style="display:none">BUILD 28.10 10:59</span>
+    <span id="buildStamp" style="display:none">BUILD 28.10 11:04</span>
   </section>
 
 </main>
@@ -2077,7 +2077,7 @@
   /* Просвет между дисками листания. Одно число на все места: карточка
      кейса, фотокейс и наборы инфографики — иначе они расходились по-разному.
      Было 12 и жёстко прошитые 76 у пары на большом экране. */
-  var DISC_GAP = 6;
+  var DISC_GAP = 3;
 
   function esc(v){ return String(v == null ? '' : v)
     .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
@@ -2703,6 +2703,31 @@
     armPan();
   }
 
+  /* Листание пальцем. Лента лежит в кадре iframe, и касания до окна не
+     доходят вовсе — поэтому слушаем и сам контейнер, и документ внутри
+     кадра. Документ свой, с того же адреса, так что доступ к нему есть. */
+  function armSwipe(ribS, fr, onNext, onPrev){
+    function wire(target){
+      if(!target || target.__swipeWired) return;
+      target.__swipeWired = true;
+      var x0 = 0, y0 = 0, on = false;
+      target.addEventListener('touchstart', function(e){
+        if(e.touches.length !== 1){ on = false; return; }
+        x0 = e.touches[0].clientX; y0 = e.touches[0].clientY; on = true;
+      }, {passive: true});
+      target.addEventListener('touchend', function(e){
+        if(!on) return; on = false;
+        var t = e.changedTouches[0], dx = t.clientX - x0, dy = t.clientY - y0;
+        if(Math.abs(dx) < 42 || Math.abs(dx) < Math.abs(dy)) return;
+        if(dx < 0) onNext(); else onPrev();
+      });
+    }
+    wire(ribS);
+    function wireDoc(){ try{ wire(fr.contentDocument); }catch(e){} }
+    wireDoc();
+    fr.addEventListener('load', wireDoc);
+  }
+
   function wireRibbonOnly(){
     var ribS = cwScroll.querySelector('.cw-screen.ribbon.solo');
     if(!ribS) return;
@@ -2725,11 +2750,14 @@
       prev.style.pointerEvents = canBack ? 'auto' : 'none';
       gsap.to(prev, {opacity: canBack ? 1 : 0, duration: .3, ease: 'none'});
     }
-    next.addEventListener('click', function(){ pageRibbon(ribS, 1, syncNav); syncNav(); });
-    prev.addEventListener('click', function(){
+    function goNext(){ pageRibbon(ribS, 1, syncNav); syncNav(); }
+    function goPrev(){
       if(ribS.scrollLeft <= 2 && ribS.__backToSets){ ribS.__backToSets(); return; }
       pageRibbon(ribS, -1, syncNav);
-    });
+    }
+    next.addEventListener('click', goNext);
+    prev.addEventListener('click', goPrev);
+    armSwipe(ribS, fr, goNext, goPrev);
     ribS.addEventListener('scroll', syncNav);
     document.addEventListener('keydown', function(e){
       if(!cwOpen || !ribS.isConnected) return;
@@ -2757,11 +2785,15 @@
        листает кадр назад. Раньше из ленты выйти было нечем. */
     prev.hidden = false;
     function sync(){}
-    next.addEventListener('click', function(){ pageRibbon(ribS, 1, sync); });
-    prev.addEventListener('click', function(){
+    function mNext(){ pageRibbon(ribS, 1, sync); }
+    function mPrev(){
       if(ribS.scrollLeft <= 2){ if(back) back(); return; }
       pageRibbon(ribS, -1, sync);
-    });
+    }
+    next.addEventListener('click', mNext);
+    prev.addEventListener('click', mPrev);
+    var mFr = ribS.querySelector('iframe');
+    if(mFr) armSwipe(ribS, mFr, mNext, mPrev);
     ribS.addEventListener('scroll', sync);
     sync();
   }
@@ -3246,9 +3278,17 @@
               /* Только на телефоне: на большом экране .cc-nav стоит в
                  координатах макета карточки, и кнопка уехала бы в пустоту. */
               var narrowSet = window.matchMedia('(max-width:900px)').matches;
+              /* Стрелка нарисована здесь, а не взята из общего файла: у того
+                 кружок обведён чёрным, а в этой кнопке обводка не нужна. */
               backBtn.innerHTML =
                 '<button class="cc-next" type="button" aria-label="Назад">' +
-                  '<img src="cases/sanek-tpl/arrow.svg" alt="" style="transform:scaleX(-1)">' +
+                  '<svg viewBox="0 0 57.0508 57.0508" aria-hidden="true" ' +
+                    'style="transform:scaleX(-1)">' +
+                    '<circle cx="28.5254" cy="28.5254" r="28.0254" fill="#fff"/>' +
+                    '<path d="M21.8164 28.5269H35.2344M27.7934 35.9679L35.2344 ' +
+                      '28.5269L27.7934 21.0859" stroke="#000" stroke-width="2" ' +
+                      'stroke-linecap="round" fill="none"/>' +
+                  '</svg>' +
                   '<span class="nav-lbl">Назад</span></button>';
               if(narrowSet){
                 panel0.appendChild(backBtn);
