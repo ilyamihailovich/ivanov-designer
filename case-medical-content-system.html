@@ -243,12 +243,56 @@ html,body{margin:0;padding:0;max-width:100%;overflow-x:hidden;}
 .mcs .cols2 > div{break-inside:avoid;margin-bottom:clamp(18px,1.8vw,30px);}
 
 /* ---------- мокапы ---------- */
-.mcs .phone{width:min(300px,78vw);margin:0 auto;border-radius:19px;padding:11px;
-  background:#0e1216;box-shadow:0 26px 70px rgba(16,26,40,.26);}
-.mcs .phone .screen{border-radius:14px;overflow:hidden;background:#fff;
-  height:clamp(430px,52vw,560px);display:flex;flex-direction:column;position:relative;}
-.mcs .phone .bar{height:26px;display:flex;align-items:center;justify-content:center;
-  font-family:'Inter',Arial,sans-serif;font-size:10px;color:rgba(0,0,0,.4);flex:0 0 auto;}
+/* ---------- корпус iPhone 16 Pro ----------
+   Пропорции взяты от самого аппарата: корпус 71,45 x 149,6 мм, экран 393 x 852
+   пункта. Поэтому и рамка, и радиусы, и остров, и кнопки заданы в процентах
+   от ширины — мокап остаётся верным на любом размере. Углы эллиптические:
+   у корпуса радиус по горизонтали и вертикали разный. */
+.mcs .phone{position:relative;width:min(300px,78vw);margin:0 auto;
+  aspect-ratio:71.45/149.6;}
+.mcs .phone .body{position:absolute;inset:0;border-radius:16.4%/7.83%;
+  padding:1.75%;
+  background:linear-gradient(135deg,#e7e9ea 0%,#a8aeb2 10%,#f2f3f4 22%,#9aa1a6 40%,
+    #e9ebec 56%,#8f969b 72%,#e3e6e7 86%,#9ba2a7 100%);
+  box-shadow:0 34px 80px rgba(16,26,40,.30), 0 3px 10px rgba(0,0,0,.22),
+             inset 0 0 0 .5px rgba(255,255,255,.45);}
+.mcs .phone .bezel{position:absolute;inset:1.75%;border-radius:15%/7.2%;
+  background:#05070a;padding:1.25%;
+  box-shadow:inset 0 0 0 .5px rgba(255,255,255,.08);}
+.mcs .phone .screen{position:absolute;inset:1.25%;border-radius:14%/6.75%;
+  overflow:hidden;background:#fff;display:flex;flex-direction:column;}
+/* остров камеры */
+.mcs .phone .island{position:absolute;top:1.55%;left:50%;transform:translateX(-50%);
+  width:31.8%;height:3.95%;border-radius:999px;background:#05070a;z-index:6;}
+/* полоса жеста «домой» */
+.mcs .phone .home{position:absolute;bottom:.9%;left:50%;transform:translateX(-50%);
+  width:35%;height:.45%;min-height:3px;border-radius:999px;
+  background:rgba(0,0,0,.3);z-index:6;}
+/* боковые кнопки: слева кнопка действия и качелька громкости,
+   справа кнопка питания и управление камерой */
+.mcs .phone .btn{position:absolute;z-index:1;border-radius:1.4px;
+  background:linear-gradient(90deg,#8d9499,#dcdfe1 45%,#aab0b4);}
+.mcs .phone .btn.l{left:-.9%;width:1.1%;}
+.mcs .phone .btn.r{right:-.9%;width:1.1%;}
+.mcs .phone .btn.act{top:15.6%;height:4.1%;}
+.mcs .phone .btn.vup{top:22.6%;height:6.4%;}
+.mcs .phone .btn.vdn{top:30.4%;height:6.4%;}
+.mcs .phone .btn.pwr{top:24.8%;height:10.2%;}
+.mcs .phone .btn.cam{top:38.6%;height:4.6%;
+  background:linear-gradient(90deg,#aab0b4,#f1f3f4 45%,#c3c8cb);}
+/* строка состояния */
+.mcs .phone .sbar{flex:0 0 auto;height:6.4%;min-height:26px;display:flex;
+  align-items:center;justify-content:space-between;padding:0 7.5% 0 9%;
+  font-family:'Inter',Arial,sans-serif;font-size:11px;font-weight:600;
+  letter-spacing:-.02em;color:#000;}
+.mcs .phone .sbar .ico{display:flex;align-items:center;gap:4px;}
+.mcs .phone .sbar svg{display:block;height:10px;width:auto;}
+.mcs .phone .appname{flex:0 0 auto;text-align:center;padding:0 0 6px;
+  font-family:'Inter',Arial,sans-serif;font-size:10px;font-weight:500;
+  color:rgba(0,0,0,.4);}
+/* Имя .pad уже занято отступом секции — внизу экрана телефона получалось
+   130 пикселей вместо двадцати, и содержимое обрезалось. */
+.mcs .phone .safe{flex:0 0 auto;height:3.2%;}
 .mcs .tg{background:#eef2f6;flex:1 1 auto;padding:12px;overflow:hidden;
   display:flex;flex-direction:column;gap:9px;}
 .mcs .tg .bub{background:#fff;border-radius:7px;padding:11px 12px;
@@ -378,15 +422,28 @@ html,body{margin:0;padding:0;max-width:100%;overflow-x:hidden;}
 /* гигиенист */
 .mcs .duo{display:grid;grid-template-columns:minmax(0,1.65fr) minmax(0,1fr);
   gap:clamp(16px,2vw,40px);align-items:end;}
-.mcs .desk{border-radius:8px;background:#0e1216;padding:10px 10px 0;
-  box-shadow:0 22px 60px rgba(16,26,40,.22);}
-.mcs .desk .screen{border-radius:5px;overflow:hidden;background:#fff;
-  aspect-ratio:16/10;display:flex;flex-direction:column;}
+/* ---------- монитор iMac ----------
+   Светлые рамки одинаковой толщины по трём сторонам, подбородок под экраном,
+   тонкая ножка и плоское основание — всё в долях от ширины, чтобы мокап
+   держал пропорции на любом размере. */
+.mcs .desk{width:100%;}
+.mcs .desk .disp{border-radius:1.6%/2.4%;padding:1.5%;
+  background:linear-gradient(180deg,#f3f4f6,#e4e7ea);
+  box-shadow:0 26px 64px rgba(16,26,40,.22), inset 0 0 0 .5px rgba(255,255,255,.7);}
+.mcs .desk .screen{border-radius:4px;overflow:hidden;background:#fff;
+  aspect-ratio:16/10;display:flex;flex-direction:column;
+  box-shadow:inset 0 0 0 .5px rgba(0,0,0,.14);}
+.mcs .desk .chin{height:0;padding-top:5.4%;}
+.mcs .desk .neck{width:13%;height:0;padding-top:7.2%;margin:0 auto;
+  background:linear-gradient(90deg,#b9bfc5,#eceef0 42%,#f4f5f6 52%,#c6ccd1);}
+.mcs .desk .base{width:34%;height:0;padding-top:1.5%;margin:0 auto;
+  border-radius:0 0 7px 7px;
+  background:linear-gradient(180deg,#d3d7db,#b4bac0);
+  box-shadow:0 10px 22px rgba(16,26,40,.14);}
 .mcs .desk .chrome{height:22px;background:#f4f6f9;display:flex;align-items:center;
   gap:4px;padding:0 9px;flex:0 0 auto;}
 .mcs .desk .chrome u{width:7px;height:7px;border-radius:50%;background:#dbe1e9;
   text-decoration:none;display:block;}
-.mcs .desk .foot{height:12px;}
 .mcs .seg{display:inline-flex;gap:3px;padding:3px;border-radius:999px;background:#eef2f7;
   margin-bottom:12px;}
 .mcs .seg button{border:0;background:none;border-radius:999px;padding:6px 14px;
@@ -721,8 +778,11 @@ html{scroll-behavior:smooth;}
     <div class="two">
       <div class="rv">
         <div class="phone">
+          <i class="btn l act"></i><i class="btn l vup"></i><i class="btn l vdn"></i><i class="btn r pwr"></i><i class="btn r cam"></i>
+          <div class="body"><div class="bezel">
           <div class="screen">
-            <div class="bar">Бот согласования</div>
+            <div class="sbar"><span>9:41</span><span class="ico"><svg viewBox="0 0 18 12" aria-hidden="true"><rect y="8" width="3" height="4" rx="1" fill="#000"/><rect x="5" y="6" width="3" height="6" rx="1" fill="#000"/><rect x="10" y="3" width="3" height="9" rx="1" fill="#000"/><rect x="15" width="3" height="12" rx="1" fill="#000" fill-opacity=".3"/></svg><svg viewBox="0 0 16 12" aria-hidden="true"><path d="M8 11 .8 4.3a10.4 10.4 0 0 1 14.4 0L8 11Z" fill="#000"/></svg><svg viewBox="0 0 26 12" aria-hidden="true"><rect x=".5" y=".5" width="22" height="11" rx="3.4" fill="none" stroke="#000" stroke-opacity=".35"/><rect x="2" y="2" width="16" height="8" rx="2.2" fill="#000"/><path d="M24 4.3v3.4a2 2 0 0 0 0-3.4Z" fill="#000" fill-opacity=".35"/></svg></span></div>
+            <div class="appname">Бот согласования</div>
             <div class="tg">
               <div class="bub">
                 <div class="t">Рилс · Имплантация</div>
@@ -740,7 +800,10 @@ html{scroll-behavior:smooth;}
                 <div class="meta" id="tgState">Решение основного согласующего ещё не принято</div>
               </div>
             </div>
+            <div class="safe"></div>
           </div>
+          </div></div>
+          <span class="island"></span><span class="home"></span>
         </div>
       </div>
 
@@ -849,8 +912,11 @@ html{scroll-behavior:smooth;}
         </div>
 
         <div class="phone">
+          <i class="btn l act"></i><i class="btn l vup"></i><i class="btn l vdn"></i><i class="btn r pwr"></i><i class="btn r cam"></i>
+          <div class="body"><div class="bezel">
           <div class="screen">
-            <div class="bar">Mini App</div>
+            <div class="sbar"><span>9:41</span><span class="ico"><svg viewBox="0 0 18 12" aria-hidden="true"><rect y="8" width="3" height="4" rx="1" fill="#000"/><rect x="5" y="6" width="3" height="6" rx="1" fill="#000"/><rect x="10" y="3" width="3" height="9" rx="1" fill="#000"/><rect x="15" width="3" height="12" rx="1" fill="#000" fill-opacity=".3"/></svg><svg viewBox="0 0 16 12" aria-hidden="true"><path d="M8 11 .8 4.3a10.4 10.4 0 0 1 14.4 0L8 11Z" fill="#000"/></svg><svg viewBox="0 0 26 12" aria-hidden="true"><rect x=".5" y=".5" width="22" height="11" rx="3.4" fill="none" stroke="#000" stroke-opacity=".35"/><rect x="2" y="2" width="16" height="8" rx="2.2" fill="#000"/><path d="M24 4.3v3.4a2 2 0 0 0 0-3.4Z" fill="#000" fill-opacity=".35"/></svg></span></div>
+            <div class="appname">Mini App</div>
             <div class="app">
               <div class="pane on" id="p1">
                 <p class="capt">Контент-план месяца · теги платформы, формата и рубрики</p>
@@ -887,7 +953,10 @@ html{scroll-behavior:smooth;}
                 </div>
               </div>
             </div>
+            <div class="safe"></div>
           </div>
+          </div></div>
+          <span class="island"></span><span class="home"></span>
         </div>
       </div>
     </div>
@@ -1195,20 +1264,30 @@ html{scroll-behavior:smooth;}
       </div>
       <div class="duo">
         <div class="desk">
-          <div class="screen">
-            <div class="chrome"><u></u><u></u><u></u></div>
-            <div class="ph r169" id="deskPh"
-              style="border:0;border-radius:0;flex:1 1 auto;">3D-карта межзубных
-              ёршиков 16:9 — модель зубных рядов с выбранными размерами</div>
+          <div class="disp">
+            <div class="screen">
+              <div class="chrome"><u></u><u></u><u></u></div>
+              <div class="ph" id="deskPh"
+                style="border:0;border-radius:0;flex:1 1 auto;">3D-карта межзубных
+                ёршиков 16:9 — модель зубных рядов с выбранными размерами</div>
+            </div>
+            <div class="chin"></div>
           </div>
-          <div class="foot"></div>
+          <div class="neck"></div>
+          <div class="base"></div>
         </div>
         <div class="phone" style="width:min(240px,66vw);">
-          <div class="screen" style="height:clamp(340px,38vw,420px);">
-            <div class="bar">Онлайн-карта пациента</div>
-            <div class="ph r916" style="border:0;border-radius:0;flex:1 1 auto;">
+          <i class="btn l act"></i><i class="btn l vup"></i><i class="btn l vdn"></i><i class="btn r pwr"></i><i class="btn r cam"></i>
+          <div class="body"><div class="bezel">
+          <div class="screen">
+            <div class="sbar"><span>9:41</span><span class="ico"><svg viewBox="0 0 18 12" aria-hidden="true"><rect y="8" width="3" height="4" rx="1" fill="#000"/><rect x="5" y="6" width="3" height="6" rx="1" fill="#000"/><rect x="10" y="3" width="3" height="9" rx="1" fill="#000"/><rect x="15" width="3" height="12" rx="1" fill="#000" fill-opacity=".3"/></svg><svg viewBox="0 0 16 12" aria-hidden="true"><path d="M8 11 .8 4.3a10.4 10.4 0 0 1 14.4 0L8 11Z" fill="#000"/></svg><svg viewBox="0 0 26 12" aria-hidden="true"><rect x=".5" y=".5" width="22" height="11" rx="3.4" fill="none" stroke="#000" stroke-opacity=".35"/><rect x="2" y="2" width="16" height="8" rx="2.2" fill="#000"/><path d="M24 4.3v3.4a2 2 0 0 0 0-3.4Z" fill="#000" fill-opacity=".35"/></svg></span></div>
+            <div class="appname">Онлайн-карта пациента</div>
+            <div class="ph" style="border:0;border-radius:0;flex:1 1 auto;">
               Онлайн-карта пациента 9:16 — фирменный документ по ссылке и QR-коду</div>
+            <div class="safe"></div>
           </div>
+          </div></div>
+          <span class="island"></span><span class="home"></span>
         </div>
       </div>
     </div>
