@@ -3,250 +3,390 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>Цифровая экосистема контента для премиальной клиники — Илья Иванов</title>
+<title>Контент-система для премиальной клиники — Илья Иванов</title>
 <meta name="description" content="Кейс: SMM медицинского бренда, переведённый в управляемую систему — Telegram-продукты, собственный сервер, Figma-плагины, стандарты бренда и приложение для врачей.">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap&subset=cyrillic" rel="stylesheet">
 <link rel="preload" href="fonts/ak.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="assets/case-medical/bg/glass-column.webp" as="image" type="image/webp">
 <style>
 /* ===========================================================
-   Кейс «Цифровая экосистема контента».
-   Страница самостоятельная: все правила живут под .mcs, общие стили
-   сайта сюда не подключаются и не меняются.
+   Кейс «Контент-система для премиальной клиники».
+   Все правила живут под .mcs — общие стили сайта не затрагиваются.
 
-   Типографика: три размера текста — 17 основной, 22 вводный абзац
-   секции, 14 подпись. Заголовки и цифры набраны шрифтом сайта (AK),
-   Inter остаётся только в тексте и подписях, как в остальных кейсах.
+   Палитра акцента снята с видео в assets/case-medical/bg/:
+   дисперсия света даёт три доминирующих семейства — глубокий синий,
+   бирюза и янтарь. На них построен единственный акцентный градиент.
+   Всё остальное — белый и очень светлый серый.
    =========================================================== */
 @font-face{font-family:'AK';src:url('fonts/ak.woff2') format('woff2');
   font-weight:100 900;font-style:normal;font-display:swap;}
 
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
-/* overflow-x:hidden на html/body делает body прокручиваемым контейнером
-   и ломает position:sticky — именно из-за этого закреплённый экран уезжал
-   вверх. overflow-x:clip обрезает так же, но контейнер прокрутки
-   не создаёт. */
-html{overflow-x:clip;
-  /* Safari на iPhone сам увеличивает шрифт в длинных блоках: подписи
-     на сцене раздувались и налезали друг на друга */
-  -webkit-text-size-adjust:100%;text-size-adjust:100%;}
+html{overflow-x:clip;-webkit-text-size-adjust:100%;text-size-adjust:100%;
+  scroll-behavior:smooth;}
 html,body{margin:0;padding:0;max-width:100%;}
 
 .mcs{
-  /* шкала отступов — других значений на странице нет */
   --s8:8px; --s16:16px; --s24:24px; --s32:32px; --s48:48px;
   --s64:64px; --s96:96px; --s128:128px; --s160:160px;
-  --sec:var(--s160);      /* между секциями */
-  --head:var(--s64);      /* от заголовка секции до содержимого */
-  --grid:var(--s32);      /* между элементами в сетке */
-  --gut:clamp(24px,5vw,64px);
+  --sec:var(--s160); --head:var(--s64); --grid:var(--s32);
+  --gut:clamp(20px,5vw,64px);
   --maxw:1280px;
-  --ink:#111315;
-  --text:#3a3a3a;
-  --mute:#60656b;         /* подписи: не светлее #6B6B6B */
-  --line:rgba(17,19,21,.12);
-  --accent:#5a6b85;
+
+  --ink:#0E1116;
+  --text:#3A3A3A;
+  --mute:#60656B;
+  --grey:#F5F5F7;
+  --dark:#0E0E10;
+  --line:rgba(0,0,0,.08);
+
+  /* акцент из видео */
+  --deep:#0E2A46;
+  --blue:#1C7FB8;
+  --cyan:#55C6FE;
+  --amber:#E8923C;
+  --grad:linear-gradient(126deg,#0E2A46 0%,#1C7FB8 32%,#55C6FE 56%,#E8923C 100%);
+  --grad-soft:linear-gradient(126deg,rgba(14,42,70,.9) 0%,rgba(28,127,184,.85) 34%,rgba(85,198,254,.8) 60%,rgba(232,146,60,.8) 100%);
+
   --eo:cubic-bezier(.22,1,.36,1);
   font-family:'AK','Helvetica Neue',Helvetica,Arial,sans-serif;
   color:var(--ink);background:#fff;-webkit-font-smoothing:antialiased;
 }
 
-/* ---------- сетка: одна ширина контейнера на всей странице ---------- */
+/* зерно поверх градиентов, чтобы они не выглядели пластиковыми */
+.grain::after{content:'';position:absolute;inset:0;pointer-events:none;
+  opacity:.045;mix-blend-mode:overlay;border-radius:inherit;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E");}
+
+/* ---------- сетка ---------- */
 .mcs .wrap{max-width:var(--maxw);margin:0 auto;padding:0 var(--gut);}
 .mcs .grid{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));
   gap:0 var(--grid);}
 .mcs .cl{grid-column:1 / 6;}
 .mcs .cr{grid-column:7 / 13;}
-/* колонка, оставшаяся одна после того как пустые слоты не отрисовались */
 .mcs .cl.full,.mcs .cr.full{grid-column:1 / 9;margin-top:0;}
-.mcs section{padding:0 0 var(--sec);}
+.mcs section{padding:0 0 var(--sec);position:relative;}
 
-/* ---------- типографика: три размера текста ---------- */
-.mcs h1{font-size:clamp(38px,5vw,78px);line-height:1.02;letter-spacing:-.045em;
+/* ---------- типографика ---------- */
+.mcs h1{font-size:clamp(34px,5.6vw,80px);line-height:1.02;letter-spacing:-.045em;
   font-weight:500;margin:0;}
-.mcs h2{font-size:clamp(28px,3.2vw,50px);line-height:1.03;letter-spacing:-.04em;
+.mcs h2{font-size:clamp(27px,3.2vw,50px);line-height:1.04;letter-spacing:-.04em;
   font-weight:500;margin:0 0 var(--head);max-width:20ch;}
-.mcs h3{font-size:clamp(19px,1.6vw,24px);line-height:1.1;letter-spacing:-.028em;
+.mcs h3{font-size:clamp(19px,1.6vw,24px);line-height:1.12;letter-spacing:-.028em;
   font-weight:600;margin:0 0 var(--s16);}
 .mcs h4{font-size:18px;line-height:1.2;letter-spacing:-.022em;font-weight:600;
-  color:var(--ink);margin:0 0 var(--s8);}
+  margin:0 0 var(--s8);}
 .mcs p{font-family:'Inter',Arial,sans-serif;font-size:17px;line-height:1.55;
   letter-spacing:-.011em;color:var(--text);margin:0 0 var(--s16);max-width:65ch;}
 .mcs p:last-child{margin-bottom:0;}
-.mcs .lead{font-size:22px;line-height:1.4;color:var(--text);max-width:46ch;}
-@media (max-width:860px){ .mcs .lead{font-size:20px;} }
+.mcs .lead{font-size:22px;line-height:1.4;color:var(--text);max-width:48ch;}
+.mcs .cap{font-family:'Inter',Arial,sans-serif;font-size:15px;line-height:1.45;
+  color:var(--mute);margin:0;}
+@media (max-width:860px){ .mcs .lead{font-size:19px;} }
 
 /* ---------- шапка ---------- */
-.mcs .top{position:sticky;top:0;z-index:30;display:flex;align-items:center;
+.mcs .top{position:sticky;top:0;z-index:40;display:flex;align-items:center;
   justify-content:space-between;padding:var(--s16) var(--gut);
-  background:rgba(255,255,255,.86);-webkit-backdrop-filter:blur(14px);
-  backdrop-filter:blur(14px);transition:box-shadow .3s var(--eo);}
+  background:rgba(255,255,255,.82);-webkit-backdrop-filter:blur(16px);
+  backdrop-filter:blur(16px);transition:box-shadow .3s var(--eo);}
 .mcs .top.stuck{box-shadow:0 1px 0 var(--line);}
-.mcs .top a{font-family:'Inter',Arial,sans-serif;font-size:14px;font-weight:500;
+.mcs .top a{font-family:'Inter',Arial,sans-serif;font-size:15px;font-weight:500;
   color:var(--ink);text-decoration:none;}
 .mcs .top .back{display:inline-flex;align-items:center;gap:var(--s8);}
 .mcs .top svg{width:13px;height:13px;display:block;}
 
-/* ---------- первый экран ---------- */
-.mcs .hero{position:relative;padding:var(--s128) 0 var(--sec);overflow:hidden;}
-.mcs .hero .tint{position:absolute;left:-10%;right:-10%;top:-30%;height:130%;
-  z-index:0;pointer-events:none;background:
-    radial-gradient(54% 46% at 20% 16%,rgba(146,168,202,.20),transparent 72%),
-    radial-gradient(50% 42% at 80% 34%,rgba(172,188,212,.16),transparent 74%);}
-.mcs .hero > .wrap{position:relative;z-index:1;}
-/* заголовок занимает десять колонок, чтобы ложиться в две-три строки */
-.mcs .hero h1{grid-column:1 / 11;}
-.mcs .hero .lead{grid-column:1 / 7;margin-top:var(--s32);}
-.mcs .facts{margin-top:var(--s96);display:grid;
-  grid-template-columns:repeat(12,minmax(0,1fr));gap:var(--s32) var(--grid);
-  align-items:start;}
-.mcs .facts div{grid-column:span 3;}
-/* число сверху, подпись под ним */
-.mcs .facts .v{font-size:clamp(30px,2.9vw,44px);line-height:1;
-  letter-spacing:-.04em;font-weight:500;margin:0 0 var(--s8);}
-.mcs .facts .k{font-family:'Inter',Arial,sans-serif;font-size:14px;
-  color:var(--mute);margin:0;line-height:1.35;}
-.mcs .meta{margin:var(--s64) 0 0;display:grid;
-  grid-template-columns:repeat(12,minmax(0,1fr));gap:var(--s24) var(--grid);}
-.mcs .meta div{grid-column:span 4;}
-.mcs .meta dt{font-family:'Inter',Arial,sans-serif;font-size:14px;
-  color:var(--mute);margin:0 0 var(--s8);}
-.mcs .meta dd{font-family:'Inter',Arial,sans-serif;font-size:17px;
-  line-height:1.55;color:var(--text);margin:0;}
-
-/* ---------- экраны интерфейсов: только сам экран, без корпусов ---------- */
-.mcs .screen{position:relative;overflow:hidden;background:#f0f0f1;
-  box-shadow:0 34px 90px rgba(16,24,40,.11), 0 6px 20px rgba(16,24,40,.05);}
-.mcs .screen.desktop{border-radius:15px;aspect-ratio:16/10;}
-.mcs .screen.phone{border-radius:30px;aspect-ratio:9/19.5;}
-.mcs .screen.square{border-radius:12px;aspect-ratio:1/1;}
-.mcs .screen.photo{border-radius:12px;aspect-ratio:4/5;}
-.mcs .screen img,.mcs .screen video{width:100%;height:100%;object-fit:cover;
-  display:block;}
-.mcs .screen .slot{position:absolute;inset:0;display:flex;align-items:center;
-  justify-content:center;padding:var(--s24);text-align:center;
-  font-family:'Inter',Arial,sans-serif;font-size:14px;line-height:1.45;
-  color:var(--mute);}
-/* сдержанная глубина: экран входит из наклона и ложится ровно */
-.mcs .screen.d3{opacity:0;--r0:12deg;--ty:40px;--rx:0deg;--ry:0deg;
-  transform:perspective(1200px)
-    rotateX(calc(var(--r0) + var(--rx))) rotateY(var(--ry))
-    translateY(var(--ty));
-  transition:opacity .7s ease-out, transform .7s ease-out;}
-.mcs .screen.d3.in{opacity:1;--r0:0deg;--ty:0px;}
-.mcs .screen.d3.rdy{transition:transform .3s ease-out;}
-.mcs .shots{display:grid;gap:var(--grid);}
-.mcs .shots.n2{grid-template-columns:repeat(2,minmax(0,1fr));}
-.mcs .shots.n3{grid-template-columns:repeat(3,minmax(0,1fr));}
-.mcs .shots.n4{grid-template-columns:repeat(4,minmax(0,1fr));}
-/* десктоп и телефон рядом: телефон мельче и слегка перекрывает экран */
-.mcs .combo{position:relative;}
-.mcs .combo .side{position:absolute;right:0;bottom:-10%;width:16%;z-index:2;}
-@media (max-width:860px){
-  .mcs .combo .side{position:static;width:56%;margin:var(--s48) auto 0;}
-}
-
-/* ============== сцена «Экосистема в работе» ============== */
-.mcs .eco{padding-bottom:var(--sec);}
-.mcs .ecoWrap{position:relative;height:400vh;}
-/* на iOS панель браузера то появляется, то уходит: 100vh больше видимой
-   области, и кадр сцены обрезался бы снизу — svh считает по видимой */
-.mcs .ecoPin{position:sticky;top:0;height:100vh;height:100svh;
-  overflow:hidden;}
-.mcs .ecoPin .tint{position:absolute;inset:0;z-index:0;pointer-events:none;
+/* ================= 1. первый экран ================= */
+.mcs .hero{padding:var(--s96) 0 var(--s96);text-align:center;overflow:hidden;}
+/* мягкое двухцветное гало за заголовком */
+.mcs .halo{position:absolute;left:50%;top:-10%;width:min(1100px,130vw);
+  aspect-ratio:1/.62;transform:translateX(-50%);z-index:0;pointer-events:none;
   background:
-    radial-gradient(44% 46% at 26% 26%,rgba(146,168,202,.20),transparent 72%),
-    radial-gradient(42% 44% at 76% 74%,rgba(168,184,208,.15),transparent 74%);}
-.mcs #ecoCanvas{position:absolute;inset:0;width:100%;height:100%;z-index:1;
-  display:block;}
-.mcs .sc-labels{position:absolute;inset:0;z-index:2;}
-.mcs .sc-node,.mcs .sc-cap{position:absolute;left:0;top:0;white-space:nowrap;
-  font-family:'Inter',Arial,sans-serif;will-change:transform;
-  transform-origin:0 50%;}
-/* подписи узлов — размер основного текста, вес 500, почти чёрные */
-.mcs .sc-node{font-size:17px;font-weight:500;letter-spacing:-.014em;
-  color:var(--ink);pointer-events:auto;cursor:default;
-  transition:opacity .3s var(--eo);}
-.mcs .sc-node{display:inline-flex;align-items:center;}
-.mcs .sc-node em{flex:0 0 auto;width:9px;height:9px;border-radius:50%;
-  background:var(--accent);margin-right:10px;
-  box-shadow:0 0 0 5px rgba(90,107,133,.16);
-  transition:box-shadow .3s var(--eo);}
-.mcs .sc-node.rtl{flex-direction:row-reverse;}
-.mcs .sc-node.rtl em{margin-right:0;margin-left:10px;}
-.mcs .sc-node.on em{box-shadow:0 0 0 8px rgba(90,107,133,.26);}
-.mcs .sc-node.dim{opacity:.34;}
-/* подпись слоя — размер подписи, обычный регистр, у левого края плиты */
-.mcs .sc-cap{font-size:14px;font-weight:500;letter-spacing:-.01em;
-  color:var(--mute);}
-.mcs .sc-head{position:absolute;left:0;right:0;top:var(--s96);z-index:3;
-  pointer-events:none;transition:opacity .3s linear;}
-.mcs .sc-head h2{margin:0;}
-.mcs .sc-dots{position:absolute;right:var(--gut);top:50%;z-index:3;
-  transform:translateY(-50%);display:flex;flex-direction:column;gap:10px;}
-.mcs .sc-dots i{width:7px;height:7px;border-radius:50%;
-  background:rgba(17,19,21,.16);transition:background .4s var(--eo);}
-.mcs .sc-dots i.on{background:var(--accent);}
-.mcs .sc-step{position:absolute;left:0;right:0;bottom:var(--s96);z-index:3;
-  padding:0 var(--gut);max-width:var(--maxw);margin:0 auto;
-  font-size:22px;line-height:1.35;color:var(--ink);opacity:0;
-  transform:translateY(8px);
-  transition:opacity .4s var(--eo), transform .4s var(--eo);}
-.mcs .sc-step.on{opacity:1;transform:none;}
-.mcs .sc-out{position:absolute;left:0;right:0;bottom:var(--s32);z-index:3;
-  padding:0 var(--gut);margin:0 auto;max-width:var(--maxw);
-  font-size:17px;color:var(--mute);opacity:0;
-  transition:opacity .5s var(--eo);}
-.mcs .sc-out.on{opacity:1;}
-.mcs .sc-tip{position:absolute;left:0;top:0;z-index:4;pointer-events:none;
-  font-family:'Inter',Arial,sans-serif;font-size:14px;color:#fff;
-  background:rgba(17,19,21,.86);padding:6px 10px;border-radius:7px;
-  white-space:nowrap;opacity:0;transition:opacity .2s linear;}
-.mcs .sc-tip.on{opacity:1;}
-@media (max-width:759.98px){
-  .mcs .ecoWrap{height:350vh;}
-  .mcs .sc-head{top:var(--s64);}
-  .mcs .sc-dots{right:auto;left:0;bottom:var(--s128);top:auto;
-    transform:none;flex-direction:row;justify-content:center;width:100%;}
-  /* подпись текущего шага — плашка внизу экрана поверх сцены */
-  .mcs .sc-step{bottom:var(--s48);font-size:16px;line-height:1.4;
-    padding:0 16px;}
-  .mcs .sc-step::before{content:'';position:absolute;inset:-12px 4px;
-    z-index:-1;border-radius:12px;background:rgba(255,255,255,.82);
-    -webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);}
-  .mcs .sc-out{bottom:var(--s16);font-size:14px;}
+    radial-gradient(42% 50% at 36% 46%,rgba(85,198,254,.42),transparent 68%),
+    radial-gradient(40% 48% at 66% 54%,rgba(232,146,60,.30),transparent 70%),
+    radial-gradient(52% 60% at 50% 50%,rgba(14,42,70,.10),transparent 72%);
+  filter:blur(34px);}
+.mcs .hero > .wrap{position:relative;z-index:1;}
+.mcs .hero h1{max-width:17ch;margin:0 auto;}
+.mcs .hero .lead{margin:var(--s32) auto 0;}
+.mcs .hero .meta{font-family:'Inter',Arial,sans-serif;font-size:15px;
+  color:var(--mute);margin-top:var(--s16);}
+
+.mcs .plates{margin-top:var(--s64);display:flex;align-items:flex-end;
+  justify-content:center;gap:clamp(10px,1.4vw,20px);
+  perspective:1600px;perspective-origin:50% 60%;}
+.mcs .plate{position:relative;flex:0 0 auto;
+  width:clamp(84px,10.4vw,148px);border-radius:18px;overflow:hidden;
+  text-decoration:none;color:#fff;background:#0B1220;
+  box-shadow:0 30px 60px rgba(10,22,40,.22), 0 4px 14px rgba(10,22,40,.14);
+  --ry:0deg; --pz:0px; --ey:30px; --sy:0px; --hy:0px;
+  opacity:0;
+  transform:rotateY(var(--ry)) translateZ(var(--pz))
+            translateY(calc(var(--ey) + var(--sy) + var(--hy)));
+  transition:transform .8s var(--eo), opacity .8s var(--eo),
+             box-shadow .5s var(--eo);
+  will-change:transform;}
+.mcs .plate.in{opacity:1;--ey:0px;}
+.mcs .plate .fill{position:absolute;inset:0;}
+.mcs .plate video,.mcs .plate img{width:100%;height:100%;object-fit:cover;
+  display:block;transform:scale(1.12);filter:saturate(1.55) contrast(1.06);
+  object-position:var(--op,50%) 50%;}
+.mcs .plate .glow{position:absolute;inset:0;background:var(--grad);
+  opacity:.9;}
+/* стекло поверх: светлый блик по верху, мягкое затемнение к низу */
+.mcs .plate .glass{position:absolute;inset:0;border-radius:inherit;
+  background:linear-gradient(to bottom,rgba(255,255,255,.26),rgba(255,255,255,.03) 30%,rgba(8,14,24,.52));
+  -webkit-backdrop-filter:blur(9px) saturate(1.25);
+  backdrop-filter:blur(9px) saturate(1.25);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.65),
+             inset 0 0 0 1px rgba(255,255,255,.14);}
+.mcs .plate b{position:absolute;left:12px;right:12px;bottom:14px;z-index:2;
+  font-family:'Inter',Arial,sans-serif;font-size:15px;font-weight:500;
+  line-height:1.25;letter-spacing:-.012em;
+  text-shadow:0 1px 10px rgba(6,12,22,.55);}
+@media (hover:hover) and (min-width:861px){
+  .mcs .plate:hover{--hy:-10px;box-shadow:0 44px 80px rgba(10,22,40,.28), 0 6px 18px rgba(10,22,40,.16);}
 }
-/* запасной вариант: статичный кадр финального состояния и восемь шагов */
-.mcs .ecoFlat{display:none;}
-.mcs .ecoFlat img{display:block;width:100%;height:auto;border-radius:15px;}
-.mcs .ecoSteps{list-style:none;margin:var(--s64) 0 0;padding:0;display:grid;
-  grid-template-columns:repeat(12,minmax(0,1fr));gap:var(--s24) var(--grid);
+.mcs .plate:focus-visible{outline:2px solid var(--blue);outline-offset:3px;}
+@media (max-width:860px){
+  /* в прокручиваемой ленте центрирование срезает начало — выравниваем
+     по левому краю, иначе до первой плиты не доскроллить */
+  .mcs .plates{margin-left:calc(var(--gut) * -1);margin-right:calc(var(--gut) * -1);
+    padding:0 var(--gut);gap:12px;perspective:none;justify-content:flex-start;
+    overflow-x:auto;scroll-snap-type:x mandatory;
+    scroll-padding-left:var(--gut);
+    -webkit-overflow-scrolling:touch;scrollbar-width:none;}
+  .mcs .plates::-webkit-scrollbar{display:none;}
+  .mcs .plate{width:40vw;scroll-snap-align:start;--ry:0deg;--pz:0px;--sy:0px;}
+}
+
+/* ================= 2. полоса цифр ================= */
+.mcs .band{background:var(--grey);padding:var(--s96) 0;}
+.mcs .band .grid{align-items:stretch;}
+.mcs .intro{grid-column:1 / 6;background:#111;color:#fff;border-radius:22px;
+  padding:var(--s48);display:flex;align-items:flex-end;position:relative;
+  overflow:hidden;}
+.mcs .intro p{color:#fff;font-size:21px;line-height:1.35;max-width:22ch;
+  font-family:'AK',Arial,sans-serif;letter-spacing:-.02em;}
+.mcs .intro::before{content:'';position:absolute;right:-30%;top:-40%;
+  width:80%;aspect-ratio:1;background:var(--grad);opacity:.5;
+  filter:blur(44px);border-radius:50%;}
+.mcs .tiles{grid-column:7 / 13;display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));gap:var(--grid);}
+.mcs .tile{background:#fff;border-radius:18px;padding:var(--s32);}
+.mcs .tile .v{font-size:clamp(34px,3.4vw,52px);line-height:1;font-weight:500;
+  letter-spacing:-.04em;margin:0 0 var(--s8);}
+.mcs .tile .k{font-family:'Inter',Arial,sans-serif;font-size:15px;
+  color:var(--mute);margin:0;line-height:1.35;}
+@media (max-width:860px){
+  .mcs .intro,.mcs .tiles{grid-column:1 / 13;}
+  .mcs .tiles{margin-top:var(--s24);gap:var(--s16);}
+  .mcs .intro{padding:var(--s32);}
+  .mcs .tile{padding:var(--s24);}
+}
+
+/* ================= 3. задача ================= */
+.mcs .task{position:relative;}
+.mcs .taskgrid{display:grid;grid-template-columns:1fr 1.1fr 1fr;
+  gap:var(--grid);align-items:center;}
+.mcs .claims{list-style:none;margin:0;padding:0;display:grid;gap:var(--s32);}
+.mcs .claims li{font-family:'Inter',Arial,sans-serif;font-size:17px;
+  line-height:1.4;color:var(--ink);padding-left:var(--s24);position:relative;}
+.mcs .claims li::before{content:'';position:absolute;left:0;top:.55em;
+  width:7px;height:7px;border-radius:50%;background:var(--blue);}
+.mcs .radial{position:relative;aspect-ratio:1/.82;}
+.mcs .radial svg{position:absolute;inset:0;width:100%;height:100%;overflow:visible;}
+.mcs .radial path{transition:stroke-dashoffset .9s var(--eo);}
+.mcs .radial line{opacity:0;transition:opacity .5s linear;}
+.mcs .radial.in line{opacity:1;}
+.mcs .radial .blob{position:absolute;left:50%;top:84%;width:62%;aspect-ratio:1.5;
+  transform:translate(-50%,-50%);border-radius:50%;background:var(--grad);
+  filter:blur(28px);opacity:.82;}
+.mcs .answers{display:grid;gap:var(--s16);}
+.mcs .answer{background:#fff;border-radius:16px;padding:var(--s24);
+  box-shadow:0 10px 30px rgba(14,42,70,.07), 0 1px 3px rgba(14,42,70,.05);}
+.mcs .answer h4{margin:0 0 6px;}
+.mcs .answer p{font-size:15px;margin:0;}
+@media (max-width:1023.98px){
+  .mcs .taskgrid{grid-template-columns:1fr;gap:var(--s48);}
+  .mcs .radial{order:-1;max-width:420px;margin:0 auto;width:100%;}
+  .mcs .radial svg{display:none;}
+  .mcs .claims{gap:var(--s16);}
+}
+
+/* ================= 4. карта экосистемы ================= */
+.mcs .map{position:relative;overflow:hidden;padding-bottom:var(--sec);}
+.mcs .mapbg{position:absolute;inset:0;z-index:0;overflow:hidden;}
+.mcs .mapbg video,.mcs .mapbg img{width:100%;height:100%;object-fit:cover;
+  opacity:.2;filter:blur(26px) saturate(1.2);transform:scale(1.15);}
+.mcs .mapgrid{position:absolute;inset:0;z-index:1;pointer-events:none;
+  background-image:
+    linear-gradient(to right,rgba(0,0,0,.055) 1px,transparent 1px),
+    linear-gradient(to bottom,rgba(0,0,0,.055) 1px,transparent 1px);
+  background-size:88px 88px;
+  -webkit-mask-image:radial-gradient(70% 62% at 50% 50%,#000 42%,transparent 88%);
+  mask-image:radial-gradient(70% 62% at 50% 50%,#000 42%,transparent 88%);}
+.mcs .mapcross{position:absolute;inset:0;z-index:1;pointer-events:none;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='88' height='88'%3E%3Cpath d='M0 0h7M0 0v7M-3.5 0h7M0-3.5v7' stroke='rgba(0,0,0,.24)' stroke-width='1'/%3E%3C/svg%3E");
+  background-size:88px 88px;background-position:-3px -3px;
+  -webkit-mask-image:radial-gradient(70% 62% at 50% 50%,#000 42%,transparent 88%);
+  mask-image:radial-gradient(70% 62% at 50% 50%,#000 42%,transparent 88%);}
+.mcs .map > .wrap{position:relative;z-index:2;}
+.mcs .canvas{position:relative;aspect-ratio:16/9;margin-top:var(--s64);}
+.mcs .canvas svg.links{position:absolute;inset:0;width:100%;height:100%;
+  overflow:visible;}
+.mcs .canvas svg.links path{fill:none;stroke:rgba(14,42,70,.26);
+  stroke-width:1.2;stroke-dasharray:5 6;}
+.mcs .node{position:absolute;transform:translate(-50%,-50%);
+  display:inline-flex;align-items:center;gap:9px;white-space:nowrap;
+  padding:9px 15px 9px 12px;border-radius:999px;
+  background:rgba(255,255,255,.72);
+  -webkit-backdrop-filter:blur(22px) saturate(1.1);
+  backdrop-filter:blur(22px) saturate(1.1);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.9),
+             0 1px 0 rgba(14,42,70,.06),
+             0 12px 28px rgba(14,42,70,.10);
+  font-family:'Inter',Arial,sans-serif;font-size:15px;font-weight:500;
+  color:var(--ink);transition:transform .4s var(--eo), box-shadow .4s var(--eo);
+  will-change:transform;}
+.mcs .node svg{width:17px;height:17px;flex:0 0 auto;color:var(--blue);}
+.mcs .node.on{transform:translate(-50%,-50%) scale(1.09);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.95),
+             0 0 0 2px rgba(85,198,254,.35),
+             0 18px 36px rgba(14,42,70,.16);}
+.mcs .core{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);
+  width:clamp(118px,13vw,172px);aspect-ratio:1;border-radius:50%;
+  overflow:hidden;background:var(--grad);display:grid;place-items:center;
+  box-shadow:0 0 0 1px rgba(255,255,255,.55),
+             0 0 54px rgba(85,198,254,.45),
+             0 24px 60px rgba(14,42,70,.26);}
+/* видео с пузырём светлое на чёрном: screen оставляет только кайму,
+   она ложится поверх акцентного градиента и даёт свечение */
+.mcs .core video,.mcs .core img{position:absolute;inset:0;width:100%;height:100%;
+  object-fit:cover;transform:scale(1.15);mix-blend-mode:screen;opacity:.95;}
+.mcs .core span{position:relative;z-index:2;color:#fff;
+  font-family:'Inter',Arial,sans-serif;font-size:15px;font-weight:500;
+  text-shadow:0 1px 10px rgba(0,0,0,.6);}
+.mcs .pulse{position:absolute;left:0;top:0;width:13px;height:13px;
+  border-radius:50%;background:var(--cyan);
+  box-shadow:0 0 0 5px rgba(85,198,254,.26), 0 0 22px 6px rgba(85,198,254,.8);
+  transform:translate(-50%,-50%);opacity:0;pointer-events:none;z-index:3;}
+.mcs .stepcap{position:absolute;left:50%;bottom:-58px;transform:translateX(-50%);
+  font-family:'Inter',Arial,sans-serif;font-size:17px;color:var(--ink);
+  background:rgba(255,255,255,.8);-webkit-backdrop-filter:blur(14px);
+  backdrop-filter:blur(14px);padding:9px 16px;border-radius:999px;
+  white-space:nowrap;opacity:0;transition:opacity .35s var(--eo);
+  box-shadow:0 8px 26px rgba(14,42,70,.1);}
+.mcs .stepcap.on{opacity:1;}
+.mcs .mapfoot{display:flex;justify-content:space-between;gap:var(--s24);
+  margin-top:var(--s96);}
+.mcs .steplist{display:none;list-style:none;margin:var(--s48) 0 0;padding:0;
   counter-reset:s;}
-.mcs .ecoSteps li{grid-column:span 6;font-family:'Inter',Arial,sans-serif;
-  font-size:17px;line-height:1.55;color:var(--text);
-  padding-left:var(--s32);position:relative;counter-increment:s;}
-.mcs .ecoSteps li::before{content:counter(s);position:absolute;left:0;top:0;
-  font-family:'AK',Arial,sans-serif;color:var(--mute);}
-@media (max-width:860px){ .mcs .ecoSteps li{grid-column:span 12;} }
-html.eco-flat .mcs .ecoWrap{display:none;}
-html.eco-flat .mcs .ecoFlat{display:block;}
+.mcs .steplist li{font-family:'Inter',Arial,sans-serif;font-size:17px;
+  line-height:1.5;color:var(--text);padding-left:var(--s32);position:relative;
+  counter-increment:s;margin-bottom:var(--s16);}
+.mcs .steplist li::before{content:counter(s);position:absolute;left:0;
+  color:var(--mute);font-family:'AK',Arial,sans-serif;}
+@media (max-width:860px){
+  .mcs .canvas{aspect-ratio:3/4.4;}
+  .mcs .node{font-size:15px;padding:8px 13px 8px 10px;}
+  .mcs .stepcap{font-size:15px;white-space:normal;max-width:84vw;
+    text-align:center;bottom:-70px;}
+  .mcs .mapfoot{flex-direction:column;gap:var(--s8);}
+}
+
+/* ================= 5. пять направлений ================= */
+.mcs .bento{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));
+  gap:var(--grid);}
+.mcs .cell{position:relative;overflow:hidden;border-radius:22px;
+  background:var(--grey);padding:var(--s32);min-height:260px;
+  display:flex;flex-direction:column;justify-content:flex-end;
+  grid-column:span 1;}
+.mcs .cell.big{grid-column:span 2;grid-row:span 2;min-height:540px;}
+.mcs .cell .art{position:absolute;inset:0;overflow:hidden;}
+/* пятно акцента, пока в слоте нет файла */
+.mcs .cell .blob{position:absolute;left:50%;top:38%;width:76%;aspect-ratio:1.2;
+  transform:translate(-50%,-50%);border-radius:46% 54% 50% 50%;
+  background:var(--grad);filter:blur(26px);opacity:.52;}
+.mcs .cell.big .blob{width:62%;}
+/* парящие фрагменты интерфейса из слотов */
+.mcs .frag{position:absolute;border-radius:12px;overflow:hidden;
+  box-shadow:0 18px 44px rgba(14,42,70,.16), 0 2px 8px rgba(14,42,70,.08);
+  will-change:transform;}
+.mcs .frag img,.mcs .frag video{width:100%;height:100%;object-fit:cover;display:block;}
+.mcs .frag.far{filter:blur(3px);opacity:.72;}
+.mcs .cell .ico{position:relative;z-index:2;width:30px;height:30px;
+  border-radius:9px;display:grid;place-items:center;margin-bottom:var(--s16);
+  background:rgba(255,255,255,.78);
+  -webkit-backdrop-filter:blur(16px);backdrop-filter:blur(16px);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.9), 0 4px 14px rgba(14,42,70,.1);}
+.mcs .cell .ico svg{width:17px;height:17px;color:var(--blue);}
+.mcs .cell h3,.mcs .cell .cap{position:relative;z-index:2;}
+.mcs .cell h3{margin-bottom:6px;}
+@media (max-width:1023.98px){
+  .mcs .bento{grid-template-columns:repeat(2,minmax(0,1fr));}
+  .mcs .cell.big{grid-column:span 2;grid-row:auto;min-height:320px;}
+}
+@media (max-width:620px){
+  .mcs .bento{grid-template-columns:1fr;}
+  .mcs .cell,.mcs .cell.big{grid-column:span 1;min-height:240px;padding:var(--s24);}
+}
+
+/* ================= 6. бот ================= */
+.mcs .orbit{position:relative;margin-top:var(--s64);
+  display:grid;place-items:center;min-height:620px;}
+/* нет центрального экрана — карточки идут сеткой, дыры не остаётся */
+.mcs .orbit.flat{min-height:0;}
+.mcs .orbit.flat .center{display:none;}
+.mcs .orbit.flat .floats{display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr));gap:var(--s16);width:100%;}
+.mcs .orbit.flat .float{position:static!important;max-width:none;
+  transform:none!important;}
+@media (max-width:1023.98px){
+  .mcs .orbit.flat .floats{grid-template-columns:repeat(2,minmax(0,1fr));}
+}
+@media (max-width:620px){
+  .mcs .orbit.flat .floats{grid-template-columns:1fr;}
+}
+.mcs .orbit .center{position:relative;z-index:2;width:min(300px,62vw);}
+.mcs .orbit .center .screen{border-radius:26px;}
+.mcs .float{position:absolute;z-index:3;max-width:224px;
+  display:flex;gap:10px;align-items:flex-start;
+  padding:13px 15px;border-radius:14px;
+  background:rgba(255,255,255,.74);
+  -webkit-backdrop-filter:blur(22px) saturate(1.1);
+  backdrop-filter:blur(22px) saturate(1.1);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.9), 0 16px 40px rgba(14,42,70,.13);
+  will-change:transform;}
+.mcs .float{opacity:0;--ex:var(--exs,0px);--ey2:18px;
+  transition:opacity .7s var(--eo), transform .7s var(--eo);}
+.mcs .float.in{opacity:1;--ex:0px;--ey2:0px;}
+.mcs .float i{flex:0 0 auto;width:9px;height:9px;border-radius:50%;
+  margin-top:5px;}
+.mcs .float b{display:block;font-family:'Inter',Arial,sans-serif;font-size:15px;
+  font-weight:600;letter-spacing:-.012em;margin-bottom:3px;}
+.mcs .float span{display:block;font-family:'Inter',Arial,sans-serif;
+  font-size:15px;line-height:1.35;color:var(--mute);}
+@media (max-width:1023.98px){
+  .mcs .orbit{min-height:0;grid-template-columns:1fr;gap:var(--s32);}
+  .mcs .orbit .center{width:min(260px,58vw);margin:0 auto;}
+  .mcs .floats{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));
+    gap:var(--s16);width:100%;margin-top:var(--s32);}
+  .mcs .float{position:static!important;max-width:none;transform:none!important;}
+}
+@media (max-width:620px){
+  .mcs .floats{grid-template-columns:1fr;}
+}
 
 /* ---------- семь статусов ---------- */
 .mcs .statuses{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));
   gap:var(--s16) var(--grid);list-style:none;margin:0;padding:0;}
 .mcs .statuses li{display:flex;gap:var(--s16);align-items:baseline;
-  font-family:'Inter',Arial,sans-serif;font-size:17px;line-height:1.55;
-  cursor:default;transition:opacity .3s var(--eo);}
+  font-family:'Inter',Arial,sans-serif;font-size:17px;line-height:1.55;}
 .mcs .statuses i{width:8px;height:8px;border-radius:50%;flex:0 0 auto;
   position:relative;top:-1px;}
 .mcs .statuses b{font-weight:600;flex:0 0 auto;}
 .mcs .statuses span{color:var(--text);}
-.mcs .statuses.lit li{opacity:.45;}
-.mcs .statuses.lit li.on{opacity:1;}
-/* Внутри узкой правой колонки список идёт одной колонкой. */
-.mcs .ch .statuses{grid-template-columns:1fr;}
-/* до 768 px: точка и название в строке, описание под названием
-   с тем же левым отступом */
 @media (max-width:767.98px){
   .mcs .statuses{grid-template-columns:1fr;}
   .mcs .statuses li{display:grid;grid-template-columns:auto minmax(0,1fr);
@@ -256,111 +396,224 @@ html.eco-flat .mcs .ecoFlat{display:block;}
   .mcs .statuses span{grid-column:2;grid-row:2;}
 }
 
-/* ---------- блоки ---------- */
-.mcs .block + .block{margin-top:var(--s64);}
-.mcs .tags{font-family:'Inter',Arial,sans-serif;font-size:17px;line-height:1.9;
-  color:var(--text);max-width:65ch;}
-
-/* ---------- закреплённый экран бота ----------
-   Левая и правая колонки лежат в одном гриде, sticky задан самой
-   колонке: экран остаётся закреплённым до конца последнего подраздела
-   и не отрывается раньше времени. Расстояние между подразделами — 96 px;
-   длину прокрутки задаёт не пустота между абзацами, а порог видимости
-   подраздела. */
-.mcs .botgrid > .cl{align-self:start;}
-@media (min-width:1024px){
-  .mcs .botgrid > .cl{position:sticky;top:var(--s96);}
-}
-.mcs .prog{display:flex;gap:4px;margin-bottom:var(--s16);}
-.mcs .prog i{flex:1 1 auto;height:2px;background:rgba(17,19,21,.12);
-  transition:background .4s var(--eo);}
-.mcs .prog i.on{background:var(--accent);}
-.mcs .swap{position:relative;}
-.mcs .botgrid .swap,.mcs #appSwap{max-width:270px;}
-.mcs .swap > *{transition:opacity .45s var(--eo);}
-.mcs .swap > *.out{opacity:0;position:absolute;inset:0;pointer-events:none;}
-.mcs .chapters > .ch + .ch{margin-top:var(--s96);}
-@media (min-width:1024px){ .mcs .ch .inline{display:none;} }
-@media (max-width:1023.98px){
-  .mcs .botgrid > .cl{display:none;}
-  .mcs .ch .inline{margin-top:var(--s32);}
-}
-
-/* ---------- сегментированный переключатель ---------- */
-.mcs .seg{display:inline-flex;gap:4px;margin-bottom:var(--s32);}
-.mcs .seg button{font-family:'Inter',Arial,sans-serif;font-size:14px;
+/* ================= 7. Mini App ================= */
+.mcs .fan{position:relative;perspective:1500px;
+  min-height:clamp(420px,46vw,560px);display:grid;place-items:center;}
+.mcs .fan .back{position:absolute;width:min(360px,70vw);aspect-ratio:1/1.1;
+  border-radius:28px;background:var(--grad);filter:blur(34px);opacity:.6;
+  transform:translateY(6%);}
+.mcs .card3d{position:absolute;width:min(252px,54vw);
+  transform-style:preserve-3d;transition:transform .7s var(--eo),
+    filter .7s var(--eo), opacity .7s var(--eo);will-change:transform;}
+.mcs .card3d .screen{border-radius:24px;}
+.mcs .seg{display:inline-flex;gap:4px;margin-bottom:var(--s32);
+  padding:4px;border-radius:12px;background:var(--grey);}
+.mcs .seg button{font-family:'Inter',Arial,sans-serif;font-size:15px;
   font-weight:500;border:0;background:none;color:var(--mute);cursor:pointer;
-  padding:var(--s8) var(--s16);border-radius:8px;
+  padding:9px var(--s16);border-radius:9px;
   transition:background .3s var(--eo), color .3s var(--eo);}
-.mcs .seg button[aria-selected="true"]{background:#f1f1f2;color:var(--ink);}
+.mcs .seg button[aria-selected="true"]{background:#fff;color:var(--ink);
+  box-shadow:0 1px 3px rgba(14,42,70,.1);}
 
-/* ---------- разметка плагина ---------- */
-.mcs .code{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
-  font-size:14px;line-height:1.85;color:var(--text);background:#f6f6f7;
-  border-radius:12px;padding:var(--s32);white-space:pre;overflow-x:auto;}
-.mcs .code span{display:block;opacity:0;transform:translateY(4px);
-  transition:opacity .3s var(--eo), transform .3s var(--eo);}
-.mcs .code.in span{opacity:1;transform:none;}
-.mcs .code b{color:var(--ink);font-weight:600;}
+/* ================= 8. инфраструктура ================= */
+.mcs .infra{background:var(--dark);color:#fff;padding:var(--s128) 0;
+  margin-bottom:var(--sec);}
+.mcs .infra h2,.mcs .infra h3,.mcs .infra h4{color:#fff;}
+.mcs .infra p{color:rgba(255,255,255,.66);}
+.mcs .flow{display:flex;align-items:center;gap:var(--s16);flex-wrap:wrap;
+  margin-bottom:var(--s64);}
+.mcs .fnode{font-family:'Inter',Arial,sans-serif;font-size:15px;
+  padding:11px 17px;border-radius:12px;color:#fff;
+  background:rgba(255,255,255,.07);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.14);}
+.mcs .fnode.acc{background:var(--grad);box-shadow:none;}
+.mcs .farrow{flex:1 1 32px;min-width:28px;height:1px;
+  background:repeating-linear-gradient(to right,rgba(255,255,255,.34) 0 5px,transparent 5px 11px);}
+.mcs .chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:var(--s32);}
+.mcs .chip{font-family:'Inter',Arial,sans-serif;font-size:15px;
+  padding:7px 13px;border-radius:999px;color:rgba(255,255,255,.82);
+  background:rgba(255,255,255,.06);
+  box-shadow:inset 0 0 0 1px rgba(255,255,255,.09);}
+.mcs .cols3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));
+  margin-top:var(--s96);}
+.mcs .cols3 > div{padding:0 var(--s32);position:relative;}
+.mcs .cols3 > div:first-child{padding-left:0;}
+.mcs .cols3 > div:last-child{padding-right:0;}
+.mcs .cols3 > div + div::before{content:'';position:absolute;left:0;top:0;
+  bottom:0;width:1px;background:rgba(255,255,255,.12);}
+.mcs .cols3 > div + div::after{content:'';position:absolute;left:-3.5px;top:-3.5px;
+  width:7px;height:7px;
+  background:
+    linear-gradient(rgba(255,255,255,.4) 0 0) center/7px 1px no-repeat,
+    linear-gradient(rgba(255,255,255,.4) 0 0) center/1px 7px no-repeat;}
+@media (max-width:860px){
+  .mcs .cols3{grid-template-columns:1fr;gap:var(--s32);}
+  .mcs .cols3 > div{padding:0;}
+  .mcs .cols3 > div + div::before{left:0;right:0;top:calc(var(--s32) * -0.5);
+    bottom:auto;width:auto;height:1px;}
+  .mcs .cols3 > div + div::after{display:none;}
+}
+
+/* ================= 9. инструменты ================= */
+.mcs .rail{display:flex;gap:var(--s16);align-items:stretch;}
+.mcs .rcard{position:relative;overflow:hidden;border-radius:22px;
+  background:var(--grey);padding:var(--s32);min-height:clamp(300px,30vw,400px);
+  display:flex;flex-direction:column;justify-content:flex-end;
+  flex:1 1 0;cursor:default;
+  transition:flex-grow .7s var(--eo), background .5s var(--eo),
+    color .5s var(--eo);}
+.mcs .rcard.on{flex-grow:2.4;background:#0B1220;color:#fff;}
+.mcs .rcard .bg{position:absolute;inset:0;opacity:0;
+  transition:opacity .6s var(--eo);background:var(--grad);}
+.mcs .rcard.on .bg{opacity:1;}
+.mcs .rcard .prev:empty{display:none;}
+.mcs .rcard .prev{position:absolute;left:var(--s32);right:var(--s32);
+  top:var(--s32);bottom:46%;border-radius:12px;overflow:hidden;opacity:0;
+  box-shadow:0 18px 44px rgba(6,14,26,.3);
+  transition:opacity .6s var(--eo);}
+.mcs .rcard.on .prev{opacity:1;}
+.mcs .rcard .prev img,.mcs .rcard .prev video{width:100%;height:100%;
+  object-fit:cover;display:block;}
+.mcs .rcard h3,.mcs .rcard .cap{position:relative;z-index:2;
+  transition:color .5s var(--eo);}
+.mcs .rcard.on h3{color:#fff;}
+.mcs .rcard.on .cap{color:rgba(255,255,255,.78);}
+.mcs .rcard .ico{position:relative;z-index:2;width:30px;height:30px;
+  border-radius:9px;display:grid;place-items:center;margin-bottom:var(--s16);
+  background:rgba(255,255,255,.78);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.9), 0 4px 14px rgba(14,42,70,.1);}
+.mcs .rcard .ico svg{width:17px;height:17px;color:var(--blue);}
+@media (max-width:860px){
+  .mcs .rail{margin-left:calc(var(--gut) * -1);margin-right:calc(var(--gut) * -1);
+    padding:0 var(--gut);overflow-x:auto;scroll-snap-type:x mandatory;
+    scrollbar-width:none;-webkit-overflow-scrolling:touch;}
+  .mcs .rail::-webkit-scrollbar{display:none;}
+  .mcs .rcard{flex:0 0 76vw;scroll-snap-align:center;min-height:300px;}
+  .mcs .rcard.on{flex-grow:0;}
+}
 
 /* ---------- слайдер «до и после» ---------- */
-.mcs .cmp{position:relative;overflow:hidden;border-radius:12px;
-  aspect-ratio:1/1;touch-action:pan-y;cursor:ew-resize;background:#f0f0f1;
-  box-shadow:0 34px 90px rgba(16,24,40,.11), 0 6px 20px rgba(16,24,40,.05);}
+.mcs .cmp{position:relative;overflow:hidden;border-radius:16px;
+  aspect-ratio:1/1;touch-action:pan-y;cursor:ew-resize;background:var(--grey);
+  box-shadow:0 30px 70px rgba(14,42,70,.12), 0 2px 8px rgba(14,42,70,.06);}
 .mcs .cmp .a,.mcs .cmp .b{position:absolute;inset:0;}
 .mcs .cmp .b{clip-path:inset(0 0 0 var(--x,50%));}
 .mcs .cmp .screen{position:absolute;inset:0;border-radius:0;box-shadow:none;
   aspect-ratio:auto;opacity:1;transform:none;}
 .mcs .cmp .bar{position:absolute;top:0;bottom:0;left:var(--x,50%);width:2px;
-  background:#fff;box-shadow:0 0 0 1px rgba(17,19,21,.12);z-index:3;}
+  background:#fff;box-shadow:0 0 0 1px rgba(14,42,70,.14);z-index:3;}
 .mcs .cmp .bar::after{content:'';position:absolute;top:50%;left:50%;
   width:34px;height:34px;border-radius:50%;background:#fff;
-  transform:translate(-50%,-50%);box-shadow:0 2px 10px rgba(16,24,40,.22);}
+  transform:translate(-50%,-50%);box-shadow:0 2px 10px rgba(14,42,70,.24);}
 .mcs .cmp .lbl{position:absolute;bottom:var(--s16);
-  font-family:'Inter',Arial,sans-serif;font-size:14px;color:var(--mute);
-  z-index:4;}
+  font-family:'Inter',Arial,sans-serif;font-size:15px;color:var(--mute);z-index:4;}
 .mcs .cmp .lbl.l{left:var(--s16);} .mcs .cmp .lbl.r{right:var(--s16);}
-.mcs .cmp .a .slot{justify-content:flex-start;text-align:left;
-  padding-right:52%;}
-.mcs .cmp .b .slot{justify-content:flex-end;text-align:right;
-  padding-left:52%;}
 
-/* ---------- три шага на линии ---------- */
-.mcs .steps{position:relative;display:grid;
-  grid-template-columns:repeat(3,minmax(0,1fr));gap:var(--grid);
-  padding-top:var(--s32);}
-.mcs .steps::before{content:'';position:absolute;left:0;right:0;top:3px;
-  height:1px;background:var(--line);}
-.mcs .st{position:relative;}
-.mcs .st::before{content:'';position:absolute;left:0;top:-32px;
-  width:8px;height:8px;border-radius:50%;background:#d7d9dc;
-  transition:background .5s var(--eo);}
-.mcs .st.on::before{background:var(--accent);}
-.mcs .st p{max-width:32ch;}
+/* ================= 10. стандарты ================= */
+.mcs .cols4{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));}
+.mcs .cols4 > div{padding:0 var(--s32);position:relative;}
+.mcs .cols4 > div:first-child{padding-left:0;}
+.mcs .cols4 > div:last-child{padding-right:0;}
+.mcs .cols4 > div + div::before{content:'';position:absolute;left:0;top:0;
+  bottom:0;width:1px;background:var(--line);}
+.mcs .cols4 > div + div::after{content:'';position:absolute;left:-3.5px;
+  top:-3.5px;width:7px;height:7px;
+  background:
+    linear-gradient(rgba(0,0,0,.22) 0 0) center/7px 1px no-repeat,
+    linear-gradient(rgba(0,0,0,.22) 0 0) center/1px 7px no-repeat;}
+/* объёмная стеклянная иконка */
+.mcs .gi{position:relative;width:46px;height:46px;border-radius:14px;
+  display:grid;place-items:center;margin-bottom:var(--s24);overflow:hidden;
+  background:var(--grad);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.7),
+             0 10px 24px rgba(14,42,70,.18);}
+.mcs .gi::before{content:'';position:absolute;inset:0;
+  background:linear-gradient(to bottom,rgba(255,255,255,.5),rgba(255,255,255,0) 52%);}
+.mcs .gi svg{position:relative;z-index:2;width:21px;height:21px;color:#fff;}
+.mcs .cols4 .v{font-size:clamp(32px,3.2vw,46px);line-height:1;font-weight:500;
+  letter-spacing:-.04em;margin:0 0 var(--s8);}
 @media (max-width:860px){
-  .mcs .steps{grid-template-columns:1fr;padding:0 0 0 var(--s24);}
-  .mcs .steps::before{left:3px;right:auto;top:0;bottom:0;width:1px;height:auto;}
-  .mcs .steps .st{padding:var(--s16) 0;}
-  .mcs .st::before{left:-24px;top:24px;}
-  .mcs .st p{max-width:none;}
+  .mcs .cols4{grid-template-columns:repeat(2,minmax(0,1fr));
+    gap:var(--s32) 0;}
+  .mcs .cols4 > div{padding:0 var(--s24);}
+  .mcs .cols4 > div:nth-child(odd){padding-left:0;}
+  .mcs .cols4 > div:nth-child(even){padding-right:0;}
+  .mcs .cols4 > div:nth-child(odd)::before,
+  .mcs .cols4 > div:nth-child(odd)::after{display:none;}
 }
 
-/* ---------- финал ---------- */
-.mcs .fin{position:relative;overflow:hidden;padding-bottom:var(--sec);}
-.mcs .fin .tint{position:absolute;inset:0;z-index:0;pointer-events:none;
-  background:
-    radial-gradient(48% 54% at 22% 24%,rgba(146,168,202,.20),transparent 72%),
-    radial-gradient(44% 50% at 80% 70%,rgba(168,184,208,.15),transparent 74%);}
-.mcs .fin > .wrap{position:relative;z-index:1;padding-top:var(--s128);}
-.mcs .thesis{font-size:clamp(28px,3.1vw,40px);line-height:1.1;
-  letter-spacing:-.038em;font-weight:500;margin:0 0 var(--s96);
-  max-width:38ch;}
-.mcs .res{list-style:none;margin:0;padding:0;display:grid;
+/* ================= 11. приложение врача ================= */
+.mcs .arc{position:relative;min-height:clamp(440px,44vw,580px);
+  display:grid;place-items:center;margin-top:var(--s64);}
+.mcs .arc.flat{min-height:0;}
+.mcs .arc.flat .center{display:none;}
+.mcs .arc.flat .acards{display:grid;
+  grid-template-columns:repeat(5,minmax(0,1fr));gap:var(--s16);width:100%;}
+.mcs .arc.flat .acard{position:static!important;width:auto;
+  transform:none!important;filter:none!important;opacity:1;}
+@media (max-width:1023.98px){
+  .mcs .arc.flat .acards{grid-template-columns:repeat(2,minmax(0,1fr));}
+}
+@media (max-width:620px){
+  .mcs .arc.flat .acards{grid-template-columns:1fr;}
+}
+.mcs .arc .center{position:relative;z-index:3;width:min(520px,76vw);}
+.mcs .arc .center .screen{border-radius:18px;}
+.mcs .acard{position:absolute;z-index:2;width:188px;padding:14px 16px;
+  border-radius:14px;background:rgba(255,255,255,.76);
+  -webkit-backdrop-filter:blur(22px) saturate(1.1);
+  backdrop-filter:blur(22px) saturate(1.1);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.9), 0 18px 44px rgba(14,42,70,.14);
+  font-family:'Inter',Arial,sans-serif;font-size:15px;font-weight:500;
+  line-height:1.3;will-change:transform;}
+.mcs .acard{opacity:0;--ey2:26px;
+  transition:opacity .7s var(--eo), transform .7s var(--eo),
+  filter .7s var(--eo);}
+.mcs .acard.in{opacity:1;--ey2:0px;}
+.mcs .acard.in.far{filter:blur(3px);opacity:.66;}
+@media (max-width:1023.98px){
+  .mcs .arc{min-height:0;}
+  .mcs .arc .center{width:100%;}
+  .mcs .acards{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));
+    gap:var(--s16);width:100%;margin-top:var(--s32);}
+  .mcs .acard{position:static!important;width:auto;transform:none!important;
+    filter:none!important;opacity:1!important;}
+}
+@media (max-width:620px){ .mcs .acards{grid-template-columns:1fr;} }
+
+/* ================= 12. финал ================= */
+.mcs .banner{position:relative;overflow:hidden;border-radius:32px;
+  padding:clamp(48px,7vw,112px) clamp(28px,5vw,80px);
+  background:var(--deep);color:#fff;isolation:isolate;}
+.mcs .banner video,.mcs .banner img.bgv{position:absolute;inset:0;width:100%;
+  height:100%;object-fit:cover;z-index:0;opacity:.6;
+  mix-blend-mode:screen;transform:scale(1.2);}
+.mcs .banner .wash{position:absolute;inset:0;z-index:1;background:var(--grad-soft);}
+.mcs .banner .dim{position:absolute;inset:0;z-index:2;
+  background:linear-gradient(105deg,rgba(6,16,30,.72),rgba(6,16,30,.3) 62%,rgba(6,16,30,.6));}
+.mcs .banner h2{position:relative;z-index:4;color:#fff;margin:0;
+  max-width:22ch;font-size:clamp(28px,3.6vw,52px);line-height:1.06;}
+.mcs .res{list-style:none;margin:var(--s96) 0 0;padding:0;display:grid;
   grid-template-columns:repeat(12,minmax(0,1fr));gap:var(--s32) var(--grid);}
 .mcs .res li{grid-column:span 6;font-family:'Inter',Arial,sans-serif;
   font-size:17px;line-height:1.55;color:var(--text);
   padding-top:var(--s16);border-top:1px solid var(--line);}
 @media (max-width:860px){ .mcs .res li{grid-column:span 12;} }
+
+/* ---------- экраны из слотов ---------- */
+.mcs .screen{position:relative;overflow:hidden;background:var(--grey);
+  border-radius:16px;
+  box-shadow:0 30px 70px rgba(14,42,70,.13), 0 4px 14px rgba(14,42,70,.06);}
+.mcs .screen.desktop{aspect-ratio:16/10;}
+.mcs .screen.phone{aspect-ratio:9/19.5;border-radius:26px;}
+.mcs .screen.square{aspect-ratio:1/1;}
+.mcs .screen.photo{aspect-ratio:4/5;}
+.mcs .screen img,.mcs .screen video{width:100%;height:100%;object-fit:cover;
+  display:block;}
+.mcs .screen .slot{position:absolute;inset:0;display:flex;align-items:center;
+  justify-content:center;padding:var(--s24);text-align:center;
+  font-family:'Inter',Arial,sans-serif;font-size:15px;line-height:1.45;
+  color:var(--mute);}
 
 /* ---------- навигация ---------- */
 .mcs .cnav{border-top:1px solid var(--line);display:grid;
@@ -369,50 +622,74 @@ html.eco-flat .mcs .ecoFlat{display:block;}
   color:var(--ink);}
 .mcs .cnav a + a{text-align:right;}
 .mcs .cnav small{display:block;font-family:'Inter',Arial,sans-serif;
-  font-size:14px;color:var(--mute);margin-bottom:var(--s8);}
+  font-size:15px;color:var(--mute);margin-bottom:var(--s8);}
 .mcs .cnav strong{font-size:clamp(22px,2.1vw,32px);line-height:1.05;
   letter-spacing:-.035em;font-weight:500;}
 .mcs .foot{padding:var(--s32) var(--gut) var(--s48);display:flex;
   justify-content:space-between;gap:var(--s16);flex-wrap:wrap;
-  font-family:'Inter',Arial,sans-serif;font-size:14px;color:var(--mute);}
+  font-family:'Inter',Arial,sans-serif;font-size:15px;color:var(--mute);}
 .mcs .foot a{color:var(--mute);text-decoration:none;}
 @media (max-width:620px){
   .mcs .cnav{grid-template-columns:1fr;}
   .mcs .cnav a + a{text-align:left;border-top:1px solid var(--line);}
 }
 
-/* ---------- появление: заголовки и текст снизу на 24 px ---------- */
-.mcs .rv{opacity:0;transform:translateY(24px);
-  transition:opacity .6s ease-out, transform .6s ease-out;}
-.mcs .rv.in{opacity:1;transform:none;}
+/* ---------- появление ---------- */
+.mcs .rv{opacity:0;transform:translateY(24px);}
+.mcs .rv.in{opacity:1;transform:none;
+  transition:opacity .7s var(--eo), transform .7s var(--eo);}
 
 /* ---------- мобильная шкала ---------- */
 @media (max-width:860px){
   .mcs{--sec:var(--s96);--head:40px;--grid:var(--s24);}
   .mcs .hero{padding-top:var(--s64);}
-  .mcs .hero h1,.mcs .hero .lead{grid-column:1 / 13;}
-  .mcs .facts div{grid-column:span 6;}
-  .mcs .meta div{grid-column:span 12;}
   .mcs .cl,.mcs .cr{grid-column:1 / 13;}
   .mcs .cr{margin-top:var(--s48);}
   .mcs .cl.full,.mcs .cr.full{grid-column:1 / 13;}
-  .mcs .shots.n3,.mcs .shots.n4{grid-template-columns:repeat(2,minmax(0,1fr));}
+  .mcs .infra{padding:var(--s96) 0;}
 }
 
 @media (prefers-reduced-motion:reduce){
+  html{scroll-behavior:auto;}
   .mcs .rv{opacity:1!important;transform:none!important;transition:none!important;}
-  .mcs .screen.d3{opacity:1!important;transform:none!important;}
   .mcs *{animation-duration:.01ms!important;transition-duration:.01ms!important;}
+  .mcs .frag.far,.mcs .acard.far{filter:none;opacity:1;}
+  .mcs .plate,.mcs .float,.mcs .acard{opacity:1!important;
+    --ey:0px;--ex:0px;--ey2:0px;}
+  .mcs .radial line{opacity:1!important;}
 }
 html.reduced .mcs .rv{opacity:1!important;transform:none!important;
   transition:none!important;}
-html.reduced .mcs .screen.d3{opacity:1!important;transform:none!important;}
 html.reduced .mcs *{animation-duration:.01ms!important;
   transition-duration:.01ms!important;}
+html.reduced .mcs .plate,html.reduced .mcs .float,html.reduced .mcs .acard{
+  opacity:1!important;--ey:0px;--ex:0px;--ey2:0px;}
+html.reduced .mcs .radial line{opacity:1!important;}
+html.reduced .mcs .frag.far,html.reduced .mcs .acard.far{filter:none;opacity:1;}
+html.reduced{scroll-behavior:auto;}
 </style>
 </head>
 
 <body class="mcs">
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
+<g id="i" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"></g>
+<symbol id="i-cam" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8.5A2.5 2.5 0 0 1 5.5 6h2L9 4h6l1.5 2h2A2.5 2.5 0 0 1 21 8.5v9A2.5 2.5 0 0 1 18.5 20h-13A2.5 2.5 0 0 1 3 17.5z"/><circle cx="12" cy="13" r="3.6"/></symbol>
+<symbol id="i-puzzle" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M10 4a2 2 0 1 1 4 0v1h3a2 2 0 0 1 2 2v3h-1a2 2 0 1 0 0 4h1v3a2 2 0 0 1-2 2h-3v-1a2 2 0 1 0-4 0v1H7a2 2 0 0 1-2-2v-3H4a2 2 0 1 1 0-4h1V7a2 2 0 0 1 2-2h3z"/></symbol>
+<symbol id="i-spark" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.9 5.1L19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9z"/><path d="M18.5 15.5l.8 2.2 2.2.8-2.2.8-.8 2.2-.8-2.2-2.2-.8 2.2-.8z"/></symbol>
+<symbol id="i-chat" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a8 8 0 0 1-11.6 7.1L4 20.5l1.4-5.4A8 8 0 1 1 21 12z"/></symbol>
+<symbol id="i-cal" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="5" width="17" height="15" rx="2.5"/><path d="M3.5 10h17M8 3.5v3M16 3.5v3"/></symbol>
+<symbol id="i-send" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M21 3L10.5 13.5M21 3l-6.5 18-4-8-8-4z"/></symbol>
+<symbol id="i-server" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="4" width="17" height="6.5" rx="2"/><rect x="3.5" y="13.5" width="17" height="6.5" rx="2"/><path d="M7 7.2h.01M7 16.8h.01"/></symbol>
+<symbol id="i-db" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="6" rx="7.5" ry="3"/><path d="M4.5 6v12c0 1.7 3.4 3 7.5 3s7.5-1.3 7.5-3V6"/><path d="M4.5 12c0 1.7 3.4 3 7.5 3s7.5-1.3 7.5-3"/></symbol>
+<symbol id="i-layers" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l9 4.5-9 4.5-9-4.5z"/><path d="M3 12.5L12 17l9-4.5M3 17L12 21.5 21 17"/></symbol>
+<symbol id="i-book" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H20v15H6.5A2.5 2.5 0 0 0 4 20.5z"/><path d="M4 20.5A2.5 2.5 0 0 1 6.5 18H20v3H6.5"/></symbol>
+<symbol id="i-slides" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="4.5" width="17" height="11" rx="2"/><path d="M12 15.5v4M8.5 21h7"/></symbol>
+<symbol id="i-list" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6.5h11M9 12h11M9 17.5h11M4.5 6.5h.01M4.5 12h.01M4.5 17.5h.01"/></symbol>
+<symbol id="i-route" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="6" r="2.5"/><circle cx="18" cy="18" r="2.5"/><path d="M8.5 6H14a4 4 0 0 1 0 8h-4a4 4 0 0 0 0 8h5.5" transform="translate(0,-2)"/></symbol>
+<symbol id="i-tooth" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3c2.2 0 3 1 5 1 1.8 0 3 1.3 3 3.4 0 3-1.3 4.4-1.9 7.4-.5 2.6-.8 6.2-2.4 6.2-1.5 0-1.5-4.6-3.7-4.6s-2.2 4.6-3.7 4.6c-1.6 0-1.9-3.6-2.4-6.2C5.3 11.8 4 10.4 4 7.4 4 5.3 5.2 4 7 4c2 0 2.8-1 5-1z"/></symbol>
+<symbol id="i-shield" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l7.5 3v6c0 4.4-3.1 7.9-7.5 9.4C7.6 19.9 4.5 16.4 4.5 12V6z"/></symbol>
+</defs></svg>
 
 <header class="top" id="top">
   <a class="back" href="index.html">
@@ -423,231 +700,308 @@ html.reduced .mcs *{animation-duration:.01ms!important;
   <a href="index.html">Илья Иванов</a>
 </header>
 
-<!-- ===================== первый экран ===================== -->
-<section class="hero">
-  <span class="tint" aria-hidden="true"></span>
+<!-- ======================= 1. первый экран ======================= -->
+<section class="hero" id="hero">
+  <span class="halo" aria-hidden="true"></span>
   <div class="wrap">
-    <div class="grid">
-      <h1 class="rv">Цифровая экосистема контента для премиальной клиники</h1>
-      <p class="lead rv">Как я превратил SMM медицинского бренда в управляемую
-        систему: от Telegram-продуктов и собственного сервера до 3D-приложения
-        для врачей.</p>
-    </div>
+    <h1 class="rv">Контент-система для премиальной клиники</h1>
+    <p class="lead rv">SMM медицинского бренда, собранный как продукт:
+      Telegram-продукты, собственный сервер, плагины и стандарты.</p>
+    <p class="meta rv">SMM, продюсирование, съёмка, дизайн и разработка ·
+      клиент под NDA</p>
 
-    <div class="facts rv">
-      <div><p class="v" data-count="2">0</p><p class="k">Telegram-продукта</p></div>
-      <div><p class="v" data-count="2">0</p><p class="k">Figma-плагина</p></div>
-      <div><p class="v" data-count="7">0</p><p class="k">статусов</p></div>
-      <div><p class="v" data-count="250" data-suffix="+">0</p><p class="k">постов</p></div>
+    <div class="plates" id="plates" role="list">
+      <a class="plate" role="listitem" href="#bot" data-h="76" data-v="1">
+        <span class="fill"><span class="glow"></span></span>
+        <span class="glass"></span><b>Telegram-бот</b></a>
+      <a class="plate" role="listitem" href="#app" data-h="100" data-v="0">
+        <span class="fill"><span class="glow"></span></span>
+        <span class="glass"></span><b>Mini App</b></a>
+      <a class="plate" role="listitem" href="#infra" data-h="88" data-v="1">
+        <span class="fill"><span class="glow"></span></span>
+        <span class="glass"></span><b>Сервер</b></a>
+      <a class="plate" role="listitem" href="#tools" data-h="112" data-v="0">
+        <span class="fill"><span class="glow"></span></span>
+        <span class="glass"></span><b>Figma-плагины</b></a>
+      <a class="plate" role="listitem" href="#tools" data-h="84" data-v="1">
+        <span class="fill"><span class="glow"></span></span>
+        <span class="glass"></span><b>ИИ-продакшн</b></a>
+      <a class="plate" role="listitem" href="#hyg" data-h="96" data-v="0">
+        <span class="fill"><span class="glow"></span></span>
+        <span class="glass"></span><b>Приложение врача</b></a>
     </div>
-
-    <dl class="meta rv">
-      <div><dt>Роль</dt><dd>SMM-специалист, продюсер контента, фото- и видеограф,
-        дизайнер и разработчик внутренних инструментов</dd></div>
-      <div><dt>Формат</dt><dd>Единственный специалист по контенту, работа
-        напрямую с руководителем клиники</dd></div>
-      <div><dt>Клиент</dt><dd>Под NDA</dd></div>
-    </dl>
   </div>
 </section>
 
-<!-- ===================== контекст и задача ===================== -->
-<section>
+<!-- ======================= 2. полоса цифр ======================= -->
+<section class="band" id="numbers" style="padding-bottom:var(--s96)">
+  <div class="wrap">
+    <div class="grid">
+      <div class="intro grain rv">
+        <p>Правки терялись в переписках, а каждый материал
+          собирался вручную с нуля.</p>
+      </div>
+      <div class="tiles rv">
+        <div class="tile"><p class="v" data-count="2">0</p>
+          <p class="k">Telegram-продукта</p></div>
+        <div class="tile"><p class="v" data-count="2">0</p>
+          <p class="k">Figma-плагина</p></div>
+        <div class="tile"><p class="v" data-count="7">0</p>
+          <p class="k">статусов согласования</p></div>
+        <div class="tile"><p class="v" data-count="250" data-suffix="+">0</p>
+          <p class="k">постов</p></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ======================= 3. задача ======================= -->
+<section class="task" id="task" style="padding-top:var(--s128)">
   <div class="wrap">
     <h2 class="rv">Узким местом был процесс, а не контент</h2>
-    <div class="grid">
-      <div class="cl rv">
-        <h3>Контекст</h3>
-        <p>Премиальная стоматологическая клиника, специализирующаяся на сложных
-          хирургических и комплексных случаях. Аудитория премиальная, тематика
-          медицинская, требования к визуалу на уровне эстетики Apple. Каждая
-          единица контента проходит многоступенчатое согласование
-          с руководством и врачами.</p>
+    <div class="taskgrid" id="taskGrid">
+      <ul class="claims rv" id="claims">
+        <li>Правки терялись в переписках</li>
+        <li>Решения противоречили друг другу</li>
+        <li>Стандарты менялись</li>
+        <li>Каждый материал собирался вручную</li>
+      </ul>
+
+      <div class="radial" id="radial">
+        <span class="blob" aria-hidden="true"></span>
+        <svg viewBox="0 0 400 330" aria-hidden="true" id="radialSvg"></svg>
       </div>
-      <div class="cr rv">
-        <h3>Задача</h3>
-        <p>Наладить регулярный выпуск контента там, где главным ограничением
-          была не идея и не съёмка, а процесс. Правки терялись в переписках,
-          решения разных людей противоречили друг другу, стандарты менялись,
-          а каждый новый материал собирался вручную с нуля.</p>
-        <p>Я подошёл к SMM как к продукту. Вместо того чтобы ускорять себя,
-          я построил вокруг контента систему: инструменты согласования
-          и планирования, автоматизацию производства, стандарты бренда
-          и цифровые сервисы для самой клиники. Все продукты спроектированы
-          и запущены мной с использованием ИИ-разработки.</p>
+
+      <div class="answers rv">
+        <div class="answer"><h4>Система согласования</h4>
+          <p class="cap">Бот и Mini App на одной базе: решения и статусы
+            в одном месте.</p></div>
+        <div class="answer"><h4>Автоматизация производства</h4>
+          <p class="cap">Плагины собирают макеты, ИИ-процесс готовит визуал
+            под стандарт.</p></div>
+        <div class="answer"><h4>Стандарты бренда</h4>
+          <p class="cap">Свод правил для контента, генерации и общения
+            с пациентами.</p></div>
       </div>
     </div>
   </div>
 </section>
 
-<!-- =============== сцена: экосистема в работе ===============
-     Секция закрепляется, плиты-слои расходятся, по связям идёт путь
-     одного рилса. Содержание прежней секции «Путь рилса через систему»
-     теперь живёт внутри сцены. -->
-<section class="eco" id="eco">
-  <div class="ecoWrap" id="ecoWrap">
-    <div class="ecoPin" id="ecoPin">
-      <canvas id="ecoCanvas"></canvas>
-      <div class="sc-labels" id="ecoLabels"></div>
-      <div class="sc-head" id="ecoHead"><div class="wrap">
-        <h2>Как устроена экосистема</h2>
-      </div></div>
-      <div class="sc-dots" id="ecoDots" aria-hidden="true"></div>
-      <p class="sc-step" id="ecoStep" aria-live="polite"></p>
-      <p class="sc-out" id="ecoOut">Один сервер и одна база под обоими
-        продуктами: статус материала везде один</p>
-      <span class="sc-tip" id="ecoTip" aria-hidden="true"></span>
-    </div>
-  </div>
+<!-- ======================= 4. карта экосистемы ======================= -->
+<section class="map" id="map">
+  <div class="mapbg" id="mapBg" aria-hidden="true"></div>
+  <span class="mapgrid" aria-hidden="true"></span>
+  <span class="mapcross" aria-hidden="true"></span>
+  <div class="wrap">
+    <h2 class="rv">Как устроена экосистема</h2>
 
-  <div class="ecoFlat" id="ecoFlat">
-    <div class="wrap">
-      <h2>Как устроена экосистема</h2>
-      <img src="assets/eco-final.svg" width="1720" height="1400"
-           alt="Три слоя системы: производство, согласование и планирование, инфраструктура — со связями между узлами">
-      <ol class="ecoSteps">
-        <li>Материал загружен в бот</li>
-        <li>Бот спрашивает, согласован ли материал с врачом</li>
-        <li>Согласующие получают уведомление</li>
-        <li>Правка оставлена прямо к материалу</li>
-        <li>Новая версия с историей правки</li>
-        <li>Финальное решение основного согласующего</li>
-        <li>Статус появляется в календаре Mini App</li>
-        <li>Публикация по плану</li>
-      </ol>
-      <p style="margin-top:var(--s64)">Один сервер и одна база под обоими
-        продуктами: статус материала везде один.</p>
+    <div class="canvas" id="canvas">
+      <svg class="links" id="links" aria-hidden="true" preserveAspectRatio="none"></svg>
+      <div class="core" id="core">
+        <span>Общая база</span>
+      </div>
+      <span class="pulse" id="pulse" aria-hidden="true"></span>
+      <p class="stepcap" id="stepcap" aria-live="polite"></p>
+    </div>
+
+    <div class="mapfoot rv">
+      <p class="cap">Один источник правды</p>
+      <p class="cap">8 шагов от съёмки до публикации</p>
+    </div>
+
+    <ol class="steplist" id="stepList">
+      <li>Материал загружен в бот</li>
+      <li>Бот спрашивает, согласован ли материал с врачом</li>
+      <li>Согласующие получают уведомление</li>
+      <li>Правка оставлена прямо к материалу</li>
+      <li>Новая версия с историей правки</li>
+      <li>Финальное решение основного согласующего</li>
+      <li>Статус появляется в календаре Mini App</li>
+      <li>Публикация по плану</li>
+    </ol>
+  </div>
+</section>
+
+<!-- ======================= 5. пять направлений ======================= -->
+<section id="pillars">
+  <div class="wrap">
+    <h2 class="rv">Пять направлений</h2>
+    <div class="bento rv">
+      <div class="cell big grain" data-frags="bot-card,app-plan">
+        <span class="art"><span class="blob"></span></span>
+        <span class="ico"><svg aria-hidden="true"><use href="#i-layers"/></svg></span>
+        <h3>Система согласования и планирования</h3>
+        <p class="cap">Telegram-бот и Mini App на одной базе данных:
+          решения, статусы, контент-план и задачи.</p>
+      </div>
+      <div class="cell grain" data-frags="plugin-panel">
+        <span class="art"><span class="blob"></span></span>
+        <span class="ico"><svg aria-hidden="true"><use href="#i-puzzle"/></svg></span>
+        <h3>Инструменты производства</h3>
+        <p class="cap">Два плагина собирают карусели и сторис по разметке.</p>
+      </div>
+      <div class="cell grain" data-frags="ai-2">
+        <span class="art"><span class="blob"></span></span>
+        <span class="ico"><svg aria-hidden="true"><use href="#i-spark"/></svg></span>
+        <h3>ИИ-продакшн</h3>
+        <p class="cap">Генерация и доработка визуала под стандарт бренда.</p>
+      </div>
+      <div class="cell grain" data-frags="shot-1">
+        <span class="art"><span class="blob"></span></span>
+        <span class="ico"><svg aria-hidden="true"><use href="#i-cam"/></svg></span>
+        <h3>Контент и продакшн</h3>
+        <p class="cap">Съёмка клиники, врачей и процессов, монтаж, сценарии.</p>
+      </div>
+      <div class="cell grain" data-frags="hyg-3d">
+        <span class="art"><span class="blob"></span></span>
+        <span class="ico"><svg aria-hidden="true"><use href="#i-tooth"/></svg></span>
+        <h3>Цифровые сервисы клиники</h3>
+        <p class="cap">Приложение для гигиениста и онлайн-карта пациента.</p>
+      </div>
     </div>
   </div>
 </section>
 
-<!-- ===================== бот ===================== -->
-<section>
+<!-- ======================= 6. Telegram-бот ======================= -->
+<section id="bot">
   <div class="wrap">
     <h2 class="rv">Telegram-бот согласования</h2>
-    <p class="lead rv" style="margin-bottom:var(--s96)">Единая точка, через
-      которую проходит весь контент клиники: рилс, карусели, сторис, фото,
-      графика, тексты и озвучка. Переписки, пересланные файлы и устные «вроде
-      согласовали» заменены одним прозрачным процессом.</p>
+    <p class="lead rv">Единая точка, через которую проходит весь контент
+      клиники: рилс, карусели, сторис, фото, графика, тексты и озвучка.</p>
 
-    <div class="grid botgrid" id="botGrid">
+    <div class="orbit" id="orbit">
+      <div class="center" data-slots="bot-hand|bot-card"></div>
+      <div class="floats" id="floats">
+        <div class="float" data-x="-42" data-y="-30">
+          <i style="background:#6b8f7a"></i>
+          <span><b>Четыре роли</b><span>Автор, основной и второстепенный
+            согласующие, врач</span></span></div>
+        <div class="float" data-x="42" data-y="-34">
+          <i style="background:#9a8768"></i>
+          <span><b>Семь статусов</b><span>Список сортируется по приоритету
+            статуса, а не по дате</span></span></div>
+        <div class="float" data-x="-48" data-y="4">
+          <i style="background:#8d7c96"></i>
+          <span><b>Правки без потерь</b><span>Комментарий оставляется текстом
+            прямо к материалу</span></span></div>
+        <div class="float" data-x="48" data-y="2">
+          <i style="background:#9e7a76"></i>
+          <span><b>Согласование с врачом</b><span>Бот фиксирует имя врача
+            и собирает подтверждения</span></span></div>
+        <div class="float" data-x="-38" data-y="36">
+          <i style="background:#7d8f94"></i>
+          <span><b>Альбомы</b><span>Несколько файлов уходят одним
+            Telegram-альбомом</span></span></div>
+        <div class="float" data-x="40" data-y="38">
+          <i style="background:#6b7f9e"></i>
+          <span><b>Коллаборации</b><span>Отдельный сценарий для съёмок
+            с блогерами</span></span></div>
+      </div>
+    </div>
+
+    <div class="grid rv" style="margin-top:var(--s96)">
       <div class="cl">
-        <div class="prog" id="botProg" aria-hidden="true"></div>
-        <div class="swap" id="botSwap"></div>
+        <h3>Роли и логика решений</h3>
+        <p>В системе четыре роли: автор, основной согласующий,
+          второстепенный согласующий и врач. Каждый видит решения остальных
+          в реальном времени: сообщение обновляется, когда кто-то ответил.
+          Финальный статус «Согласовано» ставится только решением основного
+          согласующего. Эту логику я заложил после того, как нашёл сценарий,
+          в котором промежуточное одобрение могло ошибочно закрыть
+          материал.</p>
+        <h3 style="margin-top:var(--s48)">Правки без потерь</h3>
+        <p>Правка оставляется текстом прямо к материалу. В новой версии
+          согласующий сразу видит, на что отвечал в прошлый раз. Отдельный
+          раздел собирает все материалы с открытыми правками.</p>
+        <h3 style="margin-top:var(--s48)">Согласование с врачом</h3>
+        <p>При загрузке бот спрашивает, согласован ли материал с врачом
+          заранее, и фиксирует имя. Если врач одобрил материал лично, автор
+          вносит это в систему, а согласующие получают уведомление и одной
+          кнопкой подтверждают, возвращают на правку или отклоняют.</p>
       </div>
-
-      <div class="cr chapters" id="botChapters">
-        <div class="ch" data-slot="bot-card">
-          <h3>Роли и логика решений</h3>
-          <p>В системе четыре роли: автор, основной согласующий,
-            второстепенный согласующий и врач. Каждый видит решения остальных
-            в реальном времени: сообщение обновляется, когда кто-то ответил.
-            Финальный статус «Согласовано» ставится только решением основного
-            согласующего. Эту логику я заложил после того, как нашёл сценарий,
-            в котором промежуточное одобрение могло ошибочно закрыть
-            материал.</p>
-          <div class="inline" data-slots="bot-card"></div>
-        </div>
-
-        <div class="ch" data-slot="bot-list">
-          <h3>Семь статусов</h3>
-          <p style="margin-bottom:var(--s32)">Список материалов сортируется
-            не по дате, а по приоритету статуса, поэтому в первую очередь видно
-            то, что требует действия.</p>
-          <ul class="statuses" id="statuses">
-            <li><i style="background:#6b8f7a"></i><b>Согласовано</b><span>финальное решение основного согласующего</span></li>
-            <li><i style="background:#9a8768"></i><b>Внесена правка</b><span>согласующий оставил текстовую правку</span></li>
-            <li><i style="background:#8d7c96"></i><b>Правка ждёт проверки</b><span>автор прислал новую версию</span></li>
-            <li><i style="background:#9e7a76"></i><b>Не согласовано</b><span>материал в этом виде в работу не идёт</span></li>
-            <li><i style="background:#7d8f94"></i><b>Частично согласовано</b><span>решения согласующих разошлись</span></li>
-            <li><i style="background:#8a8d91"></i><b>Не рассмотрено</b><span>решения по материалу ещё нет</span></li>
-            <li><i style="background:#6b7f9e"></i><b>Статусы озвучки</b><span>отдельная ветка для озвучки материала</span></li>
-          </ul>
-          <div class="inline" data-slots="bot-list"></div>
-        </div>
-
-        <div class="ch" data-slot="bot-edit">
-          <h3>Правки без потерь</h3>
-          <p>Правка оставляется текстом прямо к материалу. В новой версии
-            согласующий сразу видит, на что отвечал в прошлый раз. Отдельный
-            раздел собирает все материалы с открытыми правками.</p>
-          <div class="inline" data-slots="bot-edit"></div>
-        </div>
-
-        <div class="ch" data-slot="bot-doctor">
-          <h3>Согласование с врачом</h3>
-          <p>При загрузке бот спрашивает, согласован ли материал с врачом
-            заранее, и фиксирует имя. Если врач одобрил материал лично, автор
-            вносит это в систему, а согласующие получают уведомление и одной
-            кнопкой подтверждают, возвращают на правку или отклоняют. Устные
-            договорённости перестают теряться.</p>
-          <div class="inline" data-slots="bot-doctor"></div>
-        </div>
-
-        <div class="ch" data-slot="bot-albums">
-          <h3>Альбомы</h3>
-          <p>Несколько фото и видео можно загрузить как один материал
-            с названием — тогда согласующие получают их настоящим
-            Telegram-альбомом — или как серию отдельных материалов. Документы
-            и медиа автоматически разводятся по группам, длинные тексты делятся
-            на части без обрезки.</p>
-          <div class="inline" data-slots="bot-albums"></div>
-        </div>
-
-        <div class="ch" data-slot="bot-collab">
-          <h3>Коллаборации</h3>
-          <p>Отдельный сценарий для съёмок с блогерами: дата, врач, нужно ли
-            согласование, изменение планов. Повторный запрос обратной связи
-            уходит сразу всем согласующим, напоминания приходят с названием
-            материала, уведомления выключаются одним переключателем.</p>
-          <div class="inline" data-slots="bot-collab"></div>
-        </div>
+      <div class="cr">
+        <h3>Альбомы</h3>
+        <p>Несколько фото и видео можно загрузить как один материал
+          с названием — тогда согласующие получают их настоящим
+          Telegram-альбомом — или как серию отдельных материалов. Документы
+          и медиа автоматически разводятся по группам, длинные тексты делятся
+          на части без обрезки.</p>
+        <h3 style="margin-top:var(--s48)">Коллаборации</h3>
+        <p>Отдельный сценарий для съёмок с блогерами: дата, врач, нужно ли
+          согласование, изменение планов. Повторный запрос обратной связи
+          уходит сразу всем согласующим, напоминания приходят с названием
+          материала, уведомления выключаются одним переключателем.</p>
       </div>
+    </div>
+
+    <div class="rv" style="margin-top:var(--s96)">
+      <h3>Семь статусов</h3>
+      <p style="margin-bottom:var(--s32)">Список материалов сортируется
+        не по дате, а по приоритету статуса, поэтому в первую очередь видно
+        то, что требует действия.</p>
+      <ul class="statuses">
+        <li><i style="background:#6b8f7a"></i><b>Согласовано</b><span>финальное решение основного согласующего</span></li>
+        <li><i style="background:#9a8768"></i><b>Внесена правка</b><span>согласующий оставил текстовую правку</span></li>
+        <li><i style="background:#8d7c96"></i><b>Правка ждёт проверки</b><span>автор прислал новую версию</span></li>
+        <li><i style="background:#9e7a76"></i><b>Не согласовано</b><span>материал в этом виде в работу не идёт</span></li>
+        <li><i style="background:#7d8f94"></i><b>Частично согласовано</b><span>решения согласующих разошлись</span></li>
+        <li><i style="background:#8a8d91"></i><b>Не рассмотрено</b><span>решения по материалу ещё нет</span></li>
+        <li><i style="background:#6b7f9e"></i><b>Статусы озвучки</b><span>отдельная ветка для озвучки материала</span></li>
+      </ul>
     </div>
   </div>
 </section>
 
-<!-- ===================== Mini App ===================== -->
-<section>
+<!-- ======================= 7. Mini App ======================= -->
+<section id="app">
   <div class="wrap">
     <h2 class="rv">Telegram Mini App</h2>
-    <p class="lead rv" style="margin-bottom:var(--s96)">Полноценное
-      веб-приложение внутри Telegram, которое заменило рабочее пространство
-      в Notion и работает на одной базе данных с ботом.</p>
+    <p class="lead rv">Полноценное веб-приложение внутри Telegram, которое
+      заменило рабочее пространство в Notion и работает на одной базе данных
+      с ботом.</p>
 
-    <div class="grid">
+    <div class="grid" style="margin-top:var(--s64)">
       <div class="cl rv" id="appCol">
         <div class="seg" id="appSeg" role="tablist" aria-label="Разделы Mini App">
           <button type="button" role="tab" aria-selected="true" data-slot="app-plan">Контент-план</button>
           <button type="button" role="tab" aria-selected="false" data-slot="app-tasks">Задачи</button>
           <button type="button" role="tab" aria-selected="false" data-slot="app-schedule">График</button>
         </div>
-        <div class="swap" id="appSwap"></div>
+        <div class="fan" id="appFan"><span class="back" aria-hidden="true"></span></div>
       </div>
       <div class="cr rv">
-        <div class="block" style="margin-top:0"><h3>Контент-план</h3>
-          <p>Календарь публикаций, где каждая единица контента отмечена тегами
-            платформы, формата и рубрики. Статус согласования подтягивается
-            из бота автоматически: календарь всегда показывает реальное
-            состояние, а не то, что кто-то забыл обновить.</p></div>
-        <div class="block"><h3>Задачи и график</h3>
-          <p>Доска рабочих задач по съёмкам, монтажу и производству. Отдельно —
-            расписание работы с разделением на дни в клинике и удалённую
-            работу, чтобы съёмки планировались под присутствие.</p></div>
-        <div class="block"><h3>Доступ и интерфейс</h3>
-          <p>Пользователь определяется по Telegram ID, без логинов и паролей.
-            Автор и согласующие видят интерфейс под свою роль. Светлая палитра,
-            минимализм в духе iOS, плавные переходы: приложение открывается
-            из Telegram на любом телефоне и ощущается как нативное.</p></div>
+        <h3>Контент-план</h3>
+        <p>Календарь публикаций, где каждая единица контента отмечена тегами
+          платформы, формата и рубрики. Статус согласования подтягивается
+          из бота автоматически: календарь всегда показывает реальное
+          состояние, а не то, что кто-то забыл обновить.</p>
+        <h3 style="margin-top:var(--s48)">Задачи и график</h3>
+        <p>Доска рабочих задач по съёмкам, монтажу и производству. Отдельно —
+          расписание работы с разделением на дни в клинике и удалённую
+          работу, чтобы съёмки планировались под присутствие.</p>
+        <h3 style="margin-top:var(--s48)">Доступ и интерфейс</h3>
+        <p>Пользователь определяется по Telegram ID, без логинов и паролей.
+          Автор и согласующие видят интерфейс под свою роль. Светлая палитра,
+          минимализм в духе iOS, плавные переходы: приложение открывается
+          из Telegram на любом телефоне и ощущается как нативное.</p>
       </div>
     </div>
   </div>
 </section>
 
-<!-- ===================== инфраструктура ===================== -->
-<section>
+<!-- ======================= 8. инфраструктура ======================= -->
+<section class="infra" id="infra" style="padding-bottom:var(--s128)">
   <div class="wrap">
     <h2 class="rv">Инфраструктура</h2>
+
+    <div class="flow rv">
+      <span class="fnode">Telegram</span><span class="farrow"></span>
+      <span class="fnode">nginx</span><span class="farrow"></span>
+      <span class="fnode">FastAPI</span><span class="farrow"></span>
+      <span class="fnode">бот</span><span class="farrow"></span>
+      <span class="fnode acc">общая база</span>
+    </div>
+
     <div class="grid">
       <div class="cl rv">
         <p>Всю серверную часть развернул и сопровождаю сам. VPS на Linux, бот
@@ -656,73 +1010,82 @@ html.reduced .mcs *{animation-duration:.01ms!important;
           собственный поддомен, SSL-сертификаты Let’s Encrypt. При каждом
           обновлении сверяю контрольные суммы файлов, чтобы на сервер
           гарантированно попадала актуальная версия.</p>
-        <p class="tags" style="margin-top:var(--s32)">Python · aiogram ·
-          FastAPI · Uvicorn · SQLite · HTML · CSS · JavaScript ·
-          Telegram Mini Apps · nginx · systemd · Cloudflare DNS ·
-          Let’s Encrypt</p>
+        <div class="chips">
+          <span class="chip">Python</span><span class="chip">aiogram</span>
+          <span class="chip">FastAPI</span><span class="chip">Uvicorn</span>
+          <span class="chip">SQLite</span><span class="chip">HTML</span>
+          <span class="chip">CSS</span><span class="chip">JavaScript</span>
+          <span class="chip">Telegram Mini Apps</span><span class="chip">nginx</span>
+          <span class="chip">systemd</span><span class="chip">Cloudflare DNS</span>
+          <span class="chip">Let’s Encrypt</span>
+        </div>
       </div>
       <div class="cr rv">
-        <h3>Миграция под блокировками</h3>
-        <div class="block" style="margin-top:0">
-          <h4>Проблема</h4>
-          <p>IP-адрес сервера оказался заблокирован, сервис перестал работать.</p>
-        </div>
-        <div class="block" style="margin-top:var(--s32)">
-          <h4>Диагностика</h4>
-          <p>После переезда на новый сервер бот заработал, а Mini App
-            у пользователей в России обрывался на загрузке. Я выяснил, что
-            соединение через CDN-прокси ограничивается после первых
-            килобайт.</p>
-        </div>
-        <div class="block" style="margin-top:var(--s32)">
-          <h4>Решение</h4>
-          <p>Вывел поддомен из-под прокси, выпустил SSL-сертификат напрямую
-            на сервере и перенёс службы с сохранением структуры. Сервис
-            восстановлен без потери данных.</p>
-        </div>
+        <h3>Что это даёт</h3>
+        <p>Бот и приложение читают и пишут в одну базу, поэтому статус
+          материала везде один: решение, принятое в боте, сразу видно
+          в календаре. Инфраструктура своя, без внешних сервисов
+          и подписок.</p>
       </div>
+    </div>
+
+    <div class="cols3 rv">
+      <div><h4>Проблема</h4>
+        <p>IP-адрес сервера оказался заблокирован, сервис перестал
+          работать.</p></div>
+      <div><h4>Диагностика</h4>
+        <p>После переезда на новый сервер бот заработал, а Mini App
+          у пользователей в России обрывался на загрузке. Я выяснил, что
+          соединение через CDN-прокси ограничивается после первых
+          килобайт.</p></div>
+      <div><h4>Решение</h4>
+        <p>Вывел поддомен из-под прокси, выпустил SSL-сертификат напрямую
+          на сервере и перенёс службы с сохранением структуры. Сервис
+          восстановлен без потери данных.</p></div>
     </div>
   </div>
 </section>
 
-<!-- ===================== инструменты производства ===================== -->
-<section>
+<!-- ======================= 9. инструменты производства ======================= -->
+<section id="tools">
   <div class="wrap">
     <h2 class="rv">Инструменты производства</h2>
-    <div class="grid">
-      <div class="cl rv">
-        <h3>Figma-плагины</h3>
-        <p>Разработал два собственных плагина: для каруселей и для сторис. Пишу
-          текст поста в простой разметке — обложка, смысловые блоки,
-          закрывающий слайд, — а плагин сам раскладывает его по фирменным
-          макетам с правильной типографикой, дисклеймером и тэглайном.</p>
+    <div class="rail rv" id="rail">
+      <div class="rcard grain on" data-slot="plugin-run">
+        <span class="bg" aria-hidden="true"></span>
+        <span class="prev"></span>
+        <span class="ico"><svg aria-hidden="true"><use href="#i-puzzle"/></svg></span>
+        <h3>Плагин каруселей</h3>
+        <p class="cap">Текст в простой разметке раскладывается по фирменным
+          макетам с типографикой, дисклеймером и тэглайном.</p>
       </div>
-      <div class="cr rv">
-        <div class="block" style="margin-top:0">
-          <h3>ИИ-продакшн</h3>
-          <p>Выстроил процесс генерации и доработки визуала нейросетями под
-            стандарт бренда: товарные фото для карточки клиники
-            на картографических сервисах, фирменные наклейки и упаковка,
-            обложки рилс в единой серии. Отработал методику точной правки
-            генераций: программный контроль положения объектов, центровка
-            логотипов, согласование света, отражений и материалов с исходной
-            сценой.</p>
-        </div>
-        <div class="block">
-          <h3>Автоматизация публикаций</h3>
-          <p>Настроил пакетный импорт контент-плана в сервис автопостинга через
-            CSV: десятки публикаций загружаются за один раз.</p>
-        </div>
+      <div class="rcard grain" data-slot="plugin-panel">
+        <span class="bg" aria-hidden="true"></span>
+        <span class="prev"></span>
+        <span class="ico"><svg aria-hidden="true"><use href="#i-slides"/></svg></span>
+        <h3>Плагин сторис</h3>
+        <p class="cap">Тот же принцип для вертикальных форматов: обложка,
+          смысловые блоки, закрывающий слайд.</p>
+      </div>
+      <div class="rcard grain" data-slot="ai-2">
+        <span class="bg" aria-hidden="true"></span>
+        <span class="prev"></span>
+        <span class="ico"><svg aria-hidden="true"><use href="#i-spark"/></svg></span>
+        <h3>ИИ-продакшн</h3>
+        <p class="cap">Программный контроль положения объектов, центровка
+          логотипов, согласование света и материалов с исходной сценой.</p>
+      </div>
+      <div class="rcard grain" data-slot="app-plan">
+        <span class="bg" aria-hidden="true"></span>
+        <span class="prev"></span>
+        <span class="ico"><svg aria-hidden="true"><use href="#i-send"/></svg></span>
+        <h3>Автопостинг</h3>
+        <p class="cap">Пакетный импорт контент-плана через CSV: десятки
+          публикаций загружаются за один раз.</p>
       </div>
     </div>
 
-    <div class="grid rv" style="margin-top:var(--s96)">
-      <div class="cl">
-        <pre class="code" id="pluginCode"><span><b>#POST</b></span><span><b>#COVER</b></span><span>title: гигиена</span><span>subtitle: что стоит знать перед визитом</span><span> </span><span><b>#BLOCK</b></span><span>title: ЗАЧЕМ</span><span>body: регулярный уход занимает меньше времени,</span><span>      чем лечение его последствий.</span><span> </span><span><b>#CLOSING</b></span><span>tagline: забота начинается с привычки</span></pre>
-      </div>
-      <div class="cr" data-slots="plugin-run"></div>
-    </div>
-    <div class="grid rv" style="margin-top:var(--s64)">
+    <div class="grid rv" id="cmpRow" style="margin-top:var(--s64)">
       <div class="cl">
         <div class="cmp" data-a="ai-1" data-b="ai-2">
           <span class="lbl l">До</span><span class="lbl r">После</span>
@@ -737,43 +1100,35 @@ html.reduced .mcs *{animation-duration:.01ms!important;
   </div>
 </section>
 
-<!-- ===================== контент и продакшн ===================== -->
-<section>
-  <div class="wrap">
-    <h2 class="rv">Контент и продакшн</h2>
-    <div class="grid">
-      <div class="cl rv">
-        <p>Фото- и видеосъёмка клиники, врачей и клинических процессов, монтаж.
-          Сценарии рилс для врачей разных специальностей: хирург-имплантолог,
-          пародонтолог, ортодонт, гнатолог. Каждый сценарий включает дословный
-          текст врача и раскадровку перебивок.</p>
-      </div>
-      <div class="cr rv">
-        <div class="block" style="margin-top:0"><h3>Форматы</h3>
-          <p>Экспертные карусели, в том числе закреплённый пост с ключевыми
-            клиническими направлениями клиники. В Threads — более 250 постов,
-            включая интерактивные форматы, и ответы в ветках от лица клиники.
-            Имиджевая рубрика об улыбке в истории искусства и культуры
-            связывает культурный контекст с работой клиники.</p></div>
-        <div class="block"><h3>Инфлюенс-маркетинг</h3>
-          <p>HTML-письмо с бартерным предложением для блогеров, сценарии
-            визитов и экскурсий по клинике.</p></div>
-      </div>
-    </div>
-    <div class="facts rv" style="margin-top:var(--s96)">
-      <div><p class="v" data-count="250" data-suffix="+">0</p><p class="k">постов в Threads</p></div>
-    </div>
-    <div class="shots n4 rv" style="margin-top:var(--s64)"
-         data-slots="shot-1,shot-2,shot-3,shot-4"></div>
-  </div>
-</section>
-
-<!-- ===================== стандарты бренда ===================== -->
-<section>
+<!-- ======================= 10. стандарты ======================= -->
+<section id="standards">
   <div class="wrap">
     <h2 class="rv">Стандарты бренда</h2>
-    <div class="grid">
-      <div class="cl rv">
+    <div class="cols4 rv">
+      <div>
+        <span class="gi grain"><svg aria-hidden="true"><use href="#i-book"/></svg></span>
+        <p class="v" data-count="11">0</p>
+        <p class="cap">разделов стандарта</p>
+      </div>
+      <div>
+        <span class="gi grain"><svg aria-hidden="true"><use href="#i-slides"/></svg></span>
+        <p class="v" data-count="52">0</p>
+        <p class="cap">слайда обучения</p>
+      </div>
+      <div>
+        <span class="gi grain"><svg aria-hidden="true"><use href="#i-list"/></svg></span>
+        <p class="v" data-count="50">0</p>
+        <p class="cap">типовых ситуаций</p>
+      </div>
+      <div>
+        <span class="gi grain"><svg aria-hidden="true"><use href="#i-route"/></svg></span>
+        <p class="v" data-count="7">0</p>
+        <p class="cap">направлений со скриптами</p>
+      </div>
+    </div>
+
+    <div class="grid rv" style="margin-top:var(--s96)">
+      <div class="cl">
         <h3>Визуальный и текстовый стандарт соцсетей</h3>
         <p>Единый свод правил: палитра, шрифт, структура каждого формата,
           лексика, тон, запрещённые формулировки, правила для текстов,
@@ -781,123 +1136,84 @@ html.reduced .mcs *{animation-duration:.01ms!important;
           и для меня, и для ИИ-инструментов, поэтому любой материал с первого
           черновика звучит голосом бренда.</p>
       </div>
-      <div class="cr rv">
-        <div class="block" style="margin-top:0">
-          <h3>Коммуникация с пациентами</h3>
-          <p>Эталонная логика ответов в директе: сначала как проходит
-            диагностика, затем как строится лечение, и только потом стоимость.
-            Правила подачи цены, работа с возражениями, единый голос
-            клиники.</p>
-        </div>
-        <div class="block">
-          <h3>Стандарт коммуникации администраторов</h3>
-          <p>Совместно с маркетологом клиники разработал единый стандарт
-            общения администраторов с пациентами по телефону и в переписке,
-            чтобы каждый контакт с клиникой поддерживал премиальное
-            позиционирование бренда. В основе анализ реальных диалогов
-            и расшифровок звонков.</p>
-          <p>Итог: стандарт из 11 разделов — голос клиники, логика продаж,
-            протокол цены, телефон, переписка, разбор ситуаций, чек-листы, план
-            внедрения — и обучающая презентация на 52 слайда со скриптами
-            по семи направлениям, техникой работы с жалобами и каталогом
-            из 50 типовых ситуаций.</p>
-        </div>
-      </div>
-    </div>
-
-    <div class="facts rv" style="margin-top:var(--s96)">
-      <div><p class="v" data-count="11">0</p><p class="k">разделов стандарта</p></div>
-      <div><p class="v" data-count="52">0</p><p class="k">слайда презентации</p></div>
-      <div><p class="v" data-count="50">0</p><p class="k">типовых ситуаций</p></div>
-      <div><p class="v" data-count="7">0</p><p class="k">направлений со скриптами</p></div>
-    </div>
-
-    <div class="rv" style="margin-top:var(--s96)">
-      <h3>Логика ответа пациенту</h3>
-      <div class="steps" id="talkSteps">
-        <div class="st"><h4>Диагностика</h4><p>Сначала — как проходит осмотр и что он показывает</p></div>
-        <div class="st"><h4>Лечение</h4><p>Затем — как строится план и из чего он складывается</p></div>
-        <div class="st"><h4>Стоимость</h4><p>И только потом — цена, по правилам её подачи</p></div>
+      <div class="cr">
+        <h3>Коммуникация с пациентами</h3>
+        <p>Эталонная логика ответов в директе: сначала как проходит
+          диагностика, затем как строится лечение, и только потом стоимость.
+          Правила подачи цены, работа с возражениями, единый голос клиники.</p>
+        <h3 style="margin-top:var(--s48)">Стандарт коммуникации администраторов</h3>
+        <p>Совместно с маркетологом клиники разработал единый стандарт
+          общения администраторов с пациентами по телефону и в переписке,
+          чтобы каждый контакт с клиникой поддерживал премиальное
+          позиционирование бренда. В основе анализ реальных диалогов
+          и расшифровок звонков.</p>
       </div>
     </div>
   </div>
 </section>
 
-<!-- ===================== приложение для врача ===================== -->
-<section>
+<!-- ======================= 11. приложение для гигиениста ======================= -->
+<section id="hyg">
   <div class="wrap">
     <h2 class="rv">Приложение для гигиениста и пародонтолога</h2>
-    <div class="grid">
-      <div class="cl rv">
-        <p>Рабочий инструмент врача, который превращает рекомендации
-          по домашней гигиене из устных советов в персональный фирменный
-          документ пациента.</p>
-      </div>
-      <div class="cr rv">
-        <div class="block" style="margin-top:0"><h3>Карта межзубных ёршиков</h3>
-          <p>Трёхмерная модель зубных рядов раскрывается как полость рта,
-            вращается и переключается между ракурсами. Врач отмечает размер
-            ёршика для каждого межзубного промежутка, а модель отражает
-            состояние зубов: отсутствующие зубы, имплантаты, элементы протезов.
-            Для быстрого ввода есть переключение на схематическую карту, для
-            объяснения пациенту — режим анатомии с полупрозрачной
-            костью.</p></div>
-        <div class="block"><h3>Остальные модули</h3>
-          <p>Скрининг пародонта PSR — быстрая оценка состояния дёсен
-            по сегментам. Индивидуальная схема гигиены — набор средств
-            и порядок ухода под конкретного пациента. Памятки после процедур —
-            шаблоны, из которых врач за несколько секунд выбирает нужные
-            пункты.</p></div>
-        <div class="block"><h3>Для пациента</h3>
-          <p>Результат приходит как фирменная онлайн-карта по QR-коду или
-            ссылке и как PDF формата A4, готовый к печати.</p></div>
-        <div class="block"><h3>Технологии и безопасность</h3>
-          <p>Next.js, PostgreSQL, React Three Fiber, ролевая авторизация врачей
-            и гигиенистов, хранение данных пациентов с учётом требований
-            152-ФЗ. Работает на десктопе и смартфоне, в том числе для
-            заполнения ассистентом под диктовку врача.</p></div>
+    <p class="lead rv">Рабочий инструмент врача, который превращает
+      рекомендации по домашней гигиене из устных советов в персональный
+      фирменный документ пациента.</p>
+
+    <div class="arc" id="arc">
+      <div class="center" data-slots="hyg-3d"></div>
+      <div class="acards" id="acards">
+        <div class="acard" data-a="-78">3D-карта ёршиков</div>
+        <div class="acard" data-a="-39">Скрининг PSR</div>
+        <div class="acard" data-a="0">Схема гигиены</div>
+        <div class="acard" data-a="39">Памятки после процедур</div>
+        <div class="acard" data-a="78">Карта пациента по QR</div>
       </div>
     </div>
 
-    <div class="rv" id="hygBox" style="margin-top:var(--s96)">
-      <div class="seg" id="hygSeg" role="tablist" aria-label="Вид карты" hidden>
-        <button type="button" role="tab" aria-selected="true" data-slot="hyg-3d">3D</button>
-        <button type="button" role="tab" aria-selected="false" data-slot="hyg-map">Схема</button>
+    <div class="grid rv" style="margin-top:var(--s96)">
+      <div class="cl">
+        <h3>Карта межзубных ёршиков</h3>
+        <p>Трёхмерная модель зубных рядов раскрывается как полость рта,
+          вращается и переключается между ракурсами. Врач отмечает размер
+          ёршика для каждого межзубного промежутка, а модель отражает
+          состояние зубов: отсутствующие зубы, имплантаты, элементы протезов.
+          Для быстрого ввода есть переключение на схематическую карту, для
+          объяснения пациенту — режим анатомии с полупрозрачной костью.</p>
+        <h3 style="margin-top:var(--s48)">Остальные модули</h3>
+        <p>Скрининг пародонта PSR — быстрая оценка состояния дёсен
+          по сегментам. Индивидуальная схема гигиены — набор средств
+          и порядок ухода под конкретного пациента. Памятки после процедур —
+          шаблоны, из которых врач за несколько секунд выбирает нужные
+          пункты.</p>
       </div>
-      <div class="combo" id="hygCombo">
-        <div class="swap" id="hygSwap"></div>
-        <div class="side" data-slots="hyg-patient"></div>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- ===================== сайт клиники ===================== -->
-<section>
-  <div class="wrap">
-    <h2 class="rv">Сайт клиники</h2>
-    <div class="grid">
-      <div class="cl rv">
-        <h3>Структура и контент</h3>
+      <div class="cr">
+        <h3>Для пациента</h3>
+        <p>Результат приходит как фирменная онлайн-карта по QR-коду или
+          ссылке и как PDF формата A4, готовый к печати.</p>
+        <h3 style="margin-top:var(--s48)">Технологии и безопасность</h3>
+        <p>Next.js, PostgreSQL, React Three Fiber, ролевая авторизация врачей
+          и гигиенистов, хранение данных пациентов с учётом требований
+          152-ФЗ. Работает на десктопе и смартфоне, в том числе для
+          заполнения ассистентом под диктовку врача.</p>
+        <h3 style="margin-top:var(--s48)">Сайт клиники</h3>
         <p>Переработал структуру сайта и его содержание: порядок разделов,
-          формулировки и подачу материала. Сайт говорит с пациентом тем же
-          голосом, что соцсети и администраторы, — по одному своду правил.</p>
-      </div>
-      <div class="cr rv">
-        <h3>Съёмка для новых страниц</h3>
-        <p>Снял клинику под новые страницы, в той же визуальной логике,
-          по которой собирается контент для соцсетей.</p>
+          формулировки и подачу материала. Снял клинику под новые страницы.</p>
       </div>
     </div>
   </div>
 </section>
 
-<!-- ===================== финал ===================== -->
-<section class="fin">
-  <span class="tint" aria-hidden="true"></span>
+<!-- ======================= 12. финал ======================= -->
+<section id="final">
   <div class="wrap">
-    <h2 class="thesis rv">Контент перестал зависеть от переписок: у каждого
-      материала одна точка правды</h2>
+    <div class="banner grain rv" id="banner">
+      <span class="wash" aria-hidden="true"></span>
+      <span class="dim" aria-hidden="true"></span>
+      <h2>Контент перестал зависеть от переписок: у каждого материала
+        одна точка правды</h2>
+    </div>
+
     <ul class="res rv">
       <li>Весь поток контента переведён в единую систему согласования
         и планирования.</li>
@@ -919,450 +1235,6 @@ html.reduced .mcs *{animation-duration:.01ms!important;
 <div class="foot"><span>Илья Иванов</span><a href="index.html">На главную</a></div>
 
 <script src="case-medical-content-system.media.js"></script>
-<script>
-(function(){
-  'use strict';
-  /* ?reduced=1 в адресе включает тот же режим, что и системная настройка
-     «меньше движения» — чтобы можно было проверить её, не меняя настройки
-     в системе. */
-  var reduced = matchMedia('(prefers-reduced-motion: reduce)').matches ||
-                /(^|[?&])reduced=1(&|$)/.test(location.search);
-  if(reduced) document.documentElement.classList.add('reduced');
-  var MEDIA = window.CASE_MEDIA || {};
-  var FLAGS = window.CASE_MEDIA_FLAGS || {};
-  var RATIO = {desktop:1, phone:1, square:1, photo:1};
-
-  /* Заглушки по умолчанию не рисуются: пустой слот не занимает места,
-     а секция перестраивается без него. showPlaceholders:true возвращает
-     серые плоскости — это режим подготовки материала. */
-  var SHOW = !!FLAGS.showPlaceholders;
-
-  function hasFile(id){
-    var m = MEDIA[id];
-    return !!(m && m.src && (m.type !== 'video' || m.src.mp4 || m.src.webm));
-  }
-
-  /* ---------- слоты медиа ---------- */
-  function build(id){
-    var m = MEDIA[id];
-    var file = hasFile(id);
-    if(!file && !SHOW) return null;
-    var box = document.createElement('div');
-    box.className = 'screen ' + (m && RATIO[m.ratio] ? m.ratio : 'desktop');
-    if(!file){
-      var s = document.createElement('span');
-      s.className = 'slot';
-      s.textContent = (m && m.note) || 'Место под съёмку';
-      box.appendChild(s);
-      return box;
-    }
-    if(m.type === 'video'){
-      if(reduced && m.poster){
-        var im = document.createElement('img');
-        im.src = m.poster; im.alt = m.alt || ''; im.loading = 'lazy';
-        box.appendChild(im);
-        return box;
-      }
-      var v = document.createElement('video');
-      v.muted = true; v.loop = true; v.playsInline = true; v.preload = 'none';
-      v.setAttribute('muted',''); v.setAttribute('playsinline','');
-      if(m.poster) v.poster = m.poster;
-      if(m.alt) v.setAttribute('aria-label', m.alt);
-      if(m.src.webm){ var a = document.createElement('source');
-        a.src = m.src.webm; a.type = 'video/webm'; v.appendChild(a); }
-      if(m.src.mp4){ var b = document.createElement('source');
-        b.src = m.src.mp4; b.type = 'video/mp4'; v.appendChild(b); }
-      box.appendChild(v);
-      if('IntersectionObserver' in window){
-        new IntersectionObserver(function(es){
-          es.forEach(function(e){
-            if(e.isIntersecting) v.play().catch(function(){}); else v.pause();
-          });
-        }, {threshold:.25}).observe(box);
-      }
-      return box;
-    }
-    var pic = document.createElement('picture');
-    if(m.fallback){
-      var src = document.createElement('source');
-      src.srcset = m.src;
-      src.type = /\.avif$/i.test(m.src) ? 'image/avif' : 'image/webp';
-      pic.appendChild(src);
-    }
-    var img = document.createElement('img');
-    img.src = m.fallback || m.src;
-    img.alt = m.alt || ''; img.loading = 'lazy'; img.decoding = 'async';
-    pic.appendChild(img);
-    box.appendChild(pic);
-    return box;
-  }
-
-  /* ---------- перестройка вёрстки без пустых слотов ----------
-     Убранный элемент тянет за собой опустевшую колонку, а двухколоночная
-     секция становится одноколоночной: дырок на месте медиа не остаётся. */
-  function kids(el){
-    var n = 0;
-    [].forEach.call(el.children, function(c){
-      if(c.nodeType === 1 && !c.hasAttribute('hidden')) n++;
-    });
-    return n;
-  }
-  function solo(grid){
-    var cl = null, cr = null;
-    [].forEach.call(grid.children, function(c){
-      if(c.classList && c.classList.contains('cl')) cl = c;
-      if(c.classList && c.classList.contains('cr')) cr = c;
-    });
-    if(cl && !cr) cl.classList.add('full');
-    if(cr && !cl) cr.classList.add('full');
-  }
-  function drop(el){
-    var grid = el.closest('.grid');
-    var col = el.parentNode;
-    el.remove();
-    while(col && col !== grid && col.classList &&
-          (col.classList.contains('cl') || col.classList.contains('cr') ||
-           col.classList.contains('block')) && !kids(col)){
-      var up = col.parentNode;
-      col.remove();
-      col = up;
-    }
-    if(grid){
-      if(!kids(grid)){
-        var host = grid.parentNode;
-        grid.remove();
-        if(host && host.classList && host.classList.contains('rv') &&
-           !kids(host)) host.remove();
-      } else solo(grid);
-    }
-  }
-
-  [].forEach.call(document.querySelectorAll('[data-slots]'), function(host){
-    var made = 0;
-    host.getAttribute('data-slots').split(',').forEach(function(id){
-      var el = build(id.trim());
-      if(el){ host.appendChild(el); made++; }
-    });
-    if(!made) drop(host);
-  });
-
-  /* ---------- закреплённый экран бота ----------
-     Пока у слотов бота нет файлов, секция бота — обычная одноколоночная
-     текстовая секция без закрепления. */
-  var chapters = document.getElementById('botChapters');
-  var botSwap = document.getElementById('botSwap');
-  var botProg = document.getElementById('botProg');
-  var botGrid = document.getElementById('botGrid');
-  var botShow = null;
-  var chs = chapters ? [].slice.call(chapters.querySelectorAll('.ch')) : [];
-  var botReady = chs.some(function(c){ return hasFile(c.dataset.slot); });
-
-  if(chapters && botSwap && (botReady || SHOW)){
-    var frames = {};
-    chs.forEach(function(ch){
-      var el = build(ch.dataset.slot);
-      if(!el) return;
-      el.classList.add('out');
-      frames[ch.dataset.slot] = el;
-      botSwap.appendChild(el);
-      if(botProg) botProg.appendChild(document.createElement('i'));
-    });
-    var bars = botProg ? [].slice.call(botProg.children) : [];
-    var current = null;
-    botShow = function(slot){
-      if(slot === current || !frames[slot]) return;
-      current = slot;
-      Object.keys(frames).forEach(function(k){
-        frames[k].classList.toggle('out', k !== slot);
-      });
-    };
-    var markActive = function(i){
-      bars.forEach(function(b, k){ b.classList.toggle('on', k <= i); });
-      botShow(chs[i].dataset.slot);
-    };
-    markActive(0);
-    if('IntersectionObserver' in window){
-      /* Активен тот подраздел, чья середина ближе к середине экрана:
-         при быстрой прокрутке сразу несколько подразделов пересекают
-         полосу, и «последний пришедший» давал не тот экран. */
-      var seen = [];
-      var io3 = new IntersectionObserver(function(es){
-        es.forEach(function(e){
-          var i = chs.indexOf(e.target);
-          var k = seen.indexOf(i);
-          if(e.isIntersecting){ if(k < 0) seen.push(i); }
-          else if(k > -1) seen.splice(k, 1);
-        });
-        if(!seen.length) return;
-        var mid = innerHeight / 2, best = seen[0], dist = Infinity;
-        seen.forEach(function(i){
-          var r = chs[i].getBoundingClientRect();
-          var d = Math.abs(r.top + r.height / 2 - mid);
-          if(d < dist){ dist = d; best = i; }
-        });
-        markActive(best);
-      }, {rootMargin:'-45% 0px -45% 0px', threshold:0});
-      chs.forEach(function(c){ io3.observe(c); });
-    }
-  } else if(botGrid){
-    var left = botGrid.querySelector('.cl');
-    if(left) left.remove();
-    if(chapters) chapters.classList.add('full');
-  }
-
-  /* наведение на статус выделяет строку и показывает слот со списком */
-  var stl = document.getElementById('statuses');
-  if(stl){
-    stl.addEventListener('pointerover', function(e){
-      var li = e.target.closest('li'); if(!li) return;
-      stl.classList.add('lit');
-      [].forEach.call(stl.children, function(x){ x.classList.toggle('on', x === li); });
-      if(botShow) botShow('bot-list');
-    });
-    stl.addEventListener('pointerleave', function(){
-      stl.classList.remove('lit');
-      [].forEach.call(stl.children, function(x){ x.classList.remove('on'); });
-    });
-  }
-
-  /* ---------- сегментированные переключатели ----------
-     Переключатель, который листал бы только пустые слоты, не
-     показывается вовсе. */
-  function wireSeg(segId, swapId){
-    var seg = document.getElementById(segId), swap = document.getElementById(swapId);
-    if(!seg || !swap) return null;
-    var btns = [].slice.call(seg.querySelectorAll('button'));
-    var ready = btns.filter(function(b){ return hasFile(b.dataset.slot); });
-    if(!ready.length && !SHOW){
-      seg.remove(); swap.remove();
-      return {gone:true};
-    }
-    var made = {}, first = null;
-    btns.forEach(function(b){
-      var el = build(b.dataset.slot);
-      if(!el){ b.remove(); return; }
-      if(first) el.classList.add('out'); else first = b;
-      made[b.dataset.slot] = el;
-      swap.appendChild(el);
-    });
-    btns = [].slice.call(seg.querySelectorAll('button'));
-    btns.forEach(function(b){
-      b.setAttribute('aria-selected', String(b === first));
-    });
-    if(btns.length < 2) seg.hidden = true;
-    seg.addEventListener('click', function(e){
-      var b = e.target.closest('button'); if(!b) return;
-      btns.forEach(function(x){ x.setAttribute('aria-selected', String(x === b)); });
-      Object.keys(made).forEach(function(k){
-        made[k].classList.toggle('out', k !== b.dataset.slot);
-      });
-    });
-    return {seg:seg, btns:btns};
-  }
-
-  var app = wireSeg('appSeg', 'appSwap');
-  if(app && app.gone){
-    var appCol = document.getElementById('appCol');
-    if(appCol){ var ag = appCol.closest('.grid'); appCol.remove(); if(ag) solo(ag); }
-  }
-
-  var hyg = wireSeg('hygSeg', 'hygSwap');
-  if(hyg && hyg.gone){
-    var combo = document.getElementById('hygCombo');
-    /* карта ушла, но онлайн-карта пациента могла остаться */
-    if(combo && !kids(combo)) combo.remove();
-    var hb = document.getElementById('hygBox');
-    if(hb && !kids(hb)) hb.remove();
-  } else if(hyg){
-    /* переключатель появляется, когда в обоих слотах есть файлы,
-       либо когда он включён флагом для проверки на заглушках */
-    var ready2 = ['hyg-3d','hyg-map'].every(hasFile);
-    hyg.seg.hidden = !(ready2 || FLAGS.forceShowToggle);
-  }
-
-  /* ---------- разметка плагина: строки появляются по одной ---------- */
-  var code = document.getElementById('pluginCode');
-  if(code){
-    var lines = [].slice.call(code.children);
-    if(reduced || !('IntersectionObserver' in window)){
-      code.classList.add('in');
-    } else {
-      lines.forEach(function(l, i){ l.style.transitionDelay = (i * 55) + 'ms'; });
-      new IntersectionObserver(function(es, ob){
-        es.forEach(function(e){
-          if(e.isIntersecting){ code.classList.add('in'); ob.disconnect(); }
-        });
-      }, {threshold:.25}).observe(code);
-    }
-  }
-
-  /* ---------- слайдеры «до и после» ----------
-     Слайдер, у которого нет обеих половин, не показывается. */
-  [].forEach.call(document.querySelectorAll('.cmp'), function(cmp){
-    var ea = build(cmp.dataset.a), eb = build(cmp.dataset.b);
-    if(!ea || !eb){ drop(cmp); return; }
-    var a = document.createElement('div'); a.className = 'a';
-    var b = document.createElement('div'); b.className = 'b';
-    a.appendChild(ea); b.appendChild(eb);
-    var bar = document.createElement('span'); bar.className = 'bar';
-    cmp.insertBefore(b, cmp.firstChild);
-    cmp.insertBefore(a, cmp.firstChild);
-    cmp.appendChild(bar);
-    cmp.style.setProperty('--x', '50%');
-    var down = false;
-    function at(e){
-      var r = cmp.getBoundingClientRect();
-      var cx = (e.touches ? e.touches[0].clientX : e.clientX) - r.left;
-      var v = Math.max(0, Math.min(1, cx / r.width));
-      cmp.style.setProperty('--x', (v * 100).toFixed(2) + '%');
-    }
-    cmp.addEventListener('pointerdown', function(e){
-      down = true; cmp.setPointerCapture(e.pointerId); at(e);
-    });
-    cmp.addEventListener('pointermove', function(e){ if(down) at(e); });
-    cmp.addEventListener('pointerup', function(){ down = false; });
-    cmp.addEventListener('pointercancel', function(){ down = false; });
-    cmp.addEventListener('touchmove', function(e){
-      if(down && e.cancelable) e.preventDefault();
-    }, {passive:false});
-  });
-
-  /* ---------- глубина экранов: вход из наклона и отклик на курсор ---------- */
-  var screens = [].filter.call(document.querySelectorAll('.screen'),
-    function(s){ return !s.closest('.cmp'); });
-  screens.forEach(function(s){ s.classList.add('d3'); });
-  if(reduced || !('IntersectionObserver' in window)){
-    screens.forEach(function(s){ s.classList.add('in','rdy'); });
-  } else {
-    var ioS = new IntersectionObserver(function(es){
-      es.forEach(function(e){
-        if(!e.isIntersecting) return;
-        var t = e.target;
-        t.classList.add('in');
-        setTimeout(function(){ t.classList.add('rdy'); }, 750);
-        ioS.unobserve(t);
-      });
-    }, {rootMargin:'0px 0px -8% 0px', threshold:.1});
-    screens.forEach(function(s){ ioS.observe(s); });
-  }
-  if(!reduced && matchMedia('(min-width:1024px) and (hover:hover)').matches){
-    screens.forEach(function(s){
-      s.addEventListener('pointermove', function(e){
-        var r = s.getBoundingClientRect();
-        var nx = (e.clientX - r.left) / r.width - .5;
-        var ny = (e.clientY - r.top) / r.height - .5;
-        s.style.setProperty('--ry', (nx * 8).toFixed(2) + 'deg');
-        s.style.setProperty('--rx', (-ny * 8).toFixed(2) + 'deg');
-      });
-      s.addEventListener('pointerleave', function(){
-        s.style.setProperty('--ry','0deg'); s.style.setProperty('--rx','0deg');
-      });
-    });
-  }
-
-  /* ---------- счётчики ---------- */
-  var nums = [].slice.call(document.querySelectorAll('[data-count]'));
-  function run(el){
-    var to = parseFloat(el.getAttribute('data-count')) || 0;
-    var sfx = el.getAttribute('data-suffix') || '';
-    if(reduced){ el.textContent = to + sfx; return; }
-    var t0 = 0, dur = 900;
-    (function step(now){
-      if(!t0) t0 = now;
-      var k = Math.min(1, (now - t0) / dur);
-      el.textContent = Math.round(to * (1 - Math.pow(1 - k, 3))) + sfx;
-      if(k < 1) requestAnimationFrame(step);
-    })(performance.now());
-  }
-  if(!('IntersectionObserver' in window)){ nums.forEach(run); }
-  else {
-    var io4 = new IntersectionObserver(function(es){
-      es.forEach(function(e){
-        if(e.isIntersecting){ run(e.target); io4.unobserve(e.target); }
-      });
-    }, {threshold:.5});
-    nums.forEach(function(n){ io4.observe(n); });
-  }
-
-  /* ---------- три шага в стандарте коммуникации ---------- */
-  var talk = document.getElementById('talkSteps');
-  if(talk){
-    var ts = [].slice.call(talk.querySelectorAll('.st'));
-    if(reduced || !('IntersectionObserver' in window)){
-      ts.forEach(function(x){ x.classList.add('on'); });
-    } else {
-      var io5 = new IntersectionObserver(function(es){
-        es.forEach(function(e){
-          if(e.isIntersecting){ e.target.classList.add('on'); io5.unobserve(e.target); }
-        });
-      }, {rootMargin:'0px 0px -20% 0px', threshold:.2});
-      ts.forEach(function(x){ io5.observe(x); });
-    }
-  }
-
-  /* ---------- появление секций ---------- */
-  var rv = [].slice.call(document.querySelectorAll('.rv'));
-  if(reduced || !('IntersectionObserver' in window)){
-    rv.forEach(function(e){ e.classList.add('in'); });
-  } else {
-    var io = new IntersectionObserver(function(es){
-      es.forEach(function(e){
-        if(e.isIntersecting){ e.target.classList.add('in'); io.unobserve(e.target); }
-      });
-    }, {rootMargin:'0px 0px -6% 0px', threshold:.05});
-    rv.forEach(function(e){ io.observe(e); });
-  }
-
-  /* ---------- сцена экосистемы ----------
-     Без WebGL или при «меньше движения» показывается заранее
-     отрендеренный кадр финального состояния и восемь шагов списком. */
-  var webgl = (function(){
-    try{
-      var c = document.createElement('canvas');
-      return !!(c.getContext('webgl2') || c.getContext('webgl'));
-    }catch(e){ return false; }
-  })();
-  if(!webgl || reduced){
-    document.documentElement.classList.add('eco-flat');
-  } else {
-    import('./case-medical-content-system.scene.js').catch(function(){
-      document.documentElement.classList.add('eco-flat');
-    });
-  }
-
-  /* ---------- шапка ---------- */
-  var topEl = document.getElementById('top');
-  if(topEl){
-    var stick = function(){ topEl.classList.toggle('stuck', scrollY > 8); };
-    stick(); addEventListener('scroll', stick, {passive:true});
-  }
-
-  /* ---------- соседние кейсы ---------- */
-  var nav = document.getElementById('cnav');
-  function buildNav(){
-    var all = window.CASES_DATA || [];
-    if(!nav || !all.length) return;
-    var me = -1;
-    for(var i = 0; i < all.length; i++){
-      if(all[i].url === 'case-medical-content-system.html'){ me = i; break; }
-    }
-    if(me < 0) return;
-    function link(c, label, idx){
-      var a = document.createElement('a');
-      a.href = c.url ? c.url : ('index.html#case-' + idx);
-      a.innerHTML = '<small></small><strong></strong>';
-      a.querySelector('small').textContent = label;
-      a.querySelector('strong').textContent = c.t;
-      return a;
-    }
-    var pi = (me - 1 + all.length) % all.length, ni = (me + 1) % all.length;
-    nav.appendChild(link(all[pi], 'Предыдущий кейс', pi));
-    nav.appendChild(link(all[ni], 'Следующий кейс', ni));
-  }
-  var sc = document.createElement('script');
-  sc.src = 'cases.js'; sc.onload = buildNav;
-  document.body.appendChild(sc);
-})();
-</script>
+<script src="case-medical-content-system.view.js" defer></script>
 </body>
 </html>
