@@ -67,6 +67,13 @@ html,body{margin:0;padding:0;max-width:100%;overflow-x:hidden;}
 .mcs .h4{font-size:clamp(15px,1.15vw,19px);line-height:1.1;letter-spacing:-.03em;
   font-weight:600;margin:0 0 8px;}
 .mcs p{margin:0 0 14px;}
+/* Нижнее поле абзаца складывалось с внутренним отступом карточки, и снизу
+   выходило заметно больше, чем сверху. У последнего элемента в любом блоке
+   нижнего поля нет — поля карточек симметричны по всей странице. */
+.mcs p:last-child,
+.mcs .h1:last-child,.mcs .h2:last-child,
+.mcs .h3:last-child,.mcs .h4:last-child,
+.mcs .kicker:last-child{margin-bottom:0;}
 .mcs .body{font-family:'Inter','Helvetica Neue',Arial,sans-serif;font-weight:400;
   font-size:clamp(14.5px,1.02vw,17px);line-height:1.5;letter-spacing:-.011em;
   color:rgba(0,0,0,.76);}
@@ -82,7 +89,10 @@ html,body{margin:0;padding:0;max-width:100%;overflow-x:hidden;}
 /* ---------- градиентные пятна ----------
    Радиальные пятна низкой насыщенности, размытые и очень медленно
    плывущие. Лежат только в четырёх местах страницы, а не фоном под всем. */
-.mcs .glow{position:absolute;inset:0;overflow:hidden;pointer-events:none;z-index:0;}
+/* Пятна обрезает сам слой с градиентом, а не секция: иначе секция срезала
+   бы и подписи узлов, которые выходят за её край. */
+.mcs .glow{position:absolute;inset:0;overflow:hidden;border-radius:inherit;
+  pointer-events:none;z-index:0;}
 .mcs .glow i{position:absolute;display:block;border-radius:50%;
   filter:blur(70px);opacity:.75;will-change:transform;}
 @media (min-width:900px){ .mcs .glow i{filter:blur(110px);} }
@@ -134,10 +144,11 @@ html,body{margin:0;padding:0;max-width:100%;overflow-x:hidden;}
 .mcs .meta .nda{font-weight:600;color:var(--ink);}
 .mcs .teasers{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));
   gap:clamp(10px,1.1vw,20px);margin-top:clamp(34px,4vw,70px);}
-.mcs .teasers div{padding:clamp(14px,1.4vw,22px);border-radius:16px;}
+.mcs .teasers div{padding:clamp(14px,1.4vw,22px);border-radius:8px;
+  display:flex;flex-direction:column-reverse;justify-content:center;}
 .mcs .teasers b{display:block;font-size:clamp(26px,3.4vw,54px);line-height:.92;
   letter-spacing:-.05em;font-weight:500;}
-.mcs .teasers em{display:block;font-style:normal;margin-top:8px;
+.mcs .teasers em{display:block;font-style:normal;margin-bottom:10px;
   font-family:'Inter',Arial,sans-serif;font-size:12.5px;line-height:1.25;
   font-weight:400;color:rgba(0,0,0,.6);letter-spacing:-.01em;}
 
@@ -150,16 +161,20 @@ html,body{margin:0;padding:0;max-width:100%;overflow-x:hidden;}
 .mcs .quote span{color:var(--a2);}
 
 /* ---------- схема системы ---------- */
-.mcs .schema{position:relative;border-radius:28px;overflow:hidden;
+.mcs .schema{position:relative;border-radius:14px;overflow:visible;
   padding:clamp(24px,3vw,56px);}
 .mcs .flow{display:grid;gap:clamp(12px,1.2vw,20px);position:relative;z-index:1;
   grid-template-columns:repeat(4,minmax(0,1fr));align-items:stretch;}
-.mcs .node{position:relative;border-radius:18px;padding:clamp(14px,1.3vw,22px);
-  cursor:default;transition:transform .35s var(--eo), box-shadow .35s var(--eo),
+.mcs .node{position:relative;border-radius:9px;padding:clamp(14px,1.3vw,22px);
+  cursor:default;display:flex;flex-direction:column;justify-content:center;
+  transition:transform .35s var(--eo), box-shadow .35s var(--eo),
     opacity .3s var(--eo);}
 .mcs .node .h4{margin-bottom:6px;}
+/* Высота в две строки оставляла под короткой подписью пустое поле, и
+   отступ снизу выходил больше, чем сверху. Текст прижат к середине
+   карточки, поэтому поля сверху и снизу всегда равны. */
 .mcs .node .one{font-family:'Inter',Arial,sans-serif;font-size:12.5px;line-height:1.3;
-  color:rgba(0,0,0,.6);letter-spacing:-.01em;min-height:2.6em;}
+  color:rgba(0,0,0,.6);letter-spacing:-.01em;}
 .mcs .flow.lit .node{opacity:.34;}
 .mcs .flow.lit .node.on{opacity:1;transform:translateY(-3px);
   box-shadow:0 14px 40px rgba(20,32,48,.13), inset 0 0 0 1px rgba(255,255,255,.7);}
@@ -168,11 +183,11 @@ html,body{margin:0;padding:0;max-width:100%;overflow-x:hidden;}
   font-size:11.5px;font-weight:500;padding:6px 11px;border-radius:999px;
   background:var(--ink);color:#fff;opacity:0;pointer-events:none;
   transition:opacity .25s var(--eo), transform .25s var(--eo);z-index:3;}
-.mcs .node.on .tip{opacity:1;transform:translate(-50%,0);}
+.mcs .node.src .tip{opacity:1;transform:translate(-50%,0);}
 .mcs .span2{grid-column:span 2;}
 .mcs .pair{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));
   gap:clamp(12px,1.2vw,20px);}
-.mcs .base{margin-top:clamp(12px,1.2vw,20px);border-radius:18px;
+.mcs .base{margin-top:clamp(12px,1.2vw,20px);border-radius:9px;
   padding:clamp(13px,1.1vw,18px);text-align:center;position:relative;z-index:1;}
 .mcs .aside3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));
   gap:clamp(12px,1.2vw,20px);margin-top:clamp(12px,1.2vw,20px);position:relative;z-index:1;}
@@ -189,7 +204,7 @@ html,body{margin:0;padding:0;max-width:100%;overflow-x:hidden;}
   grid-auto-columns:minmax(188px,1fr);overflow-x:auto;padding-bottom:12px;
   scrollbar-width:none;-webkit-overflow-scrolling:touch;}
 .mcs .rail::-webkit-scrollbar{display:none;}
-.mcs .step{border-radius:16px;padding:clamp(14px,1.2vw,20px);
+.mcs .step{border-radius:8px;padding:clamp(14px,1.2vw,20px);
   border:1px solid var(--hair);position:relative;}
 .mcs .step b{display:block;font-size:11px;font-family:'Inter',Arial,sans-serif;
   font-weight:600;letter-spacing:.08em;color:var(--a2);margin-bottom:9px;}
@@ -200,7 +215,7 @@ html,body{margin:0;padding:0;max-width:100%;overflow-x:hidden;}
 /* ---------- бенто ---------- */
 .mcs .bento{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));
   gap:clamp(12px,1.2vw,20px);}
-.mcs .cell{position:relative;border-radius:22px;padding:clamp(18px,1.8vw,32px);
+.mcs .cell{position:relative;border-radius:11px;padding:clamp(18px,1.8vw,32px);
   border:1px solid var(--hair);text-decoration:none;color:var(--ink);
   display:flex;flex-direction:column;justify-content:space-between;
   min-height:clamp(150px,13vw,230px);overflow:hidden;
@@ -228,26 +243,26 @@ html,body{margin:0;padding:0;max-width:100%;overflow-x:hidden;}
 .mcs .cols2 > div{break-inside:avoid;margin-bottom:clamp(18px,1.8vw,30px);}
 
 /* ---------- мокапы ---------- */
-.mcs .phone{width:min(300px,78vw);margin:0 auto;border-radius:38px;padding:11px;
+.mcs .phone{width:min(300px,78vw);margin:0 auto;border-radius:19px;padding:11px;
   background:#0e1216;box-shadow:0 26px 70px rgba(16,26,40,.26);}
-.mcs .phone .screen{border-radius:28px;overflow:hidden;background:#fff;
+.mcs .phone .screen{border-radius:14px;overflow:hidden;background:#fff;
   height:clamp(430px,52vw,560px);display:flex;flex-direction:column;position:relative;}
 .mcs .phone .bar{height:26px;display:flex;align-items:center;justify-content:center;
   font-family:'Inter',Arial,sans-serif;font-size:10px;color:rgba(0,0,0,.4);flex:0 0 auto;}
 .mcs .tg{background:#eef2f6;flex:1 1 auto;padding:12px;overflow:hidden;
   display:flex;flex-direction:column;gap:9px;}
-.mcs .tg .bub{background:#fff;border-radius:14px;padding:11px 12px;
+.mcs .tg .bub{background:#fff;border-radius:7px;padding:11px 12px;
   font-family:'Inter',Arial,sans-serif;font-size:11.5px;line-height:1.35;
   color:rgba(0,0,0,.78);box-shadow:0 1px 2px rgba(16,26,40,.08);}
 .mcs .tg .bub .t{font-weight:600;color:#000;margin-bottom:5px;font-size:12px;}
 .mcs .tg .bub .meta{color:rgba(0,0,0,.45);font-size:10.5px;margin-top:4px;}
-.mcs .tg .ph{height:92px;border-radius:10px;margin:-2px 0 8px;
+.mcs .tg .ph{height:92px;border-radius:5px;margin:-2px 0 8px;
   background:linear-gradient(135deg,#dde5ee,#c9d5e3);display:flex;align-items:center;
   justify-content:center;font-family:'Inter',Arial,sans-serif;font-size:10px;
   color:rgba(0,0,0,.45);text-align:center;padding:6px;}
 .mcs .tg .btns{display:grid;grid-template-columns:repeat(2,1fr);gap:6px;margin-top:9px;}
 .mcs .tg .btns button{font-family:'Inter',Arial,sans-serif;font-size:11px;font-weight:500;
-  border:0;border-radius:9px;padding:8px 6px;background:#f1f4f8;color:#1b2531;
+  border:0;border-radius:5px;padding:8px 6px;background:#f1f4f8;color:#1b2531;
   cursor:pointer;transition:background .25s var(--eo), color .25s var(--eo);}
 .mcs .tg .btns button[aria-pressed="true"]{background:var(--a2);color:#fff;}
 .mcs .tg .btns button.wide{grid-column:span 2;}
@@ -264,7 +279,7 @@ html,body{margin:0;padding:0;max-width:100%;overflow-x:hidden;}
   font-size:clamp(14px,1.05vw,17px);line-height:1.45;color:rgba(0,0,0,.78);min-height:3em;}
 
 /* Mini App */
-.mcs .appwrap{position:relative;border-radius:28px;overflow:hidden;
+.mcs .appwrap{position:relative;border-radius:14px;overflow:visible;
   padding:clamp(26px,3.4vw,64px) clamp(16px,2vw,40px);}
 .mcs .tabs{display:flex;gap:6px;justify-content:center;margin-bottom:22px;
   position:relative;z-index:1;}
@@ -282,18 +297,18 @@ html,body{margin:0;padding:0;max-width:100%;overflow-x:hidden;}
   grid-template-rows:auto repeat(5,minmax(0,1fr));gap:4px;flex:1 1 auto;min-height:0;}
 .mcs .cal span{font-family:'Inter',Arial,sans-serif;font-size:8.5px;color:rgba(0,0,0,.4);
   text-align:center;padding-bottom:2px;}
-.mcs .cal i{display:block;border-radius:6px;background:#fff;position:relative;
+.mcs .cal i{display:block;border-radius:3px;background:#fff;position:relative;
   min-height:0;box-shadow:inset 0 0 0 1px rgba(0,0,0,.05);}
 .mcs .cal i b{position:absolute;left:4px;right:4px;bottom:4px;height:4px;border-radius:2px;}
 .mcs .kan{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;flex:1 1 auto;min-height:0;align-content:start;}
-.mcs .kan > div{background:#fff;border-radius:10px;padding:7px;
+.mcs .kan > div{background:#fff;border-radius:5px;padding:7px;
   box-shadow:inset 0 0 0 1px rgba(0,0,0,.05);}
 .mcs .kan h5{margin:0 0 6px;font-family:'Inter',Arial,sans-serif;font-size:9px;
   font-weight:600;color:rgba(0,0,0,.45);letter-spacing:.04em;text-transform:uppercase;}
-.mcs .kan u{display:block;text-decoration:none;height:26px;border-radius:5px;
+.mcs .kan u{display:block;text-decoration:none;height:26px;border-radius:3px;
   background:#eef2f7;margin-bottom:5px;}
 .mcs .wk{display:flex;flex-direction:column;gap:6px;flex:1 1 auto;min-height:0;}
-.mcs .wk > div{display:flex;align-items:center;gap:8px;background:#fff;border-radius:9px;
+.mcs .wk > div{display:flex;align-items:center;gap:8px;background:#fff;border-radius:5px;
   flex:1 1 auto;min-height:0;padding:8px 10px;box-shadow:inset 0 0 0 1px rgba(0,0,0,.05);
   font-family:'Inter',Arial,sans-serif;font-size:10.5px;color:rgba(0,0,0,.7);}
 .mcs .wk b{width:26px;color:rgba(0,0,0,.4);font-weight:500;}
@@ -303,7 +318,7 @@ html,body{margin:0;padding:0;max-width:100%;overflow-x:hidden;}
 /* архитектура */
 .mcs .arch{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));
   gap:clamp(10px,1vw,16px);align-items:center;}
-.mcs .arch .box{border:1px solid var(--hair);border-radius:14px;
+.mcs .arch .box{border:1px solid var(--hair);border-radius:7px;
   padding:clamp(12px,1.1vw,18px);text-align:center;}
 .mcs .arch .box .h4{font-size:14px;margin-bottom:4px;}
 .mcs .arch .box .one{font-family:'Inter',Arial,sans-serif;font-size:11.5px;
@@ -312,7 +327,7 @@ html,body{margin:0;padding:0;max-width:100%;overflow-x:hidden;}
 .mcs .arch .lnk::after{content:'';position:absolute;right:0;top:-3px;width:7px;height:7px;
   border-top:1px solid var(--hair);border-right:1px solid var(--hair);transform:rotate(45deg);}
 .mcs .stack{display:flex;flex-wrap:wrap;gap:7px;margin-top:20px;}
-.mcs .pdr{border:1px solid var(--hair);border-radius:20px;overflow:hidden;
+.mcs .pdr{border:1px solid var(--hair);border-radius:10px;overflow:hidden;
   display:grid;grid-template-columns:repeat(3,minmax(0,1fr));}
 .mcs .pdr > div{padding:clamp(16px,1.6vw,28px);border-right:1px solid var(--hair);}
 .mcs .pdr > div:last-child{border-right:0;}
@@ -323,7 +338,7 @@ html,body{margin:0;padding:0;max-width:100%;overflow-x:hidden;}
 /* плагины */
 .mcs .plug{display:grid;grid-template-columns:minmax(0,1fr) 54px minmax(0,1fr);
   gap:clamp(10px,1.4vw,24px);align-items:center;}
-.mcs .code{background:#0f1419;border-radius:16px;padding:clamp(14px,1.4vw,22px);
+.mcs .code{background:#0f1419;border-radius:8px;padding:clamp(14px,1.4vw,22px);
   font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:12px;
   line-height:1.65;color:#cfd8e3;overflow:auto;}
 .mcs .code .k{color:#8fb0d4;}
@@ -331,7 +346,7 @@ html,body{margin:0;padding:0;max-width:100%;overflow-x:hidden;}
 .mcs .code .g{color:#6b7a8d;}
 .mcs .slides{position:relative;height:clamp(180px,17vw,260px);}
 .mcs .slides i{position:absolute;left:50%;top:50%;width:clamp(120px,11vw,168px);
-  aspect-ratio:4/5;border-radius:12px;background:#fff;
+  aspect-ratio:4/5;border-radius:6px;background:#fff;
   box-shadow:0 8px 26px rgba(20,32,48,.12), inset 0 0 0 1px rgba(0,0,0,.07);
   transform-origin:50% 50%;}
 .mcs .slides i:nth-child(1){transform:translate(-50%,-50%) rotate(-9deg) translateX(-38%);}
@@ -341,18 +356,21 @@ html,body{margin:0;padding:0;max-width:100%;overflow-x:hidden;}
 .mcs .toArrow svg{width:28px;height:28px;}
 
 /* цифры */
+/* Ячейки выровнены по низу, поэтому цифры стоят на одной линии, даже если
+   подписи над ними разной высоты. */
 .mcs .figs{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));
-  gap:clamp(12px,1.4vw,26px);}
+  gap:clamp(12px,1.4vw,26px);align-items:end;}
+.mcs .figs div{display:flex;flex-direction:column-reverse;justify-content:flex-end;}
 .mcs .figs div b{display:block;font-size:clamp(32px,4.4vw,74px);line-height:.9;
   letter-spacing:-.05em;font-weight:500;}
-.mcs .figs div em{display:block;font-style:normal;margin-top:9px;
+.mcs .figs div em{display:block;font-style:normal;margin-bottom:11px;
   font-family:'Inter',Arial,sans-serif;font-size:12.5px;line-height:1.3;
   color:rgba(0,0,0,.6);letter-spacing:-.01em;}
 
 /* логика ответа */
 .mcs .steps3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));
   gap:clamp(10px,1.1vw,18px);}
-.mcs .steps3 div{border-radius:16px;padding:clamp(14px,1.4vw,24px);
+.mcs .steps3 div{border-radius:8px;padding:clamp(14px,1.4vw,24px);
   background:linear-gradient(150deg,#f4f7fa,#e9eff5);}
 .mcs .steps3 b{display:block;font-family:'Inter',Arial,sans-serif;font-size:11px;
   font-weight:600;letter-spacing:.08em;color:var(--a2);margin-bottom:8px;}
@@ -360,9 +378,9 @@ html,body{margin:0;padding:0;max-width:100%;overflow-x:hidden;}
 /* гигиенист */
 .mcs .duo{display:grid;grid-template-columns:minmax(0,1.65fr) minmax(0,1fr);
   gap:clamp(16px,2vw,40px);align-items:end;}
-.mcs .desk{border-radius:16px;background:#0e1216;padding:10px 10px 0;
+.mcs .desk{border-radius:8px;background:#0e1216;padding:10px 10px 0;
   box-shadow:0 22px 60px rgba(16,26,40,.22);}
-.mcs .desk .screen{border-radius:10px;overflow:hidden;background:#fff;
+.mcs .desk .screen{border-radius:5px;overflow:hidden;background:#fff;
   aspect-ratio:16/10;display:flex;flex-direction:column;}
 .mcs .desk .chrome{height:22px;background:#f4f6f9;display:flex;align-items:center;
   gap:4px;padding:0 9px;flex:0 0 auto;}
@@ -378,11 +396,11 @@ html,body{margin:0;padding:0;max-width:100%;overflow-x:hidden;}
   box-shadow:0 1px 3px rgba(16,26,40,.12);}
 .mcs .mods{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));
   gap:clamp(10px,1vw,16px);margin-top:clamp(20px,2vw,36px);}
-.mcs .mod{border:1px solid var(--hair);border-radius:14px;padding:clamp(13px,1.2vw,20px);}
+.mcs .mod{border:1px solid var(--hair);border-radius:7px;padding:clamp(13px,1.2vw,20px);}
 
 /* заглушки изображений */
 .mcs .ph{display:flex;align-items:center;justify-content:center;text-align:center;
-  border-radius:14px;background:
+  border-radius:7px;background:
     linear-gradient(135deg,rgba(142,164,189,.16),rgba(195,205,217,.22));
   border:1px dashed rgba(0,0,0,.16);padding:14px;
   font-family:'Inter',Arial,sans-serif;font-size:11.5px;line-height:1.35;
@@ -395,11 +413,11 @@ html,body{margin:0;padding:0;max-width:100%;overflow-x:hidden;}
 .mcs .r32{aspect-ratio:3/2;}
 
 /* ---------- результаты ---------- */
-.mcs .results{position:relative;border-radius:28px;overflow:hidden;
+.mcs .results{position:relative;border-radius:14px;overflow:visible;
   padding:clamp(34px,4.4vw,88px);}
 .mcs .results ul{list-style:none;margin:0;padding:0;display:grid;gap:clamp(12px,1.2vw,20px);
   grid-template-columns:repeat(2,minmax(0,1fr));position:relative;z-index:1;}
-.mcs .results li{border-radius:16px;padding:clamp(15px,1.5vw,26px);
+.mcs .results li{border-radius:8px;padding:clamp(15px,1.5vw,26px);
   font-family:'Inter',Arial,sans-serif;font-size:clamp(14px,1.05vw,17px);line-height:1.42;
   color:rgba(0,0,0,.8);letter-spacing:-.011em;}
 
@@ -1332,6 +1350,9 @@ html{scroll-behavior:smooth;}
       var set = [key].concat(LINKS[key] || []);
       allNodes.forEach(function(n){
         n.classList.toggle('on', set.indexOf(n.dataset.node) > -1);
+        /* Подпись — только у того узла, на который навели: со связанными
+           узлами их всплывало сразу несколько. */
+        n.classList.toggle('src', n.dataset.node === key);
       });
       schema.querySelectorAll('.flow,.pair,.aside3').forEach(function(g){
         g.classList.add('lit');
@@ -1339,7 +1360,7 @@ html{scroll-behavior:smooth;}
       if(flow) flow.classList.add('lit');
     }
     function lightOff(){
-      allNodes.forEach(function(n){ n.classList.remove('on'); });
+      allNodes.forEach(function(n){ n.classList.remove('on'); n.classList.remove('src'); });
       schema.querySelectorAll('.lit').forEach(function(g){ g.classList.remove('lit'); });
     }
     allNodes.forEach(function(n){
@@ -1349,7 +1370,7 @@ html{scroll-behavior:smooth;}
       n.addEventListener('blur', lightOff);
       n.setAttribute('tabindex', '0');
       n.addEventListener('click', function(){
-        var was = n.classList.contains('on');
+        var was = n.classList.contains('src');
         lightOff();
         if(!was) lightUp(n.dataset.node);
       });
