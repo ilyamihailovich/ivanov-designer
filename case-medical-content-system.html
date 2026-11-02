@@ -134,19 +134,22 @@ html,body{margin:0;padding:0;max-width:100%;overflow-x:hidden;}
   padding-bottom:var(--s96);}
 .mcs .scene{position:relative;height:clamp(520px,50vw,720px);
   perspective:1500px;perspective-origin:50% 40%;}
-.mcs .layer{position:absolute;inset:0;
-  transform:translateY(calc(var(--d) * var(--sep,0) * 1px));}
+/* Сдвиг слоя приходит из JS уже в пикселях. Раньше он считался выражением
+   calc(var(--d) * var(--sep) * 1px) из двух безразмерных переменных — WebKit
+   такое выражение не разбирал, сдвиг оставался нулевым, слои лежали друг
+   на друге, и от сцены на экране не оставалось ничего, кроме легенды. */
+.mcs .layer{position:absolute;inset:0;transform:translateY(var(--dy,0px));}
 .mcs .plane{position:absolute;left:50%;top:50%;width:62%;padding-top:31%;
   transform:translate(-50%,-50%) rotateX(58deg) rotateZ(-40deg);
-  border-radius:20px;background:rgba(255,255,255,.7);
-  box-shadow:0 30px 70px rgba(16,24,40,.09);}
+  border-radius:20px;background:rgba(255,255,255,.78);
+  box-shadow:0 30px 70px rgba(16,24,40,.12);}
 /* Подписи лежат одним слоем поверх всех плоскостей: пока они жили внутри
    своего слоя, полупрозрачная плоскость соседнего слоя их забеливала.
    Каждая группа подписей повторяет вертикальный сдвиг своей плоскости,
    поэтому держится за ней при разлёте. */
 .mcs .nodes{position:absolute;inset:0;z-index:5;pointer-events:none;}
 .mcs .nodes > div{position:absolute;inset:0;
-  transform:translateY(calc(var(--d) * var(--sep,0) * 1px));}
+  transform:translateY(var(--dy,0px));}
 .mcs .node{pointer-events:auto;}
 .mcs .node{position:absolute;transform:translateY(-50%);white-space:nowrap;
   font-family:'Inter',Arial,sans-serif;font-size:14px;font-weight:500;
@@ -155,7 +158,7 @@ html,body{margin:0;padding:0;max-width:100%;overflow-x:hidden;}
 .mcs .node i{display:inline-block;width:6px;height:6px;border-radius:50%;
   background:var(--accent);margin-right:var(--s8);vertical-align:2px;}
 .mcs .links{position:absolute;inset:0;z-index:4;pointer-events:none;
-  opacity:var(--sep,0);}
+  opacity:0;}
 .mcs .links line{stroke:rgba(17,19,21,.24);stroke-width:1;
   transition:stroke .3s var(--eo), stroke-width .3s var(--eo);}
 .mcs .scene.lit .node{opacity:.28;}
@@ -172,9 +175,13 @@ html,body{margin:0;padding:0;max-width:100%;overflow-x:hidden;}
 .mcs .stack .lvl + .lvl{border-top:1px solid var(--line);padding-top:var(--s24);}
 .mcs .stack span{display:block;font-family:'Inter',Arial,sans-serif;
   font-size:16px;color:var(--text);line-height:1.5;}
-@media (max-width:860px){
+/* Сцена показывается от 1024 и шире — в Safari и Chrome одинаково.
+   prefers-reduced-motion сцену не отключает: она просто сразу раскрыта. */
+@media (max-width:1023.98px){
   .mcs .scene{display:none;}
   .mcs .stack{display:block;}
+}
+@media (max-width:860px){
   .mcs .legend li{grid-column:span 12;}
 }
 
@@ -216,6 +223,81 @@ html,body{margin:0;padding:0;max-width:100%;overflow-x:hidden;}
 .mcs .block + .block{margin-top:var(--s64);}
 .mcs .tags{font-family:'Inter',Arial,sans-serif;font-size:16px;line-height:1.9;
   color:var(--text);max-width:65ch;}
+
+
+/* ---------- закреплённый экран бота ---------- */
+.mcs .sticky{position:sticky;top:var(--s96);}
+.mcs .prog{display:flex;gap:4px;margin-bottom:var(--s16);}
+.mcs .prog i{flex:1 1 auto;height:2px;background:rgba(17,19,21,.12);
+  transition:background .4s var(--eo);}
+.mcs .prog i.on{background:var(--accent);}
+.mcs .swap{position:relative;}
+.mcs .swap > *{transition:opacity .45s var(--eo);}
+.mcs .swap > *.out{opacity:0;position:absolute;inset:0;pointer-events:none;}
+.mcs .chapters > .ch{padding:var(--s64) 0;}
+.mcs .chapters > .ch:first-child{padding-top:0;}
+.mcs .chapters > .ch:last-child{padding-bottom:0;}
+.mcs .ch h3{transition:color .4s var(--eo);}
+@media (min-width:1024px){
+  .mcs .chapters > .ch{min-height:62vh;display:flex;flex-direction:column;
+    justify-content:center;}
+  .mcs .ch .inline{display:none;}
+}
+@media (max-width:1023.98px){
+  .mcs .sticky{display:none;}
+  .mcs .ch .inline{margin-top:var(--s32);}
+}
+
+/* ---------- сегментированный переключатель ---------- */
+.mcs .seg{display:inline-flex;gap:4px;margin-bottom:var(--s32);}
+.mcs .seg button{font-family:'Inter',Arial,sans-serif;font-size:15px;
+  font-weight:500;border:0;background:none;color:var(--mute);cursor:pointer;
+  padding:var(--s8) var(--s16);border-radius:8px;
+  transition:background .3s var(--eo), color .3s var(--eo);}
+.mcs .seg button[aria-selected="true"]{background:#f1f1f2;color:var(--ink);}
+
+/* ---------- разметка плагина ---------- */
+.mcs .code{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  font-size:14px;line-height:1.85;color:var(--text);background:#f6f6f7;
+  border-radius:12px;padding:var(--s32);white-space:pre;overflow-x:auto;}
+.mcs .code span{display:block;opacity:0;transform:translateY(4px);
+  transition:opacity .3s var(--eo), transform .3s var(--eo);}
+.mcs .code.in span{opacity:1;transform:none;}
+.mcs .code b{color:var(--ink);font-weight:600;}
+
+/* ---------- слайдер «до и после» ---------- */
+.mcs .cmp{position:relative;overflow:hidden;border-radius:12px;
+  aspect-ratio:1/1;touch-action:pan-y;cursor:ew-resize;background:#f0f0f1;
+  box-shadow:0 34px 90px rgba(16,24,40,.11), 0 6px 20px rgba(16,24,40,.05);}
+.mcs .cmp .a,.mcs .cmp .b{position:absolute;inset:0;}
+.mcs .cmp .b{clip-path:inset(0 0 0 var(--x,50%));}
+.mcs .cmp .screen{position:absolute;inset:0;border-radius:0;box-shadow:none;
+  aspect-ratio:auto;}
+.mcs .cmp .bar{position:absolute;top:0;bottom:0;left:var(--x,50%);width:2px;
+  background:#fff;box-shadow:0 0 0 1px rgba(17,19,21,.12);z-index:3;}
+.mcs .cmp .bar::after{content:'';position:absolute;top:50%;left:50%;
+  width:34px;height:34px;border-radius:50%;background:#fff;
+  transform:translate(-50%,-50%);box-shadow:0 2px 10px rgba(16,24,40,.22);}
+.mcs .cmp .lbl{position:absolute;bottom:var(--s16);font-family:'Inter',Arial,sans-serif;
+  font-size:13px;color:var(--mute);z-index:4;}
+.mcs .cmp .lbl.l{left:var(--s16);} .mcs .cmp .lbl.r{right:var(--s16);}
+
+/* ---------- три шага на линии ---------- */
+.mcs .steps{position:relative;display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr));gap:var(--grid);
+  padding-top:var(--s32);}
+.mcs .steps::before{content:'';position:absolute;left:0;right:0;top:3px;
+  height:1px;background:var(--line);}
+@media (max-width:860px){
+  .mcs .steps{grid-template-columns:1fr;padding:0 0 0 var(--s24);}
+  .mcs .steps::before{left:3px;right:auto;top:0;bottom:0;width:1px;height:auto;}
+  .mcs .steps .st{padding:var(--s16) 0;}
+}
+
+/* ---------- статус под курсором ---------- */
+.mcs .statuses li{cursor:default;transition:opacity .3s var(--eo);}
+.mcs .statuses.lit li{opacity:.45;}
+.mcs .statuses.lit li.on{opacity:1;}
 
 /* ---------- результаты ---------- */
 .mcs .res{list-style:none;margin:0;padding:0;display:grid;
@@ -844,12 +926,20 @@ html,body{margin:0;padding:0;max-width:100%;overflow-x:hidden;}
         ln.setAttribute('y2', rb.top - r.top + rb.height / 2);
       });
     }
+    /* Сдвиг каждого слоя задаётся готовым значением в пикселях: выражение
+       calc() из двух безразмерных переменных WebKit не разбирал, и слои
+       оставались сложенными. */
+    var movers = [].slice.call(scene.querySelectorAll('.layer, .nodes > div'));
     function spread(){
       var r = scene.getBoundingClientRect();
       var vh = innerHeight || 1;
       var p = reduced ? 1 : (vh - r.top) / (vh * 0.75);
       p = p < 0 ? 0 : (p > 1 ? 1 : p);
-      scene.style.setProperty('--sep', p.toFixed(3));
+      movers.forEach(function(el){
+        var d = parseFloat(el.style.getPropertyValue('--d')) || 0;
+        el.style.setProperty('--dy', (d * p).toFixed(1) + 'px');
+      });
+      links.style.opacity = p.toFixed(3);
       draw();
     }
     var tick = false;
