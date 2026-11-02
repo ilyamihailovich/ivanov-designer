@@ -155,6 +155,11 @@ html,body{margin:0;padding:0;max-width:100%;overflow-x:hidden;}
   font-family:'Inter',Arial,sans-serif;font-size:14px;font-weight:500;
   letter-spacing:-.012em;color:var(--ink);cursor:default;
   transition:opacity .3s var(--eo);}
+/* Подпись слоя: имя уровня стоит на самой плоскости, под сценой его
+   повторять не нужно — там только по строке пояснения. */
+.mcs .cap{position:absolute;transform:translateY(-50%);white-space:nowrap;
+  font-family:'Inter',Arial,sans-serif;font-size:13px;font-weight:600;
+  letter-spacing:.02em;color:var(--mute);}
 .mcs .node i{display:inline-block;width:6px;height:6px;border-radius:50%;
   background:var(--accent);margin-right:var(--s8);vertical-align:2px;}
 .mcs .links{position:absolute;inset:0;z-index:4;pointer-events:none;
@@ -217,6 +222,9 @@ html,body{margin:0;padding:0;max-width:100%;overflow-x:hidden;}
   position:relative;top:-1px;}
 .mcs .statuses b{font-weight:600;flex:0 0 auto;}
 .mcs .statuses span{color:var(--text);}
+/* Внутри узкой правой колонки список идёт одной колонкой: в двух значения
+   ломались по три-четыре слова на строку. */
+.mcs .ch .statuses{grid-template-columns:1fr;}
 @media (max-width:860px){ .mcs .statuses{grid-template-columns:1fr;} }
 
 /* ---------- блоки ---------- */
@@ -232,6 +240,7 @@ html,body{margin:0;padding:0;max-width:100%;overflow-x:hidden;}
   transition:background .4s var(--eo);}
 .mcs .prog i.on{background:var(--accent);}
 .mcs .swap{position:relative;}
+.mcs .sticky .swap,.mcs #appSwap{max-width:300px;}
 .mcs .swap > *{transition:opacity .45s var(--eo);}
 .mcs .swap > *.out{opacity:0;position:absolute;inset:0;pointer-events:none;}
 .mcs .chapters > .ch{padding:var(--s64) 0;}
@@ -281,6 +290,12 @@ html,body{margin:0;padding:0;max-width:100%;overflow-x:hidden;}
 .mcs .cmp .lbl{position:absolute;bottom:var(--s16);font-family:'Inter',Arial,sans-serif;
   font-size:13px;color:var(--mute);z-index:4;}
 .mcs .cmp .lbl.l{left:var(--s16);} .mcs .cmp .lbl.r{right:var(--s16);}
+/* Подписи заглушек расходятся по своим половинам: в центре они накладывались
+   друг на друга и читались как мешанина. */
+.mcs .cmp .a .slot{justify-content:flex-start;text-align:left;
+  padding-right:52%;}
+.mcs .cmp .b .slot{justify-content:flex-end;text-align:right;
+  padding-left:52%;}
 
 /* ---------- три шага на линии ---------- */
 .mcs .steps{position:relative;display:grid;
@@ -346,6 +361,10 @@ html,body{margin:0;padding:0;max-width:100%;overflow-x:hidden;}
   .mcs .rv{opacity:1!important;transform:none!important;transition:none!important;}
   .mcs *{animation-duration:.01ms!important;transition-duration:.01ms!important;}
 }
+html.reduced .mcs .rv{opacity:1!important;transform:none!important;
+  transition:none!important;}
+html.reduced .mcs *{animation-duration:.01ms!important;
+  transition-duration:.01ms!important;}
 </style>
 </head>
 
@@ -370,10 +389,10 @@ html,body{margin:0;padding:0;max-width:100%;overflow-x:hidden;}
       для врачей.</p>
 
     <div class="facts rv">
-      <div><p class="k">Telegram-продукта</p><p class="v">2</p></div>
-      <div><p class="k">Figma-плагина</p><p class="v">2</p></div>
-      <div><p class="k">статусов согласования</p><p class="v">7</p></div>
-      <div><p class="k">постов</p><p class="v">250+</p></div>
+      <div><p class="k">Telegram-продукта</p><p class="v" data-count="2">0</p></div>
+      <div><p class="k">Figma-плагина</p><p class="v" data-count="2">0</p></div>
+      <div><p class="k">статусов согласования</p><p class="v" data-count="7">0</p></div>
+      <div><p class="k">постов</p><p class="v" data-count="250" data-suffix="+">0</p></div>
     </div>
 
     <dl class="meta rv">
@@ -430,16 +449,19 @@ html,body{margin:0;padding:0;max-width:100%;overflow-x:hidden;}
 
       <div class="nodes">
         <div style="--d:-120">
+          <span class="cap" style="left:0;top:50%">Производство</span>
           <span class="node" data-id="shoot" style="left:30%;top:60%"><i></i>Съёмка, монтаж, тексты</span>
           <span class="node" data-id="figma" style="left:46%;top:50%"><i></i>Figma-плагины</span>
           <span class="node" data-id="ai" style="left:62%;top:40%"><i></i>ИИ-продакшн</span>
         </div>
         <div style="--d:0">
+          <span class="cap" style="left:0;top:50%">Согласование и планирование</span>
           <span class="node" data-id="bot" style="left:32%;top:58%"><i></i>Telegram-бот</span>
           <span class="node" data-id="app" style="left:50%;top:48%"><i></i>Mini App</span>
           <span class="node" data-id="pub" style="left:82%;top:33%"><i></i>Публикация</span>
         </div>
         <div style="--d:120">
+          <span class="cap" style="left:0;top:50%">Инфраструктура</span>
           <span class="node" data-id="srv" style="left:34%;top:56%"><i></i>Сервер</span>
           <span class="node" data-id="db" style="left:56%;top:44%"><i></i>Общая база данных</span>
         </div>
@@ -456,12 +478,11 @@ html,body{margin:0;padding:0;max-width:100%;overflow-x:hidden;}
     </div>
 
     <ul class="legend rv">
-      <li><h4>Производство</h4><p>Съёмка и монтаж, сборка макетов плагинами,
-        генерация визуала под стандарт.</p></li>
-      <li><h4>Согласование и планирование</h4><p>Бот держит решения и статусы,
-        Mini App — план и задачи.</p></li>
-      <li><h4>Инфраструктура</h4><p>Один сервер и одна база под обоими
-        продуктами: статус материала везде один.</p></li>
+      <li><p>Съёмка и монтаж, сборка макетов плагинами, генерация визуала
+        под стандарт.</p></li>
+      <li><p>Бот держит решения и статусы, Mini App — план и задачи.</p></li>
+      <li><p>Один сервер и одна база под обоими продуктами: статус материала
+        везде один.</p></li>
     </ul>
   </div>
 </section>
@@ -492,67 +513,87 @@ html,body{margin:0;padding:0;max-width:100%;overflow-x:hidden;}
 <section>
   <div class="wrap">
     <h2 class="rv">Telegram-бот согласования</h2>
+    <p class="rv" style="margin-bottom:var(--s96)">Единая точка, через которую
+      проходит весь контент клиники: рилс, карусели, сторис, фото, графика,
+      тексты и озвучка. Переписки, пересланные файлы и устные «вроде
+      согласовали» заменены одним прозрачным процессом.</p>
+
     <div class="grid">
-      <div class="cl rv">
-        <p>Единая точка, через которую проходит весь контент клиники: рилс,
-          карусели, сторис, фото, графика, тексты и озвучка. Переписки,
-          пересланные файлы и устные «вроде согласовали» заменены одним
-          прозрачным процессом.</p>
-      </div>
-      <div class="cr rv">
-        <div class="block" style="margin-top:0">
-          <h3>Роли и логика решений</h3>
-          <p>В системе четыре роли: автор, основной согласующий, второстепенный
-            согласующий и врач. Каждый видит решения остальных в реальном
-            времени: сообщение обновляется, когда кто-то ответил. Финальный
-            статус «Согласовано» ставится только решением основного
-            согласующего. Эту логику я заложил после того, как нашёл сценарий,
-            в котором промежуточное одобрение могло ошибочно закрыть материал.</p>
+      <div class="cl">
+        <div class="sticky">
+          <div class="prog" id="botProg" aria-hidden="true"></div>
+          <div class="swap" id="botSwap"></div>
         </div>
-        <div class="block">
+      </div>
+
+      <div class="cr chapters" id="botChapters">
+        <div class="ch" data-slot="bot-card">
+          <h3>Роли и логика решений</h3>
+          <p>В системе четыре роли: автор, основной согласующий,
+            второстепенный согласующий и врач. Каждый видит решения остальных
+            в реальном времени: сообщение обновляется, когда кто-то ответил.
+            Финальный статус «Согласовано» ставится только решением основного
+            согласующего. Эту логику я заложил после того, как нашёл сценарий,
+            в котором промежуточное одобрение могло ошибочно закрыть
+            материал.</p>
+          <div class="inline" data-slots="bot-card"></div>
+        </div>
+
+        <div class="ch" data-slot="bot-list">
+          <h3>Семь статусов</h3>
+          <p style="margin-bottom:var(--s32)">Список материалов сортируется
+            не по дате, а по приоритету статуса, поэтому в первую очередь видно
+            то, что требует действия.</p>
+          <ul class="statuses" id="statuses">
+            <li><i style="background:#6b8f7a"></i><b>Согласовано</b><span>финальное решение основного согласующего</span></li>
+            <li><i style="background:#9a8768"></i><b>Внесена правка</b><span>согласующий оставил текстовую правку</span></li>
+            <li><i style="background:#8d7c96"></i><b>Правка ждёт проверки</b><span>автор прислал новую версию</span></li>
+            <li><i style="background:#9e7a76"></i><b>Не согласовано</b><span>материал в этом виде в работу не идёт</span></li>
+            <li><i style="background:#7d8f94"></i><b>Частично согласовано</b><span>решения согласующих разошлись</span></li>
+            <li><i style="background:#8a8d91"></i><b>Не рассмотрено</b><span>решения по материалу ещё нет</span></li>
+            <li><i style="background:#6b7f9e"></i><b>Статусы озвучки</b><span>отдельная ветка для озвучки материала</span></li>
+          </ul>
+          <div class="inline" data-slots="bot-list"></div>
+        </div>
+
+        <div class="ch" data-slot="bot-edit">
           <h3>Правки без потерь</h3>
           <p>Правка оставляется текстом прямо к материалу. В новой версии
             согласующий сразу видит, на что отвечал в прошлый раз. Отдельный
             раздел собирает все материалы с открытыми правками.</p>
+          <div class="inline" data-slots="bot-edit"></div>
         </div>
-        <div class="block">
+
+        <div class="ch" data-slot="bot-doctor">
           <h3>Согласование с врачом</h3>
           <p>При загрузке бот спрашивает, согласован ли материал с врачом
             заранее, и фиксирует имя. Если врач одобрил материал лично, автор
             вносит это в систему, а согласующие получают уведомление и одной
             кнопкой подтверждают, возвращают на правку или отклоняют. Устные
             договорённости перестают теряться.</p>
+          <div class="inline" data-slots="bot-doctor"></div>
         </div>
-        <div class="block">
-          <h3>Альбомы и коллаборации</h3>
+
+        <div class="ch" data-slot="bot-albums">
+          <h3>Альбомы</h3>
           <p>Несколько фото и видео можно загрузить как один материал
             с названием — тогда согласующие получают их настоящим
             Telegram-альбомом — или как серию отдельных материалов. Документы
             и медиа автоматически разводятся по группам, длинные тексты делятся
-            на части без обрезки. Для съёмок с блогерами есть отдельный
-            сценарий: дата, врач, нужно ли согласование, изменение планов.</p>
+            на части без обрезки.</p>
+          <div class="inline" data-slots="bot-albums"></div>
+        </div>
+
+        <div class="ch" data-slot="bot-collab">
+          <h3>Коллаборации</h3>
+          <p>Отдельный сценарий для съёмок с блогерами: дата, врач, нужно ли
+            согласование, изменение планов. Повторный запрос обратной связи
+            уходит сразу всем согласующим, напоминания приходят с названием
+            материала, уведомления выключаются одним переключателем.</p>
+          <div class="inline" data-slots="bot-collab"></div>
         </div>
       </div>
     </div>
-
-    <div class="rv" style="margin-top:var(--s96)">
-      <h3>Семь статусов</h3>
-      <p style="margin-bottom:var(--s32)">Список материалов сортируется
-        не по дате, а по приоритету статуса, поэтому в первую очередь видно то,
-        что требует действия.</p>
-      <ul class="statuses">
-        <li><i style="background:#6b8f7a"></i><b>Согласовано</b><span>финальное решение основного согласующего</span></li>
-        <li><i style="background:#9a8768"></i><b>Внесена правка</b><span>согласующий оставил текстовую правку</span></li>
-        <li><i style="background:#8d7c96"></i><b>Правка ждёт проверки</b><span>автор прислал новую версию</span></li>
-        <li><i style="background:#9e7a76"></i><b>Не согласовано</b><span>материал в этом виде в работу не идёт</span></li>
-        <li><i style="background:#7d8f94"></i><b>Частично согласовано</b><span>решения согласующих разошлись</span></li>
-        <li><i style="background:#8a8d91"></i><b>Не рассмотрено</b><span>решения по материалу ещё нет</span></li>
-        <li><i style="background:#6b7f9e"></i><b>Статусы озвучки</b><span>отдельная ветка для озвучки материала</span></li>
-      </ul>
-    </div>
-
-    <div class="shots n3 rv" style="margin-top:var(--s96)"
-         data-slots="bot-card,bot-list,bot-edit"></div>
   </div>
 </section>
 
@@ -560,10 +601,18 @@ html,body{margin:0;padding:0;max-width:100%;overflow-x:hidden;}
 <section>
   <div class="wrap">
     <h2 class="rv">Telegram Mini App</h2>
+    <p class="rv" style="margin-bottom:var(--s96)">Полноценное веб-приложение
+      внутри Telegram, которое заменило рабочее пространство в Notion
+      и работает на одной базе данных с ботом.</p>
+
     <div class="grid">
       <div class="cl rv">
-        <p>Полноценное веб-приложение внутри Telegram, которое заменило рабочее
-          пространство в Notion и работает на одной базе данных с ботом.</p>
+        <div class="seg" id="appSeg" role="tablist" aria-label="Разделы Mini App">
+          <button type="button" role="tab" aria-selected="true" data-slot="app-plan">Контент-план</button>
+          <button type="button" role="tab" aria-selected="false" data-slot="app-tasks">Задачи</button>
+          <button type="button" role="tab" aria-selected="false" data-slot="app-schedule">График</button>
+        </div>
+        <div class="swap" id="appSwap"></div>
       </div>
       <div class="cr rv">
         <div class="block" style="margin-top:0"><h3>Контент-план</h3>
@@ -582,8 +631,6 @@ html,body{margin:0;padding:0;max-width:100%;overflow-x:hidden;}
             из Telegram на любом телефоне и ощущается как нативное.</p></div>
       </div>
     </div>
-    <div class="shots n3 rv" style="margin-top:var(--s96)"
-         data-slots="app-plan,app-tasks,app-switch"></div>
   </div>
 </section>
 
@@ -659,10 +706,24 @@ html,body{margin:0;padding:0;max-width:100%;overflow-x:hidden;}
       </div>
     </div>
 
-    <div class="shots n2 rv" style="margin-top:var(--s96)"
-         data-slots="plugin-run,plugin-panel"></div>
-    <div class="shots n4 rv" style="margin-top:var(--s64)"
-         data-slots="ai-1,ai-2,ai-3,ai-4"></div>
+    <div class="grid rv" style="margin-top:var(--s96)">
+      <div class="cl">
+        <pre class="code" id="pluginCode"><span><b>#POST</b></span><span><b>#COVER</b></span><span>title: гигиена</span><span>subtitle: что стоит знать перед визитом</span><span> </span><span><b>#BLOCK</b></span><span>title: ЗАЧЕМ</span><span>body: регулярный уход занимает меньше времени,</span><span>      чем лечение его последствий.</span><span> </span><span><b>#CLOSING</b></span><span>tagline: забота начинается с привычки</span></pre>
+      </div>
+      <div class="cr" data-slots="plugin-run"></div>
+    </div>
+    <div class="grid rv" style="margin-top:var(--s64)">
+      <div class="cl">
+        <div class="cmp" data-a="ai-1" data-b="ai-2">
+          <span class="lbl l">До</span><span class="lbl r">После</span>
+        </div>
+      </div>
+      <div class="cr">
+        <div class="cmp" data-a="ai-3" data-b="ai-4">
+          <span class="lbl l">До</span><span class="lbl r">После</span>
+        </div>
+      </div>
+    </div>
   </div>
 </section>
 
@@ -689,7 +750,10 @@ html,body{margin:0;padding:0;max-width:100%;overflow-x:hidden;}
             визитов и экскурсий по клинике.</p></div>
       </div>
     </div>
-    <div class="shots n4 rv" style="margin-top:var(--s96)"
+    <div class="facts rv" style="margin-top:var(--s96)">
+      <div><p class="k">постов в Threads</p><p class="v" data-count="250" data-suffix="+">0</p></div>
+    </div>
+    <div class="shots n4 rv" style="margin-top:var(--s64)"
          data-slots="shot-1,shot-2,shot-3,shot-4"></div>
   </div>
 </section>
@@ -728,6 +792,22 @@ html,body{margin:0;padding:0;max-width:100%;overflow-x:hidden;}
             по семи направлениям, техникой работы с жалобами и каталогом
             из 50 типовых ситуаций.</p>
         </div>
+      </div>
+    </div>
+
+    <div class="facts rv" style="margin-top:var(--s96)">
+      <div><p class="k">разделов стандарта</p><p class="v" data-count="11">0</p></div>
+      <div><p class="k">слайда презентации</p><p class="v" data-count="52">0</p></div>
+      <div><p class="k">типовых ситуаций</p><p class="v" data-count="50">0</p></div>
+      <div><p class="k">направлений со скриптами</p><p class="v" data-count="7">0</p></div>
+    </div>
+
+    <div class="rv" style="margin-top:var(--s96)">
+      <h3>Логика ответа пациенту</h3>
+      <div class="steps" id="talkSteps">
+        <div class="st"><h4>Диагностика</h4><p>Сначала — как проходит осмотр и что он показывает</p></div>
+        <div class="st"><h4>Лечение</h4><p>Затем — как строится план и из чего он складывается</p></div>
+        <div class="st"><h4>Стоимость</h4><p>И только потом — цена, по правилам её подачи</p></div>
       </div>
     </div>
   </div>
@@ -769,9 +849,16 @@ html,body{margin:0;padding:0;max-width:100%;overflow-x:hidden;}
       </div>
     </div>
 
-    <div class="combo rv" style="margin-top:var(--s96)">
-      <div data-slots="hyg-3d"></div>
-      <div class="side" data-slots="hyg-patient"></div>
+    <div class="rv" style="margin-top:var(--s96)">
+      <div class="seg" id="hygSeg" role="tablist" aria-label="Вид карты"
+           hidden>
+        <button type="button" role="tab" aria-selected="true" data-slot="hyg-3d">3D</button>
+        <button type="button" role="tab" aria-selected="false" data-slot="hyg-map">Схема</button>
+      </div>
+      <div class="combo">
+        <div class="swap" id="hygSwap"></div>
+        <div class="side" data-slots="hyg-patient"></div>
+      </div>
     </div>
 
     <div class="rv" style="margin-top:var(--s96)">
@@ -810,7 +897,12 @@ html,body{margin:0;padding:0;max-width:100%;overflow-x:hidden;}
 <script>
 (function(){
   'use strict';
-  var reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  /* ?reduced=1 в адресе включает тот же режим, что и системная настройка
+     «меньше движения» — чтобы можно было проверить её, не меняя настройки
+     в системе. */
+  var reduced = matchMedia('(prefers-reduced-motion: reduce)').matches ||
+                /(^|[?&])reduced=1(&|$)/.test(location.search);
+  if(reduced) document.documentElement.classList.add('reduced');
   var MEDIA = window.CASE_MEDIA || {};
   var RATIO = {desktop:1, phone:1, square:1, photo:1};
 
@@ -876,6 +968,188 @@ html,body{margin:0;padding:0;max-width:100%;overflow-x:hidden;}
       host.appendChild(build(id.trim()));
     });
   });
+
+  /* ---------- закреплённый экран бота ----------
+     Экран слева меняется на слот того подраздела, который сейчас в работе.
+     Полоса над ним показывает, сколько подразделов пройдено. */
+  var chapters = document.getElementById('botChapters');
+  var botSwap = document.getElementById('botSwap');
+  var botProg = document.getElementById('botProg');
+  var botShow = null;
+  if(chapters && botSwap){
+    var chs = [].slice.call(chapters.querySelectorAll('.ch'));
+    var frames = {};
+    chs.forEach(function(ch, i){
+      var el = build(ch.dataset.slot);
+      el.classList.add('out');
+      frames[ch.dataset.slot] = el;
+      botSwap.appendChild(el);
+      if(botProg){
+        var bar = document.createElement('i');
+        botProg.appendChild(bar);
+      }
+    });
+    var bars = botProg ? [].slice.call(botProg.children) : [];
+    var current = null;
+    botShow = function(slot){
+      if(slot === current) return;
+      current = slot;
+      Object.keys(frames).forEach(function(k){
+        frames[k].classList.toggle('out', k !== slot);
+      });
+    };
+    function markActive(i){
+      bars.forEach(function(b, k){ b.classList.toggle('on', k <= i); });
+      chs.forEach(function(c, k){ c.classList.toggle('active', k === i); });
+      botShow(chs[i].dataset.slot);
+    }
+    markActive(0);
+    if('IntersectionObserver' in window){
+      var io3 = new IntersectionObserver(function(es){
+        es.forEach(function(e){
+          if(e.isIntersecting) markActive(chs.indexOf(e.target));
+        });
+      }, {rootMargin:'-45% 0px -45% 0px', threshold:0});
+      chs.forEach(function(c){ io3.observe(c); });
+    }
+
+    /* наведение на статус показывает слот со списком по статусам */
+    var st = document.getElementById('statuses');
+    if(st){
+      var back = null;
+      st.addEventListener('pointerover', function(e){
+        var li = e.target.closest('li'); if(!li) return;
+        st.classList.add('lit');
+        [].forEach.call(st.children, function(x){ x.classList.toggle('on', x === li); });
+        if(back === null) back = current;
+        botShow('bot-list');
+      });
+      st.addEventListener('pointerleave', function(){
+        st.classList.remove('lit');
+        [].forEach.call(st.children, function(x){ x.classList.remove('on'); });
+        if(back){ botShow(back); back = null; }
+      });
+    }
+  }
+
+  /* ---------- сегментированные переключатели ---------- */
+  function wireSeg(segId, swapId){
+    var seg = document.getElementById(segId), swap = document.getElementById(swapId);
+    if(!seg || !swap) return null;
+    var btns = [].slice.call(seg.querySelectorAll('button'));
+    var made = {};
+    btns.forEach(function(b, i){
+      var el = build(b.dataset.slot);
+      if(i) el.classList.add('out');
+      made[b.dataset.slot] = el;
+      swap.appendChild(el);
+    });
+    seg.addEventListener('click', function(e){
+      var b = e.target.closest('button'); if(!b) return;
+      btns.forEach(function(x){ x.setAttribute('aria-selected', String(x === b)); });
+      Object.keys(made).forEach(function(k){
+        made[k].classList.toggle('out', k !== b.dataset.slot);
+      });
+    });
+    return {seg:seg, btns:btns};
+  }
+  wireSeg('appSeg', 'appSwap');
+  var hyg = wireSeg('hygSeg', 'hygSwap');
+  if(hyg){
+    /* переключатель появляется, когда в обоих слотах есть файлы,
+       либо когда он включён флагом для проверки на заглушках */
+    var flags = window.CASE_MEDIA_FLAGS || {};
+    var ready = ['hyg-3d','hyg-map'].every(function(k){
+      var m = MEDIA[k];
+      return m && m.src && (m.type !== 'video' || m.src.mp4 || m.src.webm);
+    });
+    hyg.seg.hidden = !(ready || flags.forceShowToggle);
+  }
+
+  /* ---------- разметка плагина: строки появляются по одной ---------- */
+  var code = document.getElementById('pluginCode');
+  if(code){
+    var lines = [].slice.call(code.children);
+    if(reduced || !('IntersectionObserver' in window)){
+      code.classList.add('in');
+    } else {
+      lines.forEach(function(l, i){ l.style.transitionDelay = (i * 55) + 'ms'; });
+      new IntersectionObserver(function(es, ob){
+        es.forEach(function(e){
+          if(e.isIntersecting){ code.classList.add('in'); ob.disconnect(); }
+        });
+      }, {threshold:.25}).observe(code);
+    }
+  }
+
+  /* ---------- слайдеры «до и после» ---------- */
+  [].forEach.call(document.querySelectorAll('.cmp'), function(cmp){
+    var a = document.createElement('div'); a.className = 'a';
+    var b = document.createElement('div'); b.className = 'b';
+    a.appendChild(build(cmp.dataset.a));
+    b.appendChild(build(cmp.dataset.b));
+    var bar = document.createElement('span'); bar.className = 'bar';
+    cmp.insertBefore(b, cmp.firstChild);
+    cmp.insertBefore(a, cmp.firstChild);
+    cmp.appendChild(bar);
+    cmp.style.setProperty('--x', '50%');
+    var down = false;
+    function at(e){
+      var r = cmp.getBoundingClientRect();
+      var cx = (e.touches ? e.touches[0].clientX : e.clientX) - r.left;
+      var v = Math.max(0, Math.min(1, cx / r.width));
+      cmp.style.setProperty('--x', (v * 100).toFixed(2) + '%');
+    }
+    cmp.addEventListener('pointerdown', function(e){
+      down = true; cmp.setPointerCapture(e.pointerId); at(e);
+    });
+    cmp.addEventListener('pointermove', function(e){ if(down) at(e); });
+    cmp.addEventListener('pointerup', function(){ down = false; });
+    cmp.addEventListener('pointercancel', function(){ down = false; });
+    cmp.addEventListener('touchmove', function(e){
+      if(down && e.cancelable) e.preventDefault();
+    }, {passive:false});
+  });
+
+  /* ---------- счётчики ---------- */
+  var nums = [].slice.call(document.querySelectorAll('[data-count]'));
+  function run(el){
+    var to = parseFloat(el.getAttribute('data-count')) || 0;
+    var sfx = el.getAttribute('data-suffix') || '';
+    if(reduced){ el.textContent = to + sfx; return; }
+    var t0 = 0, dur = 900;
+    (function step(now){
+      if(!t0) t0 = now;
+      var k = Math.min(1, (now - t0) / dur);
+      el.textContent = Math.round(to * (1 - Math.pow(1 - k, 3))) + sfx;
+      if(k < 1) requestAnimationFrame(step);
+    })(performance.now());
+  }
+  if(!('IntersectionObserver' in window)){ nums.forEach(run); }
+  else {
+    var io4 = new IntersectionObserver(function(es){
+      es.forEach(function(e){
+        if(e.isIntersecting){ run(e.target); io4.unobserve(e.target); }
+      });
+    }, {threshold:.5});
+    nums.forEach(function(n){ io4.observe(n); });
+  }
+
+  /* ---------- три шага в стандарте коммуникации ---------- */
+  var talk = document.getElementById('talkSteps');
+  if(talk){
+    var ts = [].slice.call(talk.querySelectorAll('.st'));
+    if(reduced || !('IntersectionObserver' in window)){
+      ts.forEach(function(x){ x.classList.add('on'); });
+    } else {
+      var io5 = new IntersectionObserver(function(es){
+        es.forEach(function(e){
+          if(e.isIntersecting){ e.target.classList.add('on'); io5.unobserve(e.target); }
+        });
+      }, {rootMargin:'0px 0px -20% 0px', threshold:.2});
+      ts.forEach(function(x){ io5.observe(x); });
+    }
+  }
 
   /* ---------- появление секций ---------- */
   var rv = [].slice.call(document.querySelectorAll('.rv'));
