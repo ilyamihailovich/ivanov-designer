@@ -12,16 +12,25 @@
 /* ===========================================================
    Кейс «Цифровая экосистема контента».
    Страница самостоятельная: все правила живут под .mcs, общие стили
-   сайта сюда не подключаются и не меняются. Из общего взяты только
-   шрифты и чёрное на белом.
-   Иерархия держится на отступах и типографике: рамок и подложек нет
-   нигде, кроме экранов интерфейсов, у которых только мягкая тень.
+   сайта сюда не подключаются и не меняются.
+
+   Типографика: три размера текста — 17 основной, 22 вводный абзац
+   секции, 14 подпись. Заголовки и цифры набраны шрифтом сайта (AK),
+   Inter остаётся только в тексте и подписях, как в остальных кейсах.
    =========================================================== */
 @font-face{font-family:'AK';src:url('fonts/ak.woff2') format('woff2');
   font-weight:100 900;font-style:normal;font-display:swap;}
 
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
-html,body{margin:0;padding:0;max-width:100%;overflow-x:hidden;}
+/* overflow-x:hidden на html/body делает body прокручиваемым контейнером
+   и ломает position:sticky — именно из-за этого закреплённый экран уезжал
+   вверх. overflow-x:clip обрезает так же, но контейнер прокрутки
+   не создаёт. */
+html{overflow-x:clip;
+  /* Safari на iPhone сам увеличивает шрифт в длинных блоках: подписи
+     на сцене раздувались и налезали друг на друга */
+  -webkit-text-size-adjust:100%;text-size-adjust:100%;}
+html,body{margin:0;padding:0;max-width:100%;}
 
 .mcs{
   /* шкала отступов — других значений на странице нет */
@@ -34,7 +43,7 @@ html,body{margin:0;padding:0;max-width:100%;overflow-x:hidden;}
   --maxw:1280px;
   --ink:#111315;
   --text:#3a3a3a;
-  --mute:#64696e;
+  --mute:#60656b;         /* подписи: не светлее #6B6B6B */
   --line:rgba(17,19,21,.12);
   --accent:#5a6b85;
   --eo:cubic-bezier(.22,1,.36,1);
@@ -48,23 +57,24 @@ html,body{margin:0;padding:0;max-width:100%;overflow-x:hidden;}
   gap:0 var(--grid);}
 .mcs .cl{grid-column:1 / 6;}
 .mcs .cr{grid-column:7 / 13;}
+/* колонка, оставшаяся одна после того как пустые слоты не отрисовались */
+.mcs .cl.full,.mcs .cr.full{grid-column:1 / 9;margin-top:0;}
 .mcs section{padding:0 0 var(--sec);}
 
-/* ---------- типографика ---------- */
-.mcs h1{font-size:clamp(40px,5.4vw,88px);line-height:1;letter-spacing:-.045em;
-  font-weight:500;margin:0;max-width:16ch;}
+/* ---------- типографика: три размера текста ---------- */
+.mcs h1{font-size:clamp(38px,5vw,78px);line-height:1.02;letter-spacing:-.045em;
+  font-weight:500;margin:0;}
 .mcs h2{font-size:clamp(28px,3.2vw,50px);line-height:1.03;letter-spacing:-.04em;
   font-weight:500;margin:0 0 var(--head);max-width:20ch;}
 .mcs h3{font-size:clamp(19px,1.6vw,24px);line-height:1.1;letter-spacing:-.028em;
   font-weight:600;margin:0 0 var(--s16);}
-.mcs h4{font-family:'Inter',Arial,sans-serif;font-size:16px;line-height:1.25;
-  letter-spacing:-.015em;font-weight:600;color:var(--ink);margin:0 0 var(--s8);}
+.mcs h4{font-size:18px;line-height:1.2;letter-spacing:-.022em;font-weight:600;
+  color:var(--ink);margin:0 0 var(--s8);}
 .mcs p{font-family:'Inter',Arial,sans-serif;font-size:17px;line-height:1.55;
   letter-spacing:-.011em;color:var(--text);margin:0 0 var(--s16);max-width:65ch;}
 .mcs p:last-child{margin-bottom:0;}
-.mcs .lead{font-size:clamp(18px,1.55vw,24px);line-height:1.4;color:var(--text);
-  max-width:46ch;}
-@media (max-width:860px){ .mcs p{font-size:16px;} }
+.mcs .lead{font-size:22px;line-height:1.4;color:var(--text);max-width:46ch;}
+@media (max-width:860px){ .mcs .lead{font-size:20px;} }
 
 /* ---------- шапка ---------- */
 .mcs .top{position:sticky;top:0;z-index:30;display:flex;align-items:center;
@@ -84,21 +94,25 @@ html,body{margin:0;padding:0;max-width:100%;overflow-x:hidden;}
     radial-gradient(54% 46% at 20% 16%,rgba(146,168,202,.20),transparent 72%),
     radial-gradient(50% 42% at 80% 34%,rgba(172,188,212,.16),transparent 74%);}
 .mcs .hero > .wrap{position:relative;z-index:1;}
-.mcs .hero .lead{margin-top:var(--s32);}
+/* заголовок занимает десять колонок, чтобы ложиться в две-три строки */
+.mcs .hero h1{grid-column:1 / 11;}
+.mcs .hero .lead{grid-column:1 / 7;margin-top:var(--s32);}
 .mcs .facts{margin-top:var(--s96);display:grid;
-  grid-template-columns:repeat(12,minmax(0,1fr));gap:var(--s32) var(--grid);}
+  grid-template-columns:repeat(12,minmax(0,1fr));gap:var(--s32) var(--grid);
+  align-items:start;}
 .mcs .facts div{grid-column:span 3;}
-.mcs .facts .k{font-family:'Inter',Arial,sans-serif;font-size:14px;
-  color:var(--mute);margin:0 0 var(--s8);line-height:1.35;}
+/* число сверху, подпись под ним */
 .mcs .facts .v{font-size:clamp(30px,2.9vw,44px);line-height:1;
-  letter-spacing:-.04em;font-weight:500;margin:0;}
+  letter-spacing:-.04em;font-weight:500;margin:0 0 var(--s8);}
+.mcs .facts .k{font-family:'Inter',Arial,sans-serif;font-size:14px;
+  color:var(--mute);margin:0;line-height:1.35;}
 .mcs .meta{margin:var(--s64) 0 0;display:grid;
   grid-template-columns:repeat(12,minmax(0,1fr));gap:var(--s24) var(--grid);}
 .mcs .meta div{grid-column:span 4;}
 .mcs .meta dt{font-family:'Inter',Arial,sans-serif;font-size:14px;
   color:var(--mute);margin:0 0 var(--s8);}
-.mcs .meta dd{font-family:'Inter',Arial,sans-serif;font-size:16px;line-height:1.45;
-  color:var(--text);margin:0;}
+.mcs .meta dd{font-family:'Inter',Arial,sans-serif;font-size:17px;
+  line-height:1.55;color:var(--text);margin:0;}
 
 /* ---------- экраны интерфейсов: только сам экран, без корпусов ---------- */
 .mcs .screen{position:relative;overflow:hidden;background:#f0f0f1;
@@ -111,8 +125,16 @@ html,body{margin:0;padding:0;max-width:100%;overflow-x:hidden;}
   display:block;}
 .mcs .screen .slot{position:absolute;inset:0;display:flex;align-items:center;
   justify-content:center;padding:var(--s24);text-align:center;
-  font-family:'Inter',Arial,sans-serif;font-size:13px;line-height:1.45;
+  font-family:'Inter',Arial,sans-serif;font-size:14px;line-height:1.45;
   color:var(--mute);}
+/* сдержанная глубина: экран входит из наклона и ложится ровно */
+.mcs .screen.d3{opacity:0;--r0:12deg;--ty:40px;--rx:0deg;--ry:0deg;
+  transform:perspective(1200px)
+    rotateX(calc(var(--r0) + var(--rx))) rotateY(var(--ry))
+    translateY(var(--ty));
+  transition:opacity .7s ease-out, transform .7s ease-out;}
+.mcs .screen.d3.in{opacity:1;--r0:0deg;--ty:0px;}
+.mcs .screen.d3.rdy{transition:transform .3s ease-out;}
 .mcs .shots{display:grid;gap:var(--grid);}
 .mcs .shots.n2{grid-template-columns:repeat(2,minmax(0,1fr));}
 .mcs .shots.n3{grid-template-columns:repeat(3,minmax(0,1fr));}
@@ -124,142 +146,149 @@ html,body{margin:0;padding:0;max-width:100%;overflow-x:hidden;}
   .mcs .combo .side{position:static;width:56%;margin:var(--s48) auto 0;}
 }
 
-/* ---------- экосистема ---------- */
-.mcs .eco{position:relative;overflow:hidden;}
-.mcs .eco .tint{position:absolute;inset:0;z-index:0;pointer-events:none;
+/* ============== сцена «Экосистема в работе» ============== */
+.mcs .eco{padding-bottom:var(--sec);}
+.mcs .ecoWrap{position:relative;height:400vh;}
+/* на iOS панель браузера то появляется, то уходит: 100vh больше видимой
+   области, и кадр сцены обрезался бы снизу — svh считает по видимой */
+.mcs .ecoPin{position:sticky;top:0;height:100vh;height:100svh;
+  overflow:hidden;}
+.mcs .ecoPin .tint{position:absolute;inset:0;z-index:0;pointer-events:none;
   background:
-    radial-gradient(44% 50% at 26% 30%,rgba(146,168,202,.18),transparent 72%),
-    radial-gradient(42% 46% at 76% 72%,rgba(168,184,208,.14),transparent 74%);}
-.mcs .eco > .wrap{position:relative;z-index:1;padding-top:var(--s96);
-  padding-bottom:var(--s96);}
-.mcs .scene{position:relative;height:clamp(520px,50vw,720px);
-  perspective:1500px;perspective-origin:50% 40%;}
-/* Сдвиг слоя приходит из JS уже в пикселях. Раньше он считался выражением
-   calc(var(--d) * var(--sep) * 1px) из двух безразмерных переменных — WebKit
-   такое выражение не разбирал, сдвиг оставался нулевым, слои лежали друг
-   на друге, и от сцены на экране не оставалось ничего, кроме легенды. */
-.mcs .layer{position:absolute;inset:0;transform:translateY(var(--dy,0px));}
-.mcs .plane{position:absolute;left:50%;top:50%;width:62%;padding-top:31%;
-  transform:translate(-50%,-50%) rotateX(58deg) rotateZ(-40deg);
-  border-radius:20px;background:rgba(255,255,255,.78);
-  box-shadow:0 30px 70px rgba(16,24,40,.12);}
-/* Подписи лежат одним слоем поверх всех плоскостей: пока они жили внутри
-   своего слоя, полупрозрачная плоскость соседнего слоя их забеливала.
-   Каждая группа подписей повторяет вертикальный сдвиг своей плоскости,
-   поэтому держится за ней при разлёте. */
-.mcs .nodes{position:absolute;inset:0;z-index:5;pointer-events:none;}
-.mcs .nodes > div{position:absolute;inset:0;
-  transform:translateY(var(--dy,0px));}
-.mcs .node{pointer-events:auto;}
-.mcs .node{position:absolute;transform:translateY(-50%);white-space:nowrap;
-  font-family:'Inter',Arial,sans-serif;font-size:14px;font-weight:500;
-  letter-spacing:-.012em;color:var(--ink);cursor:default;
+    radial-gradient(44% 46% at 26% 26%,rgba(146,168,202,.20),transparent 72%),
+    radial-gradient(42% 44% at 76% 74%,rgba(168,184,208,.15),transparent 74%);}
+.mcs #ecoCanvas{position:absolute;inset:0;width:100%;height:100%;z-index:1;
+  display:block;}
+.mcs .sc-labels{position:absolute;inset:0;z-index:2;}
+.mcs .sc-node,.mcs .sc-cap{position:absolute;left:0;top:0;white-space:nowrap;
+  font-family:'Inter',Arial,sans-serif;will-change:transform;
+  transform-origin:0 50%;}
+/* подписи узлов — размер основного текста, вес 500, почти чёрные */
+.mcs .sc-node{font-size:17px;font-weight:500;letter-spacing:-.014em;
+  color:var(--ink);pointer-events:auto;cursor:default;
   transition:opacity .3s var(--eo);}
-/* Подпись слоя: имя уровня стоит на самой плоскости, под сценой его
-   повторять не нужно — там только по строке пояснения. */
-.mcs .cap{position:absolute;transform:translateY(-50%);white-space:nowrap;
-  font-family:'Inter',Arial,sans-serif;font-size:13px;font-weight:600;
-  letter-spacing:.02em;color:var(--mute);}
-.mcs .node i{display:inline-block;width:6px;height:6px;border-radius:50%;
-  background:var(--accent);margin-right:var(--s8);vertical-align:2px;}
-.mcs .links{position:absolute;inset:0;z-index:4;pointer-events:none;
-  opacity:0;}
-.mcs .links line{stroke:rgba(17,19,21,.24);stroke-width:1;
-  transition:stroke .3s var(--eo), stroke-width .3s var(--eo);}
-.mcs .scene.lit .node{opacity:.28;}
-.mcs .scene.lit .node.on{opacity:1;}
-.mcs .scene.lit .links line{stroke:rgba(17,19,21,.08);}
-.mcs .links line.on{stroke:var(--accent);stroke-width:1.6;}
-.mcs .legend{margin:var(--s64) 0 0;display:grid;
+.mcs .sc-node{display:inline-flex;align-items:center;}
+.mcs .sc-node em{flex:0 0 auto;width:9px;height:9px;border-radius:50%;
+  background:var(--accent);margin-right:10px;
+  box-shadow:0 0 0 5px rgba(90,107,133,.16);
+  transition:box-shadow .3s var(--eo);}
+.mcs .sc-node.rtl{flex-direction:row-reverse;}
+.mcs .sc-node.rtl em{margin-right:0;margin-left:10px;}
+.mcs .sc-node.on em{box-shadow:0 0 0 8px rgba(90,107,133,.26);}
+.mcs .sc-node.dim{opacity:.34;}
+/* подпись слоя — размер подписи, обычный регистр, у левого края плиты */
+.mcs .sc-cap{font-size:14px;font-weight:500;letter-spacing:-.01em;
+  color:var(--mute);}
+.mcs .sc-head{position:absolute;left:0;right:0;top:var(--s96);z-index:3;
+  pointer-events:none;transition:opacity .3s linear;}
+.mcs .sc-head h2{margin:0;}
+.mcs .sc-dots{position:absolute;right:var(--gut);top:50%;z-index:3;
+  transform:translateY(-50%);display:flex;flex-direction:column;gap:10px;}
+.mcs .sc-dots i{width:7px;height:7px;border-radius:50%;
+  background:rgba(17,19,21,.16);transition:background .4s var(--eo);}
+.mcs .sc-dots i.on{background:var(--accent);}
+.mcs .sc-step{position:absolute;left:0;right:0;bottom:var(--s96);z-index:3;
+  padding:0 var(--gut);max-width:var(--maxw);margin:0 auto;
+  font-size:22px;line-height:1.35;color:var(--ink);opacity:0;
+  transform:translateY(8px);
+  transition:opacity .4s var(--eo), transform .4s var(--eo);}
+.mcs .sc-step.on{opacity:1;transform:none;}
+.mcs .sc-out{position:absolute;left:0;right:0;bottom:var(--s32);z-index:3;
+  padding:0 var(--gut);margin:0 auto;max-width:var(--maxw);
+  font-size:17px;color:var(--mute);opacity:0;
+  transition:opacity .5s var(--eo);}
+.mcs .sc-out.on{opacity:1;}
+.mcs .sc-tip{position:absolute;left:0;top:0;z-index:4;pointer-events:none;
+  font-family:'Inter',Arial,sans-serif;font-size:14px;color:#fff;
+  background:rgba(17,19,21,.86);padding:6px 10px;border-radius:7px;
+  white-space:nowrap;opacity:0;transition:opacity .2s linear;}
+.mcs .sc-tip.on{opacity:1;}
+@media (max-width:759.98px){
+  .mcs .ecoWrap{height:350vh;}
+  .mcs .sc-head{top:var(--s64);}
+  .mcs .sc-dots{right:auto;left:0;bottom:var(--s128);top:auto;
+    transform:none;flex-direction:row;justify-content:center;width:100%;}
+  /* подпись текущего шага — плашка внизу экрана поверх сцены */
+  .mcs .sc-step{bottom:var(--s48);font-size:16px;line-height:1.4;
+    padding:0 16px;}
+  .mcs .sc-step::before{content:'';position:absolute;inset:-12px 4px;
+    z-index:-1;border-radius:12px;background:rgba(255,255,255,.82);
+    -webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);}
+  .mcs .sc-out{bottom:var(--s16);font-size:14px;}
+}
+/* запасной вариант: статичный кадр финального состояния и восемь шагов */
+.mcs .ecoFlat{display:none;}
+.mcs .ecoFlat img{display:block;width:100%;height:auto;border-radius:15px;}
+.mcs .ecoSteps{list-style:none;margin:var(--s64) 0 0;padding:0;display:grid;
   grid-template-columns:repeat(12,minmax(0,1fr));gap:var(--s24) var(--grid);
-  list-style:none;padding:0;}
-.mcs .legend li{grid-column:span 4;}
-/* мобильная схема: три слоя вертикально, между ними тонкие линии */
-.mcs .stack{display:none;}
-.mcs .stack .lvl{padding-bottom:var(--s24);}
-.mcs .stack .lvl + .lvl{border-top:1px solid var(--line);padding-top:var(--s24);}
-.mcs .stack span{display:block;font-family:'Inter',Arial,sans-serif;
-  font-size:16px;color:var(--text);line-height:1.5;}
-/* Сцена показывается от 1024 и шире — в Safari и Chrome одинаково.
-   prefers-reduced-motion сцену не отключает: она просто сразу раскрыта. */
-@media (max-width:1023.98px){
-  .mcs .scene{display:none;}
-  .mcs .stack{display:block;}
-}
-@media (max-width:860px){
-  .mcs .legend li{grid-column:span 12;}
-}
-
-/* ---------- путь материала ---------- */
-.mcs .path .row{position:relative;display:grid;gap:var(--grid);
-  padding-top:var(--s32);}
-.mcs .path .row + .row{margin-top:var(--s64);}
-.mcs .path .row::before{content:'';position:absolute;left:0;right:0;top:3px;
-  height:1px;background:var(--line);}
-.mcs .path .row.r5{grid-template-columns:repeat(5,minmax(0,1fr));}
-.mcs .path .row.r4{grid-template-columns:repeat(5,minmax(0,1fr));}
-.mcs .st{position:relative;}
-.mcs .st::before{content:'';position:absolute;left:0;top:-32px;
-  width:7px;height:7px;border-radius:50%;background:#d7d9dc;
-  transition:background .5s var(--eo);}
-.mcs .st.on::before{background:var(--accent);}
-.mcs .st p{font-size:15px;max-width:32ch;}
-@media (max-width:860px){
-  .mcs .path .row{grid-template-columns:1fr!important;padding:0 0 0 var(--s24);}
-  .mcs .path .row::before{left:3px;right:auto;top:0;bottom:0;width:1px;height:auto;}
-  .mcs .path .row + .row{margin-top:0;}
-  .mcs .st{padding:var(--s16) 0;}
-  .mcs .st::before{left:-24px;top:24px;}
-  .mcs .st p{max-width:none;}
-}
+  counter-reset:s;}
+.mcs .ecoSteps li{grid-column:span 6;font-family:'Inter',Arial,sans-serif;
+  font-size:17px;line-height:1.55;color:var(--text);
+  padding-left:var(--s32);position:relative;counter-increment:s;}
+.mcs .ecoSteps li::before{content:counter(s);position:absolute;left:0;top:0;
+  font-family:'AK',Arial,sans-serif;color:var(--mute);}
+@media (max-width:860px){ .mcs .ecoSteps li{grid-column:span 12;} }
+html.eco-flat .mcs .ecoWrap{display:none;}
+html.eco-flat .mcs .ecoFlat{display:block;}
 
 /* ---------- семь статусов ---------- */
 .mcs .statuses{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));
   gap:var(--s16) var(--grid);list-style:none;margin:0;padding:0;}
 .mcs .statuses li{display:flex;gap:var(--s16);align-items:baseline;
-  font-family:'Inter',Arial,sans-serif;font-size:16px;line-height:1.45;}
-.mcs .statuses i{width:7px;height:7px;border-radius:50%;flex:0 0 auto;
+  font-family:'Inter',Arial,sans-serif;font-size:17px;line-height:1.55;
+  cursor:default;transition:opacity .3s var(--eo);}
+.mcs .statuses i{width:8px;height:8px;border-radius:50%;flex:0 0 auto;
   position:relative;top:-1px;}
 .mcs .statuses b{font-weight:600;flex:0 0 auto;}
 .mcs .statuses span{color:var(--text);}
-/* Внутри узкой правой колонки список идёт одной колонкой: в двух значения
-   ломались по три-четыре слова на строку. */
+.mcs .statuses.lit li{opacity:.45;}
+.mcs .statuses.lit li.on{opacity:1;}
+/* Внутри узкой правой колонки список идёт одной колонкой. */
 .mcs .ch .statuses{grid-template-columns:1fr;}
-@media (max-width:860px){ .mcs .statuses{grid-template-columns:1fr;} }
+/* до 768 px: точка и название в строке, описание под названием
+   с тем же левым отступом */
+@media (max-width:767.98px){
+  .mcs .statuses{grid-template-columns:1fr;}
+  .mcs .statuses li{display:grid;grid-template-columns:auto minmax(0,1fr);
+    column-gap:var(--s16);row-gap:2px;align-items:start;}
+  .mcs .statuses i{grid-column:1;grid-row:1;top:9px;}
+  .mcs .statuses b{grid-column:2;grid-row:1;}
+  .mcs .statuses span{grid-column:2;grid-row:2;}
+}
 
 /* ---------- блоки ---------- */
 .mcs .block + .block{margin-top:var(--s64);}
-.mcs .tags{font-family:'Inter',Arial,sans-serif;font-size:16px;line-height:1.9;
+.mcs .tags{font-family:'Inter',Arial,sans-serif;font-size:17px;line-height:1.9;
   color:var(--text);max-width:65ch;}
 
-
-/* ---------- закреплённый экран бота ---------- */
-.mcs .sticky{position:sticky;top:var(--s96);}
+/* ---------- закреплённый экран бота ----------
+   Левая и правая колонки лежат в одном гриде, sticky задан самой
+   колонке: экран остаётся закреплённым до конца последнего подраздела
+   и не отрывается раньше времени. Расстояние между подразделами — 96 px;
+   длину прокрутки задаёт не пустота между абзацами, а порог видимости
+   подраздела. */
+.mcs .botgrid > .cl{align-self:start;}
+@media (min-width:1024px){
+  .mcs .botgrid > .cl{position:sticky;top:var(--s96);}
+}
 .mcs .prog{display:flex;gap:4px;margin-bottom:var(--s16);}
 .mcs .prog i{flex:1 1 auto;height:2px;background:rgba(17,19,21,.12);
   transition:background .4s var(--eo);}
 .mcs .prog i.on{background:var(--accent);}
 .mcs .swap{position:relative;}
-.mcs .sticky .swap,.mcs #appSwap{max-width:300px;}
+.mcs .botgrid .swap,.mcs #appSwap{max-width:270px;}
 .mcs .swap > *{transition:opacity .45s var(--eo);}
 .mcs .swap > *.out{opacity:0;position:absolute;inset:0;pointer-events:none;}
-.mcs .chapters > .ch{padding:var(--s64) 0;}
-.mcs .chapters > .ch:first-child{padding-top:0;}
-.mcs .chapters > .ch:last-child{padding-bottom:0;}
-.mcs .ch h3{transition:color .4s var(--eo);}
-@media (min-width:1024px){
-  .mcs .chapters > .ch{min-height:62vh;display:flex;flex-direction:column;
-    justify-content:center;}
-  .mcs .ch .inline{display:none;}
-}
+.mcs .chapters > .ch + .ch{margin-top:var(--s96);}
+@media (min-width:1024px){ .mcs .ch .inline{display:none;} }
 @media (max-width:1023.98px){
-  .mcs .sticky{display:none;}
+  .mcs .botgrid > .cl{display:none;}
   .mcs .ch .inline{margin-top:var(--s32);}
 }
 
 /* ---------- сегментированный переключатель ---------- */
 .mcs .seg{display:inline-flex;gap:4px;margin-bottom:var(--s32);}
-.mcs .seg button{font-family:'Inter',Arial,sans-serif;font-size:15px;
+.mcs .seg button{font-family:'Inter',Arial,sans-serif;font-size:14px;
   font-weight:500;border:0;background:none;color:var(--mute);cursor:pointer;
   padding:var(--s8) var(--s16);border-radius:8px;
   transition:background .3s var(--eo), color .3s var(--eo);}
@@ -281,17 +310,16 @@ html,body{margin:0;padding:0;max-width:100%;overflow-x:hidden;}
 .mcs .cmp .a,.mcs .cmp .b{position:absolute;inset:0;}
 .mcs .cmp .b{clip-path:inset(0 0 0 var(--x,50%));}
 .mcs .cmp .screen{position:absolute;inset:0;border-radius:0;box-shadow:none;
-  aspect-ratio:auto;}
+  aspect-ratio:auto;opacity:1;transform:none;}
 .mcs .cmp .bar{position:absolute;top:0;bottom:0;left:var(--x,50%);width:2px;
   background:#fff;box-shadow:0 0 0 1px rgba(17,19,21,.12);z-index:3;}
 .mcs .cmp .bar::after{content:'';position:absolute;top:50%;left:50%;
   width:34px;height:34px;border-radius:50%;background:#fff;
   transform:translate(-50%,-50%);box-shadow:0 2px 10px rgba(16,24,40,.22);}
-.mcs .cmp .lbl{position:absolute;bottom:var(--s16);font-family:'Inter',Arial,sans-serif;
-  font-size:13px;color:var(--mute);z-index:4;}
+.mcs .cmp .lbl{position:absolute;bottom:var(--s16);
+  font-family:'Inter',Arial,sans-serif;font-size:14px;color:var(--mute);
+  z-index:4;}
 .mcs .cmp .lbl.l{left:var(--s16);} .mcs .cmp .lbl.r{right:var(--s16);}
-/* Подписи заглушек расходятся по своим половинам: в центре они накладывались
-   друг на друга и читались как мешанина. */
 .mcs .cmp .a .slot{justify-content:flex-start;text-align:left;
   padding-right:52%;}
 .mcs .cmp .b .slot{justify-content:flex-end;text-align:right;
@@ -303,24 +331,36 @@ html,body{margin:0;padding:0;max-width:100%;overflow-x:hidden;}
   padding-top:var(--s32);}
 .mcs .steps::before{content:'';position:absolute;left:0;right:0;top:3px;
   height:1px;background:var(--line);}
+.mcs .st{position:relative;}
+.mcs .st::before{content:'';position:absolute;left:0;top:-32px;
+  width:8px;height:8px;border-radius:50%;background:#d7d9dc;
+  transition:background .5s var(--eo);}
+.mcs .st.on::before{background:var(--accent);}
+.mcs .st p{max-width:32ch;}
 @media (max-width:860px){
   .mcs .steps{grid-template-columns:1fr;padding:0 0 0 var(--s24);}
   .mcs .steps::before{left:3px;right:auto;top:0;bottom:0;width:1px;height:auto;}
   .mcs .steps .st{padding:var(--s16) 0;}
+  .mcs .st::before{left:-24px;top:24px;}
+  .mcs .st p{max-width:none;}
 }
 
-/* ---------- статус под курсором ---------- */
-.mcs .statuses li{cursor:default;transition:opacity .3s var(--eo);}
-.mcs .statuses.lit li{opacity:.45;}
-.mcs .statuses.lit li.on{opacity:1;}
-
-/* ---------- результаты ---------- */
+/* ---------- финал ---------- */
+.mcs .fin{position:relative;overflow:hidden;padding-bottom:var(--sec);}
+.mcs .fin .tint{position:absolute;inset:0;z-index:0;pointer-events:none;
+  background:
+    radial-gradient(48% 54% at 22% 24%,rgba(146,168,202,.20),transparent 72%),
+    radial-gradient(44% 50% at 80% 70%,rgba(168,184,208,.15),transparent 74%);}
+.mcs .fin > .wrap{position:relative;z-index:1;padding-top:var(--s128);}
+.mcs .thesis{font-size:clamp(28px,3.1vw,40px);line-height:1.1;
+  letter-spacing:-.038em;font-weight:500;margin:0 0 var(--s96);
+  max-width:38ch;}
 .mcs .res{list-style:none;margin:0;padding:0;display:grid;
   grid-template-columns:repeat(12,minmax(0,1fr));gap:var(--s32) var(--grid);}
 .mcs .res li{grid-column:span 6;font-family:'Inter',Arial,sans-serif;
   font-size:17px;line-height:1.55;color:var(--text);
   padding-top:var(--s16);border-top:1px solid var(--line);}
-@media (max-width:860px){ .mcs .res li{grid-column:span 12;font-size:16px;} }
+@media (max-width:860px){ .mcs .res li{grid-column:span 12;} }
 
 /* ---------- навигация ---------- */
 .mcs .cnav{border-top:1px solid var(--line);display:grid;
@@ -328,8 +368,8 @@ html,body{margin:0;padding:0;max-width:100%;overflow-x:hidden;}
 .mcs .cnav a{display:block;padding:var(--s48) var(--gut);text-decoration:none;
   color:var(--ink);}
 .mcs .cnav a + a{text-align:right;}
-.mcs .cnav small{display:block;font-family:'Inter',Arial,sans-serif;font-size:14px;
-  color:var(--mute);margin-bottom:var(--s8);}
+.mcs .cnav small{display:block;font-family:'Inter',Arial,sans-serif;
+  font-size:14px;color:var(--mute);margin-bottom:var(--s8);}
 .mcs .cnav strong{font-size:clamp(22px,2.1vw,32px);line-height:1.05;
   letter-spacing:-.035em;font-weight:500;}
 .mcs .foot{padding:var(--s32) var(--gut) var(--s48);display:flex;
@@ -341,28 +381,32 @@ html,body{margin:0;padding:0;max-width:100%;overflow-x:hidden;}
   .mcs .cnav a + a{text-align:left;border-top:1px solid var(--line);}
 }
 
-/* ---------- появление ---------- */
-.mcs .rv{opacity:0;transform:translateY(16px);
-  transition:opacity .8s var(--eo), transform .8s var(--eo);}
+/* ---------- появление: заголовки и текст снизу на 24 px ---------- */
+.mcs .rv{opacity:0;transform:translateY(24px);
+  transition:opacity .6s ease-out, transform .6s ease-out;}
 .mcs .rv.in{opacity:1;transform:none;}
 
 /* ---------- мобильная шкала ---------- */
 @media (max-width:860px){
   .mcs{--sec:var(--s96);--head:40px;--grid:var(--s24);}
   .mcs .hero{padding-top:var(--s64);}
+  .mcs .hero h1,.mcs .hero .lead{grid-column:1 / 13;}
   .mcs .facts div{grid-column:span 6;}
   .mcs .meta div{grid-column:span 12;}
   .mcs .cl,.mcs .cr{grid-column:1 / 13;}
   .mcs .cr{margin-top:var(--s48);}
+  .mcs .cl.full,.mcs .cr.full{grid-column:1 / 13;}
   .mcs .shots.n3,.mcs .shots.n4{grid-template-columns:repeat(2,minmax(0,1fr));}
 }
 
 @media (prefers-reduced-motion:reduce){
   .mcs .rv{opacity:1!important;transform:none!important;transition:none!important;}
+  .mcs .screen.d3{opacity:1!important;transform:none!important;}
   .mcs *{animation-duration:.01ms!important;transition-duration:.01ms!important;}
 }
 html.reduced .mcs .rv{opacity:1!important;transform:none!important;
   transition:none!important;}
+html.reduced .mcs .screen.d3{opacity:1!important;transform:none!important;}
 html.reduced .mcs *{animation-duration:.01ms!important;
   transition-duration:.01ms!important;}
 </style>
@@ -383,16 +427,18 @@ html.reduced .mcs *{animation-duration:.01ms!important;
 <section class="hero">
   <span class="tint" aria-hidden="true"></span>
   <div class="wrap">
-    <h1 class="rv">Цифровая экосистема контента для премиальной клиники</h1>
-    <p class="lead rv">Как я превратил SMM медицинского бренда в управляемую
-      систему: от Telegram-продуктов и собственного сервера до 3D-приложения
-      для врачей.</p>
+    <div class="grid">
+      <h1 class="rv">Цифровая экосистема контента для премиальной клиники</h1>
+      <p class="lead rv">Как я превратил SMM медицинского бренда в управляемую
+        систему: от Telegram-продуктов и собственного сервера до 3D-приложения
+        для врачей.</p>
+    </div>
 
     <div class="facts rv">
-      <div><p class="k">Telegram-продукта</p><p class="v" data-count="2">0</p></div>
-      <div><p class="k">Figma-плагина</p><p class="v" data-count="2">0</p></div>
-      <div><p class="k">статусов согласования</p><p class="v" data-count="7">0</p></div>
-      <div><p class="k">постов</p><p class="v" data-count="250" data-suffix="+">0</p></div>
+      <div><p class="v" data-count="2">0</p><p class="k">Telegram-продукта</p></div>
+      <div><p class="v" data-count="2">0</p><p class="k">Figma-плагина</p></div>
+      <div><p class="v" data-count="7">0</p><p class="k">статусов</p></div>
+      <div><p class="v" data-count="250" data-suffix="+">0</p><p class="k">постов</p></div>
     </div>
 
     <dl class="meta rv">
@@ -434,77 +480,43 @@ html.reduced .mcs *{animation-duration:.01ms!important;
   </div>
 </section>
 
-<!-- ===================== экосистема ===================== -->
-<section class="eco">
-  <span class="tint" aria-hidden="true"></span>
-  <div class="wrap">
-    <h2 class="rv">Как устроена экосистема</h2>
-
-    <div class="scene" id="scene">
-      <div class="layer" style="--d:-120"><span class="plane"></span></div>
-      <div class="layer" style="--d:0"><span class="plane"></span></div>
-      <div class="layer" style="--d:120"><span class="plane"></span></div>
-
-      <svg class="links" id="links" aria-hidden="true"></svg>
-
-      <div class="nodes">
-        <div style="--d:-120">
-          <span class="cap" style="left:0;top:50%">Производство</span>
-          <span class="node" data-id="shoot" style="left:30%;top:60%"><i></i>Съёмка, монтаж, тексты</span>
-          <span class="node" data-id="figma" style="left:46%;top:50%"><i></i>Figma-плагины</span>
-          <span class="node" data-id="ai" style="left:62%;top:40%"><i></i>ИИ-продакшн</span>
-        </div>
-        <div style="--d:0">
-          <span class="cap" style="left:0;top:50%">Согласование и планирование</span>
-          <span class="node" data-id="bot" style="left:32%;top:58%"><i></i>Telegram-бот</span>
-          <span class="node" data-id="app" style="left:50%;top:48%"><i></i>Mini App</span>
-          <span class="node" data-id="pub" style="left:82%;top:33%"><i></i>Публикация</span>
-        </div>
-        <div style="--d:120">
-          <span class="cap" style="left:0;top:50%">Инфраструктура</span>
-          <span class="node" data-id="srv" style="left:34%;top:56%"><i></i>Сервер</span>
-          <span class="node" data-id="db" style="left:56%;top:44%"><i></i>Общая база данных</span>
-        </div>
-      </div>
+<!-- =============== сцена: экосистема в работе ===============
+     Секция закрепляется, плиты-слои расходятся, по связям идёт путь
+     одного рилса. Содержание прежней секции «Путь рилса через систему»
+     теперь живёт внутри сцены. -->
+<section class="eco" id="eco">
+  <div class="ecoWrap" id="ecoWrap">
+    <div class="ecoPin" id="ecoPin">
+      <canvas id="ecoCanvas"></canvas>
+      <div class="sc-labels" id="ecoLabels"></div>
+      <div class="sc-head" id="ecoHead"><div class="wrap">
+        <h2>Как устроена экосистема</h2>
+      </div></div>
+      <div class="sc-dots" id="ecoDots" aria-hidden="true"></div>
+      <p class="sc-step" id="ecoStep" aria-live="polite"></p>
+      <p class="sc-out" id="ecoOut">Один сервер и одна база под обоими
+        продуктами: статус материала везде один</p>
+      <span class="sc-tip" id="ecoTip" aria-hidden="true"></span>
     </div>
-
-    <div class="stack">
-      <div class="lvl"><h4>Производство</h4>
-        <span>Съёмка, монтаж, тексты · Figma-плагины · ИИ-продакшн</span></div>
-      <div class="lvl"><h4>Согласование и планирование</h4>
-        <span>Telegram-бот ↔ Mini App → Публикация</span></div>
-      <div class="lvl"><h4>Инфраструктура</h4>
-        <span>Сервер · Общая база данных</span></div>
-    </div>
-
-    <ul class="legend rv">
-      <li><p>Съёмка и монтаж, сборка макетов плагинами, генерация визуала
-        под стандарт.</p></li>
-      <li><p>Бот держит решения и статусы, Mini App — план и задачи.</p></li>
-      <li><p>Один сервер и одна база под обоими продуктами: статус материала
-        везде один.</p></li>
-    </ul>
   </div>
-</section>
 
-<!-- ===================== путь материала ===================== -->
-<section>
-  <div class="wrap">
-    <h2 class="rv">Путь рилса через систему</h2>
-    <div class="path" id="path">
-      <div class="row r5">
-        <div class="st"><h4>Загрузка в бот</h4><p>Автор отправляет материал одним сообщением</p></div>
-        <div class="st"><h4>Вопрос о враче</h4><p>Бот спрашивает, согласован ли материал с врачом заранее</p></div>
-        <div class="st"><h4>Уведомления</h4><p>Согласующие получают материал и кнопки решений</p></div>
-        <div class="st"><h4>Правка</h4><p>Комментарий оставляется текстом прямо к материалу</p></div>
-        <div class="st"><h4>Новая версия</h4><p>Видно, на что согласующий отвечал в прошлый раз</p></div>
-      </div>
-      <div class="row r4">
-        <div class="st"><h4>Решение</h4><p>Основной согласующий принимает финальное решение</p></div>
-        <div class="st"><h4>Статус «Согласовано»</h4><p>Ставится только решением основного согласующего</p></div>
-        <div class="st"><h4>Календарь Mini App</h4><p>Статус подтягивается в контент-план автоматически</p></div>
-        <div class="st"><h4>Публикация</h4><p>Материал выходит по плану</p></div>
-      </div>
+  <div class="ecoFlat" id="ecoFlat">
+    <div class="wrap">
+      <h2>Как устроена экосистема</h2>
+      <img src="assets/eco-final.svg" width="1720" height="1400"
+           alt="Три слоя системы: производство, согласование и планирование, инфраструктура — со связями между узлами">
+      <ol class="ecoSteps">
+        <li>Материал загружен в бот</li>
+        <li>Бот спрашивает, согласован ли материал с врачом</li>
+        <li>Согласующие получают уведомление</li>
+        <li>Правка оставлена прямо к материалу</li>
+        <li>Новая версия с историей правки</li>
+        <li>Финальное решение основного согласующего</li>
+        <li>Статус появляется в календаре Mini App</li>
+        <li>Публикация по плану</li>
+      </ol>
+      <p style="margin-top:var(--s64)">Один сервер и одна база под обоими
+        продуктами: статус материала везде один.</p>
     </div>
   </div>
 </section>
@@ -513,17 +525,15 @@ html.reduced .mcs *{animation-duration:.01ms!important;
 <section>
   <div class="wrap">
     <h2 class="rv">Telegram-бот согласования</h2>
-    <p class="rv" style="margin-bottom:var(--s96)">Единая точка, через которую
-      проходит весь контент клиники: рилс, карусели, сторис, фото, графика,
-      тексты и озвучка. Переписки, пересланные файлы и устные «вроде
+    <p class="lead rv" style="margin-bottom:var(--s96)">Единая точка, через
+      которую проходит весь контент клиники: рилс, карусели, сторис, фото,
+      графика, тексты и озвучка. Переписки, пересланные файлы и устные «вроде
       согласовали» заменены одним прозрачным процессом.</p>
 
-    <div class="grid">
+    <div class="grid botgrid" id="botGrid">
       <div class="cl">
-        <div class="sticky">
-          <div class="prog" id="botProg" aria-hidden="true"></div>
-          <div class="swap" id="botSwap"></div>
-        </div>
+        <div class="prog" id="botProg" aria-hidden="true"></div>
+        <div class="swap" id="botSwap"></div>
       </div>
 
       <div class="cr chapters" id="botChapters">
@@ -601,12 +611,12 @@ html.reduced .mcs *{animation-duration:.01ms!important;
 <section>
   <div class="wrap">
     <h2 class="rv">Telegram Mini App</h2>
-    <p class="rv" style="margin-bottom:var(--s96)">Полноценное веб-приложение
-      внутри Telegram, которое заменило рабочее пространство в Notion
-      и работает на одной базе данных с ботом.</p>
+    <p class="lead rv" style="margin-bottom:var(--s96)">Полноценное
+      веб-приложение внутри Telegram, которое заменило рабочее пространство
+      в Notion и работает на одной базе данных с ботом.</p>
 
     <div class="grid">
-      <div class="cl rv">
+      <div class="cl rv" id="appCol">
         <div class="seg" id="appSeg" role="tablist" aria-label="Разделы Mini App">
           <button type="button" role="tab" aria-selected="true" data-slot="app-plan">Контент-план</button>
           <button type="button" role="tab" aria-selected="false" data-slot="app-tasks">Задачи</button>
@@ -751,7 +761,7 @@ html.reduced .mcs *{animation-duration:.01ms!important;
       </div>
     </div>
     <div class="facts rv" style="margin-top:var(--s96)">
-      <div><p class="k">постов в Threads</p><p class="v" data-count="250" data-suffix="+">0</p></div>
+      <div><p class="v" data-count="250" data-suffix="+">0</p><p class="k">постов в Threads</p></div>
     </div>
     <div class="shots n4 rv" style="margin-top:var(--s64)"
          data-slots="shot-1,shot-2,shot-3,shot-4"></div>
@@ -796,10 +806,10 @@ html.reduced .mcs *{animation-duration:.01ms!important;
     </div>
 
     <div class="facts rv" style="margin-top:var(--s96)">
-      <div><p class="k">разделов стандарта</p><p class="v" data-count="11">0</p></div>
-      <div><p class="k">слайда презентации</p><p class="v" data-count="52">0</p></div>
-      <div><p class="k">типовых ситуаций</p><p class="v" data-count="50">0</p></div>
-      <div><p class="k">направлений со скриптами</p><p class="v" data-count="7">0</p></div>
+      <div><p class="v" data-count="11">0</p><p class="k">разделов стандарта</p></div>
+      <div><p class="v" data-count="52">0</p><p class="k">слайда презентации</p></div>
+      <div><p class="v" data-count="50">0</p><p class="k">типовых ситуаций</p></div>
+      <div><p class="v" data-count="7">0</p><p class="k">направлений со скриптами</p></div>
     </div>
 
     <div class="rv" style="margin-top:var(--s96)">
@@ -849,35 +859,50 @@ html.reduced .mcs *{animation-duration:.01ms!important;
       </div>
     </div>
 
-    <div class="rv" style="margin-top:var(--s96)">
-      <div class="seg" id="hygSeg" role="tablist" aria-label="Вид карты"
-           hidden>
+    <div class="rv" id="hygBox" style="margin-top:var(--s96)">
+      <div class="seg" id="hygSeg" role="tablist" aria-label="Вид карты" hidden>
         <button type="button" role="tab" aria-selected="true" data-slot="hyg-3d">3D</button>
         <button type="button" role="tab" aria-selected="false" data-slot="hyg-map">Схема</button>
       </div>
-      <div class="combo">
+      <div class="combo" id="hygCombo">
         <div class="swap" id="hygSwap"></div>
         <div class="side" data-slots="hyg-patient"></div>
       </div>
     </div>
+  </div>
+</section>
 
-    <div class="rv" style="margin-top:var(--s96)">
-      <h3>Сайт клиники</h3>
-      <p>Переработка структуры и контента сайта, съёмка клиники для новых
-        страниц.</p>
+<!-- ===================== сайт клиники ===================== -->
+<section>
+  <div class="wrap">
+    <h2 class="rv">Сайт клиники</h2>
+    <div class="grid">
+      <div class="cl rv">
+        <h3>Структура и контент</h3>
+        <p>Переработал структуру сайта и его содержание: порядок разделов,
+          формулировки и подачу материала. Сайт говорит с пациентом тем же
+          голосом, что соцсети и администраторы, — по одному своду правил.</p>
+      </div>
+      <div class="cr rv">
+        <h3>Съёмка для новых страниц</h3>
+        <p>Снял клинику под новые страницы, в той же визуальной логике,
+          по которой собирается контент для соцсетей.</p>
+      </div>
     </div>
   </div>
 </section>
 
-<!-- ===================== результаты ===================== -->
-<section>
+<!-- ===================== финал ===================== -->
+<section class="fin">
+  <span class="tint" aria-hidden="true"></span>
   <div class="wrap">
-    <h2 class="rv">Что изменилось</h2>
+    <h2 class="thesis rv">Контент перестал зависеть от переписок: у каждого
+      материала одна точка правды</h2>
     <ul class="res rv">
       <li>Весь поток контента переведён в единую систему согласования
         и планирования.</li>
-      <li>Статусы и правки больше не теряются: у каждого материала одна точка
-        правды.</li>
+      <li>Статусы и правки больше не теряются: решение по материалу видно
+        всем участникам сразу.</li>
       <li>Вёрстка каруселей и сторис автоматизирована собственными
         плагинами.</li>
       <li>Сформирован стандарт бренда, по которому работают контент,
@@ -904,18 +929,27 @@ html.reduced .mcs *{animation-duration:.01ms!important;
                 /(^|[?&])reduced=1(&|$)/.test(location.search);
   if(reduced) document.documentElement.classList.add('reduced');
   var MEDIA = window.CASE_MEDIA || {};
+  var FLAGS = window.CASE_MEDIA_FLAGS || {};
   var RATIO = {desktop:1, phone:1, square:1, photo:1};
 
-  /* ---------- слоты медиа ----------
-     Пока у слота нет файла, на его месте ровная плоскость нужных
-     пропорций с одной строкой: что сюда будет снято. */
+  /* Заглушки по умолчанию не рисуются: пустой слот не занимает места,
+     а секция перестраивается без него. showPlaceholders:true возвращает
+     серые плоскости — это режим подготовки материала. */
+  var SHOW = !!FLAGS.showPlaceholders;
+
+  function hasFile(id){
+    var m = MEDIA[id];
+    return !!(m && m.src && (m.type !== 'video' || m.src.mp4 || m.src.webm));
+  }
+
+  /* ---------- слоты медиа ---------- */
   function build(id){
     var m = MEDIA[id];
+    var file = hasFile(id);
+    if(!file && !SHOW) return null;
     var box = document.createElement('div');
     box.className = 'screen ' + (m && RATIO[m.ratio] ? m.ratio : 'desktop');
-    var hasFile = m && m.src &&
-      (m.type !== 'video' || m.src.mp4 || m.src.webm);
-    if(!hasFile){
+    if(!file){
       var s = document.createElement('span');
       s.className = 'slot';
       s.textContent = (m && m.note) || 'Место под съёмку';
@@ -963,87 +997,159 @@ html.reduced .mcs *{animation-duration:.01ms!important;
     return box;
   }
 
-  document.querySelectorAll('[data-slots]').forEach(function(host){
-    host.getAttribute('data-slots').split(',').forEach(function(id){
-      host.appendChild(build(id.trim()));
+  /* ---------- перестройка вёрстки без пустых слотов ----------
+     Убранный элемент тянет за собой опустевшую колонку, а двухколоночная
+     секция становится одноколоночной: дырок на месте медиа не остаётся. */
+  function kids(el){
+    var n = 0;
+    [].forEach.call(el.children, function(c){
+      if(c.nodeType === 1 && !c.hasAttribute('hidden')) n++;
     });
+    return n;
+  }
+  function solo(grid){
+    var cl = null, cr = null;
+    [].forEach.call(grid.children, function(c){
+      if(c.classList && c.classList.contains('cl')) cl = c;
+      if(c.classList && c.classList.contains('cr')) cr = c;
+    });
+    if(cl && !cr) cl.classList.add('full');
+    if(cr && !cl) cr.classList.add('full');
+  }
+  function drop(el){
+    var grid = el.closest('.grid');
+    var col = el.parentNode;
+    el.remove();
+    while(col && col !== grid && col.classList &&
+          (col.classList.contains('cl') || col.classList.contains('cr') ||
+           col.classList.contains('block')) && !kids(col)){
+      var up = col.parentNode;
+      col.remove();
+      col = up;
+    }
+    if(grid){
+      if(!kids(grid)){
+        var host = grid.parentNode;
+        grid.remove();
+        if(host && host.classList && host.classList.contains('rv') &&
+           !kids(host)) host.remove();
+      } else solo(grid);
+    }
+  }
+
+  [].forEach.call(document.querySelectorAll('[data-slots]'), function(host){
+    var made = 0;
+    host.getAttribute('data-slots').split(',').forEach(function(id){
+      var el = build(id.trim());
+      if(el){ host.appendChild(el); made++; }
+    });
+    if(!made) drop(host);
   });
 
   /* ---------- закреплённый экран бота ----------
-     Экран слева меняется на слот того подраздела, который сейчас в работе.
-     Полоса над ним показывает, сколько подразделов пройдено. */
+     Пока у слотов бота нет файлов, секция бота — обычная одноколоночная
+     текстовая секция без закрепления. */
   var chapters = document.getElementById('botChapters');
   var botSwap = document.getElementById('botSwap');
   var botProg = document.getElementById('botProg');
+  var botGrid = document.getElementById('botGrid');
   var botShow = null;
-  if(chapters && botSwap){
-    var chs = [].slice.call(chapters.querySelectorAll('.ch'));
+  var chs = chapters ? [].slice.call(chapters.querySelectorAll('.ch')) : [];
+  var botReady = chs.some(function(c){ return hasFile(c.dataset.slot); });
+
+  if(chapters && botSwap && (botReady || SHOW)){
     var frames = {};
-    chs.forEach(function(ch, i){
+    chs.forEach(function(ch){
       var el = build(ch.dataset.slot);
+      if(!el) return;
       el.classList.add('out');
       frames[ch.dataset.slot] = el;
       botSwap.appendChild(el);
-      if(botProg){
-        var bar = document.createElement('i');
-        botProg.appendChild(bar);
-      }
+      if(botProg) botProg.appendChild(document.createElement('i'));
     });
     var bars = botProg ? [].slice.call(botProg.children) : [];
     var current = null;
     botShow = function(slot){
-      if(slot === current) return;
+      if(slot === current || !frames[slot]) return;
       current = slot;
       Object.keys(frames).forEach(function(k){
         frames[k].classList.toggle('out', k !== slot);
       });
     };
-    function markActive(i){
+    var markActive = function(i){
       bars.forEach(function(b, k){ b.classList.toggle('on', k <= i); });
-      chs.forEach(function(c, k){ c.classList.toggle('active', k === i); });
       botShow(chs[i].dataset.slot);
-    }
+    };
     markActive(0);
     if('IntersectionObserver' in window){
+      /* Активен тот подраздел, чья середина ближе к середине экрана:
+         при быстрой прокрутке сразу несколько подразделов пересекают
+         полосу, и «последний пришедший» давал не тот экран. */
+      var seen = [];
       var io3 = new IntersectionObserver(function(es){
         es.forEach(function(e){
-          if(e.isIntersecting) markActive(chs.indexOf(e.target));
+          var i = chs.indexOf(e.target);
+          var k = seen.indexOf(i);
+          if(e.isIntersecting){ if(k < 0) seen.push(i); }
+          else if(k > -1) seen.splice(k, 1);
         });
+        if(!seen.length) return;
+        var mid = innerHeight / 2, best = seen[0], dist = Infinity;
+        seen.forEach(function(i){
+          var r = chs[i].getBoundingClientRect();
+          var d = Math.abs(r.top + r.height / 2 - mid);
+          if(d < dist){ dist = d; best = i; }
+        });
+        markActive(best);
       }, {rootMargin:'-45% 0px -45% 0px', threshold:0});
       chs.forEach(function(c){ io3.observe(c); });
     }
-
-    /* наведение на статус показывает слот со списком по статусам */
-    var st = document.getElementById('statuses');
-    if(st){
-      var back = null;
-      st.addEventListener('pointerover', function(e){
-        var li = e.target.closest('li'); if(!li) return;
-        st.classList.add('lit');
-        [].forEach.call(st.children, function(x){ x.classList.toggle('on', x === li); });
-        if(back === null) back = current;
-        botShow('bot-list');
-      });
-      st.addEventListener('pointerleave', function(){
-        st.classList.remove('lit');
-        [].forEach.call(st.children, function(x){ x.classList.remove('on'); });
-        if(back){ botShow(back); back = null; }
-      });
-    }
+  } else if(botGrid){
+    var left = botGrid.querySelector('.cl');
+    if(left) left.remove();
+    if(chapters) chapters.classList.add('full');
   }
 
-  /* ---------- сегментированные переключатели ---------- */
+  /* наведение на статус выделяет строку и показывает слот со списком */
+  var stl = document.getElementById('statuses');
+  if(stl){
+    stl.addEventListener('pointerover', function(e){
+      var li = e.target.closest('li'); if(!li) return;
+      stl.classList.add('lit');
+      [].forEach.call(stl.children, function(x){ x.classList.toggle('on', x === li); });
+      if(botShow) botShow('bot-list');
+    });
+    stl.addEventListener('pointerleave', function(){
+      stl.classList.remove('lit');
+      [].forEach.call(stl.children, function(x){ x.classList.remove('on'); });
+    });
+  }
+
+  /* ---------- сегментированные переключатели ----------
+     Переключатель, который листал бы только пустые слоты, не
+     показывается вовсе. */
   function wireSeg(segId, swapId){
     var seg = document.getElementById(segId), swap = document.getElementById(swapId);
     if(!seg || !swap) return null;
     var btns = [].slice.call(seg.querySelectorAll('button'));
-    var made = {};
-    btns.forEach(function(b, i){
+    var ready = btns.filter(function(b){ return hasFile(b.dataset.slot); });
+    if(!ready.length && !SHOW){
+      seg.remove(); swap.remove();
+      return {gone:true};
+    }
+    var made = {}, first = null;
+    btns.forEach(function(b){
       var el = build(b.dataset.slot);
-      if(i) el.classList.add('out');
+      if(!el){ b.remove(); return; }
+      if(first) el.classList.add('out'); else first = b;
       made[b.dataset.slot] = el;
       swap.appendChild(el);
     });
+    btns = [].slice.call(seg.querySelectorAll('button'));
+    btns.forEach(function(b){
+      b.setAttribute('aria-selected', String(b === first));
+    });
+    if(btns.length < 2) seg.hidden = true;
     seg.addEventListener('click', function(e){
       var b = e.target.closest('button'); if(!b) return;
       btns.forEach(function(x){ x.setAttribute('aria-selected', String(x === b)); });
@@ -1053,17 +1159,25 @@ html.reduced .mcs *{animation-duration:.01ms!important;
     });
     return {seg:seg, btns:btns};
   }
-  wireSeg('appSeg', 'appSwap');
+
+  var app = wireSeg('appSeg', 'appSwap');
+  if(app && app.gone){
+    var appCol = document.getElementById('appCol');
+    if(appCol){ var ag = appCol.closest('.grid'); appCol.remove(); if(ag) solo(ag); }
+  }
+
   var hyg = wireSeg('hygSeg', 'hygSwap');
-  if(hyg){
+  if(hyg && hyg.gone){
+    var combo = document.getElementById('hygCombo');
+    /* карта ушла, но онлайн-карта пациента могла остаться */
+    if(combo && !kids(combo)) combo.remove();
+    var hb = document.getElementById('hygBox');
+    if(hb && !kids(hb)) hb.remove();
+  } else if(hyg){
     /* переключатель появляется, когда в обоих слотах есть файлы,
        либо когда он включён флагом для проверки на заглушках */
-    var flags = window.CASE_MEDIA_FLAGS || {};
-    var ready = ['hyg-3d','hyg-map'].every(function(k){
-      var m = MEDIA[k];
-      return m && m.src && (m.type !== 'video' || m.src.mp4 || m.src.webm);
-    });
-    hyg.seg.hidden = !(ready || flags.forceShowToggle);
+    var ready2 = ['hyg-3d','hyg-map'].every(hasFile);
+    hyg.seg.hidden = !(ready2 || FLAGS.forceShowToggle);
   }
 
   /* ---------- разметка плагина: строки появляются по одной ---------- */
@@ -1082,12 +1196,14 @@ html.reduced .mcs *{animation-duration:.01ms!important;
     }
   }
 
-  /* ---------- слайдеры «до и после» ---------- */
+  /* ---------- слайдеры «до и после» ----------
+     Слайдер, у которого нет обеих половин, не показывается. */
   [].forEach.call(document.querySelectorAll('.cmp'), function(cmp){
+    var ea = build(cmp.dataset.a), eb = build(cmp.dataset.b);
+    if(!ea || !eb){ drop(cmp); return; }
     var a = document.createElement('div'); a.className = 'a';
     var b = document.createElement('div'); b.className = 'b';
-    a.appendChild(build(cmp.dataset.a));
-    b.appendChild(build(cmp.dataset.b));
+    a.appendChild(ea); b.appendChild(eb);
     var bar = document.createElement('span'); bar.className = 'bar';
     cmp.insertBefore(b, cmp.firstChild);
     cmp.insertBefore(a, cmp.firstChild);
@@ -1110,6 +1226,39 @@ html.reduced .mcs *{animation-duration:.01ms!important;
       if(down && e.cancelable) e.preventDefault();
     }, {passive:false});
   });
+
+  /* ---------- глубина экранов: вход из наклона и отклик на курсор ---------- */
+  var screens = [].filter.call(document.querySelectorAll('.screen'),
+    function(s){ return !s.closest('.cmp'); });
+  screens.forEach(function(s){ s.classList.add('d3'); });
+  if(reduced || !('IntersectionObserver' in window)){
+    screens.forEach(function(s){ s.classList.add('in','rdy'); });
+  } else {
+    var ioS = new IntersectionObserver(function(es){
+      es.forEach(function(e){
+        if(!e.isIntersecting) return;
+        var t = e.target;
+        t.classList.add('in');
+        setTimeout(function(){ t.classList.add('rdy'); }, 750);
+        ioS.unobserve(t);
+      });
+    }, {rootMargin:'0px 0px -8% 0px', threshold:.1});
+    screens.forEach(function(s){ ioS.observe(s); });
+  }
+  if(!reduced && matchMedia('(min-width:1024px) and (hover:hover)').matches){
+    screens.forEach(function(s){
+      s.addEventListener('pointermove', function(e){
+        var r = s.getBoundingClientRect();
+        var nx = (e.clientX - r.left) / r.width - .5;
+        var ny = (e.clientY - r.top) / r.height - .5;
+        s.style.setProperty('--ry', (nx * 8).toFixed(2) + 'deg');
+        s.style.setProperty('--rx', (-ny * 8).toFixed(2) + 'deg');
+      });
+      s.addEventListener('pointerleave', function(){
+        s.style.setProperty('--ry','0deg'); s.style.setProperty('--rx','0deg');
+      });
+    });
+  }
 
   /* ---------- счётчики ---------- */
   var nums = [].slice.call(document.querySelectorAll('[data-count]'));
@@ -1164,113 +1313,28 @@ html.reduced .mcs *{animation-duration:.01ms!important;
     rv.forEach(function(e){ io.observe(e); });
   }
 
-  /* ---------- экосистема ----------
-     Слои разъезжаются по прокрутке. Линии связей рисуются по реальным
-     координатам подписей, поэтому держатся за ними при любом разлёте.
-     Подписи лежат в обычном HTML поверх сцены — в 3D текст бы размылся. */
-  var scene = document.getElementById('scene');
-  var links = document.getElementById('links');
-  if(scene && links){
-    var PAIRS = [
-      ['shoot','bot'], ['figma','bot'], ['ai','bot'],
-      ['bot','app'], ['bot','srv'], ['bot','db'],
-      ['app','srv'], ['app','db'], ['app','pub']
-    ];
-    var nodes = {};
-    [].forEach.call(scene.querySelectorAll('.node'), function(n){
-      nodes[n.dataset.id] = n;
+  /* ---------- сцена экосистемы ----------
+     Без WebGL или при «меньше движения» показывается заранее
+     отрендеренный кадр финального состояния и восемь шагов списком. */
+  var webgl = (function(){
+    try{
+      var c = document.createElement('canvas');
+      return !!(c.getContext('webgl2') || c.getContext('webgl'));
+    }catch(e){ return false; }
+  })();
+  if(!webgl || reduced){
+    document.documentElement.classList.add('eco-flat');
+  } else {
+    import('./case-medical-content-system.scene.js').catch(function(){
+      document.documentElement.classList.add('eco-flat');
     });
-    var drawn = [];
-    PAIRS.forEach(function(p){
-      var ln = document.createElementNS('http://www.w3.org/2000/svg','line');
-      ln.dataset.a = p[0]; ln.dataset.b = p[1];
-      links.appendChild(ln); drawn.push(ln);
-    });
-    function draw(){
-      var r = scene.getBoundingClientRect();
-      if(!r.width) return;
-      links.setAttribute('viewBox','0 0 ' + r.width + ' ' + r.height);
-      drawn.forEach(function(ln){
-        var a = nodes[ln.dataset.a], b = nodes[ln.dataset.b];
-        if(!a || !b) return;
-        var ra = a.getBoundingClientRect(), rb = b.getBoundingClientRect();
-        ln.setAttribute('x1', ra.left - r.left + 3);
-        ln.setAttribute('y1', ra.top - r.top + ra.height / 2);
-        ln.setAttribute('x2', rb.left - r.left + 3);
-        ln.setAttribute('y2', rb.top - r.top + rb.height / 2);
-      });
-    }
-    /* Сдвиг каждого слоя задаётся готовым значением в пикселях: выражение
-       calc() из двух безразмерных переменных WebKit не разбирал, и слои
-       оставались сложенными. */
-    var movers = [].slice.call(scene.querySelectorAll('.layer, .nodes > div'));
-    function spread(){
-      var r = scene.getBoundingClientRect();
-      var vh = innerHeight || 1;
-      var p = reduced ? 1 : (vh - r.top) / (vh * 0.75);
-      p = p < 0 ? 0 : (p > 1 ? 1 : p);
-      movers.forEach(function(el){
-        var d = parseFloat(el.style.getPropertyValue('--d')) || 0;
-        el.style.setProperty('--dy', (d * p).toFixed(1) + 'px');
-      });
-      links.style.opacity = p.toFixed(3);
-      draw();
-    }
-    var tick = false;
-    function onScroll(){
-      if(tick) return; tick = true;
-      requestAnimationFrame(function(){ tick = false; spread(); });
-    }
-    addEventListener('scroll', onScroll, {passive:true});
-    addEventListener('resize', onScroll);
-    spread();
-    setTimeout(spread, 500);
-
-    function lit(id){
-      scene.classList.toggle('lit', !!id);
-      [].forEach.call(scene.querySelectorAll('.node'), function(n){
-        var rel = id && (n.dataset.id === id || PAIRS.some(function(p){
-          return (p[0] === id && p[1] === n.dataset.id) ||
-                 (p[1] === id && p[0] === n.dataset.id);
-        }));
-        n.classList.toggle('on', !!rel);
-      });
-      drawn.forEach(function(ln){
-        ln.classList.toggle('on', !!id &&
-          (ln.dataset.a === id || ln.dataset.b === id));
-      });
-    }
-    [].forEach.call(scene.querySelectorAll('.node'), function(n){
-      n.addEventListener('mouseenter', function(){ lit(n.dataset.id); });
-      n.addEventListener('mouseleave', function(){ lit(null); });
-      n.addEventListener('click', function(){
-        lit(scene.classList.contains('lit') && n.classList.contains('on')
-            ? null : n.dataset.id);
-      });
-    });
-  }
-
-  /* ---------- путь материала: точки заполняются по прокрутке ---------- */
-  var path = document.getElementById('path');
-  if(path){
-    var steps = [].slice.call(path.querySelectorAll('.st'));
-    if(reduced || !('IntersectionObserver' in window)){
-      steps.forEach(function(s){ s.classList.add('on'); });
-    } else {
-      var io2 = new IntersectionObserver(function(es){
-        es.forEach(function(e){
-          if(e.isIntersecting){ e.target.classList.add('on'); io2.unobserve(e.target); }
-        });
-      }, {rootMargin:'0px 0px -20% 0px', threshold:.2});
-      steps.forEach(function(s){ io2.observe(s); });
-    }
   }
 
   /* ---------- шапка ---------- */
-  var top = document.getElementById('top');
-  if(top){
-    var st = function(){ top.classList.toggle('stuck', scrollY > 8); };
-    st(); addEventListener('scroll', st, {passive:true});
+  var topEl = document.getElementById('top');
+  if(topEl){
+    var stick = function(){ topEl.classList.toggle('stuck', scrollY > 8); };
+    stick(); addEventListener('scroll', stick, {passive:true});
   }
 
   /* ---------- соседние кейсы ---------- */
