@@ -19,30 +19,24 @@
 
 window.CASE_MEDIA_FLAGS = { showPlaceholders: false, forceShowToggle: false };
 
-/* Фоновые видео. Сняты мной, лежат в assets/case-medical/bg/.
-   Из них же взята палитра акцента. */
-window.CASE_BG = {
-  plates: {
-    src: { webm: 'assets/case-medical/bg/glass-column.webm',
-           mp4:  'assets/case-medical/bg/glass-column.mp4' },
-    poster: 'assets/case-medical/bg/glass-column.webp'
-  },
-  map: {
-    src: { webm: 'assets/case-medical/bg/horizon.webm',
-           mp4:  'assets/case-medical/bg/horizon.mp4' },
-    poster: 'assets/case-medical/bg/horizon.webp'
-  },
-  core: {
-    src: { webm: 'assets/case-medical/bg/bubble.webm',
-           mp4:  'assets/case-medical/bg/bubble.mp4' },
-    poster: 'assets/case-medical/bg/bubble.webp'
-  },
-  banner: {
-    src: { webm: 'assets/case-medical/bg/prism.webm',
-           mp4:  'assets/case-medical/bg/prism.mp4' },
-    poster: 'assets/case-medical/bg/prism.webp'
-  }
-};
+/* Видео. Сняты мной, лежат в assets/case-medical/bg/.
+   Ключ совпадает с именем файла, атрибут data-bg в разметке ссылается
+   прямо на него. */
+window.CASE_BG = (function () {
+  var out = {}, base = 'assets/case-medical/bg/';
+  ['glass-column', 'prism', 'horizon', 'bubble'].forEach(function (n) {
+    out[n] = {
+      src: { webm: base + n + '.webm', mp4: base + n + '.mp4' },
+      poster: base + n + '.webp'
+    };
+  });
+  /* старые смысловые имена оставлены как синонимы */
+  out.plates = out['glass-column'];
+  out.map    = out.horizon;
+  out.core   = out.bubble;
+  out.banner = out.prism;
+  return out;
+})();
 
 window.CASE_MEDIA = {
 
