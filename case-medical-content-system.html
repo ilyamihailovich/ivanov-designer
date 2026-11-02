@@ -1,0 +1,1463 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Цифровая экосистема контента для премиальной клиники — Илья Иванов</title>
+<meta name="description" content="Кейс: SMM медицинского бренда, переведённый в управляемую систему — Telegram-продукты, собственный сервер, Figma-плагины, стандарты бренда и 3D-приложение для врачей.">
+<meta name="robots" content="index,follow">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap&subset=cyrillic" rel="stylesheet">
+<link rel="preload" href="fonts/ak.woff2" as="font" type="font/woff2" crossorigin>
+<style>
+/* ===========================================================
+   Кейс «Цифровая экосистема контента».
+
+   Страница самостоятельная и ни на что на сайте не влияет: все правила
+   ниже живут под классом .mcs, общие стили сайта сюда не подключаются.
+   Из общего взято только то, что делает страницу частью сайта, — шрифт,
+   чёрное на белом, поля и восьмиколоночная сетка с теми же числами,
+   что в index.html.
+   =========================================================== */
+
+@font-face{
+  font-family:'AK';
+  src:url('fonts/ak.woff2') format('woff2');
+  font-weight:100 900;
+  font-style:normal;
+  font-display:swap;
+}
+
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+html,body{margin:0;padding:0;max-width:100%;overflow-x:hidden;}
+
+.mcs{
+  --ink:#000; --paper:#fff;
+  --dim:rgba(0,0,0,.45); --hair:rgba(0,0,0,.14); --ghost:rgba(0,0,0,.07);
+  --eo:cubic-bezier(.22,1,.36,1);
+  /* те же поля и колонки, что на сайте */
+  --gut:clamp(18px,4.1vw,64px);
+  --maxw:1660px;
+  /* холодная гамма: серо-голубой, приглушённый сине-стальной, светло-серый.
+     Насыщенного фиолетового и лаванды нет намеренно. */
+  --a1:#8ea4bd;
+  --a2:#6f86a8;
+  --a3:#c3cdd9;
+  --a4:#dfe6ee;
+
+  font-family:'AK','Helvetica Neue',Helvetica,Arial,sans-serif;
+  font-weight:500;
+  letter-spacing:-.02em;
+  color:var(--ink);
+  background:var(--paper);
+  -webkit-font-smoothing:antialiased;
+}
+.mcs ::selection{background:var(--a4);}
+
+.mcs .wrap{max-width:var(--maxw);margin:0 auto;padding:0 var(--gut);}
+.mcs section{position:relative;}
+
+/* ---------- типографика ---------- */
+.mcs .h1{font-size:clamp(34px,6.1vw,112px);line-height:.9;letter-spacing:-.05em;
+  font-weight:500;margin:0;}
+.mcs .h2{font-size:clamp(26px,3.6vw,64px);line-height:.94;letter-spacing:-.045em;
+  font-weight:500;margin:0 0 clamp(20px,2.4vw,44px);}
+.mcs .h3{font-size:clamp(19px,1.9vw,30px);line-height:1.04;letter-spacing:-.035em;
+  font-weight:600;margin:0 0 10px;}
+.mcs .h4{font-size:clamp(15px,1.15vw,19px);line-height:1.1;letter-spacing:-.03em;
+  font-weight:600;margin:0 0 8px;}
+.mcs p{margin:0 0 14px;}
+.mcs .body{font-family:'Inter','Helvetica Neue',Arial,sans-serif;font-weight:400;
+  font-size:clamp(14.5px,1.02vw,17px);line-height:1.5;letter-spacing:-.011em;
+  color:rgba(0,0,0,.76);}
+.mcs .body strong{font-weight:600;color:var(--ink);}
+.mcs .lead{font-family:'Inter','Helvetica Neue',Arial,sans-serif;font-weight:400;
+  font-size:clamp(16px,1.35vw,22px);line-height:1.42;letter-spacing:-.014em;
+  color:rgba(0,0,0,.82);}
+.mcs .kicker{font-family:'Inter','Helvetica Neue',Arial,sans-serif;
+  font-size:12px;font-weight:600;letter-spacing:.09em;text-transform:uppercase;
+  color:var(--dim);margin:0 0 clamp(14px,1.6vw,26px);}
+.mcs .dim{color:var(--dim);}
+
+/* ---------- градиентные пятна ----------
+   Радиальные пятна низкой насыщенности, размытые и очень медленно
+   плывущие. Лежат только в четырёх местах страницы, а не фоном под всем. */
+.mcs .glow{position:absolute;inset:0;overflow:hidden;pointer-events:none;z-index:0;}
+.mcs .glow i{position:absolute;display:block;border-radius:50%;
+  filter:blur(70px);opacity:.75;will-change:transform;}
+@media (min-width:900px){ .mcs .glow i{filter:blur(110px);} }
+.mcs .glow i:nth-child(1){width:58vw;height:58vw;left:-14vw;top:-20vw;
+  background:radial-gradient(circle at 50% 50%,var(--a1),rgba(142,164,189,0) 68%);
+  animation:mcsDrift1 46s ease-in-out infinite;}
+.mcs .glow i:nth-child(2){width:52vw;height:52vw;right:-12vw;top:4vw;
+  background:radial-gradient(circle at 50% 50%,var(--a2),rgba(111,134,168,0) 68%);
+  opacity:.55;animation:mcsDrift2 58s ease-in-out infinite;}
+.mcs .glow i:nth-child(3){width:46vw;height:46vw;left:28vw;bottom:-22vw;
+  background:radial-gradient(circle at 50% 50%,var(--a3),rgba(195,205,217,0) 70%);
+  animation:mcsDrift3 52s ease-in-out infinite;}
+@keyframes mcsDrift1{0%,100%{transform:translate3d(0,0,0) scale(1);}
+  50%{transform:translate3d(6vw,4vw,0) scale(1.1);}}
+@keyframes mcsDrift2{0%,100%{transform:translate3d(0,0,0) scale(1.05);}
+  50%{transform:translate3d(-5vw,6vw,0) scale(.94);}}
+@keyframes mcsDrift3{0%,100%{transform:translate3d(0,0,0) scale(1);}
+  50%{transform:translate3d(4vw,-5vw,0) scale(1.12);}}
+.mcs .glow + *{position:relative;z-index:1;}
+
+/* матовое стекло — только на плавающих элементах поверх градиента */
+.mcs .glass{background:rgba(255,255,255,.62);
+  -webkit-backdrop-filter:blur(18px) saturate(150%);
+  backdrop-filter:blur(18px) saturate(150%);
+  box-shadow:inset 0 0 0 1px rgba(255,255,255,.6),
+             inset 0 1px 0 rgba(255,255,255,.8),
+             0 10px 36px rgba(20,32,48,.08);}
+
+/* ---------- шапка ---------- */
+.mcs .top{position:sticky;top:0;z-index:20;
+  display:flex;align-items:center;justify-content:space-between;
+  padding:14px var(--gut);background:rgba(255,255,255,.82);
+  -webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);
+  border-bottom:1px solid transparent;transition:border-color .3s var(--eo);}
+.mcs .top.stuck{border-bottom-color:var(--hair);}
+.mcs .top a{color:var(--ink);text-decoration:none;font-size:13px;font-weight:600;
+  letter-spacing:-.025em;}
+.mcs .top .back{display:inline-flex;align-items:center;gap:7px;}
+.mcs .top .back svg{width:14px;height:14px;display:block;}
+
+/* ---------- hero ---------- */
+.mcs .hero{padding:clamp(54px,8vw,130px) 0 clamp(48px,6vw,96px);overflow:hidden;}
+.mcs .hero .h1{max-width:19ch;}
+.mcs .hero .sub{max-width:62ch;margin-top:clamp(18px,2vw,34px);}
+.mcs .meta{display:flex;flex-wrap:wrap;gap:10px;margin-top:clamp(26px,3vw,46px);}
+.mcs .meta span{font-family:'Inter',Arial,sans-serif;font-size:12.5px;font-weight:500;
+  letter-spacing:-.01em;padding:8px 14px;border-radius:999px;
+  color:rgba(0,0,0,.72);}
+.mcs .meta .nda{font-weight:600;color:var(--ink);}
+.mcs .teasers{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));
+  gap:clamp(10px,1.1vw,20px);margin-top:clamp(34px,4vw,70px);}
+.mcs .teasers div{padding:clamp(14px,1.4vw,22px);border-radius:16px;}
+.mcs .teasers b{display:block;font-size:clamp(26px,3.4vw,54px);line-height:.92;
+  letter-spacing:-.05em;font-weight:500;}
+.mcs .teasers em{display:block;font-style:normal;margin-top:8px;
+  font-family:'Inter',Arial,sans-serif;font-size:12.5px;line-height:1.25;
+  font-weight:400;color:rgba(0,0,0,.6);letter-spacing:-.01em;}
+
+/* ---------- контекст и задача ---------- */
+.mcs .pad{padding:clamp(56px,7vw,130px) 0;}
+.mcs .two{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:clamp(24px,3.4vw,70px);}
+.mcs .quote{margin:clamp(34px,4.4vw,84px) 0 0;font-size:clamp(22px,3.1vw,54px);
+  line-height:1.02;letter-spacing:-.045em;font-weight:500;max-width:18ch;}
+.mcs .quote span{color:var(--a2);}
+
+/* ---------- схема системы ---------- */
+.mcs .schema{position:relative;border-radius:28px;overflow:hidden;
+  padding:clamp(24px,3vw,56px);}
+.mcs .flow{display:grid;gap:clamp(12px,1.2vw,20px);position:relative;z-index:1;
+  grid-template-columns:repeat(4,minmax(0,1fr));align-items:stretch;}
+.mcs .node{position:relative;border-radius:18px;padding:clamp(14px,1.3vw,22px);
+  cursor:default;transition:transform .35s var(--eo), box-shadow .35s var(--eo),
+    opacity .3s var(--eo);}
+.mcs .node .h4{margin-bottom:6px;}
+.mcs .node .one{font-family:'Inter',Arial,sans-serif;font-size:12.5px;line-height:1.3;
+  color:rgba(0,0,0,.6);letter-spacing:-.01em;min-height:2.6em;}
+.mcs .flow.lit .node{opacity:.34;}
+.mcs .flow.lit .node.on{opacity:1;transform:translateY(-3px);
+  box-shadow:0 14px 40px rgba(20,32,48,.13), inset 0 0 0 1px rgba(255,255,255,.7);}
+.mcs .node .tip{position:absolute;left:50%;transform:translate(-50%,6px);
+  bottom:calc(100% + 8px);white-space:nowrap;font-family:'Inter',Arial,sans-serif;
+  font-size:11.5px;font-weight:500;padding:6px 11px;border-radius:999px;
+  background:var(--ink);color:#fff;opacity:0;pointer-events:none;
+  transition:opacity .25s var(--eo), transform .25s var(--eo);z-index:3;}
+.mcs .node.on .tip{opacity:1;transform:translate(-50%,0);}
+.mcs .span2{grid-column:span 2;}
+.mcs .pair{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:clamp(12px,1.2vw,20px);}
+.mcs .base{margin-top:clamp(12px,1.2vw,20px);border-radius:18px;
+  padding:clamp(13px,1.1vw,18px);text-align:center;position:relative;z-index:1;}
+.mcs .aside3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:clamp(12px,1.2vw,20px);margin-top:clamp(12px,1.2vw,20px);position:relative;z-index:1;}
+.mcs .arrows{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));
+  gap:clamp(12px,1.2vw,20px);margin:10px 0;position:relative;z-index:1;}
+.mcs .arrows i{display:block;height:1px;background:var(--hair);position:relative;
+  margin-top:9px;}
+.mcs .arrows i::after{content:'';position:absolute;right:0;top:-3px;width:7px;height:7px;
+  border-top:1px solid var(--hair);border-right:1px solid var(--hair);
+  transform:rotate(45deg);}
+
+/* ---------- таймлайн ---------- */
+.mcs .rail{display:grid;grid-auto-flow:column;gap:clamp(12px,1.1vw,18px);
+  grid-auto-columns:minmax(188px,1fr);overflow-x:auto;padding-bottom:12px;
+  scrollbar-width:none;-webkit-overflow-scrolling:touch;}
+.mcs .rail::-webkit-scrollbar{display:none;}
+.mcs .step{border-radius:16px;padding:clamp(14px,1.2vw,20px);
+  border:1px solid var(--hair);position:relative;}
+.mcs .step b{display:block;font-size:11px;font-family:'Inter',Arial,sans-serif;
+  font-weight:600;letter-spacing:.08em;color:var(--a2);margin-bottom:9px;}
+.mcs .step .h4{font-size:15px;}
+.mcs .step .one{font-family:'Inter',Arial,sans-serif;font-size:12.5px;line-height:1.35;
+  color:rgba(0,0,0,.6);letter-spacing:-.01em;}
+
+/* ---------- бенто ---------- */
+.mcs .bento{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));
+  gap:clamp(12px,1.2vw,20px);}
+.mcs .cell{position:relative;border-radius:22px;padding:clamp(18px,1.8vw,32px);
+  border:1px solid var(--hair);text-decoration:none;color:var(--ink);
+  display:flex;flex-direction:column;justify-content:space-between;
+  min-height:clamp(150px,13vw,230px);overflow:hidden;
+  transition:transform .4s var(--eo), box-shadow .4s var(--eo);}
+.mcs .cell:hover{transform:translateY(-4px);box-shadow:0 16px 44px rgba(20,32,48,.1);}
+.mcs .cell .num{font-family:'Inter',Arial,sans-serif;font-size:11.5px;font-weight:600;
+  letter-spacing:.08em;color:var(--dim);}
+.mcs .cell .go{font-family:'Inter',Arial,sans-serif;font-size:12.5px;font-weight:500;
+  color:var(--a2);margin-top:14px;}
+.mcs .cell.big{grid-column:span 4;min-height:clamp(200px,20vw,340px);
+  background:linear-gradient(140deg,#f2f5f9 0%,#e7edf4 52%,#f6f8fb 100%);
+  border-color:transparent;}
+.mcs .cell.big .h3{font-size:clamp(22px,2.5vw,40px);}
+.mcs .cell.b2{grid-column:span 2;}
+.mcs .cell.b3{grid-column:span 3;}
+
+/* ---------- подробные секции ---------- */
+.mcs .sec{padding:clamp(56px,7vw,130px) 0;border-top:1px solid var(--hair);}
+.mcs .sec:first-of-type{border-top:0;}
+.mcs .sec .head{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.15fr);
+  gap:clamp(20px,3vw,64px);align-items:start;margin-bottom:clamp(28px,3.4vw,64px);}
+.mcs .block{margin-top:clamp(22px,2.2vw,40px);}
+.mcs .block .h4{margin-bottom:6px;}
+.mcs .cols2{column-count:2;column-gap:clamp(24px,3vw,64px);}
+.mcs .cols2 > div{break-inside:avoid;margin-bottom:clamp(18px,1.8vw,30px);}
+
+/* ---------- мокапы ---------- */
+.mcs .phone{width:min(300px,78vw);margin:0 auto;border-radius:38px;padding:11px;
+  background:#0e1216;box-shadow:0 26px 70px rgba(16,26,40,.26);}
+.mcs .phone .screen{border-radius:28px;overflow:hidden;background:#fff;
+  height:clamp(430px,52vw,560px);display:flex;flex-direction:column;position:relative;}
+.mcs .phone .bar{height:26px;display:flex;align-items:center;justify-content:center;
+  font-family:'Inter',Arial,sans-serif;font-size:10px;color:rgba(0,0,0,.4);flex:0 0 auto;}
+.mcs .tg{background:#eef2f6;flex:1 1 auto;padding:12px;overflow:hidden;
+  display:flex;flex-direction:column;gap:9px;}
+.mcs .tg .bub{background:#fff;border-radius:14px;padding:11px 12px;
+  font-family:'Inter',Arial,sans-serif;font-size:11.5px;line-height:1.35;
+  color:rgba(0,0,0,.78);box-shadow:0 1px 2px rgba(16,26,40,.08);}
+.mcs .tg .bub .t{font-weight:600;color:#000;margin-bottom:5px;font-size:12px;}
+.mcs .tg .bub .meta{color:rgba(0,0,0,.45);font-size:10.5px;margin-top:4px;}
+.mcs .tg .ph{height:92px;border-radius:10px;margin:-2px 0 8px;
+  background:linear-gradient(135deg,#dde5ee,#c9d5e3);display:flex;align-items:center;
+  justify-content:center;font-family:'Inter',Arial,sans-serif;font-size:10px;
+  color:rgba(0,0,0,.45);text-align:center;padding:6px;}
+.mcs .tg .btns{display:grid;grid-template-columns:repeat(2,1fr);gap:6px;margin-top:9px;}
+.mcs .tg .btns button{font-family:'Inter',Arial,sans-serif;font-size:11px;font-weight:500;
+  border:0;border-radius:9px;padding:8px 6px;background:#f1f4f8;color:#1b2531;
+  cursor:pointer;transition:background .25s var(--eo), color .25s var(--eo);}
+.mcs .tg .btns button[aria-pressed="true"]{background:var(--a2);color:#fff;}
+.mcs .tg .btns button.wide{grid-column:span 2;}
+
+/* статусы */
+.mcs .statuses{display:flex;flex-wrap:wrap;gap:8px;margin-top:4px;}
+.mcs .chip{font-family:'Inter',Arial,sans-serif;font-size:12.5px;font-weight:500;
+  border:1px solid var(--hair);background:#fff;border-radius:999px;
+  padding:9px 15px;cursor:pointer;color:rgba(0,0,0,.72);
+  transition:background .25s var(--eo), color .25s var(--eo), border-color .25s var(--eo);}
+.mcs .chip[aria-pressed="true"]{background:var(--ink);color:#fff;border-color:var(--ink);}
+.mcs .chip.flat{cursor:default;}
+.mcs .chipOut{margin-top:16px;font-family:'Inter',Arial,sans-serif;
+  font-size:clamp(14px,1.05vw,17px);line-height:1.45;color:rgba(0,0,0,.78);min-height:3em;}
+
+/* Mini App */
+.mcs .appwrap{position:relative;border-radius:28px;overflow:hidden;
+  padding:clamp(26px,3.4vw,64px) clamp(16px,2vw,40px);}
+.mcs .tabs{display:flex;gap:6px;justify-content:center;margin-bottom:22px;
+  position:relative;z-index:1;}
+.mcs .tabs button{font-family:'Inter',Arial,sans-serif;font-size:12.5px;font-weight:500;
+  border:0;border-radius:999px;padding:9px 16px;cursor:pointer;color:rgba(0,0,0,.7);
+  background:rgba(255,255,255,.7);transition:background .25s var(--eo), color .25s var(--eo);}
+.mcs .tabs button[aria-selected="true"]{background:var(--ink);color:#fff;}
+.mcs .app{flex:1 1 auto;background:#f7f9fb;padding:12px;overflow:hidden;
+  display:flex;flex-direction:column;}
+.mcs .pane{display:none;}
+.mcs .pane.on{display:flex;flex-direction:column;flex:1 1 auto;min-height:0;}
+.mcs .pane .capt{font-family:'Inter',Arial,sans-serif;font-size:10.5px;font-weight:600;
+  color:rgba(0,0,0,.55);margin:0 0 9px;letter-spacing:-.01em;}
+.mcs .cal{display:grid;grid-template-columns:repeat(7,1fr);
+  grid-template-rows:auto repeat(5,minmax(0,1fr));gap:4px;flex:1 1 auto;min-height:0;}
+.mcs .cal span{font-family:'Inter',Arial,sans-serif;font-size:8.5px;color:rgba(0,0,0,.4);
+  text-align:center;padding-bottom:2px;}
+.mcs .cal i{display:block;border-radius:6px;background:#fff;position:relative;
+  min-height:0;box-shadow:inset 0 0 0 1px rgba(0,0,0,.05);}
+.mcs .cal i b{position:absolute;left:4px;right:4px;bottom:4px;height:4px;border-radius:2px;}
+.mcs .kan{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;flex:1 1 auto;min-height:0;align-content:start;}
+.mcs .kan > div{background:#fff;border-radius:10px;padding:7px;
+  box-shadow:inset 0 0 0 1px rgba(0,0,0,.05);}
+.mcs .kan h5{margin:0 0 6px;font-family:'Inter',Arial,sans-serif;font-size:9px;
+  font-weight:600;color:rgba(0,0,0,.45);letter-spacing:.04em;text-transform:uppercase;}
+.mcs .kan u{display:block;text-decoration:none;height:26px;border-radius:5px;
+  background:#eef2f7;margin-bottom:5px;}
+.mcs .wk{display:flex;flex-direction:column;gap:6px;flex:1 1 auto;min-height:0;}
+.mcs .wk > div{display:flex;align-items:center;gap:8px;background:#fff;border-radius:9px;
+  flex:1 1 auto;min-height:0;padding:8px 10px;box-shadow:inset 0 0 0 1px rgba(0,0,0,.05);
+  font-family:'Inter',Arial,sans-serif;font-size:10.5px;color:rgba(0,0,0,.7);}
+.mcs .wk b{width:26px;color:rgba(0,0,0,.4);font-weight:500;}
+.mcs .wk em{margin-left:auto;font-style:normal;font-size:9.5px;padding:3px 8px;
+  border-radius:999px;background:#eef2f7;color:rgba(0,0,0,.6);}
+
+/* архитектура */
+.mcs .arch{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));
+  gap:clamp(10px,1vw,16px);align-items:center;}
+.mcs .arch .box{border:1px solid var(--hair);border-radius:14px;
+  padding:clamp(12px,1.1vw,18px);text-align:center;}
+.mcs .arch .box .h4{font-size:14px;margin-bottom:4px;}
+.mcs .arch .box .one{font-family:'Inter',Arial,sans-serif;font-size:11.5px;
+  color:rgba(0,0,0,.55);line-height:1.3;}
+.mcs .arch .lnk{height:1px;background:var(--hair);position:relative;}
+.mcs .arch .lnk::after{content:'';position:absolute;right:0;top:-3px;width:7px;height:7px;
+  border-top:1px solid var(--hair);border-right:1px solid var(--hair);transform:rotate(45deg);}
+.mcs .stack{display:flex;flex-wrap:wrap;gap:7px;margin-top:20px;}
+.mcs .pdr{border:1px solid var(--hair);border-radius:20px;overflow:hidden;
+  display:grid;grid-template-columns:repeat(3,minmax(0,1fr));}
+.mcs .pdr > div{padding:clamp(16px,1.6vw,28px);border-right:1px solid var(--hair);}
+.mcs .pdr > div:last-child{border-right:0;}
+.mcs .pdr b{display:block;font-family:'Inter',Arial,sans-serif;font-size:11px;
+  font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--a2);
+  margin-bottom:9px;}
+
+/* плагины */
+.mcs .plug{display:grid;grid-template-columns:minmax(0,1fr) 54px minmax(0,1fr);
+  gap:clamp(10px,1.4vw,24px);align-items:center;}
+.mcs .code{background:#0f1419;border-radius:16px;padding:clamp(14px,1.4vw,22px);
+  font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:12px;
+  line-height:1.65;color:#cfd8e3;overflow:auto;}
+.mcs .code .k{color:#8fb0d4;}
+.mcs .code .c{color:#7f93ad;}
+.mcs .code .g{color:#6b7a8d;}
+.mcs .slides{position:relative;height:clamp(180px,17vw,260px);}
+.mcs .slides i{position:absolute;left:50%;top:50%;width:clamp(120px,11vw,168px);
+  aspect-ratio:4/5;border-radius:12px;background:#fff;
+  box-shadow:0 8px 26px rgba(20,32,48,.12), inset 0 0 0 1px rgba(0,0,0,.07);
+  transform-origin:50% 50%;}
+.mcs .slides i:nth-child(1){transform:translate(-50%,-50%) rotate(-9deg) translateX(-38%);}
+.mcs .slides i:nth-child(2){transform:translate(-50%,-50%) rotate(-2deg);}
+.mcs .slides i:nth-child(3){transform:translate(-50%,-50%) rotate(7deg) translateX(38%);}
+.mcs .toArrow{display:flex;align-items:center;justify-content:center;color:var(--dim);}
+.mcs .toArrow svg{width:28px;height:28px;}
+
+/* цифры */
+.mcs .figs{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));
+  gap:clamp(12px,1.4vw,26px);}
+.mcs .figs div b{display:block;font-size:clamp(32px,4.4vw,74px);line-height:.9;
+  letter-spacing:-.05em;font-weight:500;}
+.mcs .figs div em{display:block;font-style:normal;margin-top:9px;
+  font-family:'Inter',Arial,sans-serif;font-size:12.5px;line-height:1.3;
+  color:rgba(0,0,0,.6);letter-spacing:-.01em;}
+
+/* логика ответа */
+.mcs .steps3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:clamp(10px,1.1vw,18px);}
+.mcs .steps3 div{border-radius:16px;padding:clamp(14px,1.4vw,24px);
+  background:linear-gradient(150deg,#f4f7fa,#e9eff5);}
+.mcs .steps3 b{display:block;font-family:'Inter',Arial,sans-serif;font-size:11px;
+  font-weight:600;letter-spacing:.08em;color:var(--a2);margin-bottom:8px;}
+
+/* гигиенист */
+.mcs .duo{display:grid;grid-template-columns:minmax(0,1.65fr) minmax(0,1fr);
+  gap:clamp(16px,2vw,40px);align-items:end;}
+.mcs .desk{border-radius:16px;background:#0e1216;padding:10px 10px 0;
+  box-shadow:0 22px 60px rgba(16,26,40,.22);}
+.mcs .desk .screen{border-radius:10px;overflow:hidden;background:#fff;
+  aspect-ratio:16/10;display:flex;flex-direction:column;}
+.mcs .desk .chrome{height:22px;background:#f4f6f9;display:flex;align-items:center;
+  gap:4px;padding:0 9px;flex:0 0 auto;}
+.mcs .desk .chrome u{width:7px;height:7px;border-radius:50%;background:#dbe1e9;
+  text-decoration:none;display:block;}
+.mcs .desk .foot{height:12px;}
+.mcs .seg{display:inline-flex;gap:3px;padding:3px;border-radius:999px;background:#eef2f7;
+  margin-bottom:12px;}
+.mcs .seg button{border:0;background:none;border-radius:999px;padding:6px 14px;
+  font-family:'Inter',Arial,sans-serif;font-size:11.5px;font-weight:500;cursor:pointer;
+  color:rgba(0,0,0,.6);transition:background .25s var(--eo), color .25s var(--eo);}
+.mcs .seg button[aria-pressed="true"]{background:#fff;color:#000;
+  box-shadow:0 1px 3px rgba(16,26,40,.12);}
+.mcs .mods{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));
+  gap:clamp(10px,1vw,16px);margin-top:clamp(20px,2vw,36px);}
+.mcs .mod{border:1px solid var(--hair);border-radius:14px;padding:clamp(13px,1.2vw,20px);}
+
+/* заглушки изображений */
+.mcs .ph{display:flex;align-items:center;justify-content:center;text-align:center;
+  border-radius:14px;background:
+    linear-gradient(135deg,rgba(142,164,189,.16),rgba(195,205,217,.22));
+  border:1px dashed rgba(0,0,0,.16);padding:14px;
+  font-family:'Inter',Arial,sans-serif;font-size:11.5px;line-height:1.35;
+  color:rgba(0,0,0,.5);letter-spacing:-.005em;}
+.mcs .phGrid{display:grid;gap:clamp(10px,1vw,16px);}
+.mcs .phGrid.g3{grid-template-columns:repeat(3,minmax(0,1fr));}
+.mcs .phGrid.g4{grid-template-columns:repeat(4,minmax(0,1fr));}
+.mcs .r11{aspect-ratio:1/1;} .mcs .r45{aspect-ratio:4/5;}
+.mcs .r916{aspect-ratio:9/16;} .mcs .r169{aspect-ratio:16/9;}
+.mcs .r32{aspect-ratio:3/2;}
+
+/* ---------- результаты ---------- */
+.mcs .results{position:relative;border-radius:28px;overflow:hidden;
+  padding:clamp(34px,4.4vw,88px);}
+.mcs .results ul{list-style:none;margin:0;padding:0;display:grid;gap:clamp(12px,1.2vw,20px);
+  grid-template-columns:repeat(2,minmax(0,1fr));position:relative;z-index:1;}
+.mcs .results li{border-radius:16px;padding:clamp(15px,1.5vw,26px);
+  font-family:'Inter',Arial,sans-serif;font-size:clamp(14px,1.05vw,17px);line-height:1.42;
+  color:rgba(0,0,0,.8);letter-spacing:-.011em;}
+
+/* ---------- навигация по кейсам ---------- */
+.mcs .cnav{border-top:1px solid var(--hair);display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));}
+.mcs .cnav a{display:block;padding:clamp(26px,3.4vw,60px) var(--gut);
+  text-decoration:none;color:var(--ink);transition:background .35s var(--eo);}
+.mcs .cnav a:hover{background:#f6f8fa;}
+.mcs .cnav a + a{border-left:1px solid var(--hair);text-align:right;}
+.mcs .cnav small{display:block;font-family:'Inter',Arial,sans-serif;font-size:11.5px;
+  font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--dim);
+  margin-bottom:10px;}
+.mcs .cnav strong{font-size:clamp(20px,2.4vw,40px);line-height:1;letter-spacing:-.04em;
+  font-weight:500;}
+.mcs .foot{padding:clamp(22px,2.4vw,40px) var(--gut);display:flex;
+  justify-content:space-between;gap:16px;flex-wrap:wrap;
+  font-family:'Inter',Arial,sans-serif;font-size:12px;color:var(--dim);}
+.mcs .foot a{color:var(--dim);text-decoration:none;}
+
+/* ---------- появление при прокрутке ---------- */
+.mcs .rv{opacity:0;transform:translateY(22px);
+  transition:opacity .9s var(--eo), transform .9s var(--eo);}
+.mcs .rv.in{opacity:1;transform:none;}
+
+/* ---------- адаптив ---------- */
+@media (max-width:1100px){
+  .mcs .bento{grid-template-columns:repeat(4,minmax(0,1fr));}
+  .mcs .cell.big{grid-column:span 4;}
+  .mcs .cell.b3{grid-column:span 2;}
+  .mcs .flow{grid-template-columns:repeat(2,minmax(0,1fr));}
+  .mcs .arrows{display:none;}
+  .mcs .arch{grid-template-columns:1fr;}
+  .mcs .arch .lnk{height:22px;width:1px;margin:0 auto;}
+  .mcs .arch .lnk::after{right:auto;left:-3px;top:auto;bottom:0;transform:rotate(135deg);}
+}
+@media (max-width:860px){
+  .mcs .two{grid-template-columns:1fr;}
+  .mcs .sec .head{grid-template-columns:1fr;}
+  .mcs .cols2{column-count:1;}
+  .mcs .teasers{grid-template-columns:repeat(2,minmax(0,1fr));}
+  .mcs .teasers div:first-child{grid-column:span 2;}
+  .mcs .figs{grid-template-columns:repeat(2,minmax(0,1fr));}
+  .mcs .results ul{grid-template-columns:1fr;}
+  .mcs .plug{grid-template-columns:1fr;}
+  .mcs .toArrow{transform:rotate(90deg);height:40px;}
+  .mcs .duo{grid-template-columns:1fr;}
+  .mcs .pdr{grid-template-columns:1fr;}
+  .mcs .pdr > div{border-right:0;border-bottom:1px solid var(--hair);}
+  .mcs .pdr > div:last-child{border-bottom:0;}
+  .mcs .steps3{grid-template-columns:1fr;}
+  .mcs .phGrid.g4{grid-template-columns:repeat(2,minmax(0,1fr));}
+}
+@media (max-width:620px){
+  .mcs .bento{grid-template-columns:1fr;}
+  .mcs .cell,.mcs .cell.big,.mcs .cell.b2,.mcs .cell.b3{grid-column:span 1;}
+  .mcs .flow{grid-template-columns:1fr;}
+  .mcs .pair{grid-template-columns:1fr;}
+  .mcs .aside3{grid-template-columns:1fr;}
+  .mcs .rail{grid-auto-flow:row;grid-auto-columns:auto;overflow:visible;}
+  .mcs .phGrid.g3{grid-template-columns:repeat(2,minmax(0,1fr));}
+  .mcs .cnav{grid-template-columns:1fr;}
+  .mcs .cnav a + a{border-left:0;border-top:1px solid var(--hair);text-align:left;}
+  .mcs .quote{max-width:none;}
+}
+
+/* ---------- покой ---------- */
+@media (prefers-reduced-motion:reduce){
+  .mcs .glow i{animation:none!important;}
+  .mcs .rv{opacity:1!important;transform:none!important;transition:none!important;}
+  .mcs *{transition-duration:.01ms!important;animation-duration:.01ms!important;
+    animation-iteration-count:1!important;scroll-behavior:auto!important;}
+}
+html{scroll-behavior:smooth;}
+@media (prefers-reduced-motion:reduce){ html{scroll-behavior:auto;} }
+</style>
+</head>
+
+<body class="mcs">
+
+<header class="top" id="top">
+  <a class="back" href="index.html">
+    <svg viewBox="0 0 16 16" fill="none" aria-hidden="true">
+      <path d="M10 3 5 8l5 5" stroke="currentColor" stroke-width="1.6"
+            stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+    Все кейсы
+  </a>
+  <a href="index.html">Илья Иванов</a>
+</header>
+
+<!-- ============================ 1. HERO ============================ -->
+<section class="hero">
+  <div class="glow"><i></i><i></i><i></i></div>
+  <div class="wrap">
+    <p class="kicker rv">Кейс</p>
+    <h1 class="h1 rv">Цифровая экосистема контента для премиальной клиники</h1>
+    <p class="lead sub rv">Как я превратил SMM медицинского бренда в управляемую
+      систему: от Telegram-продуктов и собственного сервера до 3D-приложения для врачей</p>
+
+    <div class="meta rv">
+      <span class="glass">Роль: SMM-специалист, продюсер контента, фото- и видеограф,
+        дизайнер и разработчик внутренних инструментов</span>
+      <span class="glass">Формат: единственный специалист по контенту, работа напрямую
+        с руководителем клиники</span>
+      <span class="glass nda">Клиент под NDA</span>
+    </div>
+
+    <div class="teasers rv">
+      <div class="glass"><b data-count="2">0</b><em>Telegram-продукта</em></div>
+      <div class="glass"><b data-count="2">0</b><em>Figma-плагина</em></div>
+      <div class="glass"><b data-count="7">0</b><em>статусов согласования</em></div>
+      <div class="glass"><b data-count="250" data-suffix="+">0</b><em>постов</em></div>
+      <div class="glass"><b data-count="52">0</b><em>слайда стандарта</em></div>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== 2. КОНТЕКСТ И ЗАДАЧА ===================== -->
+<section class="pad">
+  <div class="wrap">
+    <div class="two">
+      <div class="rv">
+        <h2 class="h3">Контекст</h2>
+        <p class="body">Премиальная стоматологическая клиника, специализирующаяся
+          на сложных хирургических и комплексных случаях. Аудитория премиальная,
+          тематика медицинская, требования к визуалу на уровне эстетики Apple.
+          Каждая единица контента проходит многоступенчатое согласование
+          с руководством и врачами.</p>
+      </div>
+      <div class="rv">
+        <h2 class="h3">Задача</h2>
+        <p class="body">Наладить регулярный выпуск контента там, где главным
+          ограничением была не идея и не съёмка, а процесс. Правки терялись
+          в переписках, решения разных людей противоречили друг другу, стандарты
+          менялись, а каждый новый материал собирался вручную с нуля.</p>
+        <p class="body">Я подошёл к SMM как к продукту. Вместо того чтобы ускорять
+          себя, я построил вокруг контента систему: инструменты согласования
+          и планирования, автоматизацию производства, стандарты бренда и цифровые
+          сервисы для самой клиники. Все продукты спроектированы и запущены мной
+          с использованием ИИ-разработки.</p>
+      </div>
+    </div>
+    <p class="quote rv">Узким местом был <span>процесс</span>, а не контент</p>
+  </div>
+</section>
+
+<!-- ===================== 3. СХЕМА СИСТЕМЫ ===================== -->
+<section class="pad">
+  <div class="wrap">
+    <p class="kicker rv">Схема системы</p>
+    <h2 class="h2 rv">Как устроена экосистема</h2>
+
+    <div class="schema rv" style="background:linear-gradient(160deg,#f7f9fc,#eef3f8);">
+      <div class="glow"><i></i><i></i><i></i></div>
+
+      <div class="flow" id="flow">
+        <div class="node glass" data-node="shoot" data-tip="Отсюда начинается любой материал">
+          <span class="tip">Отсюда начинается любой материал</span>
+          <p class="h4">Съёмка и производство</p>
+          <p class="one">Фото, видео, монтаж, тексты и сценарии</p>
+        </div>
+        <div class="node glass" data-node="tools" data-tip="Сборка макетов и визуала по стандарту">
+          <span class="tip">Сборка макетов и визуала по стандарту</span>
+          <p class="h4">Figma-плагины и ИИ-продакшн</p>
+          <p class="one">Карусели, сторис, обложки и генерации</p>
+        </div>
+        <div class="node glass" data-node="bot" data-tip="Единая точка согласования всего контента">
+          <span class="tip">Единая точка согласования всего контента</span>
+          <p class="h4">Telegram-бот</p>
+          <p class="one">Согласование, статусы, правки, уведомления</p>
+        </div>
+        <div class="node glass" data-node="app" data-tip="Планирование на той же базе, что и бот">
+          <span class="tip">Планирование на той же базе, что и бот</span>
+          <p class="h4">Telegram Mini App</p>
+          <p class="one">Контент-план, задачи, график работы</p>
+        </div>
+      </div>
+
+      <div class="arrows" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
+
+      <div class="pair">
+        <div class="node base glass" data-node="srv" data-tip="Бот и приложение — одни и те же службы">
+          <span class="tip">Бот и приложение — одни и те же службы</span>
+          <p class="h4">Общий сервер</p>
+          <p class="one">VPS, FastAPI, nginx, systemd</p>
+        </div>
+        <div class="node base glass" data-node="db" data-tip="Один статус материала для бота и приложения">
+          <span class="tip">Один статус материала для бота и приложения</span>
+          <p class="h4">Общая база данных</p>
+          <p class="one">Статусы и правки в одной точке правды</p>
+        </div>
+      </div>
+
+      <div class="base glass" style="margin-top:clamp(12px,1.2vw,20px);">
+        <p class="h4" style="margin:0;">Публикация</p>
+      </div>
+
+      <div class="aside3">
+        <div class="node glass" data-node="std" data-tip="Правила, по которым говорит бренд">
+          <span class="tip">Правила, по которым говорит бренд</span>
+          <p class="h4">Стандарты бренда</p>
+          <p class="one">Визуал, тексты, коммуникация</p>
+        </div>
+        <div class="node glass" data-node="hyg" data-tip="Рабочий инструмент врача и памятка пациенту">
+          <span class="tip">Рабочий инструмент врача и памятка пациенту</span>
+          <p class="h4">Приложение для гигиениста</p>
+          <p class="one">3D-карта, скрининг, схема гигиены</p>
+        </div>
+        <div class="node glass" data-node="site" data-tip="Структура, контент и съёмка для страниц">
+          <span class="tip">Структура, контент и съёмка для страниц</span>
+          <p class="h4">Сайт клиники</p>
+          <p class="one">Переработка структуры и контента</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 4. ЖИЗНЕННЫЙ ПУТЬ ОДНОГО МАТЕРИАЛА ============ -->
+<section class="pad">
+  <div class="wrap">
+    <p class="kicker rv">Жизненный путь одного материала</p>
+    <h2 class="h2 rv">Путь рилса через систему</h2>
+    <div class="rail rv">
+      <div class="step"><b>01</b><p class="h4">Загрузка в бот</p>
+        <p class="one">Автор отправляет материал одним сообщением</p></div>
+      <div class="step"><b>02</b><p class="h4">Вопрос о враче</p>
+        <p class="one">Бот спрашивает, согласован ли материал с врачом заранее</p></div>
+      <div class="step"><b>03</b><p class="h4">Уведомления</p>
+        <p class="one">Согласующие получают материал и кнопки решений</p></div>
+      <div class="step"><b>04</b><p class="h4">Правка</p>
+        <p class="one">Комментарий оставляется текстом прямо к материалу</p></div>
+      <div class="step"><b>05</b><p class="h4">Новая версия</p>
+        <p class="one">Видно, на что согласующий отвечал в прошлый раз</p></div>
+      <div class="step"><b>06</b><p class="h4">Решение</p>
+        <p class="one">Основной согласующий принимает финальное решение</p></div>
+      <div class="step"><b>07</b><p class="h4">Статус «Согласовано»</p>
+        <p class="one">Ставится только решением основного согласующего</p></div>
+      <div class="step"><b>08</b><p class="h4">Календарь Mini App</p>
+        <p class="one">Статус подтягивается в контент-план автоматически</p></div>
+      <div class="step"><b>09</b><p class="h4">Публикация</p>
+        <p class="one">Материал выходит по плану</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== 5. ПЯТЬ НАПРАВЛЕНИЙ ===================== -->
+<section class="pad">
+  <div class="wrap">
+    <p class="kicker rv">Пять направлений работы</p>
+    <h2 class="h2 rv">Из чего состоит кейс</h2>
+    <div class="bento rv">
+      <a class="cell big" href="#s1">
+        <span class="num">01</span>
+        <span><span class="h3" style="display:block;">Система согласования
+          и планирования контента</span>
+        <span class="go">Telegram-бот, Mini App, инфраструктура →</span></span>
+      </a>
+      <a class="cell b2" href="#s2">
+        <span class="num">02</span>
+        <span><span class="h3" style="display:block;">Инструменты производства</span>
+        <span class="go">Figma-плагины, ИИ-продакшн →</span></span>
+      </a>
+      <a class="cell b2" href="#s3">
+        <span class="num">03</span>
+        <span><span class="h3" style="display:block;">Контент и продакшн</span>
+        <span class="go">Съёмка, сценарии, тексты →</span></span>
+      </a>
+      <a class="cell b2" href="#s4">
+        <span class="num">04</span>
+        <span><span class="h3" style="display:block;">Стандарты бренда</span>
+        <span class="go">Визуал, тексты, коммуникация →</span></span>
+      </a>
+      <a class="cell b2" href="#s5">
+        <span class="num">05</span>
+        <span><span class="h3" style="display:block;">Цифровые продукты для клиники</span>
+        <span class="go">Приложение для врача, сайт →</span></span>
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== 6.1 БОТ И MINI APP ===================== -->
+<section class="sec" id="s1">
+  <div class="wrap">
+    <div class="head">
+      <div class="rv">
+        <p class="kicker" style="margin:0 0 12px;">01</p>
+        <h2 class="h2" style="margin:0;">Система согласования и планирования контента</h2>
+      </div>
+      <div class="rv">
+        <h3 class="h3">Telegram-бот согласования</h3>
+        <p class="body">Единая точка, через которую проходит весь контент клиники:
+          рилс, карусели, сторис, фото, графика, тексты и озвучка. Переписки,
+          пересланные файлы и устные «вроде согласовали» заменены одним прозрачным
+          процессом.</p>
+      </div>
+    </div>
+
+    <div class="two">
+      <div class="rv">
+        <div class="phone">
+          <div class="screen">
+            <div class="bar">Бот согласования</div>
+            <div class="tg">
+              <div class="bub">
+                <div class="t">Рилс · Имплантация</div>
+                <div class="ph">Место под кадр материала</div>
+                Автор отправил материал на согласование.
+                <div class="meta">Согласован с врачом заранее · статус: не рассмотрено</div>
+              </div>
+              <div class="bub">
+                <div class="t">Решение</div>
+                <div class="btns" id="tgBtns">
+                  <button type="button" aria-pressed="false">Согласовать</button>
+                  <button type="button" aria-pressed="false">На правку</button>
+                  <button type="button" aria-pressed="false" class="wide">Отклонить</button>
+                </div>
+                <div class="meta" id="tgState">Решение основного согласующего ещё не принято</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="rv">
+        <div class="block" style="margin-top:0;">
+          <p class="h4">Роли и логика решений</p>
+          <p class="body">В системе четыре роли: автор, основной согласующий,
+            второстепенный согласующий и врач. Каждый видит решения остальных
+            в реальном времени: сообщение обновляется, когда кто-то ответил.
+            Финальный статус «Согласовано» ставится только решением основного
+            согласующего. Эту логику я заложил после того, как нашёл сценарий,
+            в котором промежуточное одобрение могло ошибочно закрыть материал.</p>
+        </div>
+        <div class="block">
+          <p class="h4">Семь статусов</p>
+          <p class="body">Список материалов сортируется не по дате, а по приоритету
+            статуса, поэтому в первую очередь видно то, что требует действия.</p>
+          <div class="statuses" id="statuses">
+            <button class="chip" type="button" aria-pressed="false"
+              data-note="Финальное решение основного согласующего: материал можно публиковать.">Согласовано</button>
+            <button class="chip" type="button" aria-pressed="false"
+              data-note="Согласующий оставил текстовую правку прямо к материалу.">Внесена правка</button>
+            <button class="chip" type="button" aria-pressed="false"
+              data-note="Автор прислал новую версию, она ждёт проверки согласующим.">Правка ждёт проверки</button>
+            <button class="chip" type="button" aria-pressed="false"
+              data-note="Материал отклонён, в работу в этом виде не идёт.">Не согласовано</button>
+            <button class="chip" type="button" aria-pressed="false"
+              data-note="Решения согласующих разошлись: часть материала принята, часть нет.">Частично согласовано</button>
+            <button class="chip" type="button" aria-pressed="false"
+              data-note="Материал загружен, но решения по нему ещё нет ни у кого.">Не рассмотрено</button>
+            <button class="chip" type="button" aria-pressed="false"
+              data-note="Отдельная ветка статусов для озвучки материала.">Статусы озвучки</button>
+          </div>
+          <p class="chipOut" id="chipOut">Нажмите статус, чтобы увидеть его значение.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="block cols2 rv">
+      <div>
+        <p class="h4">Правки без потерь</p>
+        <p class="body">Правка оставляется текстом прямо к материалу. В новой версии
+          согласующий сразу видит, на что отвечал в прошлый раз. Отдельный раздел
+          собирает все материалы с открытыми правками.</p>
+      </div>
+      <div>
+        <p class="h4">Согласование с врачом</p>
+        <p class="body">При загрузке бот спрашивает, согласован ли материал с врачом
+          заранее, и фиксирует имя. Если врач одобрил материал лично, автор вносит
+          это в систему, а согласующие получают уведомление и одной кнопкой
+          подтверждают, возвращают на правку или отклоняют. Устные договорённости
+          перестают теряться.</p>
+      </div>
+      <div>
+        <p class="h4">Гибкие реакции</p>
+        <p class="body">Согласующий может сменить своё решение или дописать текстовую
+          правку после ответа, не создавая путаницы в статусах.</p>
+      </div>
+      <div>
+        <p class="h4">Альбомы</p>
+        <p class="body">Несколько фото и видео можно загрузить как один материал
+          с названием, тогда согласующие получают их настоящим Telegram-альбомом,
+          или как серию отдельных материалов. Документы и медиа автоматически
+          разводятся по отдельным группам, длинные тексты делятся на части
+          без обрезки.</p>
+      </div>
+      <div>
+        <p class="h4">Коллаборации</p>
+        <p class="body">Отдельный сценарий для съёмок с блогерами: дата, врач,
+          нужно ли согласование, изменение планов.</p>
+      </div>
+      <div>
+        <p class="h4">Коммуникация</p>
+        <p class="body">Повторный запрос обратной связи сразу всем согласующим,
+          лаконичные напоминания с названием материала, общий переключатель
+          уведомлений, категории по форматам с количеством материалов,
+          постраничная навигация.</p>
+      </div>
+    </div>
+
+    <div class="block rv">
+      <p class="h4">Место под реальные скриншоты бота</p>
+      <div class="phGrid g4" style="margin-top:12px;">
+        <div class="ph r916">Скриншот бота 9:16 — карточка материала</div>
+        <div class="ph r916">Скриншот бота 9:16 — список по статусам</div>
+        <div class="ph r916">Скриншот бота 9:16 — правка к материалу</div>
+        <div class="ph r916">Скриншот бота 9:16 — уведомление согласующему</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Mini App -->
+  <div class="wrap" style="margin-top:clamp(44px,5vw,96px);">
+    <div class="appwrap rv" style="background:linear-gradient(170deg,#f6f9fc,#eaf0f6);">
+      <div class="glow"><i></i><i></i><i></i></div>
+      <div style="position:relative;z-index:1;">
+        <h3 class="h3" style="text-align:center;">Telegram Mini App</h3>
+        <p class="body" style="text-align:center;max-width:62ch;margin:0 auto 26px;">
+          Полноценное веб-приложение внутри Telegram, которое заменило рабочее
+          пространство в Notion и работает на одной базе данных с ботом.</p>
+
+        <div class="tabs" id="appTabs" role="tablist">
+          <button type="button" role="tab" aria-selected="true" data-pane="p1">Контент-план</button>
+          <button type="button" role="tab" aria-selected="false" data-pane="p2">Задачи</button>
+          <button type="button" role="tab" aria-selected="false" data-pane="p3">График</button>
+        </div>
+
+        <div class="phone">
+          <div class="screen">
+            <div class="bar">Mini App</div>
+            <div class="app">
+              <div class="pane on" id="p1">
+                <p class="capt">Контент-план месяца · теги платформы, формата и рубрики</p>
+                <div class="cal">
+                  <span>пн</span><span>вт</span><span>ср</span><span>чт</span>
+                  <span>пт</span><span>сб</span><span>вс</span>
+                  <i></i><i><b style="background:#8ea4bd"></b></i><i></i>
+                  <i><b style="background:#6f86a8"></b></i><i></i><i></i><i></i>
+                  <i><b style="background:#c3cdd9"></b></i><i></i>
+                  <i><b style="background:#8ea4bd"></b></i><i></i>
+                  <i><b style="background:#6f86a8"></b></i><i></i><i></i>
+                  <i></i><i><b style="background:#c3cdd9"></b></i><i></i><i></i>
+                  <i><b style="background:#8ea4bd"></b></i><i></i><i></i>
+                  <i><b style="background:#6f86a8"></b></i><i></i>
+                  <i><b style="background:#8ea4bd"></b></i><i></i><i></i><i></i><i></i>
+                </div>
+              </div>
+              <div class="pane" id="p2">
+                <p class="capt">Задачи по съёмкам, монтажу и производству</p>
+                <div class="kan">
+                  <div><h5>Съёмка</h5><u></u><u></u><u></u></div>
+                  <div><h5>Монтаж</h5><u></u><u></u></div>
+                  <div><h5>Готово</h5><u></u><u></u><u></u><u></u></div>
+                </div>
+              </div>
+              <div class="pane" id="p3">
+                <p class="capt">Неделя: дни в клинике и удалённая работа</p>
+                <div class="wk">
+                  <div><b>пн</b> В клинике <em>съёмка</em></div>
+                  <div><b>вт</b> Удалённо <em>монтаж</em></div>
+                  <div><b>ср</b> В клинике <em>съёмка</em></div>
+                  <div><b>чт</b> Удалённо <em>тексты</em></div>
+                  <div><b>пт</b> В клинике <em>съёмка</em></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="block cols2 rv">
+      <div>
+        <p class="h4">Контент-план</p>
+        <p class="body">Календарь публикаций, где каждая единица контента отмечена
+          тегами платформы, формата и рубрики. Статус согласования подтягивается
+          из бота автоматически: календарь всегда показывает реальное состояние,
+          а не то, что кто-то забыл обновить.</p>
+      </div>
+      <div>
+        <p class="h4">Задачи</p>
+        <p class="body">Канбан-доска рабочих задач по съёмкам, монтажу
+          и производству.</p>
+      </div>
+      <div>
+        <p class="h4">График</p>
+        <p class="body">Расписание работы с разделением на дни в клинике
+          и удалённую работу, чтобы съёмки планировались под присутствие.</p>
+      </div>
+      <div>
+        <p class="h4">Доступ и роли</p>
+        <p class="body">Пользователь определяется по Telegram ID, без логинов
+          и паролей. Автор и согласующие видят интерфейс под свою роль.</p>
+      </div>
+      <div>
+        <p class="h4">Интерфейс</p>
+        <p class="body">Светлая палитра, матовое стекло, минимализм в духе iOS,
+          плавные переходы. Приложение открывается из Telegram на любом телефоне
+          и ощущается как нативное.</p>
+      </div>
+    </div>
+
+    <div class="block rv">
+      <p class="h4">Место под реальные скриншоты Mini App</p>
+      <div class="phGrid g3" style="margin-top:12px;">
+        <div class="ph r916">Скриншот Mini App 9:16 — контент-план</div>
+        <div class="ph r916">Скриншот Mini App 9:16 — задачи</div>
+        <div class="ph r916">Скриншот Mini App 9:16 — график</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Инфраструктура -->
+  <div class="wrap" style="margin-top:clamp(44px,5vw,96px);">
+    <div class="rv">
+      <h3 class="h3">Инфраструктура</h3>
+      <p class="body" style="max-width:72ch;">Всю серверную часть развернул
+        и сопровождаю сам. VPS на Linux, бот и веб-приложение работают как системные
+        службы с автоматическим перезапуском. Бэкенд на FastAPI, nginx в качестве
+        обратного прокси, собственный поддомен, SSL-сертификаты Let’s Encrypt.
+        При каждом обновлении сверяю контрольные суммы файлов, чтобы на сервер
+        гарантированно попадала актуальная версия.</p>
+    </div>
+
+    <div class="block rv">
+      <div class="arch">
+        <div class="box"><p class="h4">Telegram</p><p class="one">Бот и Mini App у пользователя</p></div>
+        <div class="lnk" aria-hidden="true"></div>
+        <div class="box"><p class="h4">nginx</p><p class="one">Обратный прокси, SSL</p></div>
+        <div class="lnk" aria-hidden="true"></div>
+        <div class="box"><p class="h4">FastAPI и бот</p><p class="one">Системные службы с автозапуском</p></div>
+      </div>
+      <div class="arch" style="margin-top:clamp(10px,1vw,16px);grid-template-columns:1fr;">
+        <div class="box" style="max-width:420px;margin:0 auto;">
+          <p class="h4">Общая база</p><p class="one">Одни данные для бота и приложения</p>
+        </div>
+      </div>
+      <div class="stack">
+        <span class="chip flat">Python</span><span class="chip flat">aiogram</span>
+        <span class="chip flat">FastAPI</span><span class="chip flat">Uvicorn</span>
+        <span class="chip flat">SQLite</span><span class="chip flat">HTML</span>
+        <span class="chip flat">CSS</span><span class="chip flat">JavaScript</span>
+        <span class="chip flat">Telegram Mini Apps</span><span class="chip flat">nginx</span>
+        <span class="chip flat">systemd</span><span class="chip flat">Cloudflare DNS</span>
+        <span class="chip flat">Let’s Encrypt</span>
+      </div>
+    </div>
+
+    <div class="block rv">
+      <p class="h4">Миграция под блокировками</p>
+      <div class="pdr" style="margin-top:12px;">
+        <div><b>Проблема</b><p class="body" style="margin:0;">IP-адрес сервера
+          оказался заблокирован, сервис перестал работать.</p></div>
+        <div><b>Диагностика</b><p class="body" style="margin:0;">После переезда
+          на новый сервер бот заработал, а Mini App у пользователей в России
+          обрывался на загрузке. Я выяснил, что соединение через CDN-прокси
+          ограничивается после первых килобайт.</p></div>
+        <div><b>Решение</b><p class="body" style="margin:0;">Вывел поддомен
+          из-под прокси, выпустил SSL-сертификат напрямую на сервере и перенёс
+          службы с сохранением структуры. Сервис восстановлен без потери данных.</p></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== 6.2 ИНСТРУМЕНТЫ ПРОИЗВОДСТВА ===================== -->
+<section class="sec" id="s2">
+  <div class="wrap">
+    <div class="head">
+      <div class="rv">
+        <p class="kicker" style="margin:0 0 12px;">02</p>
+        <h2 class="h2" style="margin:0;">Инструменты производства</h2>
+      </div>
+      <div class="rv">
+        <h3 class="h3">Figma-плагины</h3>
+        <p class="body">Разработал два собственных плагина: для каруселей и для
+          сторис. Пишу текст поста в простой разметке (обложка, смысловые блоки,
+          закрывающий слайд), а плагин сам раскладывает его по фирменным макетам
+          с правильной типографикой, дисклеймером и тэглайном.</p>
+      </div>
+    </div>
+
+    <div class="plug rv">
+      <div class="code"><span class="g">/* разметка поста */</span><br>
+        <span class="k">@cover</span> Заголовок карусели<br>
+        <span class="k">@block</span> Смысловой блок 1<br>
+        <span class="k">@block</span> Смысловой блок 2<br>
+        <span class="k">@block</span> Смысловой блок 3<br>
+        <span class="k">@outro</span> Закрывающий слайд<br>
+        <span class="g">— дисклеймер и тэглайн ставятся сами</span>
+      </div>
+      <div class="toArrow" aria-hidden="true">
+        <svg viewBox="0 0 28 28" fill="none">
+          <path d="M4 14h20M18 8l6 6-6 6" stroke="currentColor" stroke-width="1.5"
+                stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </div>
+      <div class="slides" aria-hidden="true"><i></i><i></i><i></i></div>
+    </div>
+
+    <div class="block rv">
+      <p class="h4">Место под скриншоты плагинов</p>
+      <div class="phGrid g3" style="margin-top:12px;">
+        <div class="ph r45">Скриншот плагина 4:5 — панель плагина в Figma</div>
+        <div class="ph r45">Скриншот 4:5 — разметка текста до сборки</div>
+        <div class="ph r45">Скриншот 4:5 — готовая карусель на макетах</div>
+      </div>
+    </div>
+
+    <div class="block rv">
+      <h3 class="h3">ИИ-продакшн</h3>
+      <p class="body" style="max-width:72ch;">Выстроил процесс генерации
+        и доработки визуала нейросетями под стандарт бренда: товарные фото
+        для карточки клиники на картографических сервисах, фирменные наклейки
+        и упаковка, обложки рилс в единой серии. Отработал методику точной правки
+        генераций: программный контроль положения объектов, центровка логотипов,
+        согласование света, отражений и материалов с исходной сценой. Для каждой
+        задачи пишу промпты по единому своду правил, поэтому визуалы выглядят
+        как одна серия.</p>
+      <div class="phGrid g4" style="margin-top:16px;">
+        <div class="ph r11">До 1:1 — исходная генерация</div>
+        <div class="ph r11">После 1:1 — доведённый визуал</div>
+        <div class="ph r11">До 1:1 — исходная генерация</div>
+        <div class="ph r11">После 1:1 — доведённый визуал</div>
+      </div>
+    </div>
+
+    <div class="block rv">
+      <h3 class="h3">Автоматизация публикаций</h3>
+      <p class="body" style="max-width:72ch;">Настроил пакетный импорт контент-плана
+        в сервис автопостинга через CSV: десятки публикаций загружаются за один раз.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== 6.3 КОНТЕНТ И ПРОДАКШН ===================== -->
+<section class="sec" id="s3">
+  <div class="wrap">
+    <div class="head">
+      <div class="rv">
+        <p class="kicker" style="margin:0 0 12px;">03</p>
+        <h2 class="h2" style="margin:0;">Контент и продакшн</h2>
+      </div>
+      <div class="rv">
+        <div class="figs" style="grid-template-columns:repeat(2,minmax(0,1fr));">
+          <div><b data-count="250" data-suffix="+">0</b><em>постов в Threads,
+            включая интерактивные форматы и ответы в ветках от лица клиники</em></div>
+          <div><b data-count="4">0</b><em>специальности врачей, под которые пишутся
+            сценарии рилс</em></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="block cols2 rv" style="margin-top:0;">
+      <div>
+        <p class="h4">Съёмка и монтаж</p>
+        <p class="body">Фото- и видеосъёмка клиники, врачей и клинических процессов,
+          монтаж.</p>
+      </div>
+      <div>
+        <p class="h4">Сценарии рилс</p>
+        <p class="body">Для врачей разных специальностей: хирург-имплантолог,
+          пародонтолог, ортодонт, гнатолог. Каждый сценарий включает дословный
+          текст врача и раскадровку перебивок.</p>
+      </div>
+      <div>
+        <p class="h4">Экспертные карусели</p>
+        <p class="body">В том числе закреплённый пост с ключевыми клиническими
+          направлениями клиники.</p>
+      </div>
+      <div>
+        <p class="h4">Инфлюенс-маркетинг</p>
+        <p class="body">HTML-письмо с бартерным предложением для блогеров, сценарии
+          визитов и экскурсий по клинике.</p>
+      </div>
+      <div>
+        <p class="h4">Имиджевая рубрика</p>
+        <p class="body">Об улыбке в истории искусства и культуры — связывает
+          культурный контекст с работой клиники.</p>
+      </div>
+    </div>
+
+    <div class="block rv">
+      <p class="h4">Место под кадры съёмок</p>
+      <div class="phGrid g4" style="margin-top:12px;">
+        <div class="ph r45">Кадр 4:5 — съёмка клиники</div>
+        <div class="ph r45">Кадр 4:5 — портрет врача</div>
+        <div class="ph r45">Кадр 4:5 — клинический процесс</div>
+        <div class="ph r45">Кадр 4:5 — деталь интерьера</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== 6.4 СТАНДАРТЫ БРЕНДА ===================== -->
+<section class="sec" id="s4">
+  <div class="wrap">
+    <div class="head">
+      <div class="rv">
+        <p class="kicker" style="margin:0 0 12px;">04</p>
+        <h2 class="h2" style="margin:0;">Стандарты бренда</h2>
+      </div>
+      <div class="rv">
+        <h3 class="h3">Визуальный и текстовый стандарт соцсетей</h3>
+        <p class="body">Единый свод правил: палитра, шрифт, структура каждого
+          формата, лексика, тон, запрещённые формулировки, правила для текстов,
+          сценариев и промптов для нейросетей. Свод работает как инструкция
+          и для меня, и для ИИ-инструментов, поэтому любой материал с первого
+          черновика звучит голосом бренда.</p>
+      </div>
+    </div>
+
+    <div class="figs rv">
+      <div><b data-count="11">0</b><em>разделов стандарта</em></div>
+      <div><b data-count="52">0</b><em>слайда обучающей презентации</em></div>
+      <div><b data-count="50">0</b><em>типовых ситуаций в каталоге</em></div>
+      <div><b data-count="7">0</b><em>направлений со скриптами</em></div>
+    </div>
+
+    <div class="block cols2 rv">
+      <div>
+        <p class="h4">Стандарт коммуникации с пациентами в директе</p>
+        <p class="body">Эталонная логика ответов: сначала как проходит диагностика,
+          затем как строится лечение, и только потом стоимость. Правила подачи
+          цены, работа с возражениями, единый голос клиники.</p>
+      </div>
+      <div>
+        <p class="h4">Стандарт коммуникации администраторов</p>
+        <p class="body">Совместно с маркетологом клиники разработал единый стандарт
+          общения администраторов с пациентами по телефону и в переписке, чтобы
+          каждый контакт с клиникой поддерживал премиальное позиционирование
+          бренда. В основе анализ реальных диалогов и расшифровок звонков.</p>
+        <p class="body">Итог: стандарт из 11 разделов (голос клиники, логика продаж,
+          протокол цены, телефон, переписка, разбор ситуаций, чек-листы, план
+          внедрения) и обучающая презентация на 52 слайда со скриптами по семи
+          направлениям, техникой работы с жалобами и каталогом из 50 типовых
+          ситуаций.</p>
+      </div>
+    </div>
+
+    <div class="block rv">
+      <p class="h4">Логика ответа пациенту</p>
+      <div class="steps3" style="margin-top:12px;">
+        <div><b>Шаг 1</b><p class="body" style="margin:0;">Как проходит диагностика</p></div>
+        <div><b>Шаг 2</b><p class="body" style="margin:0;">Как строится лечение</p></div>
+        <div><b>Шаг 3</b><p class="body" style="margin:0;">И только потом стоимость</p></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== 6.5 ЦИФРОВЫЕ ПРОДУКТЫ ===================== -->
+<section class="sec" id="s5">
+  <div class="wrap">
+    <div class="head">
+      <div class="rv">
+        <p class="kicker" style="margin:0 0 12px;">05</p>
+        <h2 class="h2" style="margin:0;">Цифровые продукты для клиники</h2>
+      </div>
+      <div class="rv">
+        <h3 class="h3">Веб-приложение для гигиениста и пародонтолога</h3>
+        <p class="body">Рабочий инструмент врача, который превращает рекомендации
+          по домашней гигиене из устных советов в персональный фирменный документ
+          пациента.</p>
+      </div>
+    </div>
+
+    <div class="rv">
+      <div class="seg" id="seg3d">
+        <button type="button" aria-pressed="true" data-mode="3d">3D</button>
+        <button type="button" aria-pressed="false" data-mode="map">Схема</button>
+      </div>
+      <div class="duo">
+        <div class="desk">
+          <div class="screen">
+            <div class="chrome"><u></u><u></u><u></u></div>
+            <div class="ph r169" id="deskPh"
+              style="border:0;border-radius:0;flex:1 1 auto;">3D-карта межзубных
+              ёршиков 16:9 — модель зубных рядов с выбранными размерами</div>
+          </div>
+          <div class="foot"></div>
+        </div>
+        <div class="phone" style="width:min(240px,66vw);">
+          <div class="screen" style="height:clamp(340px,38vw,420px);">
+            <div class="bar">Онлайн-карта пациента</div>
+            <div class="ph r916" style="border:0;border-radius:0;flex:1 1 auto;">
+              Онлайн-карта пациента 9:16 — фирменный документ по ссылке и QR-коду</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="mods rv">
+      <div class="mod"><p class="h4">3D-карта межзубных ёршиков</p>
+        <p class="body" style="margin:0;">Реалистичная 3D-модель зубных рядов,
+          которая раскрывается как полость рта, вращается и переключается между
+          ракурсами. Врач отмечает размер ёршика для каждого межзубного промежутка,
+          а модель отражает состояние зубов: отсутствующие зубы, имплантаты,
+          элементы протезов. Для быстрого ввода есть переключение на схематическую
+          карту, для объяснения пациенту — режим анатомии с полупрозрачной костью.</p></div>
+      <div class="mod"><p class="h4">Скрининг пародонта PSR</p>
+        <p class="body" style="margin:0;">Быстрая оценка состояния дёсен
+          по сегментам.</p></div>
+      <div class="mod"><p class="h4">Индивидуальная схема гигиены</p>
+        <p class="body" style="margin:0;">Набор средств и порядок ухода
+          под конкретного пациента.</p></div>
+      <div class="mod"><p class="h4">Памятки после процедур</p>
+        <p class="body" style="margin:0;">Шаблоны, из которых врач за несколько
+          секунд выбирает нужные пункты.</p></div>
+      <div class="mod"><p class="h4">Для пациента</p>
+        <p class="body" style="margin:0;">Результат приходит как фирменная онлайн-карта
+          по QR-коду или ссылке и как PDF формата A4, готовый к печати.</p></div>
+      <div class="mod"><p class="h4">Технологии и безопасность</p>
+        <p class="body" style="margin:0;">Next.js, PostgreSQL, React Three Fiber,
+          ролевая авторизация врачей и гигиенистов, хранение данных пациентов
+          с учётом требований 152-ФЗ. Работает на десктопе и смартфоне, в том числе
+          для заполнения ассистентом под диктовку врача.</p></div>
+    </div>
+
+    <div class="block rv">
+      <h3 class="h3">Сайт клиники</h3>
+      <p class="body" style="max-width:72ch;">Переработка структуры и контента сайта,
+        съёмка клиники для новых страниц.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== 7. РЕЗУЛЬТАТЫ ===================== -->
+<section class="pad">
+  <div class="wrap">
+    <div class="results rv" style="background:linear-gradient(165deg,#f5f8fb,#e9eff6);">
+      <div class="glow"><i></i><i></i><i></i></div>
+      <div style="position:relative;z-index:1;">
+        <p class="kicker">Результаты</p>
+        <h2 class="h2">Что изменилось</h2>
+        <ul>
+          <li class="glass">Весь поток контента переведён в единую систему согласования
+            и планирования.</li>
+          <li class="glass">Статусы и правки больше не теряются: у каждого материала
+            одна точка правды.</li>
+          <li class="glass">Вёрстка каруселей и сторис автоматизирована собственными
+            плагинами.</li>
+          <li class="glass">Сформирован стандарт бренда, по которому работают контент,
+            ИИ-генерация и коммуникация с пациентами.</li>
+          <li class="glass">Подготовлено обучение администраторов, направленное
+            на конверсию обращений в запись.</li>
+          <li class="glass">Клиника получила собственный цифровой инструмент для врачей
+            и пациентов.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== 8. НАВИГАЦИЯ ===================== -->
+<nav class="cnav" id="cnav" aria-label="Другие кейсы"></nav>
+
+<div class="foot">
+  <span>Илья Иванов</span>
+  <a href="index.html">На главную</a>
+</div>
+
+<script>
+(function(){
+  'use strict';
+  var reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  /* ---------- появление секций ---------- */
+  var rv = [].slice.call(document.querySelectorAll('.rv'));
+  if(reduced || !('IntersectionObserver' in window)){
+    rv.forEach(function(el){ el.classList.add('in'); });
+  } else {
+    var io = new IntersectionObserver(function(es){
+      es.forEach(function(e){
+        if(e.isIntersecting){ e.target.classList.add('in'); io.unobserve(e.target); }
+      });
+    }, {rootMargin: '0px 0px -8% 0px', threshold: .06});
+    rv.forEach(function(el){ io.observe(el); });
+  }
+
+  /* ---------- счётчики ---------- */
+  var nums = [].slice.call(document.querySelectorAll('[data-count]'));
+  function runCount(el){
+    var to = parseFloat(el.getAttribute('data-count')) || 0;
+    var sfx = el.getAttribute('data-suffix') || '';
+    if(reduced){ el.textContent = to + sfx; return; }
+    var t0 = 0, dur = 1100;
+    function tick(now){
+      if(!t0) t0 = now;
+      var p = Math.min(1, (now - t0) / dur);
+      var e = 1 - Math.pow(1 - p, 3);
+      el.textContent = Math.round(to * e) + sfx;
+      if(p < 1) requestAnimationFrame(tick);
+    }
+    requestAnimationFrame(tick);
+  }
+  if(!('IntersectionObserver' in window)){
+    nums.forEach(runCount);
+  } else {
+    var ioN = new IntersectionObserver(function(es){
+      es.forEach(function(e){
+        if(e.isIntersecting){ runCount(e.target); ioN.unobserve(e.target); }
+      });
+    }, {threshold: .4});
+    nums.forEach(function(el){ ioN.observe(el); });
+  }
+
+  /* ---------- схема: подсветка связей ----------
+     Связи заданы списком: подсвечивается сам узел и те, с кем он связан.
+     Работает и мышью, и касанием. */
+  var LINKS = {
+    shoot: ['tools'],
+    tools: ['shoot', 'bot'],
+    bot:   ['tools', 'app', 'srv', 'db'],
+    app:   ['bot', 'srv', 'db'],
+    srv:   ['bot', 'app', 'db'],
+    db:    ['bot', 'app', 'srv'],
+    std:   ['tools', 'bot'],
+    hyg:   [],
+    site:  []
+  };
+  var schema = document.querySelector('.schema');
+  if(schema){
+    var allNodes = [].slice.call(schema.querySelectorAll('.node'));
+    var flow = schema.querySelector('#flow');
+    function lightUp(key){
+      var set = [key].concat(LINKS[key] || []);
+      allNodes.forEach(function(n){
+        n.classList.toggle('on', set.indexOf(n.dataset.node) > -1);
+      });
+      schema.querySelectorAll('.flow,.pair,.aside3').forEach(function(g){
+        g.classList.add('lit');
+      });
+      if(flow) flow.classList.add('lit');
+    }
+    function lightOff(){
+      allNodes.forEach(function(n){ n.classList.remove('on'); });
+      schema.querySelectorAll('.lit').forEach(function(g){ g.classList.remove('lit'); });
+    }
+    allNodes.forEach(function(n){
+      n.addEventListener('mouseenter', function(){ lightUp(n.dataset.node); });
+      n.addEventListener('mouseleave', lightOff);
+      n.addEventListener('focus', function(){ lightUp(n.dataset.node); });
+      n.addEventListener('blur', lightOff);
+      n.setAttribute('tabindex', '0');
+      n.addEventListener('click', function(){
+        var was = n.classList.contains('on');
+        lightOff();
+        if(!was) lightUp(n.dataset.node);
+      });
+    });
+    schema.addEventListener('mouseleave', lightOff);
+  }
+
+  /* ---------- семь статусов ---------- */
+  var st = document.getElementById('statuses'), out = document.getElementById('chipOut');
+  if(st && out){
+    st.addEventListener('click', function(e){
+      var b = e.target.closest('.chip'); if(!b) return;
+      var was = b.getAttribute('aria-pressed') === 'true';
+      [].forEach.call(st.querySelectorAll('.chip'), function(c){
+        c.setAttribute('aria-pressed', 'false');
+      });
+      if(was){ out.textContent = 'Нажмите статус, чтобы увидеть его значение.'; return; }
+      b.setAttribute('aria-pressed', 'true');
+      out.textContent = b.getAttribute('data-note');
+    });
+  }
+
+  /* ---------- кнопки решения в мокапе чата ---------- */
+  var tgb = document.getElementById('tgBtns'), tgs = document.getElementById('tgState');
+  if(tgb && tgs){
+    var NOTE = {
+      'Согласовать': 'Статус «Согласовано» — его ставит только основной согласующий.',
+      'На правку':   'Статус «Внесена правка» — комментарий уходит автору к материалу.',
+      'Отклонить':   'Статус «Не согласовано» — материал в этом виде в работу не идёт.'
+    };
+    tgb.addEventListener('click', function(e){
+      var b = e.target.closest('button'); if(!b) return;
+      [].forEach.call(tgb.querySelectorAll('button'), function(x){
+        x.setAttribute('aria-pressed', 'false');
+      });
+      b.setAttribute('aria-pressed', 'true');
+      tgs.textContent = NOTE[b.textContent.trim()] || '';
+    });
+  }
+
+  /* ---------- вкладки Mini App ---------- */
+  var tabs = document.getElementById('appTabs');
+  if(tabs){
+    tabs.addEventListener('click', function(e){
+      var b = e.target.closest('button'); if(!b) return;
+      [].forEach.call(tabs.querySelectorAll('button'), function(x){
+        x.setAttribute('aria-selected', String(x === b));
+      });
+      [].forEach.call(document.querySelectorAll('.pane'), function(p){
+        p.classList.toggle('on', p.id === b.dataset.pane);
+      });
+    });
+  }
+
+  /* ---------- переключатель 3D / Схема ---------- */
+  var seg = document.getElementById('seg3d'), deskPh = document.getElementById('deskPh');
+  if(seg && deskPh){
+    var TXT = {
+      '3d':  '3D-карта межзубных ёршиков 16:9 — модель зубных рядов с выбранными размерами',
+      'map': 'Схематическая карта 16:9 — быстрый ввод размеров по межзубным промежуткам'
+    };
+    seg.addEventListener('click', function(e){
+      var b = e.target.closest('button'); if(!b) return;
+      [].forEach.call(seg.querySelectorAll('button'), function(x){
+        x.setAttribute('aria-pressed', String(x === b));
+      });
+      deskPh.textContent = TXT[b.dataset.mode];
+    });
+  }
+
+  /* ---------- шапка ---------- */
+  var top = document.getElementById('top');
+  if(top){
+    var onScroll = function(){ top.classList.toggle('stuck', window.scrollY > 8); };
+    onScroll();
+    window.addEventListener('scroll', onScroll, {passive: true});
+  }
+
+  /* ---------- соседние кейсы ----------
+     Берутся из того же списка, что и на главной, поэтому порядок здесь
+     всегда совпадает с порядком в разделе работ. */
+  var nav = document.getElementById('cnav');
+  function buildNav(){
+    var all = window.CASES_DATA || [];
+    if(!nav || !all.length) return;
+    var me = -1;
+    for(var i = 0; i < all.length; i++){
+      if(all[i].url === 'case-medical-content-system.html'){ me = i; break; }
+    }
+    if(me < 0) return;
+    var prev = all[(me - 1 + all.length) % all.length];
+    var next = all[(me + 1) % all.length];
+    function link(c, label, idx){
+      var a = document.createElement('a');
+      a.href = c.url ? c.url : ('index.html#case-' + idx);
+      a.innerHTML = '<small></small><strong></strong>';
+      a.querySelector('small').textContent = label;
+      a.querySelector('strong').textContent = c.t;
+      return a;
+    }
+    nav.appendChild(link(prev, 'Предыдущий кейс', (me - 1 + all.length) % all.length));
+    nav.appendChild(link(next, 'Следующий кейс', (me + 1) % all.length));
+  }
+  var s = document.createElement('script');
+  s.src = 'cases.js';
+  s.onload = buildNav;
+  document.body.appendChild(s);
+})();
+</script>
+</body>
+</html>

@@ -3,6 +3,15 @@
    `page` is the case itself, shown after the arrow. */
 window.CASES_DATA = [
  {
+  "t": "Цифровая экосистема контента",
+  "c": "Система согласования, планирования и производства для премиальной клиники",
+  "year": "Клиент под NDA",
+  "role": "SMM, продюсирование контента, съёмка, дизайн и разработка внутренних инструментов",
+  "img": "cases/medical-system/cover.jpg",
+  "gallery": [],
+  "url": "case-medical-content-system.html"
+ },
+ {
   "t": "Quoters",
   "c": "Айдентика, пространство и мерч премиального теннисного клуба",
   "year": "Концепт-проект",
