@@ -15,7 +15,7 @@
      Браузер забирает её сразу, вместе со шрифтом, и к моменту запуска
      модуля она уже в кеше. -->
 <link rel="preload" href="cloth-photo-3.jpg" as="image">
-<script src="cases.js?v=051409"></script>
+<script src="cases.js?v=281131"></script>
 <!-- Библиотеки лежат рядом с сайтом, а не на CDN: при недоступном CDN
      страница превращалась в белый экран со счётчиком 0 % — весь скрипт
      падает на первой же строке с gsap. -->
@@ -1571,7 +1571,7 @@
     <div class="m-copy"><span class="sm" data-goo data-fade>’26 © All Right Reserved</span></div>
 
     <div class="tailroom"></div>
-    <span id="buildStamp" style="display:none">BUILD 05.11 14:09</span>
+    <span id="buildStamp" style="display:none">BUILD 28.10 11:31</span>
   </section>
 
 </main>
@@ -3159,9 +3159,6 @@
   window.__openCase = openCaseAll;
   function openCase(i){ return openWindowFor(CASES[i]); }
   function openWindowFor(c){
-    /* У кейса может быть своя страница вместо окна с лентой: тогда строка
-       списка ведёт на неё. Остальные кейсы открываются как раньше. */
-    if(c && c.url){ location.href = c.url; return; }
     // состояние раскрытия принадлежит одному кейсу и не должно переезжать
     // в следующий — иначе текст открывается уже погашенным
     var pnl0 = cwEl.querySelector('.cw-panel');
@@ -3543,16 +3540,6 @@
     });
     var c = document.getElementById('globeCount');
     if(c) c.textContent = CASES.length + ' проектов';
-
-    /* Со страницы кейса соседние открываются ссылкой index.html#case-N:
-       нужный кейс раскрывается сразу, без поиска по списку руками. */
-    (function(){
-      var m = /^#case-(\d+)$/.exec(location.hash || '');
-      if(!m) return;
-      var i = +m[1];
-      history.replaceState(null, '', location.pathname + location.search);
-      setTimeout(function(){ openCaseAll(i); }, 600);
-    })();
 
     if(!thumb || reduced || coarse) return;
     /* The preview rolls up from the bottom of its own box. Moving to another
