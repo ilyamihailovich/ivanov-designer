@@ -15,7 +15,7 @@
      Браузер забирает её сразу, вместе со шрифтом, и к моменту запуска
      модуля она уже в кеше. -->
 <link rel="preload" href="cloth-photo-3.jpg" as="image">
-<script src="cases.js?v=281131"></script>
+<script src="cases.js?v=071419"></script>
 <!-- Библиотеки лежат рядом с сайтом, а не на CDN: при недоступном CDN
      страница превращалась в белый экран со счётчиком 0 % — весь скрипт
      падает на первой же строке с gsap. -->
@@ -1528,7 +1528,7 @@
 
     <div class="close-mid">
       <span class="clock l" id="clockH" data-goo data-nosplit>( 16</span>
-      <div class="close-still"><div class="still-fly"><div class="still-tilt"><img id="closeStill" src="yoga1.jpg" alt=""></div></div></div>
+      <div class="close-still"><div class="still-fly"><div class="still-tilt"><img id="closeStill" src="new-photo.jpg" alt=""></div></div></div>
       <span class="clock r" id="clockM" data-goo data-nosplit>41 )</span>
     </div>
 
@@ -1571,7 +1571,7 @@
     <div class="m-copy"><span class="sm" data-goo data-fade>’26 © All Right Reserved</span></div>
 
     <div class="tailroom"></div>
-    <span id="buildStamp" style="display:none">BUILD 28.10 11:31</span>
+    <span id="buildStamp" style="display:none">BUILD 07.11 14:19</span>
   </section>
 
 </main>
@@ -3956,7 +3956,7 @@
     // The two halves slide in from the edges a second after the page opens.
     // The entrance uses xPercent and the scroll join uses x, so the two never
     // overwrite one another.
-    gsap.set(wrap, {opacity: 1});
+    gsap.set(wrap, {opacity: .5});
     if(!reduced){
       gsap.fromTo(L, {xPercent: -118, opacity: 0},
         {xPercent: 0, opacity: 1, duration: 1.3, delay: 3, ease: EASE.rise});
